@@ -8,7 +8,7 @@ class SignalRService {
     this.maxReconnectAttempts = 5
     this.notificationHandlers = []
     this.errorHandlers = []
-    this.hubUrl = "https://balancev1.runasp.net/hubs/NotificationsHub"
+    this.hubUrl = import.meta.env.VITE_SIGNALR_HUB_URL
   }
 
   // ✅ دالة محسّنة لجلب التوكن

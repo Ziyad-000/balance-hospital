@@ -7,7 +7,7 @@ import {
   resendForgetPasswordCode,
   resetPassword,
 } from "../act/actAuth"
-import { m } from "framer-motion"
+
 const { initialStateAuth } = UseInitialStates()
 
 export const authSlice = createSlice({

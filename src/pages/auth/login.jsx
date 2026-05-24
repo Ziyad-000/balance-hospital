@@ -14,7 +14,7 @@ import UseInitialValues from "../../hooks/use-initial-values"
 import UseFormValidation from "../../hooks/use-form-validation"
 import UseDirection from "../../hooks/use-direction"
 import { useNavigate } from "react-router-dom"
-import withGuard from "../../utils/withGuard"
+
 import useDirection from "../../hooks/use-direction"
 import { signalRService } from "../../services/signalRService"
 
@@ -552,4 +552,4 @@ const Login = () => {
   )
 }
 
-export default withGuard(Login)
+export default Login

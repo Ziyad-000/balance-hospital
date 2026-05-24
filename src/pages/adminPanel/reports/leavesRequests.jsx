@@ -1,3 +1,5 @@
+// leavesRequests.jsx
+
 import React, { useState } from "react"
 import {
   Calendar,
@@ -10,288 +12,145 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react"
+import { getPageTheme } from "../../../utils/themeClasses"
 
-const CollapsibleLeaveCard = ({
-  leave,
-  isDark,
-  isRTL,
-  currentLang,
-  t,
-  formatDate,
-}) => {
+const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
+  const theme = getPageTheme()
   const [isCollapsed, setIsCollapsed] = useState(true)
 
-  const getStatusColor = (status) => {
+  const getStatusConfig = (status = "") => {
     switch (status.toLowerCase()) {
       case "approved":
-        return isDark
-          ? "bg-green-900/30 text-green-400 border-green-700"
-          : "bg-green-100 text-green-700 border-green-300"
+        return {
+          color:
+            "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+          icon: CheckCircle,
+          iconClass: "text-green-700 dark:text-green-300",
+          text: t("doctorReport.leaveRecords.approved"),
+        }
       case "pending":
-        return isDark
-          ? "bg-yellow-900/30 text-yellow-400 border-yellow-700"
-          : "bg-yellow-100 text-yellow-700 border-yellow-300"
+        return {
+          color:
+            "bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+          icon: AlertCircle,
+          iconClass: "text-yellow-700 dark:text-yellow-300",
+          text: t("doctorReport.leaveRecords.pending"),
+        }
       case "rejected":
-        return isDark
-          ? "bg-red-900/30 text-red-400 border-red-700"
-          : "bg-red-100 text-red-700 border-red-300"
+        return {
+          color:
+            "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+          icon: XCircle,
+          iconClass: "text-red-700 dark:text-red-300",
+          text: t("doctorReport.leaveRecords.rejected"),
+        }
       default:
-        return isDark
-          ? "bg-gray-700 text-gray-300 border-gray-600"
-          : "bg-gray-100 text-gray-700 border-gray-300"
+        return {
+          color:
+            "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+          icon: Clock,
+          iconClass: "text-slate-600 dark:text-slate-300",
+          text: status,
+        }
     }
   }
 
-  const getStatusIcon = (status) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return <CheckCircle className="w-4 h-4" />
-      case "pending":
-        return <AlertCircle className="w-4 h-4" />
-      case "rejected":
-        return <XCircle className="w-4 h-4" />
-      default:
-        return <Clock className="w-4 h-4" />
-    }
+  const getLocalized = (arValue, enValue) => {
+    return currentLang === "en" ? enValue || arValue : arValue || enValue
   }
 
-  const getStatusText = (status) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return t("doctorReport.leaveRecords.approved")
-      case "pending":
-        return t("doctorReport.leaveRecords.pending")
-      case "rejected":
-        return t("doctorReport.leaveRecords.rejected")
-      default:
-        return status
-    }
-  }
+  const statusConfig = getStatusConfig(leave.status)
+  const StatusIcon = statusConfig.icon
 
   return (
-    <div
-      className={`border rounded-lg overflow-hidden ${
-        isDark ? "border-gray-700" : "border-gray-200"
-      }`}
-    >
-      {/* Leave Header - Collapsible */}
-      <div
-        className={`p-4 cursor-pointer hover:${
-          isDark ? "bg-gray-700/50" : "bg-gray-100"
-        } transition-colors ${isDark ? "bg-gray-750" : "bg-gray-50"}`}
-        onClick={() => setIsCollapsed(!isCollapsed)}
+    <div className={`${theme.cardSoft} overflow-hidden`}>
+      <button
+        type="button"
+        className={`w-full p-4 ${theme.hoverRow}`}
+        onClick={() => setIsCollapsed((prev) => !prev)}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <Calendar
-              className={`w-5 h-5 ${
-                isDark ? "text-blue-400" : "text-blue-600"
-              }`}
-            />
-            <div className="flex-1">
-              <div
-                className={`font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {currentLang === "en" ? leave.leaveTypeEn : leave.leaveTypeAr}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Calendar className="w-5 h-5 text-blue-700 dark:text-blue-300 flex-shrink-0" />
+
+            <div className="flex-1 min-w-0 text-start">
+              <div className="font-bold text-[var(--color-text)] truncate">
+                {getLocalized(leave.leaveTypeAr, leave.leaveTypeEn)}
               </div>
-              <div
-                className={`text-xs ${
-                  isDark ? "text-gray-500" : "text-gray-400"
-                }`}
-              >
+
+              <div className="text-xs text-[var(--color-text-muted)]">
                 {formatDate(leave.leaveDate)} - {formatDate(leave.leaveEndDate)}{" "}
                 ({leave.leaveDays} {t("doctorReport.leaveRecords.days")})
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${getStatusColor(
-                leave.status
-              )}`}
+              className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${statusConfig.color}`}
             >
-              {getStatusIcon(leave.status)}
-              {getStatusText(leave.status)}
+              <StatusIcon className="w-4 h-4" />
+              {statusConfig.text}
             </span>
 
-            {/* Chevron Icon */}
-            <div className="flex items-center">
-              {isCollapsed ? (
-                <ChevronRight
-                  className={`h-5 w-5 ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  } transition-transform duration-200`}
-                />
-              ) : (
-                <ChevronDown
-                  className={`h-5 w-5 ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  } transition-transform duration-200`}
-                />
-              )}
-            </div>
+            {isCollapsed ? (
+              <ChevronRight className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            )}
           </div>
         </div>
-      </div>
+      </button>
 
-      {/* Expanded Content */}
       {!isCollapsed && (
-        <div className="p-4 space-y-3">
-          {/* Leave Details Grid */}
+        <div className="p-4 space-y-3 border-t border-[var(--color-border)]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Calendar
-                  className={`w-4 h-4 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("doctorReport.leaveRecords.startDate")}
-                </span>
-              </div>
-              <div
-                className={`text-sm font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {formatDate(leave.leaveDate)}
-              </div>
-            </div>
+            <InfoBox
+              icon={Calendar}
+              iconClass="text-blue-700 dark:text-blue-300"
+              label={t("doctorReport.leaveRecords.startDate")}
+              value={formatDate(leave.leaveDate)}
+            />
 
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Calendar
-                  className={`w-4 h-4 ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("doctorReport.leaveRecords.endDate")}
-                </span>
-              </div>
-              <div
-                className={`text-sm font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {formatDate(leave.leaveEndDate)}
-              </div>
-            </div>
+            <InfoBox
+              icon={Calendar}
+              iconClass="text-green-700 dark:text-green-300"
+              label={t("doctorReport.leaveRecords.endDate")}
+              value={formatDate(leave.leaveEndDate)}
+            />
           </div>
 
-          {/* Duration */}
-          <div
-            className={`p-3 rounded-lg ${isDark ? "bg-gray-800" : "bg-white"}`}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <Clock
-                className={`w-4 h-4 ${
-                  isDark ? "text-purple-400" : "text-purple-600"
-                }`}
-              />
-              <span
-                className={`text-xs font-medium ${
-                  isDark ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
-                {t("doctorReport.leaveRecords.duration")}
-              </span>
-            </div>
-            <div
-              className={`text-sm font-semibold ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              {leave.leaveDays} {t("doctorReport.leaveRecords.days")}
-            </div>
-          </div>
+          <InfoBox
+            icon={Clock}
+            iconClass="text-purple-700 dark:text-purple-300"
+            label={t("doctorReport.leaveRecords.duration")}
+            value={`${leave.leaveDays} ${t("doctorReport.leaveRecords.days")}`}
+          />
 
-          {/* Reason */}
           {leave.reason && (
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <FileText
-                  className={`w-4 h-4 ${
-                    isDark ? "text-orange-400" : "text-orange-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("doctorReport.leaveRecords.reason")}
-                </span>
-              </div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                {leave.reason}
-              </div>
-            </div>
+            <InfoBox
+              icon={FileText}
+              iconClass="text-orange-700 dark:text-orange-300"
+              label={t("doctorReport.leaveRecords.reason")}
+              value={leave.reason}
+              multiline
+            />
           )}
 
-          {/* Approval Info */}
-          {leave.status.toLowerCase() === "approved" && leave.approvedAt && (
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-green-900/20" : "bg-green-50"
-              }`}
-            >
+          {leave.status?.toLowerCase() === "approved" && leave.approvedAt && (
+            <div className="p-3 rounded-xl bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700">
               <div className="flex items-center gap-2 mb-1">
-                <User
-                  className={`w-4 h-4 ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
+                <User className="w-4 h-4 text-green-700 dark:text-green-300" />
+                <span className="text-xs font-bold text-green-800 dark:text-green-200">
                   {t("doctorReport.leaveRecords.approvedBy")}
                 </span>
               </div>
-              <div
-                className={`text-sm font-semibold ${
-                  isDark ? "text-green-300" : "text-green-700"
-                }`}
-              >
-                {currentLang === "en"
-                  ? leave.approvedByName
-                  : leave.approvedByNameAr}
+
+              <div className="text-sm font-bold text-green-800 dark:text-green-200">
+                {getLocalized(leave.approvedByNameAr, leave.approvedByName)}
               </div>
-              <div
-                className={`text-xs mt-1 ${
-                  isDark ? "text-gray-500" : "text-gray-600"
-                }`}
-              >
+
+              <div className="text-xs mt-1 text-green-700 dark:text-green-300">
                 {new Date(leave.approvedAt).toLocaleDateString(
                   currentLang === "en" ? "en-US" : "ar-EG",
                   {
@@ -306,10 +165,7 @@ const CollapsibleLeaveCard = ({
             </div>
           )}
 
-          {/* Request Date */}
-          <div
-            className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
-          >
+          <div className="text-xs text-[var(--color-text-muted)]">
             {t("doctorReport.leaveRecords.requestedAt")}:{" "}
             {new Date(leave.requestedAt).toLocaleDateString(
               currentLang === "en" ? "en-US" : "ar-EG",
@@ -328,129 +184,92 @@ const CollapsibleLeaveCard = ({
   )
 }
 
+const InfoBox = ({ icon: Icon, iconClass, label, value, multiline = false }) => (
+  <div className="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+    <div className="flex items-center gap-2 mb-1">
+      <Icon className={`w-4 h-4 ${iconClass}`} />
+      <span className="text-xs font-bold text-[var(--color-text-muted)]">
+        {label}
+      </span>
+    </div>
+
+    <div
+      className={`text-sm font-semibold text-[var(--color-text)] ${
+        multiline ? "leading-relaxed" : ""
+      }`}
+    >
+      {value}
+    </div>
+  </div>
+)
+
 export const LeaveRecordsSection = ({
   report,
-  isDark,
-  isRTL,
   currentLang,
   t,
   formatDate,
 }) => {
+  const theme = getPageTheme()
+
+  const StatBox = ({ value, label, tone }) => {
+    const tones = {
+      total: "bg-slate-100 text-slate-800 dark:bg-slate-800/80 dark:text-slate-200",
+      approved:
+        "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200",
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200",
+      rejected: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200",
+    }
+
+    return (
+      <div className={`p-3 rounded-xl text-center ${tones[tone]}`}>
+        <div className="text-2xl font-extrabold">{value}</div>
+        <div className="text-xs font-semibold opacity-80">{label}</div>
+      </div>
+    )
+  }
+
   return (
-    <div
-      className={`${
-        isDark ? "bg-gray-800" : "bg-white"
-      } rounded-xl shadow-lg p-6`}
-    >
-      {/* Section Header */}
+    <div className={`${theme.card} p-6`}>
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <Calendar
-            className={`w-5 h-5 ${isDark ? "text-blue-400" : "text-blue-600"}`}
-          />
-          <h3
-            className={`text-lg font-semibold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
+          <Calendar className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+
+          <h3 className="text-lg font-extrabold text-[var(--color-text)]">
             {t("doctorReport.leaveRecords.title")}
           </h3>
         </div>
 
-        {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-gray-750" : "bg-gray-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              {report.stats.totalLeaveRequests}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.leaveRecords.total")}
-            </div>
-          </div>
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-green-900/20" : "bg-green-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-green-400" : "text-green-600"
-              }`}
-            >
-              {report.stats.approvedLeaves}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.leaveRecords.approved")}
-            </div>
-          </div>
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-yellow-900/20" : "bg-yellow-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-yellow-400" : "text-yellow-600"
-              }`}
-            >
-              {report.stats.pendingLeaves}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.leaveRecords.pending")}
-            </div>
-          </div>
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-red-900/20" : "bg-red-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-red-400" : "text-red-600"
-              }`}
-            >
-              {report.stats.rejectedLeaves}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.leaveRecords.rejected")}
-            </div>
-          </div>
+          <StatBox
+            value={report.stats.totalLeaveRequests}
+            label={t("doctorReport.leaveRecords.total")}
+            tone="total"
+          />
+          <StatBox
+            value={report.stats.approvedLeaves}
+            label={t("doctorReport.leaveRecords.approved")}
+            tone="approved"
+          />
+          <StatBox
+            value={report.stats.pendingLeaves}
+            label={t("doctorReport.leaveRecords.pending")}
+            tone="pending"
+          />
+          <StatBox
+            value={report.stats.rejectedLeaves}
+            label={t("doctorReport.leaveRecords.rejected")}
+            tone="rejected"
+          />
         </div>
       </div>
 
-      {/* Leave Records List */}
       {report.leaveRecords && report.leaveRecords.length > 0 ? (
         <div className="space-y-3">
           {report.leaveRecords.map((leave) => (
             <CollapsibleLeaveCard
               key={leave.leaveId}
               leave={leave}
-              isDark={isDark}
-              isRTL={isRTL}
               currentLang={currentLang}
               t={t}
               formatDate={formatDate}
@@ -459,14 +278,8 @@ export const LeaveRecordsSection = ({
         </div>
       ) : (
         <div className="text-center py-8">
-          <Calendar
-            className={`w-12 h-12 mx-auto mb-3 ${
-              isDark ? "text-gray-600" : "text-gray-400"
-            }`}
-          />
-          <p
-            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-          >
+          <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-500 dark:text-slate-300" />
+          <p className="text-sm text-[var(--color-text-muted)]">
             {t("doctorReport.leaveRecords.noRecords")}
           </p>
         </div>

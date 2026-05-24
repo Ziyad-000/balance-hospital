@@ -24,20 +24,70 @@ import {
   ResponsiveContainer,
 } from "recharts"
 
-const COLORS = [
-  "#3B82F6", // Bright Blue
-  "#10B981", // Emerald Green
-  "#F59E0B", // Amber
-  "#EF4444", // Red
-  "#8B5CF6", // Purple
-  "#EC4899", // Pink
-  "#06B6D4", // Cyan
-  "#84CC16", // Lime
-]
+const CHART_COLORS = {
+  primary: "#2563EB",
+  secondary: "#0F766E",
+  amber: "#D97706",
+  danger: "#DC2626",
+  violet: "#7C3AED",
+  sky: "#0284C7",
+  success: "#16A34A",
+  slate: "#475569",
+}
+
+const DARK_CHART_COLORS = {
+  primary: "#60A5FA",
+  secondary: "#2DD4BF",
+  amber: "#FBBF24",
+  danger: "#F87171",
+  violet: "#A78BFA",
+  sky: "#38BDF8",
+  success: "#4ADE80",
+  slate: "#CBD5E1",
+}
+
+const getChartPalette = (isDark) => {
+  const colors = isDark ? DARK_CHART_COLORS : CHART_COLORS
+
+  return [
+    colors.primary,
+    colors.secondary,
+    colors.amber,
+    colors.violet,
+    colors.sky,
+    colors.success,
+    colors.danger,
+    colors.slate,
+  ]
+}
+
+const getTheme = (isDark) => ({
+  card: isDark
+    ? "bg-slate-900/95 border border-slate-700/80 shadow-lg shadow-black/20"
+    : "bg-white border border-slate-200 shadow-lg shadow-slate-200/70",
+  headerCard: isDark
+    ? "bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 border border-slate-700/80 shadow-lg shadow-black/20"
+    : "bg-gradient-to-br from-white via-slate-50 to-blue-50 border border-slate-200 shadow-lg shadow-slate-200/70",
+  title: isDark ? "text-slate-50" : "text-slate-900",
+  subtitle: isDark ? "text-slate-400" : "text-slate-600",
+  legend: isDark ? "text-slate-300" : "text-slate-700",
+  tooltip: isDark
+    ? "bg-slate-900/95 border border-slate-700 text-slate-100 shadow-xl shadow-black/30"
+    : "bg-white/95 border border-slate-200 text-slate-900 shadow-xl shadow-slate-200/80",
+  grid: isDark ? "#273449" : "#E2E8F0",
+  axis: isDark ? "#94A3B8" : "#64748B",
+})
+
+const formatShortName = (value, max = 18) => {
+  if (!value) return "-"
+  return value.length > max ? `${value.substring(0, max)}...` : value
+}
 
 export const DashboardCharts = ({ dashboardData, isDark, t }) => {
   const { i18n } = useTranslation()
   const isRTL = i18n.language === "ar" || i18n.dir() === "rtl"
+  const theme = getTheme(isDark)
+  const palette = getChartPalette(isDark)
 
   if (!dashboardData) return null
 
@@ -114,7 +164,7 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
     dashboardData.configurationSummary?.contractingTypes?.map((type) => ({
       name:
         i18next.language === "ar"
-          ? type.nameArabic?.substring(0, 15)
+          ? formatShortName(type.nameArabic, 15)
           : type.nameEnglish?.split(" ")[0],
       users: type.usersCount,
       maxHours: type.maxHoursPerWeek,
@@ -125,7 +175,7 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
     dashboardData.configurationSummary?.shiftTypes?.map((shift) => ({
       name:
         i18next.language === "ar"
-          ? shift.nameArabic?.substring(0, 20)
+          ? formatShortName(shift.nameArabic, 18)
           : shift.nameEnglish?.replace(" Shift", ""),
       usage: shift.usageToday,
       hours: shift.totalTime,
@@ -137,7 +187,7 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
     dashboardData.rosters?.activeRosters?.items?.map((roster) => ({
       name:
         i18next.language === "ar"
-          ? roster.categoryName?.substring(0, 15)
+          ? formatShortName(roster.categoryName, 15)
           : roster.categoryName?.split(" ")[0],
       completion: parseFloat(roster.completionPercent),
       emptyShifts: roster.emptyShiftsCount,
@@ -151,659 +201,358 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
       users: degree.usersCount,
     })) || []
 
+  const ChartCard = ({ children, className = "" }) => (
+    <div className={`${theme.card} rounded-2xl p-5 sm:p-6 ${className}`}>
+      {children}
+    </div>
+  )
+
+  const ChartTitle = ({ icon: Icon, iconClassName, children }) => (
+    <h3 className={`text-lg font-bold mb-5 flex items-center gap-2 ${theme.title}`}>
+      <span
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${
+          isDark ? "bg-slate-800" : "bg-slate-100"
+        }`}
+      >
+        <Icon className={`w-5 h-5 ${iconClassName}`} />
+      </span>
+      <span>{children}</span>
+    </h3>
+  )
+
   const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={`p-3 rounded-lg shadow-lg ${
-            isDark
-              ? "bg-gray-800 border border-gray-700"
-              : "bg-white border border-gray-200"
-          }`}
-          dir={isRTL ? "rtl" : "ltr"}
-        >
-          <p
-            className={`font-semibold mb-1 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {label}
-          </p>
+    if (!active || !payload?.length) return null
+
+    const displayLabel = payload[0]?.payload?.fullName || label
+
+    return (
+      <div className={`p-3 rounded-xl ${theme.tooltip}`} dir={isRTL ? "rtl" : "ltr"}>
+        <p className="font-semibold mb-2">{displayLabel}</p>
+        <div className="space-y-1">
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: {entry.value}
-            </p>
+            <div key={`${entry.name}-${index}`} className="flex items-center gap-2 text-sm">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className={theme.subtitle}>{entry.name}:</span>
+              <span className="font-semibold">{entry.value}</span>
+            </div>
           ))}
         </div>
-      )
-    }
-    return null
-  }
-
-  // RTL-aware Y-Axis tick component
-  const CustomYAxisTick = ({ x, y, payload, val }) => {
-    return (
-      <g transform={`translate(${x},${y})`}>
-        <text
-          x={isRTL ? val : -10}
-          y={0}
-          dy={4}
-          textAnchor={isRTL ? "start" : "end"}
-          fill={isDark ? "#9CA3AF" : "#6B7280"}
-          fontSize={12}
-        >
-          {payload.value}
-        </text>
-      </g>
+      </div>
     )
   }
 
-  // Custom X-Axis tick component
-  const CustomXAxisTick = ({ x, y, payload }) => {
+  const CustomYAxisTick = ({ x, y, payload, val = 20 }) => (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={isRTL ? val : -10}
+        y={0}
+        dy={4}
+        textAnchor={isRTL ? "start" : "end"}
+        fill={theme.axis}
+        fontSize={12}
+      >
+        {payload.value}
+      </text>
+    </g>
+  )
+
+  const CustomXAxisTick = ({ x, y, payload }) => (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={16}
+        textAnchor="middle"
+        fill={theme.axis}
+        fontSize={12}
+      >
+        {payload.value}
+      </text>
+    </g>
+  )
+
+  const CustomLegend = ({ payload }) => {
+    if (!payload?.length) return null
+
     return (
-      <g transform={`translate(${x},${y})`}>
-        <text
-          x={0}
-          y={0}
-          dy={16}
-          textAnchor="middle"
-          fill={isDark ? "#9CA3AF" : "#6B7280"}
-          fontSize={12}
-        >
-          {payload.value}
-        </text>
-      </g>
+      <ul className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2">
+        {payload.map((entry, index) => (
+          <li key={`${entry.value}-${index}`} className={`flex items-center gap-2 text-sm ${theme.legend}`}>
+            <span
+              className="inline-block h-3 w-3 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span>{entry.value}</span>
+          </li>
+        ))}
+      </ul>
     )
   }
 
-  // Calculate margins based on RTL direction
+  const PieLegend = ({ data, valueKey = "value" }) => ({ payload }) => {
+    if (!payload?.length) return null
+
+    return (
+      <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {data.map((item, index) => (
+          <li key={`${item.name}-${index}`} className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm ${isDark ? "bg-slate-800/80" : "bg-slate-50"}`}>
+            <span className={`flex min-w-0 items-center gap-2 ${theme.legend}`}>
+              <span
+                className="inline-block h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: palette[index % palette.length] }}
+              />
+              <span className="truncate">{item.name}</span>
+            </span>
+            <span className={`font-bold ${theme.title}`}>{item[valueKey]}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   const getBarChartMargins = (hasRotatedLabels = false) => {
     if (isRTL) {
       return {
-        top: 20,
-        right: 80,
-        bottom: hasRotatedLabels ? 80 : 40,
-        left: 20,
+        top: 16,
+        right: 72,
+        bottom: hasRotatedLabels ? 72 : 36,
+        left: 16,
       }
     }
+
     return {
-      top: 20,
-      right: 20,
-      bottom: hasRotatedLabels ? 80 : 40,
-      left: 80,
+      top: 16,
+      right: 16,
+      bottom: hasRotatedLabels ? 72 : 36,
+      left: 72,
     }
   }
 
-  return (
-    <div className="space-y-6 mb-6">
-      <div
-        className={`${
-          isDark ? "bg-gray-800" : "bg-white"
-        } rounded-2xl shadow-xl p-6`}
-      >
-        <h2
-          className={`text-2xl font-bold ${
-            isDark ? "text-white" : "text-gray-900"
-          } flex items-center gap-3 mb-2`}
+  const renderPieChart = ({ data, dataKey = "value", height = 310 }) => (
+    <ResponsiveContainer width="100%" height={height}>
+      <PieChart margin={{ top: 12, right: 12, bottom: 12, left: 12 }}>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="44%"
+          innerRadius={52}
+          outerRadius={86}
+          paddingAngle={3}
+          dataKey={dataKey}
+          stroke={isDark ? "#111827" : "#FFFFFF"}
+          strokeWidth={3}
+          label={false}
         >
-          <BarChart3 className="w-6 h-6 text-blue-500" />
-          {t("dashboard.charts.title") || "Dashboard Analytics"}
-        </h2>
-        <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-          {t("dashboard.charts.subtitle") ||
-            "Visual insights and data analytics"}
-        </p>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={palette[index % palette.length]} />
+          ))}
+        </Pie>
+        <Tooltip content={<CustomTooltip />} />
+        <Legend content={PieLegend({ data, valueKey: dataKey })} />
+      </PieChart>
+    </ResponsiveContainer>
+  )
+
+  const commonAxisProps = {
+    stroke: theme.axis,
+    tickLine: false,
+    axisLine: false,
+  }
+
+  return (
+    <div className="space-y-6 mb-6" dir={isRTL ? "rtl" : "ltr"}>
+      <div className={`${theme.headerCard} rounded-2xl p-5 sm:p-6`}>
+        <div className="flex items-start gap-3">
+          <span
+            className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+              isDark ? "bg-blue-500/15" : "bg-blue-100"
+            }`}
+          >
+            <BarChart3 className="w-6 h-6 text-blue-500" />
+          </span>
+          <div>
+            <h2 className={`text-2xl font-bold ${theme.title}`}>
+              {t("dashboard.charts.title") || "Dashboard Analytics"}
+            </h2>
+            <p className={`mt-1 text-sm ${theme.subtitle}`}>
+              {t("dashboard.charts.subtitle") ||
+                "Visual insights and data analytics"}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {usersDistributionData.length > 0 && (
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              <PieChartIcon className="w-5 h-5 text-blue-500" />
+          <ChartCard>
+            <ChartTitle icon={PieChartIcon} iconClassName="text-blue-500">
               {t("dashboard.charts.usersDistribution") || "Users Distribution"}
-            </h3>
-
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Pie
-                  data={usersDistributionData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={false}
-                >
-                  {usersDistributionData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-
-                {/* 🎯 Custom color-dot legend only (no default Recharts shapes) */}
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                  iconType="circle"
-                  iconSize={0} // hides default icons completely
-                  formatter={(value, entry, index) => {
-                    const color = COLORS[index % COLORS.length]
-                    const item = usersDistributionData[index]
-                    return (
-                      <span
-                        className={`flex items-center gap-2 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        } text-sm`}
-                      >
-                        <span
-                          className="inline-block w-3 h-3 rounded-full"
-                          style={{ backgroundColor: color }}
-                        ></span>
-                        {`${item.name}: ${item.value}`}
-                      </span>
-                    )
-                  }}
-                />
-
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+            </ChartTitle>
+            {renderPieChart({ data: usersDistributionData })}
+          </ChartCard>
         )}
 
         {rolesDistributionData.length > 0 && (
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              <Shield className="w-5 h-5 text-purple-500" />
+          <ChartCard>
+            <ChartTitle icon={Shield} iconClassName="text-violet-500">
               {t("dashboard.charts.rolesDistribution") || "Roles Distribution"}
-            </h3>
-
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Pie
-                  data={rolesDistributionData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={false}
-                >
-                  {rolesDistributionData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-
-                {/* 🟣 Color-synced legend with role names & values */}
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                  iconSize={0} // hides default Recharts icons
-                  formatter={(value, entry, index) => {
-                    const color = COLORS[index % COLORS.length]
-                    const item = rolesDistributionData[index]
-                    return (
-                      <span
-                        className={`flex items-center gap-2 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        } text-sm`}
-                      >
-                        <span
-                          className="inline-block w-3 h-3 rounded-full"
-                          style={{ backgroundColor: color }}
-                        ></span>
-                        {`${item.name}: ${item.value}`}
-                      </span>
-                    )
-                  }}
-                />
-
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+            </ChartTitle>
+            {renderPieChart({ data: rolesDistributionData })}
+          </ChartCard>
         )}
       </div>
 
       {categoriesDoctorsData.length > 0 && (
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6`}
-        >
-          <h3
-            className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            <Briefcase className="w-5 h-5 text-green-500" />
+        <ChartCard>
+          <ChartTitle icon={Briefcase} iconClassName="text-emerald-500">
             {t("dashboard.charts.categoriesResources") ||
               "Categories - Doctors & Resources"}
-          </h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={categoriesDoctorsData}
-              margin={getBarChartMargins()}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={isDark ? "#374151" : "#e5e7eb"}
-              />
-              <XAxis
-                dataKey="name"
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
-                tick={<CustomXAxisTick />}
-              />
+          </ChartTitle>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={categoriesDoctorsData} margin={getBarChartMargins()}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+              <XAxis dataKey="name" {...commonAxisProps} tick={<CustomXAxisTick />} />
               <YAxis
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
+                {...commonAxisProps}
                 tick={<CustomYAxisTick val={20} />}
                 orientation={isRTL ? "right" : "left"}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
-                dataKey="doctors"
-                fill="#3B82F6"
-                name={t("dashboard.charts.doctors") || "Doctors"}
-              />
-              <Bar
-                dataKey="departments"
-                fill="#10B981"
-                name={t("dashboard.charts.departments") || "Departments"}
-              />
-              <Bar
-                dataKey="rosters"
-                fill="#8B5CF6"
-                name={t("dashboard.charts.activeRosters") || "Active Rosters"}
-              />
+              <Legend content={<CustomLegend />} />
+              <Bar dataKey="doctors" fill={palette[0]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.doctors") || "Doctors"} />
+              <Bar dataKey="departments" fill={palette[1]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.departments") || "Departments"} />
+              <Bar dataKey="rosters" fill={palette[3]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.activeRosters") || "Active Rosters"} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       )}
 
       {departmentsActivityData.length > 0 && (
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6`}
-        >
-          <h3
-            className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            <Building className="w-5 h-5 text-blue-500" />
-            {t("dashboard.charts.departmentsActivity") ||
-              "Departments Activity"}
-          </h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={departmentsActivityData}
-              margin={getBarChartMargins()}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={isDark ? "#374151" : "#e5e7eb"}
-              />
-              <XAxis
-                dataKey="name"
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
-                tick={<CustomXAxisTick />}
-              />
+        <ChartCard>
+          <ChartTitle icon={Building} iconClassName="text-blue-500">
+            {t("dashboard.charts.departmentsActivity") || "Departments Activity"}
+          </ChartTitle>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={departmentsActivityData} margin={getBarChartMargins()}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+              <XAxis dataKey="name" {...commonAxisProps} tick={<CustomXAxisTick />} />
               <YAxis
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
+                {...commonAxisProps}
                 tick={<CustomYAxisTick val={30} />}
                 orientation={isRTL ? "right" : "left"}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
-                dataKey="schedules"
-                fill="#F59E0B"
-                name={
-                  t("dashboard.charts.activeSchedules") || "Active Schedules"
-                }
-              />
-              <Bar
-                dataKey="doctors"
-                fill="#10B981"
-                name={
-                  t("dashboard.charts.assignedDoctors") || "Assigned Doctors"
-                }
-              />
+              <Legend content={<CustomLegend />} />
+              <Bar dataKey="schedules" fill={palette[2]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.activeSchedules") || "Active Schedules"} />
+              <Bar dataKey="doctors" fill={palette[1]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.assignedDoctors") || "Assigned Doctors"} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {pendingRequestsData.length > 0 && (
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              <Clock className="w-5 h-5 text-orange-500" />
+          <ChartCard>
+            <ChartTitle icon={Clock} iconClassName="text-amber-500">
               {t("dashboard.charts.pendingRequestsBreakdown") ||
                 "Pending Requests Breakdown"}
-            </h3>
-
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Pie
-                  data={pendingRequestsData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={false} // disable overlapping built-in labels
-                >
-                  {pendingRequestsData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-
-                {/* 🎯 Custom color-dot legend, no Recharts rectangles */}
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                  iconType="circle"
-                  iconSize={0} // hides default icon
-                  formatter={(value, entry, index) => {
-                    const color = COLORS[index % COLORS.length]
-                    const item = pendingRequestsData[index]
-                    return (
-                      <span
-                        className={`flex items-center gap-2 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        } text-sm`}
-                      >
-                        <span
-                          className="inline-block w-3 h-3 rounded-full"
-                          style={{ backgroundColor: color }}
-                        ></span>
-                        {`${item.name}: ${item.value}`}
-                      </span>
-                    )
-                  }}
-                />
-
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+            </ChartTitle>
+            {renderPieChart({ data: pendingRequestsData })}
+          </ChartCard>
         )}
 
         {degreesData.length > 0 && (
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              <Award className="w-5 h-5 text-purple-500" />
+          <ChartCard>
+            <ChartTitle icon={Award} iconClassName="text-violet-500">
               {t("dashboard.charts.degreesDistribution") ||
                 "Degrees Distribution"}
-            </h3>
-
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Pie
-                  data={degreesData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="users"
-                  label={false} // disable overlapping labels
-                >
-                  {degreesData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-
-                {/* 🎯 Custom legend with color dots only */}
-                <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
-                  iconType="circle"
-                  iconSize={0} // hides Recharts default icons
-                  formatter={(value, entry, index) => {
-                    const color = COLORS[index % COLORS.length]
-                    const item = degreesData[index]
-                    return (
-                      <span
-                        className={`flex items-center gap-2 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        } text-sm`}
-                      >
-                        <span
-                          className="inline-block w-3 h-3 rounded-full"
-                          style={{ backgroundColor: color }}
-                        ></span>
-                        {`${item.name}: ${item.users}`}
-                      </span>
-                    )
-                  }}
-                />
-
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+            </ChartTitle>
+            {renderPieChart({ data: degreesData, dataKey: "users" })}
+          </ChartCard>
         )}
       </div>
 
       {contractingTypesData.length > 0 && (
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6`}
-        >
-          <h3
-            className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            <FileText className="w-5 h-5 text-blue-500" />
+        <ChartCard>
+          <ChartTitle icon={FileText} iconClassName="text-blue-500">
             {t("dashboard.charts.contractingTypes") ||
               "Contracting Types - Users & Max Hours"}
-          </h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={contractingTypesData}
-              margin={getBarChartMargins(true)}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={isDark ? "#374151" : "#e5e7eb"}
-              />
+          </ChartTitle>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={contractingTypesData} margin={getBarChartMargins(true)}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
               <XAxis
                 dataKey="name"
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
-                angle={0}
-                textAnchor="end"
-                height={100}
+                {...commonAxisProps}
+                tick={<CustomXAxisTick />}
                 interval={0}
+                height={70}
               />
               <YAxis
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
+                {...commonAxisProps}
                 tick={<CustomYAxisTick val={20} />}
                 orientation={isRTL ? "right" : "left"}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
-                dataKey="users"
-                fill="#3B82F6"
-                name={t("dashboard.charts.usersCount") || "Users Count"}
-              />
-              <Bar
-                dataKey="maxHours"
-                fill="#10B981"
-                name={t("dashboard.charts.maxHoursWeek") || "Max Hours/Week"}
-              />
+              <Legend content={<CustomLegend />} />
+              <Bar dataKey="users" fill={palette[0]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.usersCount") || "Users Count"} />
+              <Bar dataKey="maxHours" fill={palette[1]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.maxHoursWeek") || "Max Hours/Week"} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       )}
 
       {shiftTypesData.length > 0 && (
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6`}
-        >
-          <h3
-            className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            <Clock className="w-5 h-5 text-orange-500" />
+        <ChartCard>
+          <ChartTitle icon={Clock} iconClassName="text-amber-500">
             {t("dashboard.charts.shiftTypesUsage") ||
               "Shift Types - Today's Usage"}
-          </h3>
-          <ResponsiveContainer width="100%" height={350}>
+          </ChartTitle>
+          <ResponsiveContainer width="100%" height={360}>
             <BarChart data={shiftTypesData} margin={getBarChartMargins()}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={isDark ? "#374151" : "#e5e7eb"}
-              />
-              <XAxis
-                dataKey="name"
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
-                tick={<CustomXAxisTick />}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+              <XAxis dataKey="name" {...commonAxisProps} tick={<CustomXAxisTick />} />
               <YAxis
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
+                {...commonAxisProps}
                 tick={<CustomYAxisTick val={20} />}
                 orientation={isRTL ? "right" : "left"}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend
-                content={({ payload }) => (
-                  <ul className="flex flex-wrap gap-4 mt-3 justify-center">
-                    {payload.map((entry, index) => (
-                      <li
-                        key={`item-${index}`}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <span
-                          className="inline-block w-3 h-3 rounded-full"
-                          style={{ backgroundColor: entry.color }}
-                        ></span>
-                        <span>{entry.value}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              />
-              <Bar
-                dataKey="usage"
-                fill="#F59E0B"
-                name={t("dashboard.charts.usageToday") || "Usage Today"}
-              />
-              <Bar
-                dataKey="hours"
-                fill="#8B5CF6"
-                name={t("dashboard.charts.shiftHours") || "Shift Hours"}
-              />
+              <Legend content={<CustomLegend />} />
+              <Bar dataKey="usage" fill={palette[2]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.usageToday") || "Usage Today"} />
+              <Bar dataKey="hours" fill={palette[3]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.shiftHours") || "Shift Hours"} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       )}
 
       {rostersCompletionData.length > 0 && (
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6`}
-        >
-          <h3
-            className={`text-lg font-bold mb-4 flex items-center gap-2 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            <BarChart3 className="w-5 h-5 text-green-500" />
+        <ChartCard>
+          <ChartTitle icon={BarChart3} iconClassName="text-emerald-500">
             {t("dashboard.charts.rostersCompletion") ||
               "Active Rosters - Completion Progress"}
-          </h3>
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart
-              data={rostersCompletionData}
-              margin={getBarChartMargins()}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={isDark ? "#374151" : "#e5e7eb"}
-              />
-              <XAxis
-                dataKey="name"
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
-                tick={<CustomXAxisTick />}
-              />
+          </ChartTitle>
+          <ResponsiveContainer width="100%" height={360}>
+            <BarChart data={rostersCompletionData} margin={getBarChartMargins()}>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} vertical={false} />
+              <XAxis dataKey="name" {...commonAxisProps} tick={<CustomXAxisTick />} />
               <YAxis
-                stroke={isDark ? "#9CA3AF" : "#6B7280"}
+                {...commonAxisProps}
                 tick={<CustomYAxisTick val={20} />}
                 orientation={isRTL ? "right" : "left"}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
-                dataKey="completion"
-                fill="#10B981"
-                name={t("dashboard.charts.completionPercent") || "Completion %"}
-              />
-              <Bar
-                dataKey="emptyShifts"
-                fill="#EF4444"
-                name={t("dashboard.charts.emptyShifts") || "Empty Shifts"}
-              />
+              <Legend content={<CustomLegend />} />
+              <Bar dataKey="completion" fill={palette[1]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.completionPercent") || "Completion %"} />
+              <Bar dataKey="emptyShifts" fill={palette[6]} radius={[8, 8, 0, 0]} name={t("dashboard.charts.emptyShifts") || "Empty Shifts"} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </ChartCard>
       )}
     </div>
   )
 }
+

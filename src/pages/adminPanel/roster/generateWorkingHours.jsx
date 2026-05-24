@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { Formik, Form } from "formik"
+import { Formik, Form, Field } from "formik"
 import { toast } from "react-toastify"
 import Swal from "sweetalert2"
 import i18next from "i18next"
@@ -26,11 +26,14 @@ import {
   getRosterTree,
 } from "../../../state/act/actRosterManagement"
 import LoadingGetData from "../../../components/LoadingGetData"
+import { getPageTheme, swalTheme } from "../../../utils/themeClasses"
 
 function GenerateWorkingHours() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const theme = getPageTheme()
+
   const currentLang = i18next.language
   const isRTL = currentLang === "ar"
 
@@ -38,7 +41,6 @@ function GenerateWorkingHours() {
   const [expandedDepartments, setExpandedDepartments] = useState(new Set())
   const [expandedShifts, setExpandedShifts] = useState(new Set())
 
-  // Track selections hierarchically
   const [selectedDepartments, setSelectedDepartments] = useState(new Set())
   const [selectedShifts, setSelectedShifts] = useState(new Set())
   const [selectedDegrees, setSelectedDegrees] = useState(new Set())
@@ -47,12 +49,28 @@ function GenerateWorkingHours() {
     (state) => state.rosterManagement
   )
 
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
+  const iconColors = {
+    info: "text-blue-600 dark:text-blue-400",
+    refresh: "text-blue-600 dark:text-blue-400",
+    building: "text-green-600 dark:text-green-400",
+    clock: "text-purple-600 dark:text-purple-400",
+    degree: "text-orange-600 dark:text-orange-400",
+    success: "text-green-600 dark:text-green-400",
+    warning: "text-yellow-600 dark:text-yellow-400",
+    danger: "text-red-600 dark:text-red-400",
+    muted: "text-[var(--color-text-muted)]",
+  }
 
-  // Get roster ID and fetch data
+  const iconBg = {
+    info: "bg-blue-100 dark:bg-blue-900/30",
+    building: "bg-green-100 dark:bg-green-900/30",
+    clock: "bg-purple-100 dark:bg-purple-900/30",
+    degree: "bg-orange-100 dark:bg-orange-900/30",
+  }
+
   useEffect(() => {
     const storedRosterId = localStorage.getItem("rosterId")
+
     if (storedRosterId) {
       setRosterId(storedRosterId)
       dispatch(getRosterById({ rosterId: storedRosterId }))
@@ -60,84 +78,93 @@ function GenerateWorkingHours() {
     }
   }, [dispatch])
 
-  // Validation schema
   const validationSchema = Yup.object({
     overwriteExisting: Yup.boolean(),
   })
 
-  // Initial values
   const initialValues = {
     overwriteExisting: false,
   }
 
-  // Toggle functions
   const toggleDepartment = (deptId) => {
     const newExpanded = new Set(expandedDepartments)
+
     if (newExpanded.has(deptId)) {
       newExpanded.delete(deptId)
     } else {
       newExpanded.add(deptId)
     }
+
     setExpandedDepartments(newExpanded)
   }
 
   const toggleShift = (shiftId) => {
     const newExpanded = new Set(expandedShifts)
+
     if (newExpanded.has(shiftId)) {
       newExpanded.delete(shiftId)
     } else {
       newExpanded.add(shiftId)
     }
+
     setExpandedShifts(newExpanded)
   }
 
-  // Selection handlers
   const handleDepartmentToggle = (departmentId) => {
-    const newSelected = new Set(selectedDepartments)
-    if (newSelected.has(departmentId)) {
-      newSelected.delete(departmentId)
-      // Clear shifts and degrees for this department
+    const newSelectedDepartments = new Set(selectedDepartments)
+    const newSelectedShifts = new Set(selectedShifts)
+    const newSelectedDegrees = new Set(selectedDegrees)
+
+    if (newSelectedDepartments.has(departmentId)) {
+      newSelectedDepartments.delete(departmentId)
+
       const dept = rosterTree?.departments?.find(
-        (d) => d.departmentId === departmentId
+        (department) => department.departmentId === departmentId
       )
-      if (dept) {
-        dept.shifts?.forEach((shift) => {
-          selectedShifts.delete(shift.shiftHoursTypeId)
-          shift.scientificDegrees?.forEach((degree) => {
-            selectedDegrees.delete(degree.scientificDegreeId)
-          })
+
+      dept?.shifts?.forEach((shift) => {
+        newSelectedShifts.delete(shift.shiftHoursTypeId)
+
+        shift.scientificDegrees?.forEach((degree) => {
+          newSelectedDegrees.delete(degree.scientificDegreeId)
         })
-      }
+      })
     } else {
-      newSelected.add(departmentId)
+      newSelectedDepartments.add(departmentId)
     }
-    setSelectedDepartments(newSelected)
-    setSelectedShifts(new Set(selectedShifts))
-    setSelectedDegrees(new Set(selectedDegrees))
+
+    setSelectedDepartments(newSelectedDepartments)
+    setSelectedShifts(newSelectedShifts)
+    setSelectedDegrees(newSelectedDegrees)
   }
 
   const handleShiftToggle = (shiftHoursTypeId, departmentId) => {
-    const newSelected = new Set(selectedShifts)
-    if (newSelected.has(shiftHoursTypeId)) {
-      newSelected.delete(shiftHoursTypeId)
-      // Clear degrees for this shift
+    const newSelectedDepartments = new Set(selectedDepartments)
+    const newSelectedShifts = new Set(selectedShifts)
+    const newSelectedDegrees = new Set(selectedDegrees)
+
+    if (newSelectedShifts.has(shiftHoursTypeId)) {
+      newSelectedShifts.delete(shiftHoursTypeId)
+
       const dept = rosterTree?.departments?.find(
-        (d) => d.departmentId === departmentId
+        (department) => department.departmentId === departmentId
       )
+
       const shift = dept?.shifts?.find(
-        (s) => s.shiftHoursTypeId === shiftHoursTypeId
+        (item) => item.shiftHoursTypeId === shiftHoursTypeId
       )
+
       shift?.scientificDegrees?.forEach((degree) => {
-        selectedDegrees.delete(degree.scientificDegreeId)
+        newSelectedDegrees.delete(degree.scientificDegreeId)
       })
     } else {
-      newSelected.add(shiftHoursTypeId)
-      // Auto-select parent department
-      selectedDepartments.add(departmentId)
+      newSelectedShifts.add(shiftHoursTypeId)
+      newSelectedDepartments.add(departmentId)
     }
-    setSelectedShifts(newSelected)
-    setSelectedDepartments(new Set(selectedDepartments))
-    setSelectedDegrees(new Set(selectedDegrees))
+
+    setSelectedDepartments(newSelectedDepartments)
+    setSelectedShifts(newSelectedShifts)
+    setSelectedDegrees(newSelectedDegrees)
   }
 
   const handleDegreeToggle = (
@@ -145,40 +172,27 @@ function GenerateWorkingHours() {
     shiftHoursTypeId,
     departmentId
   ) => {
-    const newSelected = new Set(selectedDegrees)
-    if (newSelected.has(scientificDegreeId)) {
-      newSelected.delete(scientificDegreeId)
+    const newSelectedDepartments = new Set(selectedDepartments)
+    const newSelectedShifts = new Set(selectedShifts)
+    const newSelectedDegrees = new Set(selectedDegrees)
+
+    if (newSelectedDegrees.has(scientificDegreeId)) {
+      newSelectedDegrees.delete(scientificDegreeId)
     } else {
-      newSelected.add(scientificDegreeId)
-      // Auto-select parent shift and department
-      selectedShifts.add(shiftHoursTypeId)
-      selectedDepartments.add(departmentId)
+      newSelectedDegrees.add(scientificDegreeId)
+      newSelectedShifts.add(shiftHoursTypeId)
+      newSelectedDepartments.add(departmentId)
     }
-    setSelectedDegrees(newSelected)
-    setSelectedShifts(new Set(selectedShifts))
-    setSelectedDepartments(new Set(selectedDepartments))
+
+    setSelectedDepartments(newSelectedDepartments)
+    setSelectedShifts(newSelectedShifts)
+    setSelectedDegrees(newSelectedDegrees)
   }
 
-  // Check if department is fully selected (all children selected)
-  const isDepartmentFullySelected = (dept) => {
-    if (!selectedDepartments.has(dept.departmentId)) return false
-    return dept.shifts?.every((shift) =>
-      selectedShifts.has(shift.shiftHoursTypeId)
-    )
-  }
-
-  // Check if shift is fully selected (all children selected)
-  const isShiftFullySelected = (shift) => {
-    if (!selectedShifts.has(shift.shiftHoursTypeId)) return false
-    return shift.scientificDegrees?.every((degree) =>
-      selectedDegrees.has(degree.scientificDegreeId)
-    )
-  }
-
-  // Calculate totals
   const calculateTotals = () => {
-    if (!rosterTree?.departments)
+    if (!rosterTree?.departments) {
       return { generated: 0, expected: 0, percent: 0 }
+    }
 
     const totals = rosterTree.departments.reduce(
       (acc, dept) => ({
@@ -195,13 +209,48 @@ function GenerateWorkingHours() {
     }
   }
 
+  const getProgressColor = (percent) => {
+    if (percent === 100) {
+      return {
+        text: "text-green-600 dark:text-green-400",
+        bg: "bg-green-500",
+        badge:
+          "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20",
+      }
+    }
+
+    if (percent > 50) {
+      return {
+        text: "text-yellow-600 dark:text-yellow-400",
+        bg: "bg-yellow-500",
+        badge:
+          "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
+      }
+    }
+
+    if (percent > 0) {
+      return {
+        text: "text-red-600 dark:text-red-400",
+        bg: "bg-red-500",
+        badge:
+          "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+      }
+    }
+
+    return {
+      text: "text-[var(--color-text-muted)]",
+      bg: "bg-[var(--color-text-muted)]",
+      badge:
+        "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+    }
+  }
+
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (!rosterId) {
         throw new Error(t("roster.workingHourss.error.noRosterId"))
       }
 
-      // Build the request based on selections
       const generateData = {
         rosterId: parseInt(rosterId),
         departmentIds:
@@ -213,11 +262,8 @@ function GenerateWorkingHours() {
         overwriteExisting: values.overwriteExisting,
       }
 
-      console.log("Generating working hours with data:", generateData)
-
       const result = await dispatch(addWorkingHours(generateData)).unwrap()
 
-      // Refresh tree data
       await dispatch(getRosterTree({ rosterId }))
 
       toast.success(
@@ -230,14 +276,15 @@ function GenerateWorkingHours() {
         }
       )
 
-      // Show generation summary
       if (result.data) {
         Swal.fire({
           title:
             t("roster.workingHourss.success.summaryTitle") ||
             "Generation Complete",
           html: `
-            <div class="text-left">
+            <div style="text-align: ${
+              currentLang === "ar" ? "right" : "left"
+            }">
               <p><strong>${
                 t("roster.workingHourss.summary.added") || "Added"
               }:</strong> ${result.data.addedCount}</p>
@@ -254,16 +301,13 @@ function GenerateWorkingHours() {
           `,
           icon: "success",
           confirmButtonText: t("common.ok"),
-          confirmButtonColor: "#10b981",
-          background: isDark ? "#1f2937" : "#ffffff",
-          color: isDark ? "#f9fafb" : "#111827",
+          ...swalTheme,
+          confirmButtonColor: "var(--color-success)",
         })
       }
 
       navigate(`/admin-panel/rosters/${rosterId}`)
     } catch (error) {
-      console.error("Working hours generation error:", error)
-
       Swal.fire({
         title: t("roster.workingHourss.error.title"),
         text:
@@ -274,9 +318,8 @@ function GenerateWorkingHours() {
             : error?.message || t("roster.workingHourss.error.message"),
         icon: "error",
         confirmButtonText: t("common.ok"),
-        confirmButtonColor: "#ef4444",
-        background: isDark ? "#1f2937" : "#ffffff",
-        color: isDark ? "#f9fafb" : "#111827",
+        ...swalTheme,
+        confirmButtonColor: "var(--color-danger)",
       })
     } finally {
       setSubmitting(false)
@@ -297,23 +340,19 @@ function GenerateWorkingHours() {
 
   const totals = calculateTotals()
   const hasExistingData = totals.generated > 0
+  const progressColor = getProgressColor(totals.percent)
 
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
             <button
               onClick={navigateBack}
-              className={`p-2 rounded-lg ${isRTL ? "ml-4" : "mr-4"} ${
-                isDark
-                  ? "text-gray-400 hover:text-white hover:bg-gray-700"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              } transition-colors`}
+              className={`p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] transition-colors ${
+                isRTL ? "ml-4" : "mr-4"
+              }`}
+              type="button"
             >
               {currentLang === "en" ? (
                 <ArrowLeft size={20} />
@@ -321,29 +360,20 @@ function GenerateWorkingHours() {
                 <ArrowRight size={20} />
               )}
             </button>
+
             <div>
-              <h1
-                className={`text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className="text-3xl font-bold text-[var(--color-text)]">
                 {t("roster.workingHourss.generateTitle") ||
                   "Generate Working Hours"}
               </h1>
+
               {selectedRoster && (
                 <div className="mt-2">
-                  <p
-                    className={`text-lg ${
-                      isDark ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  >
+                  <p className="text-lg text-[var(--color-primary)]">
                     {selectedRoster.title}
                   </p>
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
+
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     {selectedRoster.categoryName} • {selectedRoster.month}/
                     {selectedRoster.year}
                   </p>
@@ -353,53 +383,27 @@ function GenerateWorkingHours() {
           </div>
         </div>
 
-        {/* Progress Overview */}
         {hasExistingData && (
-          <div
-            className={`mb-6 p-6 rounded-lg border ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
+          <div className={`${theme.card} mb-6 p-6`}>
             <div className="flex items-center justify-between mb-4">
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h3 className="text-lg font-semibold text-[var(--color-text)]">
                 {t("roster.workingHourss.overallProgress") ||
                   "Overall Progress"}
               </h3>
-              <span
-                className={`text-2xl font-bold ${
-                  totals.percent === 100
-                    ? "text-green-500"
-                    : totals.percent > 50
-                    ? "text-yellow-500"
-                    : "text-red-500"
-                }`}
-              >
+
+              <span className={`text-2xl font-bold ${progressColor.text}`}>
                 {totals.percent.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+
+            <div className="w-full bg-[var(--color-bg-soft)] rounded-full h-4 overflow-hidden">
               <div
-                className={`h-4 rounded-full transition-all ${
-                  totals.percent === 100
-                    ? "bg-green-500"
-                    : totals.percent > 50
-                    ? "bg-yellow-500"
-                    : "bg-red-500"
-                }`}
-                style={{ width: `${totals.percent}%` }}
-              ></div>
+                className={`h-4 rounded-full transition-all ${progressColor.bg}`}
+                style={{ width: `${Math.min(totals.percent, 100)}%` }}
+              />
             </div>
-            <p
-              className={`text-sm mt-2 ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
+
+            <p className="text-sm mt-2 text-[var(--color-text-muted)]">
               {totals.generated} / {totals.expected}{" "}
               {t("roster.workingHourss.cellsGenerated") || "cells generated"}
             </p>
@@ -407,36 +411,17 @@ function GenerateWorkingHours() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Tree Structure with Selection */}
-          <div
-            className={`rounded-lg border p-6 ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
-            <h2
-              className={`text-xl font-semibold mb-4 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
+          <div className={`${theme.card} p-6`}>
+            <h2 className="text-xl font-semibold mb-4 text-[var(--color-text)]">
               {t("roster.workingHourss.selectStructure") ||
                 "Select Structure to Generate"}
             </h2>
 
-            {/* Info */}
-            <div
-              className={`mb-4 p-3 rounded-lg border-l-4 border-blue-500 ${
-                isDark ? "bg-blue-900/20" : "bg-blue-50"
-              }`}
-            >
+            <div className="mb-4 p-3 rounded-lg border-s-4 border-blue-500 bg-[var(--color-info-soft)]">
               <div className="flex items-start gap-2">
-                <Info className="text-blue-500 mt-0.5" size={14} />
-                <p
-                  className={`text-xs ${
-                    isDark ? "text-blue-200" : "text-blue-700"
-                  }`}
-                >
+                <Info className={`${iconColors.info} mt-0.5`} size={14} />
+
+                <p className="text-xs text-[var(--color-info)]">
                   {t("roster.workingHourss.hierarchyInfo") ||
                     "Select departments, then shifts, then scientific degrees. Leave empty to generate for all."}
                 </p>
@@ -444,218 +429,226 @@ function GenerateWorkingHours() {
             </div>
 
             {rosterTree?.departments?.length === 0 ? (
-              <div
-                className={`text-center py-8 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-center py-8 text-[var(--color-text-muted)]">
                 <Info size={48} className="mx-auto mb-4 opacity-50" />
+
                 <p>
                   {t("roster.workingHourss.noStructure") ||
                     "No roster structure found"}
                 </p>
               </div>
             ) : (
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {rosterTree?.departments?.map((dept) => (
-                  <div key={dept.departmentId}>
-                    {/* Department */}
-                    <div
-                      className={`p-3 rounded-lg border ${
-                        isDark
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-gray-50 border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 flex-1">
-                          <input
-                            type="checkbox"
-                            checked={selectedDepartments.has(dept.departmentId)}
-                            onChange={() =>
-                              handleDepartmentToggle(dept.departmentId)
-                            }
-                            className="rounded"
-                          />
-                          <button
-                            onClick={() => toggleDepartment(dept.departmentId)}
-                            className="flex items-center gap-2 flex-1 text-left"
-                          >
-                            {expandedDepartments.has(dept.departmentId) ? (
-                              <ChevronDown size={16} />
-                            ) : (
-                              <ChevronRight size={16} />
-                            )}
-                            <Building2 size={16} />
-                            <span className="font-medium">
-                              {currentLang === "ar"
-                                ? dept.nameArabic
-                                : dept.nameEnglish}
-                            </span>
-                          </button>
-                        </div>
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${
-                            dept.completionPercent === 100
-                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                              : dept.completionPercent > 0
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                              : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                          }`}
-                        >
-                          {dept.completionPercent.toFixed(0)}%
-                        </span>
-                      </div>
-                    </div>
+              <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+                {rosterTree?.departments?.map((dept) => {
+                  const deptProgress = getProgressColor(dept.completionPercent)
 
-                    {/* Shifts */}
-                    {expandedDepartments.has(dept.departmentId) && (
-                      <div
-                        className={`${isRTL ? "mr-6" : "ml-6"} mt-2 space-y-2`}
-                      >
-                        {dept.shifts?.map((shift) => (
-                          <div key={shift.shiftHoursTypeId}>
-                            <div
-                              className={`p-2 rounded border ${
-                                isDark
-                                  ? "bg-gray-750 border-gray-600"
-                                  : "bg-white border-gray-200"
-                              }`}
+                  return (
+                    <div key={dept.departmentId}>
+                      <div className={`${theme.cardSoft} p-3`}>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 flex-1">
+                            <input
+                              type="checkbox"
+                              checked={selectedDepartments.has(
+                                dept.departmentId
+                              )}
+                              onChange={() =>
+                                handleDepartmentToggle(dept.departmentId)
+                              }
+                              className="rounded text-blue-600 focus:ring-blue-500"
+                            />
+
+                            <button
+                              onClick={() =>
+                                toggleDepartment(dept.departmentId)
+                              }
+                              className="flex items-center gap-2 flex-1 text-start text-[var(--color-text)]"
+                              type="button"
                             >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedShifts.has(
-                                      shift.shiftHoursTypeId
-                                    )}
-                                    onChange={() =>
-                                      handleShiftToggle(
-                                        shift.shiftHoursTypeId,
-                                        dept.departmentId
-                                      )
-                                    }
-                                    className="rounded"
-                                  />
-                                  <button
-                                    onClick={() =>
-                                      toggleShift(shift.shiftHoursTypeId)
-                                    }
-                                    className="flex items-center gap-2 flex-1 text-left"
-                                  >
-                                    {expandedShifts.has(
-                                      shift.shiftHoursTypeId
-                                    ) ? (
-                                      <ChevronDown size={14} />
-                                    ) : (
-                                      <ChevronRight size={14} />
-                                    )}
-                                    <Clock size={14} />
-                                    <span className="text-sm">
-                                      {currentLang === "ar"
-                                        ? shift.nameArabic
-                                        : shift.nameEnglish}
-                                    </span>
-                                  </button>
-                                </div>
-                                <span
-                                  className={`text-xs px-2 py-0.5 rounded ${
-                                    shift.completionPercent === 100
-                                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                                      : shift.completionPercent > 0
-                                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                                      : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                                  }`}
-                                >
-                                  {shift.completionPercent.toFixed(0)}%
-                                </span>
-                              </div>
-                            </div>
+                              {expandedDepartments.has(dept.departmentId) ? (
+                                <ChevronDown
+                                  size={16}
+                                  className={iconColors.muted}
+                                />
+                              ) : (
+                                <ChevronRight
+                                  size={16}
+                                  className={iconColors.muted}
+                                />
+                              )}
 
-                            {/* Scientific Degrees */}
-                            {expandedShifts.has(shift.shiftHoursTypeId) && (
-                              <div
-                                className={`${
-                                  isRTL ? "mr-6" : "ml-6"
-                                } mt-1 space-y-1`}
-                              >
-                                {shift.scientificDegrees?.map((degree) => (
-                                  <div
-                                    key={degree.scientificDegreeId}
-                                    className={`p-2 rounded text-sm ${
-                                      isDark
-                                        ? "bg-gray-800 text-gray-300"
-                                        : "bg-gray-50 text-gray-700"
-                                    }`}
-                                  >
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2 flex-1">
-                                        <input
-                                          type="checkbox"
-                                          checked={selectedDegrees.has(
-                                            degree.scientificDegreeId
-                                          )}
-                                          onChange={() =>
-                                            handleDegreeToggle(
-                                              degree.scientificDegreeId,
-                                              shift.shiftHoursTypeId,
-                                              dept.departmentId
-                                            )
-                                          }
-                                          className="rounded text-xs"
-                                        />
-                                        <GraduationCap size={12} />
-                                        <span className="text-xs">
-                                          {currentLang === "ar"
-                                            ? degree.nameArabic
-                                            : degree.nameEnglish}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-2 text-xs">
-                                        {degree.hasWorkingHours ? (
-                                          <CheckCircle
-                                            size={12}
-                                            className="text-green-500"
+                              <Building2
+                                size={16}
+                                className={iconColors.building}
+                              />
+
+                              <span className="font-semibold">
+                                {currentLang === "ar"
+                                  ? dept.nameArabic
+                                  : dept.nameEnglish}
+                              </span>
+                            </button>
+                          </div>
+
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full font-semibold ${deptProgress.badge}`}
+                          >
+                            {dept.completionPercent.toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+
+                      {expandedDepartments.has(dept.departmentId) && (
+                        <div
+                          className={`${
+                            isRTL ? "mr-6" : "ml-6"
+                          } mt-2 space-y-2`}
+                        >
+                          {dept.shifts?.map((shift) => {
+                            const shiftProgress = getProgressColor(
+                              shift.completionPercent
+                            )
+
+                            return (
+                              <div key={shift.shiftHoursTypeId}>
+                                <div className={`${theme.cardSoft} p-2`}>
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2 flex-1">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedShifts.has(
+                                          shift.shiftHoursTypeId
+                                        )}
+                                        onChange={() =>
+                                          handleShiftToggle(
+                                            shift.shiftHoursTypeId,
+                                            dept.departmentId
+                                          )
+                                        }
+                                        className="rounded text-blue-600 focus:ring-blue-500"
+                                      />
+
+                                      <button
+                                        onClick={() =>
+                                          toggleShift(shift.shiftHoursTypeId)
+                                        }
+                                        className="flex items-center gap-2 flex-1 text-start text-[var(--color-text)]"
+                                        type="button"
+                                      >
+                                        {expandedShifts.has(
+                                          shift.shiftHoursTypeId
+                                        ) ? (
+                                          <ChevronDown
+                                            size={14}
+                                            className={iconColors.muted}
                                           />
                                         ) : (
-                                          <AlertCircle
-                                            size={12}
-                                            className="text-gray-400"
+                                          <ChevronRight
+                                            size={14}
+                                            className={iconColors.muted}
                                           />
                                         )}
-                                        <span>
-                                          {degree.generatedDays}/
-                                          {degree.totalDays}
+
+                                        <Clock
+                                          size={14}
+                                          className={iconColors.clock}
+                                        />
+
+                                        <span className="text-sm font-medium">
+                                          {currentLang === "ar"
+                                            ? shift.nameArabic
+                                            : shift.nameEnglish}
                                         </span>
-                                      </div>
+                                      </button>
                                     </div>
+
+                                    <span
+                                      className={`text-xs px-2 py-0.5 rounded-full font-semibold ${shiftProgress.badge}`}
+                                    >
+                                      {shift.completionPercent.toFixed(0)}%
+                                    </span>
                                   </div>
-                                ))}
+                                </div>
+
+                                {expandedShifts.has(
+                                  shift.shiftHoursTypeId
+                                ) && (
+                                  <div
+                                    className={`${
+                                      isRTL ? "mr-6" : "ml-6"
+                                    } mt-1 space-y-1`}
+                                  >
+                                    {shift.scientificDegrees?.map((degree) => (
+                                      <div
+                                        key={degree.scientificDegreeId}
+                                        className="p-2 rounded-lg text-sm bg-[var(--color-bg-soft)] text-[var(--color-text)] border border-[var(--color-border)]"
+                                      >
+                                        <div className="flex items-center justify-between gap-3">
+                                          <div className="flex items-center gap-2 flex-1">
+                                            <input
+                                              type="checkbox"
+                                              checked={selectedDegrees.has(
+                                                degree.scientificDegreeId
+                                              )}
+                                              onChange={() =>
+                                                handleDegreeToggle(
+                                                  degree.scientificDegreeId,
+                                                  shift.shiftHoursTypeId,
+                                                  dept.departmentId
+                                                )
+                                              }
+                                              className="rounded text-blue-600 focus:ring-blue-500"
+                                            />
+
+                                            <GraduationCap
+                                              size={12}
+                                              className={iconColors.degree}
+                                            />
+
+                                            <span className="text-xs">
+                                              {currentLang === "ar"
+                                                ? degree.nameArabic
+                                                : degree.nameEnglish}
+                                            </span>
+                                          </div>
+
+                                          <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+                                            {degree.hasWorkingHours ? (
+                                              <CheckCircle
+                                                size={12}
+                                                className={iconColors.success}
+                                              />
+                                            ) : (
+                                              <AlertCircle
+                                                size={12}
+                                                className={iconColors.muted}
+                                              />
+                                            )}
+
+                                            <span>
+                                              {degree.generatedDays}/
+                                              {degree.totalDays}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
 
-          {/* Right Column - Generation Form */}
-          <div
-            className={`rounded-lg border p-6 ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
-            <h2
-              className={`text-xl font-semibold mb-4 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
+          <div className={`${theme.card} p-6`}>
+            <h2 className="text-xl font-semibold mb-4 text-[var(--color-text)]">
               {t("roster.workingHourss.generateSettings") ||
                 "Generation Settings"}
             </h2>
@@ -666,48 +659,49 @@ function GenerateWorkingHours() {
               onSubmit={handleSubmit}
               enableReinitialize
             >
-              {({ isSubmitting, values }) => (
+              {({ isSubmitting, values, setFieldValue }) => (
                 <Form className="space-y-6">
-                  {/* Selection Summary */}
-                  <div
-                    className={`p-4 rounded-lg ${
-                      isDark ? "bg-gray-700" : "bg-gray-50"
-                    }`}
-                  >
-                    <h3 className="text-sm font-medium mb-3">
+                  <div className={`${theme.cardSoft} p-4`}>
+                    <h3 className="text-sm font-semibold mb-3 text-[var(--color-text)]">
                       {t("roster.workingHourss.selectionSummary") ||
                         "Selection Summary"}
                     </h3>
+
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>
+                      <div className="flex justify-between gap-3">
+                        <span className="text-[var(--color-text-muted)]">
                           {t("roster.workingHourss.departments") ||
                             "Departments"}
                           :
                         </span>
-                        <span className="font-medium">
+
+                        <span className="font-semibold text-[var(--color-text)]">
                           {selectedDepartments.size === 0
                             ? t("common.all") || "All"
                             : selectedDepartments.size}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-[var(--color-text-muted)]">
                           {t("roster.workingHourss.shifts") || "Shifts"}:
                         </span>
-                        <span className="font-medium">
+
+                        <span className="font-semibold text-[var(--color-text)]">
                           {selectedShifts.size === 0
                             ? t("common.all") || "All"
                             : selectedShifts.size}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>
+
+                      <div className="flex justify-between gap-3">
+                        <span className="text-[var(--color-text-muted)]">
                           {t("roster.workingHourss.degrees") ||
                             "Scientific Degrees"}
                           :
                         </span>
-                        <span className="font-medium">
+
+                        <span className="font-semibold text-[var(--color-text)]">
                           {selectedDegrees.size === 0
                             ? t("common.all") || "All"
                             : selectedDegrees.size}
@@ -716,73 +710,47 @@ function GenerateWorkingHours() {
                     </div>
                   </div>
 
-                  {/* Overwrite Checkbox */}
-                  <div
-                    className={`p-4 border rounded-lg ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
+                  <div className={`${theme.cardSoft} p-4`}>
+                    <div className="flex items-center justify-between gap-4">
                       <div>
                         <label
                           htmlFor="overwriteExisting"
-                          className={`text-sm font-medium ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
+                          className="text-sm font-semibold text-[var(--color-text)]"
                         >
                           {t("roster.workingHourss.overwriteExisting") ||
                             "Overwrite Existing"}
                         </label>
-                        <p
-                          className={`text-xs mt-1 ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
+
+                        <p className="text-xs mt-1 text-[var(--color-text-muted)]">
                           {t("roster.workingHourss.overwriteHelp") ||
                             "Replace existing working hours with defaults"}
                         </p>
                       </div>
-                      <input
+
+                      <Field
                         type="checkbox"
                         id="overwriteExisting"
                         name="overwriteExisting"
-                        checked={values.overwriteExisting}
-                        onChange={(e) => {
-                          values.overwriteExisting = e.target.checked
-                        }}
-                        className="w-4 h-4 rounded"
+                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  {/* Warning */}
                   {values.overwriteExisting && (
-                    <div
-                      className={`p-4 rounded-lg border-l-4 border-red-500 ${
-                        isDark ? "bg-red-900/20" : "bg-red-50"
-                      }`}
-                    >
+                    <div className="p-4 rounded-lg border-s-4 border-red-500 bg-[var(--color-danger-soft)]">
                       <div className="flex items-start gap-2">
                         <AlertCircle
                           className="text-red-500 mt-0.5"
                           size={16}
                         />
+
                         <div>
-                          <p
-                            className={`text-sm font-medium ${
-                              isDark ? "text-red-300" : "text-red-800"
-                            }`}
-                          >
+                          <p className="text-sm font-semibold text-[var(--color-danger)]">
                             {t("roster.workingHourss.warningTitle") ||
                               "Warning"}
                           </p>
-                          <p
-                            className={`text-sm mt-1 ${
-                              isDark ? "text-red-200" : "text-red-700"
-                            }`}
-                          >
+
+                          <p className="text-sm mt-1 text-[var(--color-danger)]">
                             {t("roster.workingHourss.overwriteWarning") ||
                               "This will remove all doctor assignments!"}
                           </p>
@@ -791,16 +759,11 @@ function GenerateWorkingHours() {
                     </div>
                   )}
 
-                  {/* Buttons */}
-                  <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between pt-6 border-t border-[var(--color-border)]">
                     <button
                       type="button"
                       onClick={navigateBack}
-                      className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
-                        isDark
-                          ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className={theme.secondaryButton}
                     >
                       {currentLang === "en" ? (
                         <ArrowLeft size={16} className="mr-2" />
@@ -817,11 +780,11 @@ function GenerateWorkingHours() {
                         loading.addWorkingHours ||
                         rosterTree?.departments?.length === 0
                       }
-                      className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting || loading.addWorkingHours ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 rtl:mr-0 rtl:ml-2" />
                           {t("common.generating") || "Generating..."}
                         </>
                       ) : (

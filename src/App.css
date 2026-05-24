@@ -1,94 +1,174 @@
+/* ============================================================
+   App Layout Overrides
+   Works with the theme variables from index.css
+   ============================================================ */
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: initial;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
+/* Main app wrapper helpers */
+.app,
+.app-layout,
+.layout,
+.main-layout {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Page containers */
+.page,
+.page-container,
+.content,
+.main-content {
+  width: 100%;
+  min-height: 100%;
+  background: transparent;
+  color: var(--color-text);
+}
+
+/* Cards */
+.card {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal),
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Logo support, only if still used somewhere */
 .logo {
-  height: 6em;
-  padding: 1.5em;
+  height: 4.5rem;
+  padding: 1rem;
   will-change: filter;
-  -webkit-transition: filter 300ms;
-  -moz-transition: filter 300ms;
-  -ms-transition: filter 300ms;
-  -o-transition: filter 300ms;
-  transition: filter 300ms;
+  transition: filter 300ms ease, transform 300ms ease;
 }
 
 .logo:hover {
-  -webkit-filter: drop-shadow(0 0 2em #646cffaa);
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 1.5rem rgba(37, 99, 235, 0.35));
+  transform: translateY(-1px);
 }
 
 .logo.react:hover {
-  -webkit-filter: drop-shadow(0 0 2em #61dafbaa);
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 1.5rem rgba(45, 212, 191, 0.35));
 }
 
-@-webkit-keyframes logo-spin {
-  from {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-
-@-moz-keyframes logo-spin {
-  from {
-    -moz-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -moz-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-
-@-o-keyframes logo-spin {
-  from {
-    -o-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -o-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-
+/* Reduced, cleaner logo animation */
 @keyframes logo-spin {
   from {
-    -webkit-transform: rotate(0deg);
-    -moz-transform: rotate(0deg);
-    -ms-transform: rotate(0deg);
-    -o-transform: rotate(0deg);
     transform: rotate(0deg);
   }
+
   to {
-    -webkit-transform: rotate(360deg);
-    -moz-transform: rotate(360deg);
-    -ms-transform: rotate(360deg);
-    -o-transform: rotate(360deg);
     transform: rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
-    -webkit-animation: logo-spin infinite 20s linear;
-    -moz-animation: logo-spin infinite 20s linear;
-    -o-animation: logo-spin infinite 20s linear;
     animation: logo-spin infinite 20s linear;
   }
 }
 
-.card {
-  padding: 2em;
+/* Text helpers */
+.read-the-docs,
+.helper-text,
+.secondary-text {
+  color: var(--color-text-muted);
 }
 
-.read-the-docs {
-  color: #888;
+/* Links */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Dashboard sections */
+.section,
+.widget,
+.dashboard-card {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Keep images responsive */
+img,
+svg {
+  max-width: 100%;
+}
+
+/* SweetAlert2 theme harmony */
+.swal2-popup {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+.swal2-title {
+  color: var(--color-text) !important;
+}
+
+.swal2-html-container {
+  color: var(--color-text-muted) !important;
+}
+
+.swal2-confirm {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.swal2-confirm:hover {
+  background: var(--color-primary-hover) !important;
+}
+
+/* Toastify theme harmony */
+.Toastify__toast {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.Toastify__toast-body {
+  color: var(--color-text) !important;
+}
+
+.Toastify__close-button {
+  color: var(--color-text-muted) !important;
+}
+
+/* Prevent old starter styles from forcing centered layouts */
+.app *,
+#root * {
+  -webkit-tap-highlight-color: transparent;
 }

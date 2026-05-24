@@ -1,8 +1,9 @@
+// workingHour.jsx
 import React, { useEffect } from "react"
 import i18next from "i18next"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
-import { useParams, useNavigate, Link } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,17 +25,17 @@ import {
 import { getWorkingHour } from "../../../state/act/actRosterManagement"
 import LoadingGetData from "../../../components/LoadingGetData"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 function WorkingHour() {
   const { workingHourId } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
 
   const { workingHour, loading, errors } = useSelector(
     (state) => state.rosterManagement
   )
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
 
   const { t } = useTranslation()
   const currentLang = i18next.language
@@ -50,10 +51,11 @@ function WorkingHour() {
     }
   }, [dispatch, workingHourId])
 
-  // Format time
   const formatTime = (timeString) => {
     if (!timeString) return "-"
+
     const time = new Date(timeString)
+
     return time.toLocaleTimeString(currentLang === "ar" ? "ar-SA" : "en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -61,15 +63,13 @@ function WorkingHour() {
     })
   }
 
-  // Get fill percentage color
   const getFillColor = (percentage) => {
-    if (percentage >= 80) return isDark ? "text-green-400" : "text-green-600"
-    if (percentage >= 50) return isDark ? "text-yellow-400" : "text-yellow-600"
-    if (percentage >= 25) return isDark ? "text-orange-400" : "text-orange-600"
-    return isDark ? "text-red-400" : "text-red-600"
+    if (percentage >= 80) return "text-green-600 dark:text-green-400"
+    if (percentage >= 50) return "text-yellow-600 dark:text-yellow-400"
+    if (percentage >= 25) return "text-orange-600 dark:text-orange-400"
+    return "text-red-600 dark:text-red-400"
   }
 
-  // Get fill background color
   const getFillBgColor = (percentage) => {
     if (percentage >= 80) return "bg-green-500"
     if (percentage >= 50) return "bg-yellow-500"
@@ -77,35 +77,93 @@ function WorkingHour() {
     return "bg-red-500"
   }
 
+  const iconColors = {
+    clock: "text-blue-600 dark:text-blue-400",
+    calendar: "text-blue-600 dark:text-blue-400",
+    target: "text-blue-600 dark:text-blue-400",
+    userCheck: "text-green-600 dark:text-green-400",
+    building: "text-green-600 dark:text-green-400",
+    users: "text-orange-600 dark:text-orange-400",
+    briefcase: "text-purple-600 dark:text-purple-400",
+    user: "text-orange-600 dark:text-orange-400",
+    file: "text-slate-500 dark:text-slate-400",
+    danger: "text-red-600 dark:text-red-400",
+    success: "text-green-600 dark:text-green-400",
+  }
+
+  const iconBg = {
+    clock: "bg-blue-100 dark:bg-blue-900/30",
+    target: "bg-blue-100 dark:bg-blue-900/30",
+    userCheck: "bg-green-100 dark:bg-green-900/30",
+    building: "bg-green-100 dark:bg-green-900/30",
+    users: "bg-orange-100 dark:bg-orange-900/30",
+    briefcase: "bg-purple-100 dark:bg-purple-900/30",
+    user: "bg-orange-100 dark:bg-orange-900/30",
+    file: "bg-slate-100 dark:bg-slate-800",
+  }
+
+  const InfoRow = ({ icon: Icon, iconClass, label, value, subValue }) => (
+    <div className="flex items-start gap-3">
+      <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${iconClass}`} />
+
+      <div>
+        <p className="font-semibold text-[var(--color-text)]">{label}</p>
+
+        <p className="text-sm text-[var(--color-text-muted)]">{value}</p>
+
+        {subValue && (
+          <p className="text-xs text-[var(--color-text-soft)]">{subValue}</p>
+        )}
+      </div>
+    </div>
+  )
+
+  const StatCard = ({ icon: Icon, iconClass, bgClass, label, value, valueClass }) => (
+    <div className={`${theme.card} p-6`}>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p
+            className={`text-2xl font-bold ${
+              valueClass || "text-[var(--color-text)]"
+            }`}
+          >
+            {value}
+          </p>
+
+          <p className="text-sm text-[var(--color-text-muted)]">{label}</p>
+        </div>
+
+        <div className={`p-3 rounded-xl ${bgClass}`}>
+          <Icon className={`h-8 w-8 ${iconClass}`} />
+        </div>
+      </div>
+    </div>
+  )
+
   if (loading?.fetch) {
     return <LoadingGetData text={t("gettingData.workingHour")} />
   }
 
   if (errors.workingHours) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
+      <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-6xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
+          <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+
               <div className="text-red-500 text-lg mb-4">
                 {errors.workingHours}
               </div>
+
               <button
                 onClick={() => navigate(-1)}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className={theme.primaryButton}
+                type="button"
               >
                 {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
+
+                <span className={isRTL ? "mr-2" : "ml-2"}>
                   {t("common.goBack")}
                 </span>
               </button>
@@ -118,12 +176,11 @@ function WorkingHour() {
 
   if (!workingHour) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div
-          className={`text-center ${
-            isDark ? "text-gray-300" : "text-gray-600"
-          }`}
-        >
+      <div
+        className="flex items-center justify-center min-h-screen bg-[var(--color-bg)]"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div className="text-center text-[var(--color-text-muted)]">
           <p>{t("roster.workingHours.error.notFound")}</p>
         </div>
       </div>
@@ -131,29 +188,23 @@ function WorkingHour() {
   }
 
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
             <button
               onClick={() => navigate(-1)}
-              className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
-                isDark
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              } transition-colors`}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              type="button"
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-              <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
+
+              <span className={isRTL ? "mr-2" : "ml-2"}>
                 {t("common.goBack")}
               </span>
             </button>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() =>
                   navigate(
@@ -161,6 +212,7 @@ function WorkingHour() {
                   )
                 }
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                type="button"
               >
                 <Edit size={16} />
                 {t("common.edit")}
@@ -173,6 +225,7 @@ function WorkingHour() {
                   )
                 }
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                type="button"
               >
                 <UserPlus size={16} />
                 {t("roster.actions.assignDoctor")}
@@ -181,30 +234,16 @@ function WorkingHour() {
           </div>
 
           <div className="flex items-center gap-4 mb-4">
-            <div
-              className={`p-3 ${
-                isDark ? "bg-gray-700" : "bg-blue-100"
-              } rounded-lg`}
-            >
-              <Clock
-                className={`h-8 w-8 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
-                }`}
-              />
+            <div className={`p-3 rounded-xl ${iconBg.clock}`}>
+              <Clock className={`h-8 w-8 ${iconColors.clock}`} />
             </div>
+
             <div>
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-2`}
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-2">
                 {t("roster.workingHours.titlee")}
               </h1>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
+
+              <p className="text-sm text-[var(--color-text-muted)]">
                 {formatDate(workingHour.shiftDate)} -{" "}
                 {workingHour.dayOfWeekName}
               </p>
@@ -212,297 +251,113 @@ function WorkingHour() {
           </div>
         </div>
 
-        {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {workingHour.requiredDoctors}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.workingHours.fields.requiredDoctors")}
-                </p>
-              </div>
-              <Target
-                className={`h-8 w-8 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
-                }`}
-              />
-            </div>
-          </div>
+          <StatCard
+            icon={Target}
+            iconClass={iconColors.target}
+            bgClass={iconBg.target}
+            value={workingHour.requiredDoctors}
+            label={t("roster.workingHours.fields.requiredDoctors")}
+          />
 
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {workingHour.currentAssignedDoctors}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.assignedDoctors")}
-                </p>
-              </div>
-              <UserCheck
-                className={`h-8 w-8 ${
-                  isDark ? "text-green-400" : "text-green-600"
-                }`}
-              />
-            </div>
-          </div>
+          <StatCard
+            icon={UserCheck}
+            iconClass={iconColors.userCheck}
+            bgClass={iconBg.userCheck}
+            value={workingHour.currentAssignedDoctors}
+            label={t("roster.assignedDoctors")}
+          />
 
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {workingHour.remainingSlots}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.remainingSlots")}
-                </p>
-              </div>
-              <Users
-                className={`h-8 w-8 ${
-                  isDark ? "text-orange-400" : "text-orange-600"
-                }`}
-              />
-            </div>
-          </div>
+          <StatCard
+            icon={Users}
+            iconClass={iconColors.users}
+            bgClass={iconBg.users}
+            value={workingHour.remainingSlots}
+            label={t("roster.remainingSlots")}
+          />
 
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${getFillColor(
-                    workingHour.fillPercentage
-                  )}`}
-                >
-                  {Math.round(workingHour.fillPercentage)}%
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.fillPercentage")}
-                </p>
-              </div>
-              <Timer
-                className={`h-8 w-8 ${getFillColor(
-                  workingHour.fillPercentage
-                )}`}
-              />
-            </div>
-          </div>
+          <StatCard
+            icon={Timer}
+            iconClass={getFillColor(workingHour.fillPercentage)}
+            bgClass="bg-[var(--color-bg-soft)]"
+            value={`${Math.round(workingHour.fillPercentage)}%`}
+            valueClass={getFillColor(workingHour.fillPercentage)}
+            label={t("roster.fillPercentage")}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Details */}
           <div className="lg:col-span-2">
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6 mb-6`}
-            >
-              <h2
-                className={`text-xl font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-6`}
-              >
+            <div className={`${theme.card} p-6 mb-6`}>
+              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6">
                 {t("roster.workingHours.titlee")}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Date & Time Information */}
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Calendar
-                      className={`h-5 w-5 mt-0.5 ${
-                        isDark ? "text-blue-400" : "text-blue-600"
-                      }`}
-                    />
-                    <div>
-                      <p
-                        className={`font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {t("common.date")}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        {formatDate(workingHour.shiftDate)}
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isDark ? "text-gray-500" : "text-gray-500"
-                        }`}
-                      >
-                        {workingHour.dayOfWeekName}
-                      </p>
-                    </div>
-                  </div>
+                  <InfoRow
+                    icon={Calendar}
+                    iconClass={iconColors.calendar}
+                    label={t("common.date")}
+                    value={formatDate(workingHour.shiftDate)}
+                    subValue={workingHour.dayOfWeekName}
+                  />
 
-                  <div className="flex items-start gap-3">
-                    <Building
-                      className={`h-5 w-5 mt-0.5 ${
-                        isDark ? "text-green-400" : "text-green-600"
-                      }`}
-                    />
-                    <div>
-                      <p
-                        className={`font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {t("common.department")}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        {currentLang === "en"
-                          ? workingHour.department.nameEnglish
-                          : workingHour.department.nameArabic}{" "}
-                      </p>
-                    </div>
-                  </div>
+                  <InfoRow
+                    icon={Building}
+                    iconClass={iconColors.building}
+                    label={t("common.department")}
+                    value={
+                      currentLang === "en"
+                        ? workingHour.department.nameEnglish
+                        : workingHour.department.nameArabic
+                    }
+                  />
                 </div>
 
-                {/* Shift Information */}
                 <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Briefcase
-                      className={`h-5 w-5 mt-0.5 ${
-                        isDark ? "text-purple-400" : "text-purple-600"
-                      }`}
-                    />
-                    <div>
-                      <p
-                        className={`font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {t("adminPanel.shiftHours")}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        {currentLang === "en"
-                          ? workingHour.shift.nameEnglish
-                          : workingHour.shift.nameArabic}{" "}
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          isDark ? "text-gray-500" : "text-gray-500"
-                        }`}
-                      >
-                        {workingHour.shift.period} ({workingHour.shift.hours}h)
-                      </p>
-                    </div>
-                  </div>
+                  <InfoRow
+                    icon={Briefcase}
+                    iconClass={iconColors.briefcase}
+                    label={t("adminPanel.shiftHours")}
+                    value={
+                      currentLang === "en"
+                        ? workingHour.shift.nameEnglish
+                        : workingHour.shift.nameArabic
+                    }
+                    subValue={`${workingHour.shift.period} (${workingHour.shift.hours}h)`}
+                  />
 
-                  <div className="flex items-start gap-3">
-                    <User
-                      className={`h-5 w-5 mt-0.5 ${
-                        isDark ? "text-orange-400" : "text-orange-600"
-                      }`}
-                    />
-                    <div>
-                      <p
-                        className={`font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {t("roster.contractingTypes.fields.contractingTypes")}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        {currentLang === "en"
-                          ? workingHour.contractingType.nameEnglish
-                          : workingHour.contractingType.nameArabic}
-                      </p>
-                    </div>
-                  </div>
+                  <InfoRow
+                    icon={User}
+                    iconClass={iconColors.user}
+                    label={t("roster.contractingTypes.fields.contractingTypes")}
+                    value={
+                      currentLang === "en"
+                        ? workingHour.contractingType.nameEnglish
+                        : workingHour.contractingType.nameArabic
+                    }
+                  />
                 </div>
               </div>
 
-              {/* Status Indicators */}
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
                 <div className="flex flex-wrap items-center gap-4">
                   {workingHour.isFullyBooked && (
-                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
                       <CheckCircle
                         size={16}
-                        className={`${isRTL ? "ml-2" : "mr-2"}`}
+                        className={isRTL ? "ml-2" : "mr-2"}
                       />
                       {t("roster.fullyBooked")}
                     </span>
                   )}
 
                   {workingHour.isOverBooked && (
-                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20">
                       <AlertCircle
                         size={16}
-                        className={`${isRTL ? "ml-2" : "mr-2"}`}
+                        className={isRTL ? "ml-2" : "mr-2"}
                       />
                       {t("roster.overBooked")}
                     </span>
@@ -510,18 +365,15 @@ function WorkingHour() {
 
                   <div className="flex items-center gap-2">
                     <span
-                      className={`text-sm font-medium ${getFillColor(
+                      className={`text-sm font-semibold ${getFillColor(
                         workingHour.fillPercentage
                       )}`}
                     >
                       {Math.round(workingHour.fillPercentage)}%{" "}
                       {t("roster.filled")}
                     </span>
-                    <div
-                      className={`w-20 ${
-                        isDark ? "bg-gray-700" : "bg-gray-200"
-                      } rounded-full h-2`}
-                    >
+
+                    <div className="w-24 bg-[var(--color-bg-soft)] rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${getFillBgColor(
                           workingHour.fillPercentage
@@ -532,34 +384,25 @@ function WorkingHour() {
                             100
                           )}%`,
                         }}
-                      ></div>
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Notes */}
               {workingHour.notes && (
-                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
                   <div className="flex items-start gap-3">
                     <FileText
-                      className={`h-5 w-5 mt-0.5 ${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      }`}
+                      className={`h-5 w-5 mt-0.5 ${iconColors.file}`}
                     />
+
                     <div>
-                      <p
-                        className={`font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        } mb-2`}
-                      >
+                      <p className="font-semibold text-[var(--color-text)] mb-2">
                         {t("common.notes")}
                       </p>
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
+
+                      <p className="text-sm text-[var(--color-text-muted)]">
                         {workingHour.notes}
                       </p>
                     </div>
@@ -569,28 +412,14 @@ function WorkingHour() {
             </div>
           </div>
 
-          {/* Assigned Doctors */}
           <div>
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
+            <div className={`${theme.card} p-6`}>
               <div className="flex items-center justify-between mb-4">
-                <h3
-                  className={`text-lg font-semibold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
+                <h3 className="text-lg font-semibold text-[var(--color-text)]">
                   {t("roster.assignedDoctors")}
                 </h3>
-                <span
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
+
+                <span className="text-sm text-[var(--color-text-muted)]">
                   {workingHour.assignedDoctors?.length || 0}/
                   {workingHour.maxDoctors}
                 </span>
@@ -600,94 +429,64 @@ function WorkingHour() {
               workingHour.assignedDoctors.length > 0 ? (
                 <div className="space-y-3">
                   {workingHour.assignedDoctors.map((doctor, index) => (
-                    <div
-                      key={index}
-                      className={`p-3 rounded-lg border ${
-                        isDark
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-gray-50 border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
+                    <div key={index} className={`${theme.cardSoft} p-3`}>
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`p-2 rounded-full ${
-                              isDark ? "bg-gray-600" : "bg-blue-100"
-                            }`}
+                            className={`p-2 rounded-full ${iconBg.user}`}
                           >
                             <User
                               size={16}
-                              className={`${
-                                isDark ? "text-gray-300" : "text-blue-600"
-                              }`}
+                              className={iconColors.user}
                             />
                           </div>
+
                           <div>
-                            <p
-                              className={`font-medium ${
-                                isDark ? "text-white" : "text-gray-900"
-                              }`}
-                            >
-                              {currentLang == "en"
-                                ? doctor.doctorNameAr
-                                : doctor.doctorNameEn}
+                            <p className="font-semibold text-[var(--color-text)]">
+                              {currentLang === "en"
+                                ? doctor.doctorNameEn
+                                : doctor.doctorNameAr}
                             </p>
-                            <p
-                              className={`text-xs ${
-                                isDark ? "text-gray-400" : "text-gray-600"
-                              }`}
-                            >
+
+                            <p className="text-xs text-[var(--color-text-muted)]">
                               {doctor.contractingTypeName}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+
+                        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
                           <span
-                            className={`text-xs px-2 py-1 rounded-full ${
+                            className={`text-xs px-2 py-1 rounded-full border ${
                               doctor.assignmentMethod === "MANUAL"
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                                : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                ? "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
+                                : "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"
                             }`}
                           >
                             {doctor.assignmentMethod}
                           </span>
+
                           <button
                             onClick={() => handleNavigateToSchedule(doctor)}
-                            className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                              isDark
-                                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                : "bg-blue-600 hover:bg-blue-700 text-white"
-                            }`}
+                            className="px-3 py-1 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                            type="button"
                           >
-                            {t("roster.doctorSchedule.title")}{" "}
+                            {t("roster.doctorSchedule.title")}
                           </button>
                         </div>
                       </div>
 
-                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center justify-between text-xs">
-                          <span
-                            className={`${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
+                      <div className="mt-2 pt-2 border-t border-[var(--color-border)]">
+                        <div className="flex items-center justify-between gap-3 text-xs text-[var(--color-text-muted)]">
+                          <span>
                             {t("roster.workingHours.assignedBy")}:{" "}
                             {doctor.assignedByName}
                           </span>
-                          <span
-                            className={`${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {formatTime(doctor.assignedAt)}
-                          </span>
+
+                          <span>{formatTime(doctor.assignedAt)}</span>
                         </div>
+
                         {doctor.notes && (
-                          <p
-                            className={`text-xs mt-1 ${
-                              isDark ? "text-gray-500" : "text-gray-500"
-                            }`}
-                          >
+                          <p className="text-xs mt-1 text-[var(--color-text-soft)]">
                             {doctor.notes}
                           </p>
                         )}
@@ -697,67 +496,37 @@ function WorkingHour() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Users
-                    className={`h-12 w-12 mx-auto mb-3 ${
-                      isDark ? "text-gray-500" : "text-gray-400"
-                    }`}
-                  />
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
+                  <Users className="h-12 w-12 mx-auto mb-3 text-[var(--color-text-soft)]" />
+
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     {t("roster.noAssignedDoctors")}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Metadata */}
-            <div
-              className={`mt-6 ${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4`}
-              >
+            <div className={`${theme.card} mt-6 p-6`}>
+              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
                 {t("specificCategory.sections.metadata.title")}
               </h3>
+
               <div className="space-y-3">
                 <div>
-                  <p
-                    className={`text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {t("roster.details.createdAt")}
                   </p>
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
+
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     {formatTime(workingHour.createdAt)}
                   </p>
                 </div>
+
                 <div>
-                  <p
-                    className={`text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
                     {t("roster.details.createdBy")}
                   </p>
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
+
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     {workingHour.createdByName}
                   </p>
                 </div>

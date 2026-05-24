@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { useSelector } from "react-redux"
 import {
   Calendar,
   Users,
@@ -13,12 +12,12 @@ import {
   FileText,
   Eye,
   Briefcase,
-  UserCheck,
   Edit,
   UserPlus,
   ChevronDown,
   ChevronRight,
 } from "lucide-react"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 const CollapsibleDateCard = ({
   dayData,
@@ -30,130 +29,116 @@ const CollapsibleDateCard = ({
   const [isCollapsed, setIsCollapsed] = useState(true)
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
-  const { mymode } = useSelector((state) => state.mode)
-
-  console.log("day data", dayData)
+  const theme = getPageTheme()
 
   const isRTL = i18n.language === "ar"
   const currentLang = i18n.language || "ar"
-  const isDark = mymode === "dark"
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed)
   }
 
+  const iconColors = {
+    calendar: "text-blue-600 dark:text-blue-400",
+    building: "text-green-600 dark:text-green-400",
+    briefcase: "text-purple-600 dark:text-purple-400",
+    user: "text-orange-600 dark:text-orange-400",
+    users: "text-blue-600 dark:text-blue-400",
+    file: "text-slate-500 dark:text-slate-400",
+    view: "text-blue-600 dark:text-blue-400",
+    edit: "text-green-600 dark:text-green-400",
+    assign: "text-purple-600 dark:text-purple-400",
+    success: "text-green-600 dark:text-green-400",
+    danger: "text-red-600 dark:text-red-400",
+  }
+
+  const iconBg = {
+    calendar: "bg-blue-100 dark:bg-blue-900/30",
+    building: "bg-green-100 dark:bg-green-900/30",
+    briefcase: "bg-purple-100 dark:bg-purple-900/30",
+    user: "bg-orange-100 dark:bg-orange-900/30",
+    users: "bg-blue-100 dark:bg-blue-900/30",
+    file: "bg-slate-100 dark:bg-slate-800",
+  }
+
+  const actionButtonClass = {
+    view:
+      "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
+    edit:
+      "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500",
+    assign:
+      "bg-purple-600 hover:bg-purple-700 text-white focus:ring-purple-500",
+  }
+
   return (
-    <div
-      className={`${
-        isDark ? "bg-gray-800" : "bg-white"
-      } rounded-lg shadow-sm border ${
-        isDark ? "border-gray-700" : "border-gray-200"
-      }`}
-    >
-      {/* Collapsible Date Header */}
+    <div className={`${theme.card} overflow-hidden`}>
       <div
-        className={`p-6 border-b ${
-          isDark ? "border-gray-700" : "border-gray-200"
-        } cursor-pointer hover:${
-          isDark ? "bg-gray-700/50" : "bg-gray-50"
-        } transition-colors`}
+        className={`p-6 border-b ${theme.divider} cursor-pointer ${theme.hoverRow}`}
         onClick={toggleCollapse}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <div
-              className={`p-3 ${
-                isDark ? "bg-blue-900/30" : "bg-blue-100"
-              } rounded-lg`}
+              className={`p-3 rounded-xl shrink-0 ${iconBg.calendar} ${iconColors.calendar}`}
             >
-              <Calendar
-                className={`h-6 w-6 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
-                }`}
-              />
+              <Calendar className="h-6 w-6" />
             </div>
-            <div>
-              <h2
-                className={`text-xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold text-[var(--color-text)] truncate">
                 {formatDate(dayData.date)}
               </h2>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
+
+              <p className="text-sm text-[var(--color-text-muted)]">
                 {dayData.dayOfWeekName}
               </p>
             </div>
           </div>
 
-          {/* Chevron Icon */}
-          <div className="flex items-center">
+          <div className="flex items-center text-[var(--color-text-muted)]">
             {isCollapsed ? (
-              <ChevronRight
-                className={`h-5 w-5 ${
-                  isDark ? "text-gray-400" : "text-gray-600"
-                } transition-transform duration-200`}
-              />
+              <ChevronRight className="h-5 w-5 transition-transform duration-200" />
             ) : (
-              <ChevronDown
-                className={`h-5 w-5 ${
-                  isDark ? "text-gray-400" : "text-gray-600"
-                } transition-transform duration-200`}
-              />
+              <ChevronDown className="h-5 w-5 transition-transform duration-200" />
             )}
           </div>
         </div>
       </div>
 
-      {/* Collapsible Content */}
       {!isCollapsed && (
         <div className="p-6 space-y-6">
           {dayData.departments.map((department) => (
             <div key={department.departmentId} className="space-y-4">
-              {/* Department Header */}
               <div className="flex items-center gap-3">
-                <Building
-                  className={`h-5 w-5 ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                />
-                <h3
-                  className={`text-lg font-semibold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
+                <div
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center ${iconBg.building}`}
                 >
+                  <Building className={`h-5 w-5 ${iconColors.building}`} />
+                </div>
+
+                <h3 className="text-lg font-semibold text-[var(--color-text)]">
                   {department.departmentName}
                 </h3>
               </div>
 
-              {/* Shifts for this department */}
-              <div className="space-y-4 ml-8">
+              <div className={`${isRTL ? "mr-0 md:mr-8" : "ml-0 md:ml-8"} space-y-4`}>
                 {department.shifts.map((shift) => (
                   <div key={shift.shiftId} className="space-y-3">
-                    {/* Shift Header */}
                     <div className="flex items-center gap-3">
-                      <Briefcase
-                        className={`h-4 w-4 ${
-                          isDark ? "text-purple-400" : "text-purple-600"
-                        }`}
-                      />
+                      <div
+                        className={`h-8 w-8 rounded-lg flex items-center justify-center ${iconBg.briefcase}`}
+                      >
+                        <Briefcase
+                          className={`h-4 w-4 ${iconColors.briefcase}`}
+                        />
+                      </div>
+
                       <div>
-                        <h4
-                          className={`font-medium ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
+                        <h4 className="font-semibold text-[var(--color-text)]">
                           {shift.shiftName}
                         </h4>
-                        <p
-                          className={`text-sm ${
-                            isDark ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
+
+                        <p className="text-sm text-[var(--color-text-muted)]">
                           {shift.shiftPeriod} ({shift.hours}h) •{" "}
                           {formatTime(shift.startTime)} -{" "}
                           {formatTime(shift.endTime)}
@@ -161,56 +146,38 @@ const CollapsibleDateCard = ({
                       </div>
                     </div>
 
-                    {/* Contracting Types for this shift */}
-                    <div className="space-y-3 ml-6">
+                    <div className={`${isRTL ? "mr-0 md:mr-6" : "ml-0 md:ml-6"} space-y-3`}>
                       {shift.contractingTypes.map((contractingType) => {
                         const detail = contractingType.workingHourDetail
+
                         return (
                           <div
                             key={`${contractingType.contractingTypeId}-${detail.id}`}
-                            className={`p-4 rounded-lg border ${
-                              isDark
-                                ? "bg-gray-700/50 border-gray-600"
-                                : "bg-gray-50 border-gray-200"
-                            }`}
+                            className={`${theme.cardSoft} p-4`}
                           >
                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                              {/* Contracting Type Info */}
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-3">
-                                  <User
-                                    className={`h-4 w-4 ${
-                                      isDark
-                                        ? "text-orange-400"
-                                        : "text-orange-600"
-                                    }`}
-                                  />
-                                  <span
-                                    className={`font-medium ${
-                                      isDark ? "text-white" : "text-gray-900"
-                                    }`}
+                                  <div
+                                    className={`h-8 w-8 rounded-lg flex items-center justify-center ${iconBg.user}`}
                                   >
+                                    <User
+                                      className={`h-4 w-4 ${iconColors.user}`}
+                                    />
+                                  </div>
+
+                                  <span className="font-semibold text-[var(--color-text)]">
                                     {contractingType.contractingTypeName}
                                   </span>
                                 </div>
 
-                                {/* Assignment Stats */}
                                 <div className="flex flex-wrap items-center gap-4 mb-3">
                                   <div className="flex items-center gap-2">
                                     <Users
-                                      className={`h-4 w-4 ${
-                                        isDark
-                                          ? "text-blue-400"
-                                          : "text-blue-600"
-                                      }`}
+                                      className={`h-4 w-4 ${iconColors.users}`}
                                     />
-                                    <span
-                                      className={`text-sm ${
-                                        isDark
-                                          ? "text-gray-300"
-                                          : "text-gray-700"
-                                      }`}
-                                    >
+
+                                    <span className="text-sm text-[var(--color-text)]">
                                       {detail.currentAssignedDoctors}/
                                       {detail.requiredDoctors}{" "}
                                       {t("roster.required")}
@@ -223,8 +190,9 @@ const CollapsibleDateCard = ({
                                         detail.fillPercentage
                                       )}`}
                                     />
+
                                     <span
-                                      className={`text-sm font-medium ${getFillColor(
+                                      className={`text-sm font-semibold ${getFillColor(
                                         detail.fillPercentage
                                       )}`}
                                     >
@@ -233,42 +201,33 @@ const CollapsibleDateCard = ({
                                     </span>
                                   </div>
 
-                                  <span
-                                    className={`text-sm ${
-                                      isDark ? "text-gray-400" : "text-gray-600"
-                                    }`}
-                                  >
+                                  <span className="text-sm text-[var(--color-text-muted)]">
                                     {t("roster.workingHours.fields.maxDoctors")}
                                     : {detail.maxDoctors}
                                   </span>
 
-                                  <span
-                                    className={`text-sm ${
-                                      isDark ? "text-gray-400" : "text-gray-600"
-                                    }`}
-                                  >
+                                  <span className="text-sm text-[var(--color-text-muted)]">
                                     {t("roster.remainingSlots")}:{" "}
                                     {detail.remainingSlots}
                                   </span>
                                 </div>
 
-                                {/* Status Badges */}
                                 <div className="flex flex-wrap items-center gap-2">
                                   {detail.isFullyBooked && (
-                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
                                       <CheckCircle
                                         size={12}
-                                        className={`${isRTL ? "ml-1" : "mr-1"}`}
+                                        className={isRTL ? "ml-1" : "mr-1"}
                                       />
                                       {t("roster.fullyBooked")}
                                     </span>
                                   )}
 
                                   {detail.isOverBooked && (
-                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20">
                                       <AlertCircle
                                         size={12}
-                                        className={`${isRTL ? "ml-1" : "mr-1"}`}
+                                        className={isRTL ? "ml-1" : "mr-1"}
                                       />
                                       {t("roster.overBooked")}
                                     </span>
@@ -276,20 +235,13 @@ const CollapsibleDateCard = ({
                                 </div>
                               </div>
 
-                              {/* Progress & Actions */}
-                              <div className="flex flex-col items-end gap-4">
-                                {/* Progress Bar */}
-                                <div className="w-full lg:w-32">
+                              <div className="flex flex-col items-start lg:items-end gap-4">
+                                <div className="w-full lg:w-36">
                                   <div className="flex justify-between items-center mb-1">
-                                    <span
-                                      className={`text-xs ${
-                                        isDark
-                                          ? "text-gray-400"
-                                          : "text-gray-600"
-                                      }`}
-                                    >
+                                    <span className="text-xs text-[var(--color-text-muted)]">
                                       {t("roster.progress")}
                                     </span>
+
                                     <span
                                       className={`text-xs font-semibold ${getFillColor(
                                         detail.fillPercentage
@@ -298,11 +250,8 @@ const CollapsibleDateCard = ({
                                       {Math.round(detail.fillPercentage)}%
                                     </span>
                                   </div>
-                                  <div
-                                    className={`w-full ${
-                                      isDark ? "bg-gray-600" : "bg-gray-200"
-                                    } rounded-full h-2`}
-                                  >
+
+                                  <div className="w-full bg-[var(--color-bg-soft)] rounded-full h-2">
                                     <div
                                       className={`h-2 rounded-full transition-all duration-300 ${getFillBgColor(
                                         detail.fillPercentage
@@ -313,30 +262,32 @@ const CollapsibleDateCard = ({
                                           100
                                         )}%`,
                                       }}
-                                    ></div>
+                                    />
                                   </div>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex gap-2">
+                                <div className="flex flex-wrap gap-2">
                                   <button
                                     onClick={() => {
                                       navigate(
                                         `/admin-panel/rosters/working-hours/${detail.id}`
                                       )
                                     }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                                    className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 ${actionButtonClass.view}`}
+                                    type="button"
                                   >
                                     <Eye size={14} />
                                     {t("common.view")}
                                   </button>
+
                                   <button
                                     onClick={() =>
                                       navigate(
                                         `/admin-panel/rosters/working-hours/${detail.id}/edit`
                                       )
                                     }
-                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                                    className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 ${actionButtonClass.edit}`}
+                                    type="button"
                                   >
                                     <Edit size={14} />
                                     {t("common.edit")}
@@ -353,11 +304,12 @@ const CollapsibleDateCard = ({
                                         `/admin-panel/rosters/working-hours/${detail.id}/assign-doctors`
                                       )
                                     }}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                                    className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 ${actionButtonClass.assign}`}
                                     aria-label={t(
                                       "roster.actions.assignDoctor"
                                     )}
                                     title={t("roster.actions.assignDoctor")}
+                                    type="button"
                                   >
                                     <UserPlus size={14} />
                                     {t("roster.actions.assignDoctor")}
@@ -366,53 +318,36 @@ const CollapsibleDateCard = ({
                               </div>
                             </div>
 
-                            {/* Assigned Doctors */}
                             {detail.assignedDoctors &&
                               detail.assignedDoctors.length > 0 && (
-                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
                                   <div className="flex items-center justify-between mb-2">
-                                    <h5
-                                      className={`text-sm font-medium ${
-                                        isDark
-                                          ? "text-gray-300"
-                                          : "text-gray-700"
-                                      }`}
-                                    >
+                                    <h5 className="text-sm font-semibold text-[var(--color-text)]">
                                       {t("roster.assignedDoctors")} (
                                       {detail.assignedDoctors.length})
                                     </h5>
                                   </div>
+
                                   <div className="flex flex-wrap gap-2">
                                     {detail.assignedDoctors
                                       .slice(0, 4)
                                       .map((doctor, index) => (
                                         <span
                                           key={index}
-                                          className={`inline-flex items-center px-2 py-1 text-xs rounded-full ${
-                                            isDark
-                                              ? "bg-gray-600 text-gray-200"
-                                              : "bg-gray-100 text-gray-800"
-                                          }`}
+                                          className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-[var(--color-bg-soft)] text-[var(--color-text)] border border-[var(--color-border)]"
                                         >
                                           <User
                                             size={10}
-                                            className={`${
-                                              isRTL ? "ml-1" : "mr-1"
-                                            }`}
+                                            className={isRTL ? "ml-1" : "mr-1"}
                                           />
                                           {currentLang === "en"
                                             ? doctor.doctorNameEn
                                             : doctor.doctorNameAr}
                                         </span>
                                       ))}
+
                                     {detail.assignedDoctors.length > 4 && (
-                                      <span
-                                        className={`inline-flex items-center px-2 py-1 text-xs rounded-full ${
-                                          isDark
-                                            ? "bg-blue-600 text-blue-200"
-                                            : "bg-blue-100 text-blue-800"
-                                        }`}
-                                      >
+                                      <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20">
                                         +{detail.assignedDoctors.length - 4}{" "}
                                         {t("common.more")}
                                       </span>
@@ -421,32 +356,19 @@ const CollapsibleDateCard = ({
                                 </div>
                               )}
 
-                            {/* Notes */}
                             {detail.notes && (
-                              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                              <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
                                 <div className="flex items-start gap-2">
                                   <FileText
-                                    className={`h-4 w-4 mt-0.5 ${
-                                      isDark ? "text-gray-400" : "text-gray-500"
-                                    }`}
+                                    className={`h-4 w-4 mt-0.5 ${iconColors.file}`}
                                   />
+
                                   <div>
-                                    <p
-                                      className={`text-sm font-medium ${
-                                        isDark
-                                          ? "text-gray-300"
-                                          : "text-gray-700"
-                                      } mb-1`}
-                                    >
+                                    <p className="text-sm font-semibold text-[var(--color-text)] mb-1">
                                       {t("common.notes")}
                                     </p>
-                                    <p
-                                      className={`text-sm ${
-                                        isDark
-                                          ? "text-gray-400"
-                                          : "text-gray-600"
-                                      }`}
-                                    >
+
+                                    <p className="text-sm text-[var(--color-text-muted)]">
                                       {detail.notes}
                                     </p>
                                   </div>

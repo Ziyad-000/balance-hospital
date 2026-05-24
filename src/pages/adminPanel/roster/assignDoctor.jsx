@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react"
-import { useParams, useNavigate, Link } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import i18next from "i18next"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
@@ -17,7 +17,6 @@ import {
   Briefcase,
   Award,
   Calendar,
-  Save,
   Building,
   Clock,
 } from "lucide-react"
@@ -29,27 +28,47 @@ import {
 } from "../../../state/act/actRosterManagement"
 import LoadingGetData from "../../../components/LoadingGetData"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme, swalTheme } from "../../../utils/themeClasses"
 
-// Constants
 const MAX_NOTES_LENGTH = 500
+
 const WORKLOAD_THRESHOLDS = {
   HIGH: 90,
   MEDIUM: 70,
 }
 
-// Helper functions
-const getDoctorStatusColor = (doctor, isDark) => {
+const iconColors = {
+  assign: "text-purple-600 dark:text-purple-400",
+  clock: "text-blue-600 dark:text-blue-400",
+  search: "text-blue-600 dark:text-blue-400",
+  calendar: "text-blue-600 dark:text-blue-400",
+  users: "text-blue-600 dark:text-blue-400",
+  building: "text-green-600 dark:text-green-400",
+  briefcase: "text-purple-600 dark:text-purple-400",
+  award: "text-orange-600 dark:text-orange-400",
+  success: "text-green-600 dark:text-green-400",
+  warning: "text-yellow-600 dark:text-yellow-400",
+  danger: "text-red-600 dark:text-red-400",
+  muted: "text-[var(--color-text-muted)]",
+}
+
+const iconBg = {
+  assign: "bg-purple-100 dark:bg-purple-900/30",
+  clock: "bg-blue-100 dark:bg-blue-900/30",
+  search: "bg-blue-100 dark:bg-blue-900/30",
+  users: "bg-blue-100 dark:bg-blue-900/30",
+}
+
+const getDoctorStatusColor = (doctor) => {
   if (!doctor.isAvailable) {
-    return isDark ? "bg-red-900/20 text-red-400" : "bg-red-100 text-red-800"
+    return "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20"
   }
+
   if (doctor.hasConflict) {
-    return isDark
-      ? "bg-yellow-900/20 text-yellow-400"
-      : "bg-yellow-100 text-yellow-800"
+    return "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20"
   }
-  return isDark
-    ? "bg-green-900/20 text-green-400"
-    : "bg-green-100 text-green-800"
+
+  return "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
 }
 
 const getDoctorStatusIcon = (doctor) => {
@@ -59,14 +78,27 @@ const getDoctorStatusIcon = (doctor) => {
 }
 
 const getWorkloadColor = (percentage) => {
-  if (percentage > WORKLOAD_THRESHOLDS.HIGH) return "text-red-500 bg-red-500"
-  if (percentage > WORKLOAD_THRESHOLDS.MEDIUM)
-    return "text-yellow-500 bg-yellow-500"
-  return "text-green-500 bg-green-500"
+  if (percentage > WORKLOAD_THRESHOLDS.HIGH) {
+    return {
+      text: "text-red-600 dark:text-red-400",
+      bg: "bg-red-500",
+    }
+  }
+
+  if (percentage > WORKLOAD_THRESHOLDS.MEDIUM) {
+    return {
+      text: "text-yellow-600 dark:text-yellow-400",
+      bg: "bg-yellow-500",
+    }
+  }
+
+  return {
+    text: "text-green-600 dark:text-green-400",
+    bg: "bg-green-500",
+  }
 }
 
-// Sub-components
-const DoctorAvatar = ({ doctor, isDark }) => {
+const DoctorAvatar = ({ doctor }) => {
   if (doctor.profileImageUrl) {
     return (
       <img
@@ -78,43 +110,36 @@ const DoctorAvatar = ({ doctor, isDark }) => {
   }
 
   return (
-    <div
-      className={`w-10 h-10 rounded-full flex items-center justify-center ${
-        isDark ? "bg-gray-600" : "bg-gray-200"
-      }`}
-    >
-      <Users size={20} className={isDark ? "text-gray-400" : "text-gray-500"} />
+    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--color-bg-soft)] border border-[var(--color-border)]">
+      <Users size={20} className={iconColors.users} />
     </div>
   )
 }
 
-const WorkloadIndicator = ({ doctor, isDark, t }) => {
+const WorkloadIndicator = ({ doctor, t }) => {
   const workloadPercentage = doctor.workloadPercentage || 0
   const colorClasses = getWorkloadColor(workloadPercentage)
 
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between text-xs">
-        <span className={isDark ? "text-gray-400" : "text-gray-500"}>
+        <span className="text-[var(--color-text-muted)]">
           {t("roster.assign.workload")}
         </span>
-        <span className={`font-medium ${colorClasses.split(" ")[0]}`}>
+
+        <span className={`font-semibold ${colorClasses.text}`}>
           {workloadPercentage.toFixed(1)}%
         </span>
       </div>
-      <div
-        className={`w-full rounded-full h-1.5 mt-1 ${
-          isDark ? "bg-gray-600" : "bg-gray-200"
-        }`}
-      >
+
+      <div className="w-full rounded-full h-1.5 mt-1 bg-[var(--color-bg-soft)]">
         <div
-          className={`h-1.5 rounded-full ${colorClasses.split(" ")[1]}`}
+          className={`h-1.5 rounded-full ${colorClasses.bg}`}
           style={{ width: `${Math.min(workloadPercentage, 100)}%` }}
         />
       </div>
-      <div
-        className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}
-      >
+
+      <div className="text-xs mt-1 text-[var(--color-text-muted)]">
         {doctor.currentMonthAssignments} {t("roster.assign.assignments")} •{" "}
         {doctor.currentMonthHours} {t("roster.assign.hours")}
       </div>
@@ -122,43 +147,29 @@ const WorkloadIndicator = ({ doctor, isDark, t }) => {
   )
 }
 
-const ConflictDetails = ({
-  doctor,
-  showConflictDetails,
-  onToggle,
-  isDark,
-  t,
-}) => {
+const ConflictDetails = ({ doctor, showConflictDetails, onToggle, t }) => {
   if (!doctor.hasConflict || !doctor.conflictDetails?.length) return null
 
-  const confilcts =
+  const conflicts =
     i18next.language === "en"
       ? doctor.conflictDetails
       : doctor.conflictDetailsAr
+
   return (
     <div className="mt-2">
       <button
         type="button"
         onClick={onToggle}
-        className={`text-xs underline ${
-          isDark
-            ? "text-yellow-400 hover:text-yellow-300"
-            : "text-yellow-600 hover:text-yellow-700"
-        }`}
+        className="text-xs underline text-yellow-600 dark:text-yellow-400 hover:opacity-80"
       >
         {showConflictDetails
           ? t("roster.assign.hideConflicts")
           : t("roster.assign.showConflicts")}
       </button>
+
       {showConflictDetails && (
-        <div
-          className={`mt-1 p-2 rounded text-xs ${
-            isDark
-              ? "bg-yellow-900/20 text-yellow-400"
-              : "bg-yellow-50 text-yellow-700"
-          }`}
-        >
-          {confilcts.map((conflict, index) => (
+        <div className="mt-1 p-2 rounded-lg text-xs bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20">
+          {conflicts.map((conflict, index) => (
             <div
               key={index}
               className="flex items-center space-x-1 rtl:space-x-reverse"
@@ -179,7 +190,6 @@ const DoctorCard = ({
   onSelect,
   showConflictDetails,
   onToggleConflicts,
-  isDark,
   currentLang,
   isRTL,
   t,
@@ -198,38 +208,30 @@ const DoctorCard = ({
 
   return (
     <div
-      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+      className={`border rounded-xl p-4 cursor-pointer transition-colors ${
         isSelected
-          ? isDark
-            ? "border-blue-500 bg-blue-900/20"
-            : "border-blue-500 bg-blue-50"
-          : isDark
-          ? "border-gray-600 hover:border-gray-500 bg-gray-700"
-          : "border-gray-200 hover:border-gray-300 bg-white"
+          ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
+          : "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg-soft)]"
       }`}
       onClick={handleClick}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3 rtl:space-x-reverse flex-1">
           <div className="flex-shrink-0">
-            <DoctorAvatar doctor={doctor} isDark={isDark} />
+            <DoctorAvatar doctor={doctor} />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 rtl:space-x-reverse mb-1">
-              <h3
-                className={`font-medium truncate ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h3 className="font-semibold truncate text-[var(--color-text)]">
                 {currentLang === "ar"
                   ? doctor.doctorNameArabic
                   : doctor.doctorName}
               </h3>
+
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getDoctorStatusColor(
-                  doctor,
-                  isDark
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${getDoctorStatusColor(
+                  doctor
                 )}`}
               >
                 {getDoctorStatusIcon(doctor)}
@@ -243,50 +245,40 @@ const DoctorCard = ({
               </span>
             </div>
 
-            <div
-              className={`text-sm space-y-1 ${
-                isDark ? "text-gray-300" : "text-gray-600"
-              }`}
-            >
+            <div className="text-sm space-y-1 text-[var(--color-text-muted)]">
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Briefcase size={14} />
+                <Briefcase size={14} className={iconColors.briefcase} />
                 <span>{doctor.specialty}</span>
               </div>
+
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Award size={14} />
+                <Award size={14} className={iconColors.award} />
                 <span>{doctor.scientificDegreeName}</span>
               </div>
+
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Calendar size={14} />
+                <Calendar size={14} className={iconColors.calendar} />
                 <span>{doctor.contractingTypeName}</span>
               </div>
             </div>
 
-            <WorkloadIndicator doctor={doctor} isDark={isDark} t={t} />
+            <WorkloadIndicator doctor={doctor} t={t} />
 
             <ConflictDetails
               doctor={doctor}
               showConflictDetails={showConflictDetails[doctor.doctorId]}
               onToggle={handleToggleConflicts}
-              isDark={isDark}
               t={t}
             />
 
             {doctor.priorityScore && (
               <div className="mt-2">
-                <div
-                  className={`text-xs ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
+                <div className="text-xs text-[var(--color-text-muted)]">
                   {t("roster.assign.priorityScore")}: {doctor.priorityScore}/100
                 </div>
+
                 {doctor.priorityReason && (
-                  <div
-                    className={`text-xs mt-1 ${
-                      isDark ? "text-gray-300" : "text-gray-600"
-                    }`}
-                  >
+                  <div className="text-xs mt-1 text-[var(--color-text-muted)]">
                     {doctor.priorityReason}
                   </div>
                 )}
@@ -308,17 +300,11 @@ const DoctorCard = ({
   )
 }
 
-const EmptyState = ({ searchTerm, isDark, t }) => (
-  <div
-    className={`text-center py-8 border-2 border-dashed rounded-lg ${
-      isDark ? "border-gray-600 bg-gray-700/50" : "border-gray-300 bg-gray-50"
-    }`}
-  >
-    <Users
-      size={48}
-      className={`mx-auto mb-3 ${isDark ? "text-gray-500" : "text-gray-400"}`}
-    />
-    <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+const EmptyState = ({ searchTerm, t }) => (
+  <div className="text-center py-8 border-2 border-dashed rounded-xl border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+    <Users size={48} className="mx-auto mb-3 text-[var(--color-text-soft)]" />
+
+    <p className="text-sm text-[var(--color-text-muted)]">
       {searchTerm
         ? t("roster.assign.noDoctorsFound")
         : t("roster.assign.noAvailableDoctors")}
@@ -326,15 +312,15 @@ const EmptyState = ({ searchTerm, isDark, t }) => (
   </div>
 )
 
-const ShiftInfo = ({ workingHour, isDark, isRTL, t }) => {
+const ShiftInfo = ({ workingHour, isRTL, t }) => {
   if (!workingHour) return null
 
-  // Format date
+  const currentLang = i18next.language
 
-  // Format time
   const formatTime = (timeString) => {
     if (!timeString) return "-"
     const time = new Date(timeString)
+
     return time.toLocaleTimeString(isRTL ? "ar-SA" : "en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -342,238 +328,128 @@ const ShiftInfo = ({ workingHour, isDark, isRTL, t }) => {
     })
   }
 
-  // Extract shift and department info from the nested structure
   const shift = workingHour.shift || {}
   const department = workingHour.department || {}
   const contractingType = workingHour.contractingType || {}
-  const currentLang = i18next.language
+
   return (
-    <div
-      className={`rounded-lg border p-4 mb-6 ${
-        isDark ? "border-gray-600 bg-gray-700" : "border-gray-200 bg-gray-50"
-      }`}
-    >
+    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 mb-6 shadow-[var(--shadow-sm)]">
       <div className="flex items-start space-x-4 rtl:space-x-reverse">
-        <div
-          className={`p-3 rounded-lg ${
-            isDark ? "bg-blue-900/20" : "bg-blue-50"
-          }`}
-        >
-          <Clock className="w-6 h-6 text-blue-600" />
+        <div className={`p-3 rounded-xl ${iconBg.clock}`}>
+          <Clock className={`w-6 h-6 ${iconColors.clock}`} />
         </div>
 
         <div className="flex-1">
-          <h3
-            className={`text-lg font-medium ${
-              isDark ? "text-white" : "text-gray-900"
-            } mb-2`}
-          >
+          <h3 className="text-lg font-semibold text-[var(--color-text)] mb-2">
             {t("roster.assign.shiftDetails")}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Shift Date */}
             <div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {t("common.date")}
               </div>
-              <div
-                className={`font-medium ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <div className="font-semibold text-[var(--color-text)]">
                 {formatDate(workingHour.shiftDate)}
               </div>
               {workingHour.dayOfWeekName && (
-                <div
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
+                <div className="text-sm text-[var(--color-text-muted)]">
                   {workingHour.dayOfWeekName}
                 </div>
               )}
             </div>
 
-            {/* Shift Time */}
             <div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {t("adminPanel.shiftHours")}
               </div>
-              <div
-                className={`font-medium ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <div className="font-semibold text-[var(--color-text)]">
                 {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
               </div>
               {shift.name && (
-                <div
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
+                <div className="text-sm text-[var(--color-text-muted)]">
                   {shift.name}
                 </div>
               )}
             </div>
 
-            {/* Department */}
             <div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {t("common.department")}
               </div>
-              <div
-                className={`font-medium ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <div className="font-semibold text-[var(--color-text)]">
                 {currentLang === "en"
-                  ? department.nameArabic
-                  : department.nameEnglish}
+                  ? department.nameEnglish
+                  : department.nameArabic}
               </div>
             </div>
 
-            {/* Doctor Capacity */}
             <div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {t("roster.capacity")}
               </div>
-              <div
-                className={`font-medium ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <div className="font-semibold text-[var(--color-text)]">
                 {workingHour.currentAssignedDoctors || 0}/
                 {workingHour.requiredDoctors || 0} {t("roster.assign.doctors")}
               </div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {workingHour.fillPercentage || 0}% {t("roster.filled")}
               </div>
             </div>
 
-            {/* Shift Duration */}
             <div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {t("roster.table.period")}
               </div>
-              <div
-                className={`font-medium ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <div className="font-semibold text-[var(--color-text)]">
                 {shift.hours || 0} h
               </div>
               {shift.period && (
-                <div
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
+                <div className="text-sm text-[var(--color-text-muted)]">
                   {shift.period}
                 </div>
               )}
             </div>
 
-            {/* Contract Type */}
             <div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
+              <div className="text-sm text-[var(--color-text-muted)]">
                 {t("roster.contractingTypes.fields.contractingTypes")}
               </div>
-              <div
-                className={`font-medium ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {currentLang == "ar"
+              <div className="font-semibold text-[var(--color-text)]">
+                {currentLang === "ar"
                   ? contractingType.nameArabic
                   : contractingType.nameEnglish}
               </div>
             </div>
           </div>
 
-          {/* Status Indicators */}
           <div className="flex flex-wrap gap-2 mt-4">
             {workingHour.isFullyBooked && (
-              <span
-                className={`px-2 py-1 text-xs rounded-full ${
-                  isDark
-                    ? "bg-red-900/20 text-red-400 border border-red-800"
-                    : "bg-red-100 text-red-800 border border-red-200"
-                }`}
-              >
+              <span className="px-2 py-1 text-xs rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20">
                 {t("roster.fullyBooked")}
               </span>
             )}
 
             {workingHour.isOverBooked && (
-              <span
-                className={`px-2 py-1 text-xs rounded-full ${
-                  isDark
-                    ? "bg-orange-900/20 text-orange-400 border border-orange-800"
-                    : "bg-orange-100 text-orange-800 border border-orange-200"
-                }`}
-              >
+              <span className="px-2 py-1 text-xs rounded-full bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20">
                 {t("roster.overBooked")}
               </span>
             )}
 
             {workingHour.remainingSlots > 0 && (
-              <span
-                className={`px-2 py-1 text-xs rounded-full ${
-                  isDark
-                    ? "bg-green-900/20 text-green-400 border border-green-800"
-                    : "bg-green-100 text-green-800 border border-green-200"
-                }`}
-              >
+              <span className="px-2 py-1 text-xs rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
                 {workingHour.remainingSlots} {t("roster.remainingSlots")}
               </span>
             )}
           </div>
 
-          {/* Notes */}
           {workingHour.notes && (
-            <div className="mt-4 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20">
-              <div
-                className={`text-sm font-medium ${
-                  isDark ? "text-blue-400" : "text-blue-800"
-                } mb-1`}
-              >
+            <div className="mt-4 p-3 rounded-lg bg-[var(--color-info-soft)] border border-[var(--color-info)]/20">
+              <div className="text-sm font-semibold text-[var(--color-info)] mb-1">
                 {t("roster.assign.notes")}
               </div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-blue-300" : "text-blue-700"
-                }`}
-              >
+
+              <div className="text-sm text-[var(--color-info)]">
                 {workingHour.notes}
               </div>
             </div>
@@ -583,15 +459,15 @@ const ShiftInfo = ({ workingHour, isDark, isRTL, t }) => {
     </div>
   )
 }
-// Main component
+
 function AssignDoctor() {
   const { workingHourId } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
+
   const { loading, availableDoctorsForShift, errors, workingHour } =
     useSelector((state) => state.rosterManagement)
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
 
   const { t } = useTranslation()
   const currentLang = i18next.language
@@ -601,7 +477,6 @@ function AssignDoctor() {
   const [selectedDoctor, setSelectedDoctor] = useState(null)
   const [showConflictDetails, setShowConflictDetails] = useState({})
 
-  // Validation schema
   const validationSchema = useMemo(
     () =>
       Yup.object({
@@ -625,23 +500,22 @@ function AssignDoctor() {
     []
   )
 
-  // Fetch working hour details and available doctors when component mounts
   useEffect(() => {
     if (workingHourId) {
       dispatch(getWorkingHour({ workingHourId }))
       dispatch(
         getAvailableDoctorsForShift({
-          workingHourId: workingHourId,
+          workingHourId,
         })
       )
     }
   }, [dispatch, workingHourId])
 
-  // Filter doctors based on search term
   const filteredDoctors = useMemo(() => {
     if (!searchTerm) return availableDoctorsForShift
 
     const searchLower = searchTerm.toLowerCase()
+
     return availableDoctorsForShift.filter((doctor) => {
       const doctorName = (doctor.doctorName || "").toLowerCase()
       const doctorNameArabic = (doctor.doctorNameArabic || "").toLowerCase()
@@ -655,16 +529,12 @@ function AssignDoctor() {
     })
   }, [availableDoctorsForShift, searchTerm])
 
-  const showSweetAlert = useCallback(
-    (options) => {
-      return Swal.fire({
-        background: isDark ? "#1f2937" : "#ffffff",
-        color: isDark ? "#f9fafb" : "#111827",
-        ...options,
-      })
-    },
-    [isDark]
-  )
+  const showSweetAlert = useCallback((options) => {
+    return Swal.fire({
+      ...swalTheme,
+      ...options,
+    })
+  }, [])
 
   const handleSubmit = useCallback(
     async (values, { setSubmitting }) => {
@@ -687,23 +557,19 @@ function AssignDoctor() {
           draggable: true,
         })
 
-        navigate(-1) // Go back to previous page
+        navigate(-1)
       } catch (error) {
-        console.error("Doctor assignment error:", error)
-
         if (error?.status === 409) {
           const result = await showSweetAlert({
             title: t("roster.assign.conflict.title"),
             text:
-              currentLang === "en"
-                ? error?.errors[0] || t("roster.assign.conflict.message")
-                : error?.errors[0] || t("roster.assign.conflict.message"),
+              error?.errors?.[0] || t("roster.assign.conflict.message"),
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: t("roster.assign.conflict.override"),
             cancelButtonText: t("common.cancel"),
-            confirmButtonColor: "#f59e0b",
-            cancelButtonColor: "#6b7280",
+            confirmButtonColor: "var(--color-warning)",
+            cancelButtonColor: "var(--color-text-muted)",
           })
 
           if (result.isConfirmed) {
@@ -714,23 +580,19 @@ function AssignDoctor() {
           await showSweetAlert({
             title: t("roster.assign.error.title"),
             text:
-              currentLang === "en"
-                ? error?.errors[0] ||
-                  error?.message ||
-                  t("roster.assign.error.message")
-                : error?.errors[0] ||
-                  error?.message ||
-                  t("roster.assign.error.message"),
+              error?.errors?.[0] ||
+              error?.message ||
+              t("roster.assign.error.message"),
             icon: "error",
             confirmButtonText: t("common.ok"),
-            confirmButtonColor: "#ef4444",
+            confirmButtonColor: "var(--color-danger)",
           })
         }
       } finally {
         setSubmitting(false)
       }
     },
-    [dispatch, workingHourId, navigate, t, currentLang, showSweetAlert]
+    [dispatch, workingHourId, navigate, t, showSweetAlert]
   )
 
   const handleDoctorSelect = useCallback((doctor, setFieldValue) => {
@@ -763,26 +625,20 @@ function AssignDoctor() {
 
   if (errors.workingHours || errors.availableDoctors) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
+      <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-6xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
+          <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+
               <div className="text-red-500 text-lg mb-4">
-                {/* {errors.workingHours || errors.availableDoctors} */}
+                {errors.workingHours || errors.availableDoctors}
               </div>
+
               <button
                 onClick={() => navigate(-1)}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className={theme.primaryButton}
+                type="button"
               >
                 <ArrowLeft size={16} className={isRTL ? "ml-2" : "mr-2"} />
                 {t("common.goBack")}
@@ -795,59 +651,35 @@ function AssignDoctor() {
   }
 
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
             <button
               onClick={() => navigate(-1)}
-              className={`p-2 rounded-lg border transition-colors ${
-                isDark
-                  ? "border-gray-600 hover:bg-gray-700 text-gray-300"
-                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
-              } ${isRTL ? "ml-4" : "mr-4"}`}
+              className={`p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] transition-colors ${
+                isRTL ? "ml-4" : "mr-4"
+              }`}
+              type="button"
             >
               <ArrowLeft size={20} />
             </button>
+
             <div>
-              <h1
-                className={`text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className="text-3xl font-bold text-[var(--color-text)]">
                 {t("roster.assign.title")}
               </h1>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                } mt-1`}
-              >
+
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
                 {t("roster.assign.subtitle")}
               </p>
             </div>
           </div>
 
-          {/* Shift Information */}
-          <ShiftInfo
-            workingHour={workingHour}
-            isDark={isDark}
-            isRTL={isRTL}
-            t={t}
-          />
+          <ShiftInfo workingHour={workingHour} isRTL={isRTL} t={t} />
         </div>
 
-        {/* Form */}
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-lg shadow border ${
-            isDark ? "border-gray-700" : "border-gray-200"
-          }`}
-        >
+        <div className={`${theme.card} overflow-hidden`}>
           <div className="p-6">
             <Formik
               initialValues={initialValues}
@@ -857,61 +689,36 @@ function AssignDoctor() {
             >
               {({ isSubmitting, values, setFieldValue }) => (
                 <Form className="space-y-6">
-                  {/* Search Bar */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      } mb-2`}
-                    >
+                    <label className="block text-sm font-semibold text-[var(--color-text)] mb-2">
                       {t("roster.assign.searchDoctors")}
                     </label>
 
                     <div className="flex items-center gap-2">
-                      {/* Search Icon Container - Completely separate from input */}
-                      <div
-                        className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-200 ${
-                          isDark
-                            ? "border-gray-600 bg-gray-700 text-gray-400"
-                            : "border-gray-300 bg-white text-gray-500"
-                        }`}
-                      >
-                        <Search size={18} />
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-lg border border-[var(--color-border)] ${iconBg.search}`}>
+                        <Search size={18} className={iconColors.search} />
                       </div>
 
-                      {/* Input Container */}
                       <div className="relative flex-1">
                         <input
                           type="text"
                           placeholder={t("roster.assign.searchPlaceholder")}
                           value={searchTerm}
                           onChange={handleSearchChange}
-                          className={`w-full px-4 py-2 border rounded-lg text-sm ${
-                            isDark
-                              ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                              : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                          } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                          className={`w-full px-4 py-2 text-sm ${theme.input}`}
                         />
                       </div>
                     </div>
                   </div>
-                  {/* Available Doctors List */}
+
                   <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      } mb-3`}
-                    >
+                    <label className="block text-sm font-semibold text-[var(--color-text)] mb-3">
                       {t("roster.assign.selectDoctor")} *
                     </label>
 
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="max-h-96 overflow-y-auto pr-1">
                       {filteredDoctors.length === 0 ? (
-                        <EmptyState
-                          searchTerm={searchTerm}
-                          isDark={isDark}
-                          t={t}
-                        />
+                        <EmptyState searchTerm={searchTerm} t={t} />
                       ) : (
                         <div className="space-y-3">
                           {filteredDoctors.map((doctor) => (
@@ -926,7 +733,6 @@ function AssignDoctor() {
                               }
                               showConflictDetails={showConflictDetails}
                               onToggleConflicts={toggleConflictDetails}
-                              isDark={isDark}
                               currentLang={currentLang}
                               isRTL={isRTL}
                               t={t}
@@ -936,78 +742,58 @@ function AssignDoctor() {
                       )}
                     </div>
 
-                    {/* Doctor Selection Error */}
                     <ErrorMessage
                       name="doctorId"
                       component="div"
-                      className="text-sm text-red-600 mt-2"
+                      className="text-sm text-[var(--color-danger)] mt-2"
                     />
                   </div>
 
-                  {/* Notes Section */}
                   <div>
                     <label
                       htmlFor="notes"
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
+                      className="block text-sm font-semibold mb-2 text-[var(--color-text)]"
                     >
                       {t("roster.assign.fields.notes")}
                     </label>
+
                     <Field
                       as="textarea"
                       id="notes"
                       name="notes"
                       rows={3}
                       dir={isRTL ? "rtl" : "ltr"}
-                      className={`w-full px-3 py-2 border rounded-lg text-sm resize-vertical ${
-                        isDark
-                          ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      className={`w-full px-3 py-2 text-sm resize-vertical ${theme.input}`}
                       placeholder={t("roster.assign.placeholders.notes")}
                     />
+
                     <ErrorMessage
                       name="notes"
                       component="div"
-                      className="mt-1 text-sm text-red-600"
+                      className="mt-1 text-sm text-[var(--color-danger)]"
                     />
-                    <p
-                      className={`mt-1 text-xs ${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
+
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
                       {values.notes?.length || 0}/{MAX_NOTES_LENGTH}{" "}
                       {t("roster.assign.charactersCount")}
                     </p>
                   </div>
 
-                  {/* Override Conflicts Checkbox */}
-                  <div
-                    className={`p-3 border rounded-lg ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
+                  <div className={`${theme.cardSoft} p-3`}>
+                    <div className="flex items-start justify-between gap-4">
                       <div>
                         <label
                           htmlFor="overrideConflicts"
-                          className={`text-sm font-medium ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
+                          className="text-sm font-semibold text-[var(--color-text)]"
                         >
                           {t("roster.assign.fields.overrideConflicts")}
                         </label>
-                        <p
-                          className={`text-xs mt-1 ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
+
+                        <p className="text-xs mt-1 text-[var(--color-text-muted)]">
                           {t("roster.assign.fields.overrideConflictsHelp")}
                         </p>
                       </div>
+
                       <Field
                         type="checkbox"
                         id="overrideConflicts"
@@ -1017,16 +803,11 @@ function AssignDoctor() {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between pt-6 border-t border-[var(--color-border)]">
                     <button
                       type="button"
                       onClick={() => navigate(-1)}
-                      className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
-                        isDark
-                          ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className={theme.secondaryButton}
                     >
                       <X size={16} className={isRTL ? "ml-2" : "mr-2"} />
                       {t("common.cancel")}
@@ -1039,7 +820,7 @@ function AssignDoctor() {
                         loading?.assignDoctor ||
                         !values.doctorId
                       }
-                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting || loading?.assignDoctor ? (
                         <>

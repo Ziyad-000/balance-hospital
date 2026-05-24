@@ -1,5 +1,22 @@
+// src/state/act/actReports.js
+
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import axiosInstance from "../../utils/axiosInstance"
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
+})
+
+const unwrapApiResponse = (response) => {
+  return response?.data?.data || response?.data
+}
+
+const appendIfExists = (params, key, value) => {
+  if (value !== undefined && value !== null && value !== "") {
+    params.append(key, value)
+  }
+}
 
 export const getReports = createAsyncThunk(
   "reports/getReports",
@@ -12,56 +29,39 @@ export const getReports = createAsyncThunk(
       doctorId,
       scientificDegreeId,
       contractingTypeId,
-      page = 1,
       pageSize,
     },
     { rejectWithValue }
   ) => {
     try {
-      // Build query parameters
       const params = new URLSearchParams()
 
-      if (categoryId !== undefined && categoryId !== null) {
-        params.append("categoryId", categoryId)
-      }
-      if (departmentId !== undefined && departmentId !== null) {
-        params.append("departmentId", departmentId)
-      }
-      if (doctorId !== undefined && doctorId !== null) {
-        params.append("doctorId", doctorId)
-      }
-      if (scientificDegreeId !== undefined && scientificDegreeId !== null) {
-        params.append("scientificDegreeId", scientificDegreeId)
-      }
-      if (contractingTypeId !== undefined && contractingTypeId !== null) {
-        params.append("contractingTypeId", contractingTypeId)
-      }
-      // if (page !== undefined && page !== null) {
-      //   params.append("page", page)
-      // }
-      // if (pageSize !== undefined && pageSize !== null) {
-      //   params.append("pageSize", pageSize)
-      // }
+      appendIfExists(params, "categoryId", categoryId)
+      appendIfExists(params, "departmentId", departmentId)
+      appendIfExists(params, "doctorId", doctorId)
+      appendIfExists(params, "scientificDegreeId", scientificDegreeId)
+      appendIfExists(params, "contractingTypeId", contractingTypeId)
 
       const queryString = params.toString()
+
       const url = `/api/v1/ScheduleReporting/monthly/${month}/${year}${
         queryString ? `?${queryString}` : ""
       }`
 
       const response = await axiosInstance.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+        headers: authHeaders(),
       })
 
-      return { reports: response.data, pageSize }
+      return {
+        reports: unwrapApiResponse(response),
+        pageSize,
+      }
     } catch (error) {
       return rejectWithValue({
         message:
           error.response?.data?.messageAr ||
           error.response?.data?.messageEn ||
-          "حدث خطأ في جلب أنواع الفئات",
+          "حدث خطأ في جلب تقرير الجدول الشهري",
         errors: error.response?.data?.errors || [],
         status: error.response?.status,
         timestamp: new Date().toISOString(),
@@ -69,6 +69,7 @@ export const getReports = createAsyncThunk(
     }
   }
 )
+
 export const getReportsAttend = createAsyncThunk(
   "reports/getReportsAttend",
   async (
@@ -80,55 +81,43 @@ export const getReportsAttend = createAsyncThunk(
       doctorId,
       scientificDegreeId,
       contractingTypeId,
-      page = 1,
+      minAttendanceRate,
+      maxAbsenceRate,
       pageSize,
     },
     { rejectWithValue }
   ) => {
     try {
-      // Build query parameters
       const params = new URLSearchParams()
 
-      if (categoryId !== undefined && categoryId !== null) {
-        params.append("categoryId", categoryId)
-      }
-      if (departmentId !== undefined && departmentId !== null) {
-        params.append("departmentId", departmentId)
-      }
-      if (doctorId !== undefined && doctorId !== null) {
-        params.append("doctorId", doctorId)
-      }
-      if (scientificDegreeId !== undefined && scientificDegreeId !== null) {
-        params.append("scientificDegreeId", scientificDegreeId)
-      }
-      if (contractingTypeId !== undefined && contractingTypeId !== null) {
-        params.append("contractingTypeId", contractingTypeId)
-      }
-      // if (page !== undefined && page !== null) {
-      //   params.append("page", page)
-      // }
-      // if (pageSize !== undefined && pageSize !== null) {
-      //   params.append("pageSize", pageSize)
-      // }
+      appendIfExists(params, "categoryId", categoryId)
+      appendIfExists(params, "departmentId", departmentId)
+      appendIfExists(params, "doctorId", doctorId)
+      appendIfExists(params, "scientificDegreeId", scientificDegreeId)
+      appendIfExists(params, "contractingTypeId", contractingTypeId)
+      appendIfExists(params, "minAttendanceRate", minAttendanceRate)
+      appendIfExists(params, "maxAbsenceRate", maxAbsenceRate)
 
       const queryString = params.toString()
-      const url = `api/v1/ScheduleReporting/attendance/monthly/${month}/${year}
-${queryString ? `?${queryString}` : ""}`
+
+      const url = `/api/v1/ScheduleReporting/attendance/monthly/${month}/${year}${
+        queryString ? `?${queryString}` : ""
+      }`
 
       const response = await axiosInstance.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+        headers: authHeaders(),
       })
 
-      return { reports: response.data, pageSize }
+      return {
+        reports: unwrapApiResponse(response),
+        pageSize,
+      }
     } catch (error) {
       return rejectWithValue({
         message:
           error.response?.data?.messageAr ||
           error.response?.data?.messageEn ||
-          "حدث خطأ في جلب أنواع الفئات",
+          "حدث خطأ في جلب تقرير الحضور الشهري",
         errors: error.response?.data?.errors || [],
         status: error.response?.status,
         timestamp: new Date().toISOString(),
@@ -136,6 +125,32 @@ ${queryString ? `?${queryString}` : ""}`
     }
   }
 )
+
+export const getReportsAttendSummary = createAsyncThunk(
+  "reports/getReportsAttendSummary",
+  async ({ month, year }, { rejectWithValue }) => {
+    try {
+      const url = `/api/v1/ScheduleReporting/attendance/summary/${month}/${year}`
+
+      const response = await axiosInstance.get(url, {
+        headers: authHeaders(),
+      })
+
+      return unwrapApiResponse(response)
+    } catch (error) {
+      return rejectWithValue({
+        message:
+          error.response?.data?.messageAr ||
+          error.response?.data?.messageEn ||
+          "حدث خطأ في جلب ملخص الحضور",
+        errors: error.response?.data?.errors || [],
+        status: error.response?.status,
+        timestamp: new Date().toISOString(),
+      })
+    }
+  }
+)
+
 export const exportExcel = createAsyncThunk(
   "reports/exportExcel",
   async (
@@ -153,48 +168,50 @@ export const exportExcel = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      // Build request body
       const requestBody = {
         month,
         year,
+        IncludeStatistics: true,
+        IncludeCategories: true,
       }
 
-      // Add optional parameters
       if (categoryId !== undefined && categoryId !== null) {
         requestBody.categoryId = categoryId
       }
+
       if (departmentId !== undefined && departmentId !== null) {
         requestBody.departmentId = departmentId
       }
+
       if (doctorId !== undefined && doctorId !== null) {
         requestBody.doctorId = doctorId
       }
+
       if (scientificDegreeId !== undefined && scientificDegreeId !== null) {
         requestBody.scientificDegreeId = scientificDegreeId
       }
+
       if (contractingTypeId !== undefined && contractingTypeId !== null) {
         requestBody.contractingTypeId = contractingTypeId
       }
+
       if (format !== undefined && format !== null) {
         requestBody.format = format
       }
+
       if (language !== undefined && language !== null) {
         requestBody.language = language
       }
-      requestBody.IncludeStatistics = true
-      requestBody.IncludeCategories = true
 
-      const url = `/api/v1/ScheduleReporting/export/excel`
+      const response = await axiosInstance.post(
+        `/api/v1/ScheduleReporting/export/excel`,
+        requestBody,
+        {
+          headers: authHeaders(),
+          responseType: "blob",
+        }
+      )
 
-      const response = await axiosInstance.post(url, requestBody, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        responseType: "blob",
-      })
-
-      // Return the blob wrapped in an object
       return {
         blob: response.data,
         format,
@@ -213,17 +230,13 @@ export const exportExcel = createAsyncThunk(
     }
   }
 )
+
 export const getDashboardData = createAsyncThunk(
   "reports/getDashboardData",
   async (_, { rejectWithValue }) => {
     try {
-      const url = `/api/v1/Dashboard/overview`
-
-      const response = await axiosInstance.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+      const response = await axiosInstance.get(`/api/v1/Dashboard/overview`, {
+        headers: authHeaders(),
       })
 
       return response.data
@@ -240,24 +253,24 @@ export const getDashboardData = createAsyncThunk(
     }
   }
 )
+
 export const getDoctorReports = createAsyncThunk(
   "reports/getDoctorReports",
   async ({ doctorId, dateFrom, dateTo }, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams()
-      if (dateFrom) params.append("DateFrom", dateFrom)
-      if (dateTo) params.append("DateTo", dateTo)
+
+      appendIfExists(params, "DateFrom", dateFrom)
+      appendIfExists(params, "DateTo", dateTo)
 
       const queryString = params.toString()
+
       const url = `/api/v1/Users/doctor/${doctorId}/report${
         queryString ? `?${queryString}` : ""
       }`
 
       const response = await axiosInstance.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+        headers: authHeaders(),
       })
 
       return response.data

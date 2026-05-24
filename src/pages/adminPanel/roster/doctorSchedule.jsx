@@ -8,19 +8,12 @@ import {
   ArrowRight,
   Calendar,
   Clock,
-  Users,
   Building,
   AlertCircle,
   CheckCircle,
   User,
-  Target,
-  FileText,
   Briefcase,
   Timer,
-  UserCheck,
-  Activity,
-  Award,
-  MapPin,
   Hash,
   UserX,
 } from "lucide-react"
@@ -28,13 +21,13 @@ import { getDoctorSchedule } from "../../../state/act/actRosterManagement"
 import LoadingGetData from "../../../components/LoadingGetData"
 import UnAssignDoctorModal from "../../../components/modals/UnAsssignDoctorModal"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 function DoctorSchedule() {
   const { doctorId } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
-
-  const currentLange = i18next.language
+  const theme = getPageTheme()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [doctorData, setDoctorData] = useState({})
@@ -42,12 +35,34 @@ function DoctorSchedule() {
   const { doctorSchedule, loading, errors } = useSelector(
     (state) => state.rosterManagement
   )
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
 
   const { t } = useTranslation()
   const currentLang = i18next.language
   const isRTL = currentLang === "ar"
+
+  const iconColors = {
+    user: "text-blue-600 dark:text-blue-400",
+    hash: "text-blue-600 dark:text-blue-400",
+    calendar: "text-blue-600 dark:text-blue-400",
+    timer: "text-green-600 dark:text-green-400",
+    success: "text-green-600 dark:text-green-400",
+    building: "text-green-600 dark:text-green-400",
+    clock: "text-yellow-600 dark:text-yellow-400",
+    briefcase: "text-purple-600 dark:text-purple-400",
+    danger: "text-red-600 dark:text-red-400",
+    muted: "text-[var(--color-text-muted)]",
+  }
+
+  const iconBg = {
+    user: "bg-blue-100 dark:bg-blue-900/30",
+    calendar: "bg-blue-100 dark:bg-blue-900/30",
+    hash: "bg-blue-100 dark:bg-blue-900/30",
+    timer: "bg-green-100 dark:bg-green-900/30",
+    success: "bg-green-100 dark:bg-green-900/30",
+    clock: "bg-yellow-100 dark:bg-yellow-900/30",
+    building: "bg-green-100 dark:bg-green-900/30",
+    briefcase: "bg-purple-100 dark:bg-purple-900/30",
+  }
 
   useEffect(() => {
     if (doctorId) {
@@ -60,31 +75,61 @@ function DoctorSchedule() {
     }
   }, [dispatch, doctorId])
 
-  // Format date
-
-  // Format time
-  const formatTime = (timeString) => {
-    if (!timeString) return "-"
-    const time = new Date(timeString)
-    return time.toLocaleTimeString(currentLang === "ar" ? "ar-SA" : "en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    })
-  }
-
-  // Get status background color
   const getStatusBgColor = (status) => {
     switch (status) {
       case "CONFIRMED":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+      case "Confirmed":
+        return "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
       case "PENDING":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+      case "Pending":
+        return "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20"
       case "CANCELLED":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+      case "Cancelled":
+        return "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20"
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+        return "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
     }
+  }
+
+  const StatCard = ({ icon: Icon, iconClass, bgClass, value, label }) => (
+    <div className={`${theme.card} p-4`}>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-2xl font-bold text-[var(--color-text)]">
+            {value}
+          </p>
+          <p className="text-sm text-[var(--color-text-muted)]">{label}</p>
+        </div>
+
+        <div className={`p-3 rounded-xl ${bgClass}`}>
+          <Icon className={`h-6 w-6 ${iconClass}`} />
+        </div>
+      </div>
+    </div>
+  )
+
+  const ProgressRow = ({ label, count, colorClass = "bg-blue-500", max }) => {
+    const safeMax = max || doctorSchedule.totalAssignments || 1
+    const width = Math.min((count / safeMax) * 100, 100)
+
+    return (
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm text-[var(--color-text-muted)]">{label}</span>
+
+        <div className="flex items-center gap-2">
+          <div className="w-16 h-2 bg-[var(--color-bg-soft)] rounded-full overflow-hidden">
+            <div
+              className={`h-2 rounded-full ${colorClass}`}
+              style={{ width: `${width}%` }}
+            />
+          </div>
+
+          <span className="text-sm font-semibold text-[var(--color-text)]">
+            {count}
+          </span>
+        </div>
+      </div>
+    )
   }
 
   if (loading?.doctorSchedule) {
@@ -93,29 +138,23 @@ function DoctorSchedule() {
 
   if (errors.doctorSchedule) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
+      <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-6xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
+          <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+
               <div className="text-red-500 text-lg mb-4">
                 {errors.doctorSchedule}
               </div>
+
               <button
                 onClick={() => navigate(-1)}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className={theme.primaryButton}
+                type="button"
               >
                 {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
+                <span className={isRTL ? "mr-2" : "ml-2"}>
                   {t("common.goBack")}
                 </span>
               </button>
@@ -128,37 +167,40 @@ function DoctorSchedule() {
 
   if (!doctorSchedule) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div
-          className={`text-center ${
-            isDark ? "text-gray-300" : "text-gray-600"
-          }`}
-        >
+      <div
+        className="flex items-center justify-center min-h-screen bg-[var(--color-bg)]"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div className="text-center text-[var(--color-text-muted)]">
           <p>{t("roster.doctorSchedule.error.notFound")}</p>
         </div>
       </div>
     )
   }
 
+  const maxWeekdayCount =
+    Math.max(...Object.values(doctorSchedule.weekdaysCount || { default: 1 })) ||
+    1
+
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        <UnAssignDoctorModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          doctorData={doctorData}
+        />
+
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
             <button
               onClick={() => navigate(-1)}
-              className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
-                isDark
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              } transition-colors`}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              type="button"
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-              <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
+
+              <span className={isRTL ? "mr-2" : "ml-2"}>
                 {t("common.goBack")}
               </span>
             </button>
@@ -170,201 +212,74 @@ function DoctorSchedule() {
                 <img
                   src={doctorSchedule.profileImageUrl}
                   alt={doctorSchedule.doctorName}
-                  className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-lg"
+                  className="w-16 h-16 rounded-full object-cover border-4 border-[var(--color-surface)] shadow-lg"
                 />
               ) : (
                 <div
-                  className={`w-16 h-16 rounded-full ${
-                    isDark ? "bg-gray-700" : "bg-blue-100"
-                  } flex items-center justify-center border-4 border-white shadow-lg`}
+                  className={`w-16 h-16 rounded-full flex items-center justify-center border-4 border-[var(--color-surface)] shadow-lg ${iconBg.user}`}
                 >
-                  <User
-                    className={`h-8 w-8 ${
-                      isDark ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  />
+                  <User className={`h-8 w-8 ${iconColors.user}`} />
                 </div>
               )}
             </div>
+
             <div>
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-1`}
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)] mb-1">
                 {currentLang === "ar" && doctorSchedule.doctorNameArabic
                   ? doctorSchedule.doctorNameArabic
                   : doctorSchedule.doctorName}
               </h1>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
+
+              <p className="text-sm text-[var(--color-text-muted)]">
                 {doctorSchedule.rosterTitle}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-4`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {doctorSchedule.totalAssignments}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.doctorSchedule.totalAssignments")}
-                </p>
-              </div>
-              <Hash
-                className={`h-6 w-6 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
-                }`}
-              />
-            </div>
-          </div>
-          <UnAssignDoctorModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            doctorData={doctorData}
+          <StatCard
+            icon={Hash}
+            iconClass={iconColors.hash}
+            bgClass={iconBg.hash}
+            value={doctorSchedule.totalAssignments}
+            label={t("roster.doctorSchedule.totalAssignments")}
           />
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-4`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {doctorSchedule.totalHours}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.doctorSchedule.totalHours")}
-                </p>
-              </div>
-              <Timer
-                className={`h-6 w-6 ${
-                  isDark ? "text-green-400" : "text-green-600"
-                }`}
-              />
-            </div>
-          </div>
 
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-4`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {doctorSchedule.completedShifts}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.doctorSchedule.completedShifts")}
-                </p>
-              </div>
-              <CheckCircle
-                className={`h-6 w-6 ${
-                  isDark ? "text-green-400" : "text-green-600"
-                }`}
-              />
-            </div>
-          </div>
+          <StatCard
+            icon={Timer}
+            iconClass={iconColors.timer}
+            bgClass={iconBg.timer}
+            value={doctorSchedule.totalHours}
+            label={t("roster.doctorSchedule.totalHours")}
+          />
 
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-4`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {doctorSchedule.pendingShifts}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("roster.doctorSchedule.pendingShifts")}
-                </p>
-              </div>
-              <Clock
-                className={`h-6 w-6 ${
-                  isDark ? "text-yellow-400" : "text-yellow-600"
-                }`}
-              />
-            </div>
-          </div>
+          <StatCard
+            icon={CheckCircle}
+            iconClass={iconColors.success}
+            bgClass={iconBg.success}
+            value={doctorSchedule.completedShifts}
+            label={t("roster.doctorSchedule.completedShifts")}
+          />
+
+          <StatCard
+            icon={Clock}
+            iconClass={iconColors.clock}
+            bgClass={iconBg.clock}
+            value={doctorSchedule.pendingShifts}
+            label={t("roster.doctorSchedule.pendingShifts")}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Schedule Assignments */}
           <div className="lg:col-span-2">
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6 mb-6`}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2
-                  className={`text-xl font-semibold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
+            <div className={`${theme.card} p-6 mb-6`}>
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <h2 className="text-xl font-semibold text-[var(--color-text)]">
                   {t("roster.doctorSchedule.assignments")}
                 </h2>
-                <span
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
+
+                <span className="text-sm text-[var(--color-text-muted)]">
                   {doctorSchedule.assignments?.length || 0} {t("roster.shifts")}
                 </span>
               </div>
@@ -375,69 +290,55 @@ function DoctorSchedule() {
                   {doctorSchedule.assignments.map((assignment, index) => (
                     <div
                       key={assignment.scheduleId || index}
-                      className={`p-4 rounded-lg border ${
-                        isDark
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-gray-50 border-gray-200"
-                      } hover:shadow-md transition-shadow`}
+                      className={`${theme.cardSoft} p-4 hover:shadow-[var(--shadow-md)] transition-shadow`}
                     >
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-3 gap-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`p-2 rounded-full ${
-                              isDark ? "bg-gray-600" : "bg-blue-100"
-                            }`}
+                            className={`p-2 rounded-full ${iconBg.calendar}`}
                           >
                             <Calendar
                               size={16}
-                              className={`${
-                                isDark ? "text-blue-400" : "text-blue-600"
-                              }`}
+                              className={iconColors.calendar}
                             />
                           </div>
+
                           <div>
-                            <p
-                              className={`font-medium ${
-                                isDark ? "text-white" : "text-gray-900"
-                              }`}
-                            >
+                            <p className="font-semibold text-[var(--color-text)]">
                               {formatDate(assignment.shiftDate)}
                             </p>
-                            <p
-                              className={`text-sm ${
-                                isDark ? "text-gray-400" : "text-gray-600"
-                              }`}
-                            >
-                              {assignment.dayOfWeekName || assignment.dayOfWeek}
+
+                            <p className="text-sm text-[var(--color-text-muted)]">
+                              {assignment.dayOfWeekName ||
+                                assignment.dayOfWeek}
                             </p>
                           </div>
                         </div>
+
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-xs px-2 py-1 rounded-full ${getStatusBgColor(
+                            className={`text-xs px-2 py-1 rounded-full font-semibold ${getStatusBgColor(
                               assignment.status
                             )}`}
                           >
                             {assignment.status}
                           </span>
+
                           {assignment.status !== "Cancelled" && (
                             <button
                               onClick={() => {
                                 setDoctorData({
                                   name:
-                                    currentLange == "en"
-                                      ? doctorSchedule.doctorNameEn
-                                      : doctorSchedule.doctorNameAr,
+                                    currentLang === "en"
+                                      ? doctorSchedule.doctorName
+                                      : doctorSchedule.doctorNameArabic,
                                   doctorScheule: assignment.scheduleId,
                                 })
                                 setModalOpen(true)
                               }}
-                              className={`p-1.5 rounded-md transition-colors ${
-                                isDark
-                                  ? "bg-red-600 hover:bg-red-700 text-white"
-                                  : "bg-red-600 hover:bg-red-700 text-white"
-                              }`}
+                              className="p-1.5 rounded-md transition-colors bg-red-600 hover:bg-red-700 text-white"
                               title={t("roster.actions.unAssignDoctor")}
+                              type="button"
                             >
                               <UserX size={14} />
                             </button>
@@ -447,85 +348,48 @@ function DoctorSchedule() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                         <div className="flex items-center gap-2">
-                          <Clock
-                            size={14}
-                            className={`${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          />
-                          <span
-                            className={`text-sm ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`}
-                          >
+                          <Clock size={14} className={iconColors.clock} />
+
+                          <span className="text-sm text-[var(--color-text)]">
                             {assignment.startTime} - {assignment.endTime}
                           </span>
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              isDark
-                                ? "bg-gray-600 text-gray-300"
-                                : "bg-gray-200 text-gray-600"
-                            }`}
-                          >
+
+                          <span className="text-xs px-2 py-1 rounded bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
                             {assignment.shiftHours}h
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Building
-                            size={14}
-                            className={`${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          />
-                          <span
-                            className={`text-sm ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`}
-                          >
+                          <Building size={14} className={iconColors.building} />
+
+                          <span className="text-sm text-[var(--color-text)]">
                             {assignment.departmentName}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-4">
-                          <span
-                            className={`${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-4 text-[var(--color-text-muted)]">
+                          <span className="inline-flex items-center gap-1">
+                            <Briefcase
+                              size={13}
+                              className={iconColors.briefcase}
+                            />
                             {assignment.shiftTypeName}
                           </span>
-                          <span
-                            className={`${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {assignment.contractingTypeName}
-                          </span>
+
+                          <span>{assignment.contractingTypeName}</span>
                         </div>
-                        <span
-                          className={`${
-                            isDark ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          {t("roster.workingHours.assignedBy")}: :{" "}
+
+                        <span className="text-[var(--color-text-muted)]">
+                          {t("roster.workingHours.assignedBy")}:{" "}
                           {assignment.assignedByName}
                         </span>
                       </div>
 
                       {assignment.notes && (
-                        <div
-                          className={`mt-3 pt-3 border-t ${
-                            isDark ? "border-gray-600" : "border-gray-200"
-                          }`}
-                        >
-                          <p
-                            className={`text-xs ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
+                        <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
+                          <p className="text-xs text-[var(--color-text-muted)]">
                             {assignment.notes}
                           </p>
                         </div>
@@ -535,16 +399,9 @@ function DoctorSchedule() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Calendar
-                    className={`h-12 w-12 mx-auto mb-3 ${
-                      isDark ? "text-gray-500" : "text-gray-400"
-                    }`}
-                  />
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-[var(--color-text-soft)]" />
+
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     {t("roster.doctorSchedule.noAssignments")}
                   </p>
                 </div>
@@ -552,108 +409,51 @@ function DoctorSchedule() {
             </div>
           </div>
 
-          {/* Statistics & Charts */}
           <div>
-            {/* Shift Types Breakdown */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6 mb-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4`}
-              >
+            <div className={`${theme.card} p-6 mb-6`}>
+              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
                 {t("roster.form.shiftType")}
               </h3>
+
               <div className="space-y-3">
                 {Object.entries(doctorSchedule.shiftTypesCount || {}).map(
                   ([shiftType, count]) => (
-                    <div
+                    <ProgressRow
                       key={shiftType}
-                      className="flex items-center justify-between"
-                    >
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        {shiftType}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-16 h-2 ${
-                            isDark ? "bg-gray-700" : "bg-gray-200"
-                          } rounded-full`}
-                        >
-                          <div
-                            className="h-2 bg-blue-500 rounded-full"
-                            style={{
-                              width: `${
-                                (count / doctorSchedule.totalAssignments) * 100
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <span
-                          className={`text-sm font-medium ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {count}
-                        </span>
-                      </div>
-                    </div>
+                      label={shiftType}
+                      count={count}
+                      colorClass="bg-blue-500"
+                      max={doctorSchedule.totalAssignments}
+                    />
                   )
                 )}
               </div>
             </div>
 
-            {/* Departments */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6 mb-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4`}
-              >
+            <div className={`${theme.card} p-6 mb-6`}>
+              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
                 {t("adminPanel.departments")}
               </h3>
+
               <div className="space-y-3">
                 {Object.entries(doctorSchedule.departmentsCount || {}).map(
                   ([department, count]) => (
                     <div
                       key={department}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-2">
                         <Building
                           size={16}
-                          className={`${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
+                          className={iconColors.building}
                         />
-                        <span
-                          className={`text-sm ${
-                            isDark ? "text-gray-300" : "text-gray-700"
-                          }`}
-                        >
+
+                        <span className="text-sm text-[var(--color-text-muted)]">
                           {department}
                         </span>
                       </div>
-                      <span
-                        className={`text-sm font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
+
+                      <span className="text-sm font-semibold text-[var(--color-text)]">
                         {count}
                       </span>
                     </div>
@@ -662,65 +462,21 @@ function DoctorSchedule() {
               </div>
             </div>
 
-            {/* Weekly Distribution */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4`}
-              >
+            <div className={`${theme.card} p-6`}>
+              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4">
                 {t("roster.doctorSchedule.weeklyDistribution")}
               </h3>
+
               <div className="space-y-2">
                 {Object.entries(doctorSchedule.weekdaysCount || {}).map(
                   ([weekday, count]) => (
-                    <div
+                    <ProgressRow
                       key={weekday}
-                      className="flex items-center justify-between"
-                    >
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        {weekday}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-12 h-1.5 ${
-                            isDark ? "bg-gray-700" : "bg-gray-200"
-                          } rounded-full`}
-                        >
-                          <div
-                            className="h-1.5 bg-green-500 rounded-full"
-                            style={{
-                              width: `${
-                                (count /
-                                  Math.max(
-                                    ...Object.values(
-                                      doctorSchedule.weekdaysCount
-                                    )
-                                  )) *
-                                100
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <span
-                          className={`text-xs font-medium ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {count}
-                        </span>
-                      </div>
-                    </div>
+                      label={weekday}
+                      count={count}
+                      colorClass="bg-green-500"
+                      max={maxWeekdayCount}
+                    />
                   )
                 )}
               </div>

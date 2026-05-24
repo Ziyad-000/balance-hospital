@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useSearchParams, Link, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik"
-import * as Yup from "yup"
+import { Formik, Form, Field, ErrorMessage } from "formik"
 import { toast } from "react-toastify"
 import {
   ArrowLeft,
@@ -16,13 +15,15 @@ import {
   ArrowRight,
 } from "lucide-react"
 
-import { updateRosterBasicInfo } from "../../../state/act/actRosterManagement"
-import { getRosterById } from "../../../state/act/actRosterManagement"
+import {
+  updateRosterBasicInfo,
+  getRosterById,
+} from "../../../state/act/actRosterManagement"
 import { selectSelectedRoster } from "../../../state/slices/roster"
-
 import LoadingGetData from "../../../components/LoadingGetData"
 import Swal from "sweetalert2"
 import UseFormValidation from "../../../hooks/use-form-validation"
+import { getPageTheme, swalTheme } from "../../../utils/themeClasses"
 
 const UpdateRoster = () => {
   const { t, i18n } = useTranslation()
@@ -30,26 +31,36 @@ const UpdateRoster = () => {
   const navigate = useNavigate()
   const { rosterId } = useParams()
   const [searchParams] = useSearchParams()
+  const theme = getPageTheme()
+
   const currentLang = i18n.language
   const isRTL = currentLang === "ar"
   const rosterType = searchParams.get("type") || "basic"
+
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = rosterType === "complete" ? 4 : 2
-
   const [isDataLoaded, setIsDataLoaded] = useState(false)
 
-  const { loading, success, error, updateError } = useSelector(
-    (state) => state.rosterManagement
-  )
+  const { loading } = useSelector((state) => state.rosterManagement)
   const selectedRoster = useSelector(selectSelectedRoster)
-
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
 
   const { categoryTypes, loadingGetCategoryTypes } = useSelector(
     (state) => state.category
   )
+
   const { VALIDATION_SCHEMA_UPDATE_BASIC_ROASTER } = UseFormValidation()
+
+  const iconColors = {
+    info: "text-blue-600 dark:text-blue-400",
+    settings: "text-orange-600 dark:text-orange-400",
+    success: "text-green-600 dark:text-green-400",
+    danger: "text-red-600 dark:text-red-400",
+  }
+
+  const iconBg = {
+    info: "bg-blue-100 dark:bg-blue-900/30",
+    settings: "bg-orange-100 dark:bg-orange-900/30",
+  }
 
   useEffect(() => {
     if (rosterId) {
@@ -57,43 +68,39 @@ const UpdateRoster = () => {
     }
   }, [dispatch, rosterId])
 
-  // Set up cascading dropdowns when roster data is loaded
   useEffect(() => {
     if (selectedRoster && categoryTypes.length > 0 && !isDataLoaded) {
       setIsDataLoaded(true)
     }
-  }, [selectedRoster, categoryTypes, dispatch, isDataLoaded])
+  }, [selectedRoster, categoryTypes, isDataLoaded])
 
   if (loadingGetCategoryTypes || loading.fetch) {
     return <LoadingGetData text={t("gettingData.roster")} />
   }
 
-  // Show error if roster not found
   if (!selectedRoster && !loading.fetch) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      >
+      <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center">
-            <AlertCircle className="mx-auto mb-4 text-red-500" size={64} />
-            <h1
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } mb-4`}
-            >
+            <AlertCircle
+              className="mx-auto mb-4 text-red-500"
+              size={64}
+            />
+
+            <h1 className="text-2xl font-bold text-[var(--color-text)] mb-4">
               {t("roster.error.notFound")}
             </h1>
-            <Link
-              to="/admin-panel/rosters"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {currentLang == "en" ? (
+
+            <Link to="/admin-panel/rosters" className={theme.primaryButton}>
+              {currentLang === "en" ? (
                 <ArrowLeft size={20} />
               ) : (
                 <ArrowRight size={20} />
-              )}{" "}
-              {t("common.goBack")}
+              )}
+              <span className={isRTL ? "mr-2" : "ml-2"}>
+                {t("common.goBack")}
+              </span>
             </Link>
           </div>
         </div>
@@ -101,7 +108,6 @@ const UpdateRoster = () => {
     )
   }
 
-  // Get current year and next 5 years
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 7 }, (_, i) => currentYear + i)
 
@@ -111,7 +117,6 @@ const UpdateRoster = () => {
     const submissionDeadline = selectedRoster.submissionDeadline
       ? new Date(selectedRoster.submissionDeadline)?.toISOString()?.slice(0, 16)
       : ""
-    console.log("selectedRoster", selectedRoster?.endDate?.split("-")[2])
 
     return {
       categoryId: selectedRoster.categoryId?.toString() || "",
@@ -119,7 +124,7 @@ const UpdateRoster = () => {
       description: selectedRoster.description || "",
       month: selectedRoster.month || new Date().getMonth() + 1,
       year: selectedRoster.year || new Date().getFullYear(),
-      submissionDeadline: submissionDeadline,
+      submissionDeadline,
       startDay: selectedRoster.startDate?.split("-")[2] || 1,
       endDay: selectedRoster.endDate?.split("-")[2] || 1,
       allowSwapRequests: selectedRoster.allowSwapRequests ?? true,
@@ -128,24 +133,21 @@ const UpdateRoster = () => {
   }
 
   const handleSubmit = async (values, { setSubmitting }) => {
-    console.log("values", values)
-    let formattedDeadline = values.submissionDeadline
+    const formattedDeadline = values.submissionDeadline
 
     const startDate = `${values.year}-${values.month
       .toString()
       .padStart(2, "0")}-${values.startDay.toString().padStart(2, "0")}`
+
     const endDate = `${values.year}-${values.month
       .toString()
       .padStart(2, "0")}-${values.endDay.toString().padStart(2, "0")}`
 
-    console.log("startDate", startDate)
-    console.log("endDate", endDate)
-
     const cleanedValues = {
       title: values.title,
       description: values.description || null,
-      startDate: startDate,
-      endDate: endDate,
+      startDate,
+      endDate,
       month: values.month,
       year: values.year,
       submissionDeadline: formattedDeadline,
@@ -153,7 +155,6 @@ const UpdateRoster = () => {
       allowLeaveRequests: values.allowLeaveRequests,
     }
 
-    console.log("Cleaned values for update", cleanedValues)
     setSubmitting(true)
 
     dispatch(
@@ -165,6 +166,7 @@ const UpdateRoster = () => {
       .unwrap()
       .then(() => {
         setSubmitting(false)
+
         toast.success(t("roster.success.updated"), {
           position: "top-right",
           autoClose: 3000,
@@ -173,19 +175,22 @@ const UpdateRoster = () => {
           pauseOnHover: true,
           draggable: true,
         })
+
         navigate(`/admin-panel/rosters/${rosterId}`)
       })
       .catch((error) => {
         setSubmitting(false)
-        console.log("Update error:", error)
+
         Swal.fire({
           title: t("roster.error.updateFailed"),
-          text: error.errors[0],
+          text:
+            error?.errors?.[0] ||
+            error?.message ||
+            t("roster.error.updateFailed"),
           icon: "error",
           confirmButtonText: t("common.ok"),
-          confirmButtonColor: "#ef4444",
-          background: "#ffffff",
-          color: "#111827",
+          ...swalTheme,
+          confirmButtonColor: "var(--color-danger)",
         })
       })
   }
@@ -242,17 +247,36 @@ const UpdateRoster = () => {
     }
   }
 
+  const getStepIconColor = (step) => {
+    switch (step) {
+      case 1:
+        return iconColors.info
+      case 2:
+        return iconColors.settings
+      default:
+        return iconColors.info
+    }
+  }
+
+  const getStepIconBg = (step) => {
+    switch (step) {
+      case 1:
+        return iconBg.info
+      case 2:
+        return iconBg.settings
+      default:
+        return iconBg.info
+    }
+  }
+
   const nextStep = async (e, validateForm, setTouched) => {
     e.preventDefault()
     e.stopPropagation()
 
-    // If we're on the first step, validate first step fields only
     if (currentStep === 1) {
       try {
-        // Trigger validation for the entire form
         const errors = await validateForm()
 
-        // Define first step fields that need validation
         const firstStepFields = [
           "categoryId",
           "title",
@@ -264,149 +288,168 @@ const UpdateRoster = () => {
           "submissionDeadline",
         ]
 
-        // Check if any first step fields have errors
         const hasFirstStepErrors = firstStepFields.some(
           (field) => errors[field]
         )
 
         if (hasFirstStepErrors) {
-          // Mark first step fields as touched to show errors
           const touchedFields = {}
+
           firstStepFields.forEach((field) => {
             touchedFields[field] = true
           })
+
           setTouched(touchedFields)
-          return // Don't proceed to next step
+          return
         }
-      } catch (error) {
-        console.error("Validation error:", error)
+      } catch {
         return
       }
     }
 
-    // Proceed to next step if validation passes or not on first step
     setCurrentStep((prev) => Math.min(prev + 1, totalSteps))
   }
 
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1))
 
+  const fieldClass = (hasError = false) =>
+    `w-full px-3 py-2 ${theme.input} ${
+      hasError ? "border-[var(--color-danger)]" : ""
+    }`
+
+  const labelClass = "block text-sm font-semibold text-[var(--color-text)] mb-2"
+  const errorClass = "text-[var(--color-danger)] text-xs mt-1"
+
+  const StepHeading = ({ icon: Icon, iconClass, title }) => (
+    <div className="flex items-center mb-6">
+      <div
+        className={`h-10 w-10 rounded-xl flex items-center justify-center ${
+          iconClass.bg
+        } ${isRTL ? "ml-3" : "mr-3"}`}
+      >
+        <Icon className={`h-5 w-5 ${iconClass.text}`} />
+      </div>
+
+      <h2 className="text-xl font-semibold text-[var(--color-text)]">
+        {title}
+      </h2>
+    </div>
+  )
+
+  const SettingCard = ({ name, title, description }) => (
+    <div className={`${theme.cardSoft} p-4`}>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <label className="text-sm font-semibold text-[var(--color-text)]">
+            {title}
+          </label>
+
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            {description}
+          </p>
+        </div>
+
+        <Field
+          type="checkbox"
+          name={name}
+          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+        />
+      </div>
+    </div>
+  )
+
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
             <Link
               to="/admin-panel/rosters"
-              className={`p-2 rounded-lg border transition-colors ${
-                isDark
-                  ? "border-gray-600 hover:bg-gray-700 text-gray-300"
-                  : "border-gray-300 hover:bg-gray-50 text-gray-700"
-              } ${isRTL ? "ml-4" : "mr-4"}`}
+              className={`p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] transition-colors ${
+                isRTL ? "ml-4" : "mr-4"
+              }`}
             >
-              {currentLang == "en" ? (
+              {currentLang === "en" ? (
                 <ArrowLeft size={20} />
               ) : (
                 <ArrowRight size={20} />
-              )}{" "}
+              )}
             </Link>
+
             <div>
-              <h1
-                className={`text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className="text-3xl font-bold text-[var(--color-text)]">
                 {t("roster.form.updateRoster")}
               </h1>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                } mt-1`}
-              >
+
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
                 {selectedRoster?.title || t("roster.form.updateRosterInfo")}
               </p>
             </div>
           </div>
 
-          {/* Step Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               {Array.from({ length: totalSteps }, (_, i) => i + 1).map(
-                (step) => (
-                  <div key={step} className="flex items-center">
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                        step <= currentStep
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : isDark
-                          ? "border-gray-600 text-gray-400"
-                          : "border-gray-300 text-gray-400"
-                      }`}
-                    >
-                      {step < currentStep ? (
-                        <CheckCircle size={20} />
-                      ) : (
-                        getStepIcon(step)
-                      )}
-                    </div>
-                    <div
-                      className={`${isRTL ? "mr-3" : "ml-3"} ${
-                        step < totalSteps
-                          ? isRTL
-                            ? "border-r-2"
-                            : "border-l-2"
-                          : ""
-                      } ${
-                        step < currentStep
-                          ? "border-blue-600"
-                          : isDark
-                          ? "border-gray-600"
-                          : "border-gray-300"
-                      } ${isRTL ? "pr-3" : "pl-3"}`}
-                    >
+                (step) => {
+                  const isDone = step < currentStep
+                  const isReached = step <= currentStep
+
+                  return (
+                    <div key={step} className="flex items-center flex-1">
                       <div
-                        className={`text-sm font-medium ${
-                          step <= currentStep
-                            ? isDark
-                              ? "text-white"
-                              : "text-gray-900"
-                            : isDark
-                            ? "text-gray-400"
-                            : "text-gray-500"
+                        className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
+                          isReached
+                            ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                            : `border-[var(--color-border)] ${getStepIconBg(
+                                step
+                              )} ${getStepIconColor(step)}`
                         }`}
                       >
-                        {getStepTitle(step)}
+                        {isDone ? <CheckCircle size={20} /> : getStepIcon(step)}
                       </div>
-                    </div>
-                    {step < totalSteps && (
+
                       <div
-                        className={`flex-1 h-0.5 mx-4 ${
-                          step < currentStep
-                            ? "bg-blue-600"
-                            : isDark
-                            ? "bg-gray-600"
-                            : "bg-gray-300"
-                        }`}
-                      />
-                    )}
-                  </div>
-                )
+                        className={`${isRTL ? "mr-3" : "ml-3"} ${
+                          step < totalSteps
+                            ? isRTL
+                              ? "border-r-2"
+                              : "border-l-2"
+                            : ""
+                        } ${
+                          isReached
+                            ? "border-[var(--color-primary)]"
+                            : "border-[var(--color-border)]"
+                        } ${isRTL ? "pr-3" : "pl-3"}`}
+                      >
+                        <div
+                          className={`text-sm font-semibold ${
+                            isReached
+                              ? "text-[var(--color-text)]"
+                              : "text-[var(--color-text-muted)]"
+                          }`}
+                        >
+                          {getStepTitle(step)}
+                        </div>
+                      </div>
+
+                      {step < totalSteps && (
+                        <div
+                          className={`flex-1 h-0.5 mx-4 ${
+                            isDone
+                              ? "bg-[var(--color-primary)]"
+                              : "bg-[var(--color-border)]"
+                          }`}
+                        />
+                      )}
+                    </div>
+                  )
+                }
               )}
             </div>
           </div>
         </div>
 
-        {/* Form */}
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-lg shadow border ${
-            isDark ? "border-gray-700" : "border-gray-200"
-          }`}
-        >
+        <div className={`${theme.card} overflow-hidden`}>
           <div className="p-6">
             <Formik
               initialValues={getInitialValues()}
@@ -419,104 +462,64 @@ const UpdateRoster = () => {
                 errors,
                 touched,
                 isSubmitting,
-                setFieldValue,
                 validateForm,
                 setTouched,
               }) => (
                 <Form className="space-y-6">
-                  {/* Step 1: Basic Information */}
                   {currentStep === 1 && (
                     <div className="space-y-6">
-                      <div className="flex items-center mb-6">
-                        <Info
-                          className={`${isRTL ? "ml-3" : "mr-3"} text-blue-600`}
-                          size={24}
-                        />
-                        <h2
-                          className={`text-xl font-semibold ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {t("roster.form.basicInfo")}
-                        </h2>
-                      </div>
+                      <StepHeading
+                        icon={Info}
+                        iconClass={{ bg: iconBg.info, text: iconColors.info }}
+                        title={t("roster.form.basicInfo")}
+                      />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Category (Read Only) */}
                         <div>
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
+                          <label className={labelClass}>
                             {t("roster.form.category")} *
                           </label>
-                          <div
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-600 border-gray-600 text-gray-300"
-                                : "bg-gray-100 border-gray-300 text-gray-600"
-                            } cursor-not-allowed`}
-                          >
+
+                          <div className="w-full px-3 py-2 border rounded-lg bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed">
                             {selectedRoster?.categoryName ||
                               t("common.loading")}
                           </div>
-                          <p
-                            className={`text-xs ${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            } mt-1`}
-                          >
+
+                          <p className="text-xs text-[var(--color-text-muted)] mt-1">
                             {t("roster.form.categoryReadOnly")}
                           </p>
                         </div>
 
-                        {/* Title */}
                         <div>
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
+                          <label className={labelClass}>
                             {t("roster.form.title")} *
                           </label>
+
                           <Field
                             type="text"
                             name="title"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            className={fieldClass(
                               errors.title && touched.title
-                                ? "border-red-500"
-                                : ""
-                            }`}
+                            )}
                             placeholder={t("roster.form.titlePlaceholder")}
                           />
+
                           <ErrorMessage
                             name="title"
                             component="div"
-                            className="text-red-500 text-xs mt-1"
+                            className={errorClass}
                           />
                         </div>
 
-                        {/* Month */}
                         <div>
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
+                          <label className={labelClass}>
                             {t("roster.form.month")} *
                           </label>
+
                           <Field
                             as="select"
                             name="month"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                            className={fieldClass()}
                           >
                             {monthNames.map((month, index) => (
                               <option key={index + 1} value={index + 1}>
@@ -524,30 +527,23 @@ const UpdateRoster = () => {
                               </option>
                             ))}
                           </Field>
+
                           <ErrorMessage
                             name="month"
                             component="div"
-                            className="text-red-500 text-xs mt-1"
+                            className={errorClass}
                           />
                         </div>
 
-                        {/* Year */}
                         <div>
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
+                          <label className={labelClass}>
                             {t("roster.form.year")} *
                           </label>
+
                           <Field
                             as="select"
                             name="year"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                            className={fieldClass()}
                           >
                             {years.map((year) => (
                               <option key={year} value={year}>
@@ -555,69 +551,25 @@ const UpdateRoster = () => {
                               </option>
                             ))}
                           </Field>
+
                           <ErrorMessage
                             name="year"
                             component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
-                            {t("roster.form.startDate")} *
-                          </label>
-                          <Field
-                            as="select"
-                            name="startDay"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              errors.startDay && touched.startDay
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                          >
-                            {Array.from({ length: 30 }, (_, i) => i + 1).map(
-                              (day) => (
-                                <option key={day} value={day}>
-                                  {day}
-                                </option>
-                              )
-                            )}
-                          </Field>
-                          <ErrorMessage
-                            name="startDay"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
+                            className={errorClass}
                           />
                         </div>
 
-                        {/* End Day */}
                         <div>
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
-                            {t("roster.form.endDate")} *
+                          <label className={labelClass}>
+                            {t("roster.form.startDate")} *
                           </label>
+
                           <Field
                             as="select"
-                            name="endDay"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              errors.endDay && touched.endDay
-                                ? "border-red-500"
-                                : ""
-                            }`}
+                            name="startDay"
+                            className={fieldClass(
+                              errors.startDay && touched.startDay
+                            )}
                           >
                             {Array.from({ length: 30 }, (_, i) => i + 1).map(
                               (day) => (
@@ -627,180 +579,130 @@ const UpdateRoster = () => {
                               )
                             )}
                           </Field>
+
+                          <ErrorMessage
+                            name="startDay"
+                            component="div"
+                            className={errorClass}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={labelClass}>
+                            {t("roster.form.endDate")} *
+                          </label>
+
+                          <Field
+                            as="select"
+                            name="endDay"
+                            className={fieldClass(
+                              errors.endDay && touched.endDay
+                            )}
+                          >
+                            {Array.from({ length: 30 }, (_, i) => i + 1).map(
+                              (day) => (
+                                <option key={day} value={day}>
+                                  {day}
+                                </option>
+                              )
+                            )}
+                          </Field>
+
                           <ErrorMessage
                             name="endDay"
                             component="div"
-                            className="text-red-500 text-xs mt-1"
+                            className={errorClass}
                           />
                         </div>
-                        {/* Submission Deadline */}
+
                         <div className="md:col-span-2">
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
+                          <label className={labelClass}>
                             {t("roster.form.submissionDeadline")} *
                           </label>
+
                           <Field
                             type="datetime-local"
                             name="submissionDeadline"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            className={fieldClass(
                               errors.submissionDeadline &&
-                              touched.submissionDeadline
-                                ? "border-red-500"
-                                : ""
-                            }`}
+                                touched.submissionDeadline
+                            )}
                           />
-                          <p
-                            className={`text-xs ${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            } mt-1`}
-                          >
+
+                          <p className="text-xs text-[var(--color-text-muted)] mt-1">
                             {t("roster.form.submissionDeadlineHelp")}
                           </p>
+
                           <ErrorMessage
                             name="submissionDeadline"
                             component="div"
-                            className="text-red-500 text-xs mt-1"
+                            className={errorClass}
                           />
                         </div>
 
-                        {/* Description */}
                         <div className="md:col-span-2">
-                          <label
-                            className={`block text-sm font-medium ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            } mb-2`}
-                          >
+                          <label className={labelClass}>
                             {t("roster.form.description")}
                           </label>
+
                           <Field
                             as="textarea"
                             name="description"
                             rows="3"
-                            className={`w-full px-3 py-2 border rounded-lg ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                            className={fieldClass()}
                             placeholder={t(
                               "roster.form.descriptionPlaceholder"
                             )}
                           />
+
                           <ErrorMessage
                             name="description"
                             component="div"
-                            className="text-red-500 text-xs mt-1"
+                            className={errorClass}
                           />
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Step 2: Settings */}
                   {currentStep === 2 && (
                     <div className="space-y-6">
-                      <div className="flex items-center mb-6">
-                        <Settings
-                          className={`${isRTL ? "ml-3" : "mr-3"} text-blue-600`}
-                          size={24}
-                        />
-                        <h2
-                          className={`text-xl font-semibold ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {t("roster.form.settings")}
-                        </h2>
-                      </div>
+                      <StepHeading
+                        icon={Settings}
+                        iconClass={{
+                          bg: iconBg.settings,
+                          text: iconColors.settings,
+                        }}
+                        title={t("roster.form.settings")}
+                      />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Allow Swap Requests */}
-                        <div
-                          className={`p-4 border rounded-lg ${
-                            isDark
-                              ? "border-gray-600 bg-gray-700"
-                              : "border-gray-200 bg-gray-50"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <label
-                                className={`text-sm font-medium ${
-                                  isDark ? "text-white" : "text-gray-900"
-                                }`}
-                              >
-                                {t("roster.form.allowSwapRequests")}
-                              </label>
-                              <p
-                                className={`text-xs ${
-                                  isDark ? "text-gray-400" : "text-gray-500"
-                                } mt-1`}
-                              >
-                                {t("roster.form.allowSwapRequestsHelp")}
-                              </p>
-                            </div>
-                            <Field
-                              type="checkbox"
-                              name="allowSwapRequests"
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                            />
-                          </div>
-                        </div>
+                        <SettingCard
+                          name="allowSwapRequests"
+                          title={t("roster.form.allowSwapRequests")}
+                          description={t(
+                            "roster.form.allowSwapRequestsHelp"
+                          )}
+                        />
 
-                        {/* Allow Leave Requests */}
-                        <div
-                          className={`p-4 border rounded-lg ${
-                            isDark
-                              ? "border-gray-600 bg-gray-700"
-                              : "border-gray-200 bg-gray-50"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <label
-                                className={`text-sm font-medium ${
-                                  isDark ? "text-white" : "text-gray-900"
-                                }`}
-                              >
-                                {t("roster.form.allowLeaveRequests")}
-                              </label>
-                              <p
-                                className={`text-xs ${
-                                  isDark ? "text-gray-400" : "text-gray-500"
-                                } mt-1`}
-                              >
-                                {t("roster.form.allowLeaveRequestsHelp")}
-                              </p>
-                            </div>
-                            <Field
-                              type="checkbox"
-                              name="allowLeaveRequests"
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                            />
-                          </div>
-                        </div>
+                        <SettingCard
+                          name="allowLeaveRequests"
+                          title={t("roster.form.allowLeaveRequests")}
+                          description={t(
+                            "roster.form.allowLeaveRequestsHelp"
+                          )}
+                        />
                       </div>
                     </div>
                   )}
 
-                  {/* Navigation Buttons */}
-                  <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between pt-6 border-t border-[var(--color-border)]">
                     <div>
                       {currentStep > 1 && (
                         <button
                           type="button"
                           onClick={prevStep}
-                          className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
-                            isDark
-                              ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                          }`}
+                          className={theme.secondaryButton}
                         >
                           <ArrowLeft
                             size={16}
@@ -811,16 +713,11 @@ const UpdateRoster = () => {
                       )}
                     </div>
 
-                    <div className="flex space-x-3">
+                    <div className="flex flex-wrap gap-3">
                       <button
                         type="button"
                         onClick={() => navigate(-1)}
-                        to="/admin-panel/rosters"
-                        className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
-                          isDark
-                            ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                        }`}
+                        className={theme.secondaryButton}
                       >
                         <X size={16} className={isRTL ? "ml-2" : "mr-2"} />
                         {t("common.cancel")}
@@ -830,27 +727,28 @@ const UpdateRoster = () => {
                         <button
                           type="button"
                           onClick={(e) => nextStep(e, validateForm, setTouched)}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                          className={theme.primaryButton}
                         >
                           {t("common.next")}
-                          {currentLang == "ar" ? (
+
+                          {currentLang === "ar" ? (
                             <ArrowLeft
                               size={16}
-                              className={"mr-2 rotate-180"}
+                              className="mr-2 rotate-180"
                             />
                           ) : (
-                            <ArrowRight size={16} className={"ml-2"} />
+                            <ArrowRight size={16} className="ml-2" />
                           )}
                         </button>
                       ) : (
                         <button
                           type="submit"
                           disabled={isSubmitting || loading.update}
-                          className={`inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+                          className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isSubmitting || loading.update ? (
                             <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                               {t("roster.actions.updating")}
                             </>
                           ) : (

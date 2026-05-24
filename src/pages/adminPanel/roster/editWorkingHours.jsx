@@ -13,21 +13,23 @@ import {
 } from "../../../state/act/actRosterManagement"
 import UseFormValidation from "../../../hooks/use-form-validation"
 import LoadingGetData from "../../../components/LoadingGetData"
+import { getPageTheme, swalTheme } from "../../../utils/themeClasses"
 
 function EditWorkingHour() {
   const { workingHourId } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
 
   const { workingHour, loading } = useSelector(
     (state) => state.rosterManagement
   )
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
 
   const { t } = useTranslation()
   const currentLang = i18next.language
   const isRTL = currentLang === "ar"
+
+  const { VALIDATION_SCHEMA_EDIT_WORKING_HOUR } = UseFormValidation()
 
   useEffect(() => {
     if (workingHourId) {
@@ -35,10 +37,6 @@ function EditWorkingHour() {
     }
   }, [dispatch, workingHourId])
 
-  // Validation schema
-  const { VALIDATION_SCHEMA_EDIT_WORKING_HOUR } = UseFormValidation()
-
-  // Initial values from store
   const initialValues = {
     rosterWorkingHoursId: workingHour?.id || "",
     requiredDoctors: workingHour?.requiredDoctors || 1,
@@ -57,11 +55,9 @@ function EditWorkingHour() {
         modificationReason: values.modificationReason,
       }
 
-      console.log("Updating working hour:", updateData)
-
       await dispatch(
         updateWorkingHour({
-          workingHourId: workingHourId,
+          workingHourId,
           data: updateData,
         })
       ).unwrap()
@@ -75,11 +71,8 @@ function EditWorkingHour() {
         draggable: true,
       })
 
-      // Navigate back or to a specific route
-      navigate(-1) // Go back to previous page
+      navigate(-1)
     } catch (error) {
-      console.error("Working hour update error:", error)
-
       Swal.fire({
         title: t("roster.workingHours.error.updateTitle"),
         text:
@@ -92,14 +85,29 @@ function EditWorkingHour() {
               t("roster.workingHours.error.updateMessage"),
         icon: "error",
         confirmButtonText: t("common.ok"),
-        confirmButtonColor: "#ef4444",
-        background: isDark ? "#1f2937" : "#ffffff",
-        color: isDark ? "#f9fafb" : "#111827",
+        ...swalTheme,
+        confirmButtonColor: "var(--color-danger)",
       })
     } finally {
       setSubmitting(false)
     }
   }
+
+  const fieldClass = (hasError = false) =>
+    `w-full px-3 py-2 text-sm ${theme.input} ${
+      hasError
+        ? "border-[var(--color-danger)] bg-[var(--color-danger-soft)]"
+        : ""
+    }`
+
+  const labelClass = "block text-sm font-semibold text-[var(--color-text)] mb-2"
+  const errorClass = "mt-1 text-sm text-[var(--color-danger)]"
+
+  const CharacterCounter = ({ value }) => (
+    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+      {value?.length || 0}/500 {t("roster.workingHours.charactersCount")}
+    </p>
+  )
 
   if (loading?.fetch) {
     return <LoadingGetData text={t("gettingData.workingHour")} />
@@ -107,12 +115,11 @@ function EditWorkingHour() {
 
   if (!workingHour) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div
-          className={`text-center ${
-            isDark ? "text-gray-300" : "text-gray-600"
-          }`}
-        >
+      <div
+        className="flex items-center justify-center min-h-screen bg-[var(--color-bg)]"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div className="text-center text-[var(--color-text-muted)]">
           <p>{t("roster.workingHours.error.notFound")}</p>
         </div>
       </div>
@@ -120,48 +127,33 @@ function EditWorkingHour() {
   }
 
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} py-6`}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-6">
           <div className="flex items-center mb-4">
             <button
               onClick={() => navigate(-1)}
-              className={`p-2 rounded-lg ${
-                isDark
-                  ? "hover:bg-gray-800 text-gray-400"
-                  : "hover:bg-gray-100 text-gray-500"
-              } transition-colors mr-3`}
+              className={`p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] transition-colors ${
+                isRTL ? "ml-3" : "mr-3"
+              }`}
+              type="button"
             >
               <ArrowLeft size={20} />
             </button>
+
             <div>
-              <h1
-                className={`text-2xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className="text-2xl font-bold text-[var(--color-text)]">
                 {t("roster.workingHours.editTitle")}
               </h1>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                } mt-1`}
-              >
+
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
                 {t("roster.workingHours.editSubtitle")}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Form Card */}
-        <div
-          className={`${
-            isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-          } rounded-lg shadow border p-6`}
-        >
+        <div className={`${theme.card} p-6`}>
           <Formik
             initialValues={initialValues}
             validationSchema={VALIDATION_SCHEMA_EDIT_WORKING_HOUR}
@@ -170,172 +162,114 @@ function EditWorkingHour() {
           >
             {({ isSubmitting, errors, touched, values }) => (
               <Form className="space-y-6">
-                {/* Working Hours ID (Hidden) */}
                 <Field type="hidden" name="rosterWorkingHoursId" />
 
-                {/* Required Doctors */}
                 <div>
-                  <label
-                    htmlFor="requiredDoctors"
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } mb-2`}
-                  >
+                  <label htmlFor="requiredDoctors" className={labelClass}>
                     {t("roster.workingHours.fields.requiredDoctors")}{" "}
-                    <span className="text-red-500">*</span>
+                    <span className="text-[var(--color-danger)]">*</span>
                   </label>
+
                   <Field
                     type="number"
                     id="requiredDoctors"
                     name="requiredDoctors"
                     min="1"
-                    className={`w-full px-3 py-2 border rounded-lg text-sm ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={fieldClass(
                       errors.requiredDoctors && touched.requiredDoctors
-                        ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                        : ""
-                    }`}
+                    )}
                   />
+
                   <ErrorMessage
                     name="requiredDoctors"
                     component="div"
-                    className="mt-1 text-sm text-red-600"
+                    className={errorClass}
                   />
                 </div>
 
-                {/* Max Doctors */}
                 <div>
-                  <label
-                    htmlFor="maxDoctors"
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } mb-2`}
-                  >
+                  <label htmlFor="maxDoctors" className={labelClass}>
                     {t("roster.workingHours.fields.maxDoctors")}{" "}
-                    <span className="text-red-500">*</span>
+                    <span className="text-[var(--color-danger)]">*</span>
                   </label>
+
                   <Field
                     type="number"
                     id="maxDoctors"
                     name="maxDoctors"
                     min="1"
-                    className={`w-full px-3 py-2 border rounded-lg text-sm ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={fieldClass(
                       errors.maxDoctors && touched.maxDoctors
-                        ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                        : ""
-                    }`}
+                    )}
                   />
+
                   <ErrorMessage
                     name="maxDoctors"
                     component="div"
-                    className="mt-1 text-sm text-red-600"
+                    className={errorClass}
                   />
                 </div>
 
-                {/* Notes */}
                 <div>
-                  <label
-                    htmlFor="notes"
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } mb-2`}
-                  >
+                  <label htmlFor="notes" className={labelClass}>
                     {t("roster.workingHours.fields.notes")}
                   </label>
+
                   <Field
                     as="textarea"
                     id="notes"
                     name="notes"
                     rows={4}
                     dir={isRTL ? "rtl" : "ltr"}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm resize-vertical ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`${fieldClass(
                       errors.notes && touched.notes
-                        ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                        : ""
-                    }`}
+                    )} resize-vertical`}
                     placeholder={t("roster.workingHours.placeholders.notes")}
                   />
+
                   <ErrorMessage
                     name="notes"
                     component="div"
-                    className="mt-1 text-sm text-red-600"
+                    className={errorClass}
                   />
-                  <p
-                    className={`mt-1 text-xs ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    {values.notes?.length || 0}/500{" "}
-                    {t("roster.workingHours.charactersCount")}
-                  </p>
+
+                  <CharacterCounter value={values.notes} />
                 </div>
 
-                {/* Modification Reason */}
                 <div>
-                  <label
-                    htmlFor="modificationReason"
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } mb-2`}
-                  >
+                  <label htmlFor="modificationReason" className={labelClass}>
                     {t("roster.workingHours.fields.modificationReason")}{" "}
-                    <span className="text-red-500">*</span>
+                    <span className="text-[var(--color-danger)]">*</span>
                   </label>
+
                   <Field
                     as="textarea"
                     id="modificationReason"
                     name="modificationReason"
                     rows={3}
                     dir={isRTL ? "rtl" : "ltr"}
-                    className={`w-full px-3 py-2 border rounded-lg text-sm resize-vertical ${
-                      isDark
-                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`${fieldClass(
                       errors.modificationReason && touched.modificationReason
-                        ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                        : ""
-                    }`}
+                    )} resize-vertical`}
                     placeholder={t(
                       "roster.workingHours.placeholders.modificationReason"
                     )}
                   />
+
                   <ErrorMessage
                     name="modificationReason"
                     component="div"
-                    className="mt-1 text-sm text-red-600"
+                    className={errorClass}
                   />
-                  <p
-                    className={`mt-1 text-xs ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    {values.modificationReason?.length || 0}/500{" "}
-                    {t("roster.workingHours.charactersCount")}
-                  </p>
+
+                  <CharacterCounter value={values.modificationReason} />
                 </div>
 
-                {/* Submit Buttons */}
-                <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between pt-6 border-t border-[var(--color-border)]">
                   <button
                     type="button"
                     onClick={() => navigate(-1)}
-                    className={`inline-flex items-center px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
-                      isDark
-                        ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
+                    className={theme.secondaryButton}
                   >
                     <ArrowLeft size={16} className={isRTL ? "ml-2" : "mr-2"} />
                     {t("common.cancel")}
@@ -344,11 +278,11 @@ function EditWorkingHour() {
                   <button
                     type="submit"
                     disabled={isSubmitting || loading?.update}
-                    className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting || loading?.update ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 rtl:mr-0 rtl:ml-2" />
                         {t("roster.actions.updating")}
                       </>
                     ) : (

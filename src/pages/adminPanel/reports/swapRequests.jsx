@@ -1,3 +1,5 @@
+// swapRequests.jsx
+
 import React, { useState } from "react"
 import {
   Users,
@@ -7,240 +9,125 @@ import {
   RefreshCw,
   Clock,
   Building,
+  FileText,
 } from "lucide-react"
+import { getPageTheme } from "../../../utils/themeClasses"
 
-const CollapsibleSwapCard = ({
-  swap,
-  isDark,
-  isRTL,
-  currentLang,
-  t,
-  formatDate,
-}) => {
+const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
+  const theme = getPageTheme()
   const [isCollapsed, setIsCollapsed] = useState(true)
 
-  const getStatusColor = (status) => {
+  const getStatusConfig = (status = "") => {
     switch (status.toLowerCase()) {
       case "approved":
-        return isDark
-          ? "bg-green-900/30 text-green-400 border-green-700"
-          : "bg-green-100 text-green-700 border-green-300"
+        return {
+          color:
+            "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+          text: t("doctorReport.swapRecords.approved"),
+        }
       case "pending":
-        return isDark
-          ? "bg-yellow-900/30 text-yellow-400 border-yellow-700"
-          : "bg-yellow-100 text-yellow-700 border-yellow-300"
+        return {
+          color:
+            "bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+          text: t("doctorReport.swapRecords.pending"),
+        }
       case "rejected":
-        return isDark
-          ? "bg-red-900/30 text-red-400 border-red-700"
-          : "bg-red-100 text-red-700 border-red-300"
+        return {
+          color:
+            "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+          text: t("doctorReport.swapRecords.rejected"),
+        }
       default:
-        return isDark
-          ? "bg-gray-700 text-gray-300 border-gray-600"
-          : "bg-gray-100 text-gray-700 border-gray-300"
+        return {
+          color:
+            "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+          text: status,
+        }
     }
   }
 
-  const getStatusText = (status) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return t("doctorReport.swapRecords.approved")
-      case "pending":
-        return t("doctorReport.swapRecords.pending")
-      case "rejected":
-        return t("doctorReport.swapRecords.rejected")
-      default:
-        return status
-    }
+  const getLocalized = (arValue, enValue) => {
+    return currentLang === "en" ? enValue || arValue : arValue || enValue
   }
+
+  const statusConfig = getStatusConfig(swap.status)
 
   return (
-    <div
-      className={`border rounded-lg overflow-hidden ${
-        isDark ? "border-gray-700" : "border-gray-200"
-      }`}
-    >
-      {/* Swap Header - Collapsible */}
-      <div
-        className={`p-4 cursor-pointer hover:${
-          isDark ? "bg-gray-700/50" : "bg-gray-100"
-        } transition-colors ${isDark ? "bg-gray-750" : "bg-gray-50"}`}
-        onClick={() => setIsCollapsed(!isCollapsed)}
+    <div className={`${theme.cardSoft} overflow-hidden`}>
+      <button
+        type="button"
+        className={`w-full p-4 ${theme.hoverRow}`}
+        onClick={() => setIsCollapsed((prev) => !prev)}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <RefreshCw
-              className={`w-5 h-5 ${
-                isDark ? "text-purple-400" : "text-purple-600"
-              }`}
-            />
-            <div className="flex-1">
-              <div
-                className={`font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {currentLang === "en" ? swap.swapWithEn : swap.swapWith}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <RefreshCw className="w-5 h-5 text-purple-700 dark:text-purple-300 flex-shrink-0" />
+
+            <div className="flex-1 min-w-0 text-start">
+              <div className="font-bold text-[var(--color-text)] truncate">
+                {getLocalized(swap.swapWith, swap.swapWithEn)}
               </div>
-              <div
-                className={`text-xs ${
-                  isDark ? "text-gray-500" : "text-gray-400"
-                }`}
-              >
+
+              <div className="text-xs text-[var(--color-text-muted)]">
                 {formatDate(swap.fromDate)} - {formatDate(swap.toDate)}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                swap.status
-              )}`}
+              className={`px-3 py-1 rounded-full text-xs font-bold ${statusConfig.color}`}
             >
-              {getStatusText(swap.status)}
+              {statusConfig.text}
             </span>
 
-            {/* Chevron Icon */}
-            <div className="flex items-center">
-              {isCollapsed ? (
-                <ChevronRight
-                  className={`h-5 w-5 ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  } transition-transform duration-200`}
-                />
-              ) : (
-                <ChevronDown
-                  className={`h-5 w-5 ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  } transition-transform duration-200`}
-                />
-              )}
-            </div>
+            {isCollapsed ? (
+              <ChevronRight className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            )}
           </div>
         </div>
-      </div>
+      </button>
 
-      {/* Expanded Content */}
       {!isCollapsed && (
-        <div className="p-4 space-y-3">
-          {/* Swap Details Grid */}
+        <div className="p-4 space-y-3 border-t border-[var(--color-border)]">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Calendar
-                  className={`w-4 h-4 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("doctorReport.swapRecords.dateRange")}
-                </span>
-              </div>
-              <div
-                className={`text-sm font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {formatDate(swap.fromDate)} - {formatDate(swap.toDate)}
-              </div>
-            </div>
+            <InfoBox
+              icon={Calendar}
+              iconClass="text-blue-700 dark:text-blue-300"
+              label={t("doctorReport.swapRecords.dateRange")}
+              value={`${formatDate(swap.fromDate)} - ${formatDate(
+                swap.toDate
+              )}`}
+            />
 
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Clock
-                  className={`w-4 h-4 ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium ${
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  }`}
-                >
-                  {t("doctorReport.swapRecords.shiftType")}
-                </span>
-              </div>
-              <div
-                className={`text-sm font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {currentLang === "en"
-                  ? swap.shiftTypeNameEn
-                  : swap.shiftTypeNameAr}
-              </div>
-            </div>
+            <InfoBox
+              icon={Clock}
+              iconClass="text-green-700 dark:text-green-300"
+              label={t("doctorReport.swapRecords.shiftType")}
+              value={getLocalized(swap.shiftTypeNameAr, swap.shiftTypeNameEn)}
+            />
           </div>
 
-          {/* Department */}
-          <div
-            className={`p-3 rounded-lg ${isDark ? "bg-gray-800" : "bg-white"}`}
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <Building
-                className={`w-4 h-4 ${
-                  isDark ? "text-orange-400" : "text-orange-600"
-                }`}
-              />
-              <span
-                className={`text-xs font-medium ${
-                  isDark ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
-                {t("doctorReport.swapRecords.department")}
-              </span>
-            </div>
-            <div
-              className={`text-sm font-semibold ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              {currentLang === "en"
-                ? swap.departmentNameEn
-                : swap.departmentNameAr}
-            </div>
-          </div>
+          <InfoBox
+            icon={Building}
+            iconClass="text-orange-700 dark:text-orange-300"
+            label={t("doctorReport.swapRecords.department")}
+            value={getLocalized(swap.departmentNameAr, swap.departmentNameEn)}
+          />
 
-          {/* Reason */}
           {swap.reason && (
-            <div
-              className={`p-3 rounded-lg ${
-                isDark ? "bg-gray-800" : "bg-white"
-              }`}
-            >
-              <div
-                className={`text-xs font-medium mb-1 ${
-                  isDark ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
-                {t("doctorReport.swapRecords.reason")}
-              </div>
-              <div
-                className={`text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                {swap.reason}
-              </div>
-            </div>
+            <InfoBox
+              icon={FileText}
+              iconClass="text-slate-700 dark:text-slate-300"
+              label={t("doctorReport.swapRecords.reason")}
+              value={swap.reason}
+              multiline
+            />
           )}
 
-          {/* Created Date */}
-          <div
-            className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
-          >
+          <div className="text-xs text-[var(--color-text-muted)]">
             {t("doctorReport.swapRecords.createdAt")}:{" "}
             {new Date(swap.createdAt).toLocaleDateString(
               currentLang === "en" ? "en-US" : "ar-EG",
@@ -259,131 +146,87 @@ const CollapsibleSwapCard = ({
   )
 }
 
-export const SwapRecordsSection = ({
-  report,
-  isDark,
-  isRTL,
-  currentLang,
-  t,
-  formatDate,
-}) => {
-  return (
+const InfoBox = ({ icon: Icon, iconClass, label, value, multiline = false }) => (
+  <div className="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+    <div className="flex items-center gap-2 mb-1">
+      <Icon className={`w-4 h-4 ${iconClass}`} />
+      <span className="text-xs font-bold text-[var(--color-text-muted)]">
+        {label}
+      </span>
+    </div>
+
     <div
-      className={`${
-        isDark ? "bg-gray-800" : "bg-white"
-      } rounded-xl shadow-lg p-6`}
+      className={`text-sm font-semibold text-[var(--color-text)] ${
+        multiline ? "leading-relaxed" : ""
+      }`}
     >
-      {/* Section Header */}
+      {value}
+    </div>
+  </div>
+)
+
+export const SwapRecordsSection = ({ report, currentLang, t, formatDate }) => {
+  const theme = getPageTheme()
+
+  const StatBox = ({ value, label, tone }) => {
+    const tones = {
+      total: "bg-slate-100 text-slate-800 dark:bg-slate-800/80 dark:text-slate-200",
+      approved:
+        "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200",
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200",
+      rejected: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200",
+    }
+
+    return (
+      <div className={`p-3 rounded-xl text-center ${tones[tone]}`}>
+        <div className="text-2xl font-extrabold">{value}</div>
+        <div className="text-xs font-semibold opacity-80">{label}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`${theme.card} p-6`}>
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <Users
-            className={`w-5 h-5 ${
-              isDark ? "text-purple-400" : "text-purple-600"
-            }`}
-          />
-          <h3
-            className={`text-lg font-semibold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
+          <Users className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+
+          <h3 className="text-lg font-extrabold text-[var(--color-text)]">
             {t("doctorReport.swapRecords.title")}
           </h3>
         </div>
 
-        {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-gray-750" : "bg-gray-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              {report.stats.totalSwapRequests}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.swapRecords.total")}
-            </div>
-          </div>
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-green-900/20" : "bg-green-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-green-400" : "text-green-600"
-              }`}
-            >
-              {report.stats.approvedSwaps}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.swapRecords.approved")}
-            </div>
-          </div>
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-yellow-900/20" : "bg-yellow-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-yellow-400" : "text-yellow-600"
-              }`}
-            >
-              {report.stats.pendingSwaps}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.swapRecords.pending")}
-            </div>
-          </div>
-          <div
-            className={`p-3 rounded-lg text-center ${
-              isDark ? "bg-red-900/20" : "bg-red-50"
-            }`}
-          >
-            <div
-              className={`text-2xl font-bold ${
-                isDark ? "text-red-400" : "text-red-600"
-              }`}
-            >
-              {report.stats.rejectedSwaps}
-            </div>
-            <div
-              className={`text-xs ${
-                isDark ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {t("doctorReport.swapRecords.rejected")}
-            </div>
-          </div>
+          <StatBox
+            value={report.stats.totalSwapRequests}
+            label={t("doctorReport.swapRecords.total")}
+            tone="total"
+          />
+          <StatBox
+            value={report.stats.approvedSwaps}
+            label={t("doctorReport.swapRecords.approved")}
+            tone="approved"
+          />
+          <StatBox
+            value={report.stats.pendingSwaps}
+            label={t("doctorReport.swapRecords.pending")}
+            tone="pending"
+          />
+          <StatBox
+            value={report.stats.rejectedSwaps}
+            label={t("doctorReport.swapRecords.rejected")}
+            tone="rejected"
+          />
         </div>
       </div>
 
-      {/* Swap Records List */}
       {report.swapRecords && report.swapRecords.length > 0 ? (
         <div className="space-y-3">
           {report.swapRecords.map((swap) => (
             <CollapsibleSwapCard
               key={swap.swapId}
               swap={swap}
-              isDark={isDark}
-              isRTL={isRTL}
               currentLang={currentLang}
               t={t}
               formatDate={formatDate}
@@ -392,14 +235,8 @@ export const SwapRecordsSection = ({
         </div>
       ) : (
         <div className="text-center py-8">
-          <Users
-            className={`w-12 h-12 mx-auto mb-3 ${
-              isDark ? "text-gray-600" : "text-gray-400"
-            }`}
-          />
-          <p
-            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-          >
+          <Users className="w-12 h-12 mx-auto mb-3 text-slate-500 dark:text-slate-300" />
+          <p className="text-sm text-[var(--color-text-muted)]">
             {t("doctorReport.swapRecords.noRecords")}
           </p>
         </div>

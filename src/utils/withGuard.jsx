@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import Forbidden from "../components/forbidden"
 
-// Route to permission mapping
+// Routes that require specific permissions
 const ROUTE_PERMISSIONS = {
   // Categories
   "/admin-panel/categories": "userCanManageCategory",
@@ -36,7 +36,7 @@ const ROUTE_PERMISSIONS = {
   // Rosters
   "/admin-panel/rosters": "userCanManageRostors",
 
-  // Users (if you have user management)
+  // Users
   "/admin-panel/users": "userCanManageUsers",
 
   // Schedules
@@ -44,22 +44,14 @@ const ROUTE_PERMISSIONS = {
 
   // Reports
   "/admin-panel/reports": "userCanManageCategory",
-}
 
-// Routes that require Admin role specifically
-const ADMIN_ONLY_ROUTES = [
-  "/admin-panel/categories",
-  "/admin-panel/departments",
-  "/admin-panel/rosters",
-  "/admin-panel/dashboard",
-]
-
-// Function to check if route requires Admin role
-const isAdminOnlyRoute = (pathname) => {
-  return ADMIN_ONLY_ROUTES.some((route) => pathname === route)
+  // Dashboard — requires roster management permission
+  "/admin-panel/dashboard": "userCanManageRostors",
 }
 
 const hasAnyPermission = (userPermissions, requiredPermissions) => {
+  if (!userPermissions) return false
+
   if (typeof requiredPermissions === "string") {
     return userPermissions[requiredPermissions] === true
   }
@@ -80,14 +72,17 @@ const getRequiredPermission = (pathname) => {
     return ROUTE_PERMISSIONS[pathname]
   }
 
-  // Check for partial matches (for nested routes)
+  // Check for partial matches (for nested routes) — longest match wins
+  let bestMatch = null
+  let bestMatchLength = 0
   for (const [route, permission] of Object.entries(ROUTE_PERMISSIONS)) {
-    if (pathname.startsWith(route)) {
-      return permission
+    if (pathname.startsWith(route) && route.length > bestMatchLength) {
+      bestMatch = permission
+      bestMatchLength = route.length
     }
   }
 
-  return null // No specific permission required
+  return bestMatch // null = No specific permission required
 }
 
 export const withGuard = (Component, specificPermission = null) => {
@@ -97,9 +92,16 @@ export const withGuard = (Component, specificPermission = null) => {
     const { token, loginRoleResponseDto } = useSelector((state) => state.auth)
     const location = useLocation()
 
+    const isProtectedRoute = location.pathname.startsWith("/admin-panel")
+    const isPublicAuthRoute =
+      location.pathname === "/login" ||
+      location.pathname === "/signup" ||
+      location.pathname === "/forget-password" ||
+      location.pathname === "/reset-password"
+
     useEffect(() => {
-      // Authentication check
-      if (!token && location.pathname.startsWith("/admin-panel")) {
+      // If no token and trying to access protected route → redirect to login
+      if (!token && isProtectedRoute) {
         navigate("/login", {
           state: { from: location.pathname },
           replace: true,
@@ -107,30 +109,24 @@ export const withGuard = (Component, specificPermission = null) => {
         return
       }
 
-      if (
-        (token && location.pathname === "/login") ||
-        (token && location.pathname === "/login")
-      ) {
+      // If has token and trying to access public auth pages → redirect to admin panel
+      if (token && isPublicAuthRoute) {
         navigate("/admin-panel", { replace: true })
-        return
       }
-    }, [navigate, token, location.pathname])
+    }, [navigate, token, location.pathname, isProtectedRoute, isPublicAuthRoute])
 
-    // Don't render if no token on protected route (authentication)
-    if (!token && location.pathname.startsWith("/admin-panel")) {
+    // Block render while redirecting (unauthenticated on protected route)
+    if (!token && isProtectedRoute) {
       return null
     }
 
-    // Authorization check (permission-based and role-based)
-    if (token && location.pathname.startsWith("/admin-panel")) {
-      // Check if route requires Admin role
-      if (isAdminOnlyRoute(location.pathname)) {
-        if (loginRoleResponseDto?.roleNameEn !== "System Administrator") {
-          return <Forbidden />
-        }
-      }
+    // Block render while redirecting (authenticated on public auth page)
+    if (token && isPublicAuthRoute) {
+      return null
+    }
 
-      // Regular permission check for other routes
+    // Authorization check (permission-based) — only for protected routes
+    if (token && isProtectedRoute) {
       const requiredPermission =
         specificPermission || getRequiredPermission(location.pathname)
 

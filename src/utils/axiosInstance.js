@@ -11,12 +11,10 @@ const axiosInstance = axios.create({
 
 // Request Interceptor
 const handleRequest = (config) => {
-  // Example: add token from localStorage
-  // const token = localStorage.getItem("token");
-  // if (token) {
-  //   config.headers.Authorization = `Bearer ${token}`;
-  // }
-  console.log("Request config:", config);
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 };
 

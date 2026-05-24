@@ -450,7 +450,6 @@ const router = createBrowserRouter([
           // ========== CATEGORY MANAGEMENT ==========
           // Permission Required: userCanManageCategory
           { path: "categories", element: withSuspense(ProtectedCategory) },
-          { path: "categories", element: withSuspense(ProtectedCategory) },
           { path: "leaves/:catId", element: withSuspense(ProtectedLeaves) },
           { path: "reports", element: withSuspense(ProtedReports) },
           {
@@ -613,7 +612,7 @@ const router = createBrowserRouter([
             element: withSuspense(ProtectedManagementRoles),
           },
           {
-            path: "/admin-panel/management-roles/role/user-history/:id",
+            path: "management-roles/role/user-history/:id",
             element: withSuspense(ProtectedUserManagementRoleHistory),
           },
           {

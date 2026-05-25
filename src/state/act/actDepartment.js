@@ -1,58 +1,90 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import axiosInstance from "../../utils/axiosInstance"
 
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
+})
+
+const buildQueryParams = (params = {}) => {
+  const queryParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      queryParams.append(key, value)
+    }
+  })
+
+  return queryParams.toString()
+}
+
+const getErrorPayload = (error, fallbackMessageAr, fallbackMessageEn) => {
+  return {
+    message:
+      error.response?.data?.messageAr ||
+      error.response?.data?.messageEn ||
+      error.response?.data?.message ||
+      error.message ||
+      fallbackMessageAr,
+    messageAr:
+      error.response?.data?.messageAr || fallbackMessageAr || "حدث خطأ",
+    messageEn:
+      error.response?.data?.messageEn ||
+      fallbackMessageEn ||
+      "Something went wrong",
+    errors: error.response?.data?.errors || [],
+    status: error.response?.status,
+    data: error.response?.data,
+    timestamp: new Date().toISOString(),
+  }
+}
+
+// ===================================================================
+// DEPARTMENT LIST / CRUD
+// ===================================================================
+
 export const getDepartments = createAsyncThunk(
   "departmentSlice/getDepartments",
   async (params = {}, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const queryParams = new URLSearchParams()
+      const queryString = buildQueryParams({
+        search: params.search,
+        code: params.code,
+        includeManager: params.includeManager,
+        includeCategories: params.includeCategories,
+        categoryId: params.categoryId,
+        linkedToCategoryId: params.linkedToCategoryId,
+        isUnlinked: params.isUnlinked,
+        hasManager: params.hasManager,
+        isActive: params.isActive,
+        createdFrom: params.createdFrom,
+        createdTo: params.createdTo,
+        includeSubDepartments: params.includeSubDepartments,
+        includeStatistics: params.includeStatistics,
+        includeCategory: params.includeCategory,
+        page: params.page,
+        pageSize: params.pageSize,
+        orderBy: params.orderBy,
+        orderDesc: params.orderDesc,
+      })
 
-      // Add parameters if they exist
-      if (params.search) queryParams.append("search", params.search)
-      if (params.includeManager)
-        queryParams.append("includeManager", params.includeManager)
-      if (params.includeCategories)
-        queryParams.append("includeCategories", params.includeCategories)
-      if (params.categoryId !== undefined)
-        queryParams.append("categoryId", params.categoryId)
-      if (params.isActive !== undefined)
-        queryParams.append("isActive", params.isActive)
-      if (params.createdFrom)
-        queryParams.append("createdFrom", params.createdFrom)
-      if (params.createdTo) queryParams.append("createdTo", params.createdTo)
-      if (params.includeSubDepartments !== undefined)
-        queryParams.append(
-          "includeSubDepartments",
-          params.includeSubDepartments
-        )
-      if (params.includeStatistics !== undefined)
-        queryParams.append("includeStatistics", params.includeStatistics)
-      if (params.includeCategory !== undefined)
-        queryParams.append("includeCategory", params.includeCategory)
-      if (params.page) queryParams.append("page", params.page)
-      if (params.pageSize) queryParams.append("pageSize", params.pageSize)
-      if (params.orderBy) queryParams.append("orderBy", params.orderBy)
-      if (params.orderDesc !== undefined)
-        queryParams.append("orderDesc", params.orderDesc)
-
-      // Construct the URL with query parameters
-      const url = `/api/v1/Department${
-        queryParams.toString() ? `?${queryParams.toString()}` : ""
-      }`
+      const url = `/api/v1/Department${queryString ? `?${queryString}` : ""}`
 
       const res = await axiosInstance.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: getAuthHeaders(),
       })
-      console.log("Departments fetched successfully:", res)
+
       return res.data
     } catch (error) {
-      console.log("Error fetching departments:", error)
-
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب الأقسام",
+          "Failed to fetch departments"
+        )
+      )
     }
   }
 )
@@ -63,16 +95,28 @@ export const getDepartmentById = createAsyncThunk(
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!id) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
       const res = await axiosInstance.get(`/api/v1/Department/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: getAuthHeaders(),
       })
-      console.log("Department fetched successfully:", res)
+
       return res.data
     } catch (error) {
-      console.log("Error fetching department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب بيانات القسم",
+          "Failed to fetch department"
+        )
+      )
     }
   }
 )
@@ -87,42 +131,53 @@ export const createDepartment = createAsyncThunk(
         "/api/v1/Department",
         departmentData,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("Department created successfully:", res)
+
       return res.data
     } catch (error) {
-      console.log("Error creating department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في إنشاء القسم",
+          "Failed to create department"
+        )
+      )
     }
   }
 )
 
 export const updateDepartment = createAsyncThunk(
   "departmentSlice/updateDepartment",
-  async ({ id, departmentData }, thunkAPI) => {
+  async ({ id, departmentData, data }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.put(
-        `/api/v1/Department/${id}`,
-        departmentData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      console.log("Department updated successfully:", res)
+      if (!id) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
+      const payload = departmentData || data
+
+      const res = await axiosInstance.put(`/api/v1/Department/${id}`, payload, {
+        headers: getAuthHeaders(),
+      })
+
       return res.data
     } catch (error) {
-      console.log("Error updating department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في تحديث القسم",
+          "Failed to update department"
+        )
+      )
     }
   }
 )
@@ -133,71 +188,330 @@ export const deleteDepartment = createAsyncThunk(
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!id) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
+      const queryString = buildQueryParams({ reason })
+
       const res = await axiosInstance.delete(
-        `/api/v1/Department/${id}?reason=${reason}`,
+        `/api/v1/Department/${id}${queryString ? `?${queryString}` : ""}`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("Department deleted successfully:", res)
-      return res.data
+
+      return {
+        ...res.data,
+        deletedDepartmentId: id,
+      }
     } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في حذف القسم",
+          "Failed to delete department"
+        )
+      )
     }
   }
 )
-export const updateManagerPermission = createAsyncThunk(
-  "departmentSlice/updateManagerPermission",
-  async ({ id, data }, thunkAPI) => {
+
+// ===================================================================
+// DEPARTMENT CATEGORIES LINKING
+// ===================================================================
+
+export const getDepartmentCategories = createAsyncThunk(
+  "departmentSlice/getDepartmentCategories",
+  async ({ departmentId }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.put(
-        `api/v1/Department/${id}/manager`,
-        data,
+      if (!departmentId) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
+      const res = await axiosInstance.get(
+        `/api/v1/Department/${departmentId}/categories`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("Department Manger updated successfully:", res)
+
       return res.data
     } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب تخصصات القسم",
+          "Failed to fetch department categories"
+        )
+      )
     }
   }
 )
-export const removeDepManager = createAsyncThunk(
-  "departmentSlice/removeDepManager",
-  async ({ data }, thunkAPI) => {
+
+export const getAvailableDepartmentsForCategory = createAsyncThunk(
+  "departmentSlice/getAvailableDepartmentsForCategory",
+  async ({ categoryId, filters = {} }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!categoryId) {
+        return rejectWithValue({
+          message: "معرف التخصص مطلوب",
+          messageAr: "معرف التخصص مطلوب",
+          messageEn: "Category ID is required",
+          status: 400,
+        })
+      }
+
+      const queryString = buildQueryParams({
+        search: filters.search,
+        isActive: filters.isActive,
+        page: filters.page,
+        pageSize: filters.pageSize,
+      })
+
+      const res = await axiosInstance.get(
+        `/api/v1/Department/available-for-category/${categoryId}${
+          queryString ? `?${queryString}` : ""
+        }`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return res.data
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب الأقسام المتاحة للتخصص",
+          "Failed to fetch available departments for category"
+        )
+      )
+    }
+  }
+)
+
+export const getDepartmentsByCategory = createAsyncThunk(
+  "departmentSlice/getDepartmentsByCategory",
+  async ({ categoryId, filters = {} }, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+
+    try {
+      if (!categoryId) {
+        return rejectWithValue({
+          message: "معرف التخصص مطلوب",
+          messageAr: "معرف التخصص مطلوب",
+          messageEn: "Category ID is required",
+          status: 400,
+        })
+      }
+
+      const queryString = buildQueryParams({
+        search: filters.search,
+        isActive: filters.isActive,
+        page: filters.page,
+        pageSize: filters.pageSize,
+      })
+
+      const res = await axiosInstance.get(
+        `/api/v1/Department/by-category/${categoryId}${
+          queryString ? `?${queryString}` : ""
+        }`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return res.data
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب أقسام التخصص",
+          "Failed to fetch departments by category"
+        )
+      )
+    }
+  }
+)
+
+export const linkDepartmentToCategory = createAsyncThunk(
+  "departmentSlice/linkDepartmentToCategory",
+  async ({ id, departmentId, categoryId }, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+    const depId = id || departmentId
+
+    try {
+      if (!depId || !categoryId) {
+        return rejectWithValue({
+          message: "معرف القسم والتخصص مطلوبان",
+          messageAr: "معرف القسم والتخصص مطلوبان",
+          messageEn: "Department ID and Category ID are required",
+          status: 400,
+        })
+      }
+
       const res = await axiosInstance.post(
-        `api/v1/role/department-manager/remove`,
-        data,
+        `/api/v1/Department/${depId}/categories/${categoryId}`,
+        null,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("Department Manger updated successfully:", res)
-      return res.data
+
+      return {
+        ...res.data,
+        departmentId: depId,
+        categoryId,
+      }
     } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في ربط القسم بالتخصص",
+          "Failed to link department to category"
+        )
+      )
     }
   }
 )
+
+export const unlinkDepartmentFromCategory = createAsyncThunk(
+  "departmentSlice/unlinkDepartmentFromCategory",
+  async ({ id, departmentId, categoryId, revocationReason }, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+    const depId = id || departmentId
+
+    try {
+      if (!depId || !categoryId) {
+        return rejectWithValue({
+          message: "معرف القسم والتخصص مطلوبان",
+          messageAr: "معرف القسم والتخصص مطلوبان",
+          messageEn: "Department ID and Category ID are required",
+          status: 400,
+        })
+      }
+
+      const queryString = buildQueryParams({ revocationReason })
+
+      const res = await axiosInstance.delete(
+        `/api/v1/Department/${depId}/categories/${categoryId}${
+          queryString ? `?${queryString}` : ""
+        }`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return {
+        ...res.data,
+        departmentId: depId,
+        categoryId,
+      }
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في إلغاء ربط القسم بالتخصص",
+          "Failed to unlink department from category"
+        )
+      )
+    }
+  }
+)
+
+// ===================================================================
+// DEPARTMENT MANAGERS
+// ===================================================================
+
+export const getDepartmentManagers = createAsyncThunk(
+  "departmentSlice/getDepartmentManagers",
+  async (params = {}, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+
+    try {
+      const queryString = buildQueryParams({
+        DepartmentId: params.departmentId || params.DepartmentId,
+        SearchTerm: params.searchTerm || params.SearchTerm,
+        IsActive: params.isActive ?? params.IsActive,
+        SortBy: params.sortBy || params.SortBy,
+        SortOrder: params.sortOrder || params.SortOrder,
+        Page: params.page || params.Page,
+        PageSize: params.pageSize || params.PageSize,
+        Limit: params.limit || params.Limit,
+      })
+
+      const res = await axiosInstance.get(
+        `/api/v1/Role/department-managers${
+          queryString ? `?${queryString}` : ""
+        }`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return res.data
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب مديري الأقسام",
+          "Failed to fetch department managers"
+        )
+      )
+    }
+  }
+)
+
+export const getDepartmentsWithManagers = createAsyncThunk(
+  "departmentSlice/getDepartmentsWithManagers",
+  async (params = {}, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+
+    try {
+      const queryString = buildQueryParams({
+        searchTerm: params.searchTerm,
+        isActive: params.isActive,
+        page: params.page,
+        pageSize: params.pageSize,
+      })
+
+      const res = await axiosInstance.get(
+        `/api/v1/Role/departments-with-managers${
+          queryString ? `?${queryString}` : ""
+        }`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return res.data
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب الأقسام التي لها مديرين",
+          "Failed to fetch departments with managers"
+        )
+      )
+    }
+  }
+)
+
 export const assignDepManager = createAsyncThunk(
   "departmentSlice/assignDepManager",
   async ({ data }, thunkAPI) => {
@@ -205,292 +519,443 @@ export const assignDepManager = createAsyncThunk(
 
     try {
       const res = await axiosInstance.post(
-        `api/v1/role/department-manager/assign`,
+        "/api/v1/Role/department-manager/assign",
         data,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("Department Manger updated successfully:", res)
-      return res.data
-    } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
-    }
-  }
-)
-export const availabelDepartmentsForCategory = createAsyncThunk(
-  "departmentSlice/availabelDepartmentsForCategory",
-  async ({ categoryId }, thunkAPI) => {
-    const { rejectWithValue } = thunkAPI
 
-    try {
-      const res = await axiosInstance.get(
-        `api/v1/Department/available-for-category/${categoryId}?includeCategories=true&includeManager=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      console.log("avaialbe departments:", res)
       return res.data
     } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في تعيين مدير القسم",
+          "Failed to assign department manager"
+        )
+      )
     }
   }
 )
-export const linkDepartmentToCategory = createAsyncThunk(
-  "departmentSlice/linkDepartmentToCategory",
-  async ({ id, categoryId }, thunkAPI) => {
+
+export const removeDepManager = createAsyncThunk(
+  "departmentSlice/removeDepManager",
+  async ({ data }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
       const res = await axiosInstance.post(
-        `api/v1/Department/${id}/categories/${categoryId}`,
-        { categoryId },
+        "/api/v1/Role/department-manager/remove",
+        data,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("link departments:", res)
-      return { depId: id }
-    } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
-    }
-  }
-)
-export const unlinkDepartmentFromCategory = createAsyncThunk(
-  "departmentSlice/unlinkDepartmentFromCategory",
-  async ({ id, categoryId, revocationReason }, thunkAPI) => {
-    const { rejectWithValue } = thunkAPI
 
-    try {
-      const res = await axiosInstance.delete(
-        `api/v1/Department/${id}/categories/${categoryId}`,
-        {
-          data: { revocationReason },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      console.log("un link:", res)
-      return { depId: id }
-    } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
-    }
-  }
-)
-export const getDepartmentByCategory = createAsyncThunk(
-  "departmentSlice/getDepartmentByCategory",
-  async ({ categoryId }, thunkAPI) => {
-    const { rejectWithValue } = thunkAPI
-
-    try {
-      const res = await axiosInstance.get(
-        `api/v1/Department/by-category/${categoryId}?includeCategories=true&includeManager=true`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      console.log("departments by category:", res)
       return res.data
     } catch (error) {
-      console.log("Error deleting department:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في إزالة مدير القسم",
+          "Failed to remove department manager"
+        )
+      )
     }
   }
 )
+
+export const updateManagerPermission = createAsyncThunk(
+  "departmentSlice/updateManagerPermission",
+  async ({ id, departmentId, data }, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+    const depId = id || departmentId
+
+    try {
+      if (!depId) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
+      const res = await axiosInstance.put(
+        `/api/v1/Department/${depId}/manager`,
+        data,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return {
+        ...res.data,
+        departmentId: depId,
+      }
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في تحديث صلاحيات مدير القسم",
+          "Failed to update manager permissions"
+        )
+      )
+    }
+  }
+)
+
+// ===================================================================
+// DEPARTMENT MANAGER MONTHS / MONTH VIEW / CALENDAR / STRUCTURE
+// ===================================================================
+
 export const getDepartmentMonthList = createAsyncThunk(
   "departmentSlice/getDepartmentMonthList",
-  async ({ departmentId }, thunkAPI) => {
+  async ({ departmentId, fromMonth, fromYear, toMonth, toYear }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!departmentId) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
+      const queryString = buildQueryParams({
+        fromMonth,
+        fromYear,
+        toMonth,
+        toYear,
+      })
+
       const res = await axiosInstance.get(
-        `api/v1/DepartmentManager/department/${departmentId}/months-list`,
+        `/api/v1/DepartmentManager/department/${departmentId}/months-list${
+          queryString ? `?${queryString}` : ""
+        }`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("departments month list :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب شهور القسم",
+          "Failed to fetch department months list"
+        )
+      )
     }
   }
 )
+
 export const getDepartmentMonthView = createAsyncThunk(
   "departmentSlice/getDepartmentMonthView",
   async ({ departmentId, month, year }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!departmentId || !month || !year) {
+        return rejectWithValue({
+          message: "معرف القسم والشهر والسنة مطلوبة",
+          messageAr: "معرف القسم والشهر والسنة مطلوبة",
+          messageEn: "Department ID, month and year are required",
+          status: 400,
+        })
+      }
+
+      const queryString = buildQueryParams({ month, year })
+
       const res = await axiosInstance.get(
-        `/api/v1/DepartmentManager/department/${departmentId}/month-view?month=${month}&year=${year}`,
+        `/api/v1/DepartmentManager/department/${departmentId}/month-view?${queryString}`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("departments month list :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب عرض الشهر للقسم",
+          "Failed to fetch department month view"
+        )
+      )
     }
   }
 )
-export const getDepartmentRosterCalender = createAsyncThunk(
-  "departmentSlice/getDepartmentRosterCalender",
-  async ({ departmentId, ids }, thunkAPI) => {
+
+export const getDepartmentRosterCalendar = createAsyncThunk(
+  "departmentSlice/getDepartmentRosterCalendar",
+  async ({ departmentId, ids = [] }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
-    const params = new URLSearchParams()
-    ids.forEach((id) => params.append("ids", id))
 
     try {
+      if (!departmentId) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
+      const queryParams = new URLSearchParams()
+
+      ids.forEach((id) => {
+        if (id !== undefined && id !== null && id !== "") {
+          queryParams.append("ids", id)
+        }
+      })
+
       const res = await axiosInstance.get(
-        `/api/v1/DepartmentManager/${departmentId}/calendar?${params.toString()}`,
+        `/api/v1/DepartmentManager/${departmentId}/calendar${
+          queryParams.toString() ? `?${queryParams.toString()}` : ""
+        }`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("calender calender calender calender :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب تقويم القسم",
+          "Failed to fetch department roster calendar"
+        )
+      )
     }
   }
 )
-export const createGoFence = createAsyncThunk(
-  "departmentSlice/createGoFence",
+
+export const getDepartmentRosterStructure = createAsyncThunk(
+  "departmentSlice/getDepartmentRosterStructure",
+  async ({ departmentId, rosterId }, thunkAPI) => {
+    const { rejectWithValue } = thunkAPI
+
+    try {
+      if (!departmentId || !rosterId) {
+        return rejectWithValue({
+          message: "معرف القسم والروستر مطلوبان",
+          messageAr: "معرف القسم والروستر مطلوبان",
+          messageEn: "Department ID and roster ID are required",
+          status: 400,
+        })
+      }
+
+      const res = await axiosInstance.get(
+        `/api/v1/DepartmentManager/departments/${departmentId}/rosters/${rosterId}/structure`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return res.data
+    } catch (error) {
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب هيكل روستر القسم",
+          "Failed to fetch department roster structure"
+        )
+      )
+    }
+  }
+)
+
+// ===================================================================
+// GEOFENCE
+// ===================================================================
+
+export const createGeoFence = createAsyncThunk(
+  "departmentSlice/createGeoFence",
   async ({ departmentId, data }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!departmentId) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
       const res = await axiosInstance.post(
         `/api/v1/GeoFence/department/${departmentId}`,
         data,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("departments month list :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في إنشاء نطاق الحضور للقسم",
+          "Failed to create department geofence"
+        )
+      )
     }
   }
 )
-export const getDepartmentGoefences = createAsyncThunk(
-  "departmentSlice/getDepartmentGoefences",
+
+export const getDepartmentGeoFences = createAsyncThunk(
+  "departmentSlice/getDepartmentGeoFences",
   async ({ departmentId }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!departmentId) {
+        return rejectWithValue({
+          message: "معرف القسم مطلوب",
+          messageAr: "معرف القسم مطلوب",
+          messageEn: "Department ID is required",
+          status: 400,
+        })
+      }
+
       const res = await axiosInstance.get(
         `/api/v1/GeoFence/department/${departmentId}`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       )
-      console.log("departments month list :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب نطاقات الحضور للقسم",
+          "Failed to fetch department geofences"
+        )
+      )
     }
   }
 )
-export const deleteFence = createAsyncThunk(
-  "departmentSlice/deleteFence",
+
+export const getGeoFence = createAsyncThunk(
+  "departmentSlice/getGeoFence",
   async ({ fenceId }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.delete(`/api/v1/GeoFence/${fenceId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+      if (!fenceId) {
+        return rejectWithValue({
+          message: "معرف النطاق مطلوب",
+          messageAr: "معرف النطاق مطلوب",
+          messageEn: "Fence ID is required",
+          status: 400,
+        })
+      }
+
+      const res = await axiosInstance.get(`/api/v1/GeoFence/${fenceId}`, {
+        headers: getAuthHeaders(),
       })
-      console.log("departments month list :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في جلب نطاق الحضور",
+          "Failed to fetch geofence"
+        )
+      )
     }
   }
 )
-export const editGeofence = createAsyncThunk(
-  "departmentSlice/editGeofence",
+
+export const editGeoFence = createAsyncThunk(
+  "departmentSlice/editGeoFence",
   async ({ fenceId, data }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
+      if (!fenceId) {
+        return rejectWithValue({
+          message: "معرف النطاق مطلوب",
+          messageAr: "معرف النطاق مطلوب",
+          messageEn: "Fence ID is required",
+          status: 400,
+        })
+      }
+
       const res = await axiosInstance.put(`/api/v1/GeoFence/${fenceId}`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
       })
-      console.log("departments month list :", res)
+
       return res.data
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في تعديل نطاق الحضور",
+          "Failed to update geofence"
+        )
+      )
     }
   }
 )
-export const getGeofFence = createAsyncThunk(
-  "departmentSlice/getGeofFence",
+
+export const deleteGeoFence = createAsyncThunk(
+  "departmentSlice/deleteGeoFence",
   async ({ fenceId }, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.get(`/api/v1/GeoFence/${fenceId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
+      if (!fenceId) {
+        return rejectWithValue({
+          message: "معرف النطاق مطلوب",
+          messageAr: "معرف النطاق مطلوب",
+          messageEn: "Fence ID is required",
+          status: 400,
+        })
+      }
+
+      const res = await axiosInstance.delete(`/api/v1/GeoFence/${fenceId}`, {
+        headers: getAuthHeaders(),
       })
-      console.log("departments month list :", res)
-      return res.data
+
+      return {
+        ...res.data,
+        fenceId,
+      }
     } catch (error) {
-      console.log("Error department month list:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(
+        getErrorPayload(
+          error,
+          "حدث خطأ في حذف نطاق الحضور",
+          "Failed to delete geofence"
+        )
+      )
     }
   }
 )
+
+// ===================================================================
+// BACKWARD-COMPATIBLE ALIASES
+// ===================================================================
+
+export const availabelDepartmentsForCategory = getAvailableDepartmentsForCategory
+export const getDepartmentByCategory = getDepartmentsByCategory
+
+export const getDepartmentRosterCalender = getDepartmentRosterCalendar
+
+export const createGoFence = createGeoFence
+export const getDepartmentGoefences = getDepartmentGeoFences
+export const getGeofFence = getGeoFence
+export const editGeofence = editGeoFence
+export const deleteFence = deleteGeoFence

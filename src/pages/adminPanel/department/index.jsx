@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useTranslation } from "react-i18next"
-import "../../../styles/general.css"
+import { Link } from "react-router-dom"
 import {
   Search,
   Filter,
@@ -11,62 +11,133 @@ import {
   Edit,
   Trash2,
   Plus,
-  Menu,
   X,
-  Hash,
+  RefreshCw,
+  Building2,
   Building,
-  Calendar,
   Link2,
-  PlusIcon,
+  UserCheck,
+  Users,
+  CheckCircle,
+  XCircle,
+  MapPin,
+  Shield,
+  Hash,
+  Calendar,
+  SlidersHorizontal,
 } from "lucide-react"
+
 import { getDepartments } from "../../../state/act/actDepartment"
 import { getCategories } from "../../../state/act/actCategory"
 import {
   clearError,
+  clearFilters,
   setCurrentPage,
   setFilters,
   setPageSize,
-  setCategoryFilter,
-  clearFilters,
 } from "../../../state/slices/department"
-import { Link } from "react-router-dom"
+
 import DeleteDepartmentModal from "../../../components/modals/DeleteDepartmentModal"
-import i18next from "i18next"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 function Department() {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
+
   const [modalOpen, setModalOpen] = useState(false)
   const [toDelete, setToDelete] = useState({ id: null, name: "" })
-  const { departments, pagination, filters, loadingGetDepartments, error } =
-    useSelector((state) => state.department)
-  const { categories } = useSelector((state) => state.category)
-  const { mymode } = useSelector((state) => state.mode)
-
-  const [searchInput, setSearchInput] = useState(filters.search)
+  const [searchInput, setSearchInput] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  const [showMobileTable, setShowMobileTable] = useState(false)
-
-  // Debounced search
   const [searchTimeout, setSearchTimeout] = useState(null)
 
-  // Check if we're in dark mode
-  const isDark = mymode === "dark"
+  const {
+    departments,
+    pagination,
+    filters,
+    loadingGetDepartments,
+    error,
+  } = useSelector((state) => state.department)
 
-  // Check if current language is RTL
-  const language = i18n.language
-  const isRTL = language === "ar"
+  const { categories } = useSelector((state) => state.category)
 
-  // Fetch departments when filters change
+  const currentLang = i18n.language || "ar"
+  const isRTL = currentLang === "ar"
+
+  const safeDepartments = Array.isArray(departments) ? departments : []
+  const safeCategories = Array.isArray(categories) ? categories : []
+
   useEffect(() => {
-    dispatch(getDepartments(filters))
+    setSearchInput(filters?.search || "")
+  }, [filters?.search])
+
+  useEffect(() => {
+    dispatch(
+      getDepartments({
+        ...filters,
+        includeManager: true,
+        includeCategories: true,
+        includeStatistics: true,
+      })
+    )
   }, [dispatch, filters])
 
-  // Fetch categories for filter dropdown
   useEffect(() => {
-    dispatch(getCategories({ pageSize: 100, isActive: true }))
+    dispatch(
+      getCategories({
+        page: 1,
+        pageSize: 200,
+        isActive: true,
+        includeStatistics: true,
+        includeDepartments: true,
+      })
+    )
   }, [dispatch])
+
+  const summary = useMemo(() => {
+    const total = pagination?.totalCount || safeDepartments.length || 0
+
+    const active = safeDepartments.filter((department) => department.isActive).length
+    const inactive = safeDepartments.filter((department) => !department.isActive).length
+
+    const withManagers = safeDepartments.filter((department) =>
+      Boolean(
+        department.manager ||
+          department.managerName ||
+          department.managerNameAr ||
+          department.managerNameEn ||
+          department.departmentManager
+      )
+    ).length
+
+    const withoutManagers = safeDepartments.filter(
+      (department) =>
+        !department.manager &&
+        !department.managerName &&
+        !department.managerNameAr &&
+        !department.managerNameEn &&
+        !department.departmentManager
+    ).length
+
+    const linkedCategories = safeDepartments.reduce((sum, department) => {
+      return sum + Number(getLinkedCategoriesCount(department))
+    }, 0)
+
+    const unlinked = safeDepartments.filter(
+      (department) => Number(getLinkedCategoriesCount(department)) === 0
+    ).length
+
+    return {
+      total,
+      active,
+      inactive,
+      withManagers,
+      withoutManagers,
+      linkedCategories,
+      unlinked,
+    }
+  }, [safeDepartments, pagination])
 
   const handleSearchChange = useCallback(
     (value) => {
@@ -78,41 +149,165 @@ function Department() {
 
       const timeout = setTimeout(() => {
         dispatch(setFilters({ search: value, page: 1 }))
-      }, 500)
+      }, 450)
 
       setSearchTimeout(timeout)
     },
     [dispatch, searchTimeout]
   )
 
-  // Handle filter changes
   const handleFilterChange = (key, value) => {
     dispatch(setFilters({ [key]: value, page: 1 }))
-  }
-
-  // Handle pagination
-  const handlePageChange = (newPage) => {
-    dispatch(setCurrentPage(newPage))
-  }
-
-  const handlePageSizeChange = (newPageSize) => {
-    dispatch(setPageSize(parseInt(newPageSize)))
   }
 
   const handleClearFilters = () => {
     dispatch(clearFilters())
     setSearchInput("")
-    handleFilterChange("isActive", true)
   }
 
-  // Generate page numbers for pagination
+  const handlePageChange = (page) => {
+    dispatch(setCurrentPage(page))
+  }
+
+  const handlePageSizeChange = (pageSize) => {
+    dispatch(setPageSize(Number(pageSize)))
+  }
+
+  const refreshData = () => {
+    dispatch(
+      getDepartments({
+        ...filters,
+        includeManager: true,
+        includeCategories: true,
+        includeStatistics: true,
+      })
+    )
+  }
+
+  const getDepartmentName = (department) => {
+    return currentLang === "ar"
+      ? department.nameArabic ||
+          department.nameAr ||
+          department.departmentNameAr ||
+          department.nameEnglish ||
+          department.nameEn ||
+          department.departmentNameEn ||
+          "-"
+      : department.nameEnglish ||
+          department.nameEn ||
+          department.departmentNameEn ||
+          department.nameArabic ||
+          department.nameAr ||
+          department.departmentNameAr ||
+          "-"
+  }
+
+  const getDepartmentSubName = (department) => {
+    return currentLang === "ar"
+      ? department.nameEnglish ||
+          department.nameEn ||
+          department.departmentNameEn ||
+          "-"
+      : department.nameArabic ||
+          department.nameAr ||
+          department.departmentNameAr ||
+          "-"
+  }
+
+  const getManagerName = (department) => {
+    const manager = department.manager || department.departmentManager
+
+    if (manager) {
+      return currentLang === "ar"
+        ? manager.userNameArabic ||
+            manager.nameArabic ||
+            manager.fullNameAr ||
+            manager.userNameEnglish ||
+            manager.nameEnglish ||
+            manager.fullNameEn ||
+            "-"
+        : manager.userNameEnglish ||
+            manager.nameEnglish ||
+            manager.fullNameEn ||
+            manager.userNameArabic ||
+            manager.nameArabic ||
+            manager.fullNameAr ||
+            "-"
+    }
+
+    return currentLang === "ar"
+      ? department.managerNameAr ||
+          department.managerNameArabic ||
+          department.managerName ||
+          department.managerNameEn ||
+          "-"
+      : department.managerNameEn ||
+          department.managerNameEnglish ||
+          department.managerName ||
+          department.managerNameAr ||
+          "-"
+  }
+
+  function getLinkedCategoriesCount(department) {
+    if (Array.isArray(department.linkedCategories)) {
+      return department.linkedCategories.length
+    }
+
+    if (Array.isArray(department.categories)) {
+      return department.categories.length
+    }
+
+    return (
+      department.linkedCategoriesCount ??
+      department.categoriesCount ??
+      department.categoryCount ??
+      0
+    )
+  }
+
+  const getGeoFenceCount = (department) => {
+    if (Array.isArray(department.geofences)) return department.geofences.length
+
+    return (
+      department.geofencesCount ??
+      department.geoFencesCount ??
+      department.geoFenceCount ??
+      department.geofenceCount ??
+      0
+    )
+  }
+
+  const getCategoryNames = (department) => {
+    const list = department.linkedCategories || department.categories || []
+
+    if (!Array.isArray(list) || list.length === 0) return "-"
+
+    return list
+      .slice(0, 2)
+      .map((category) =>
+        currentLang === "ar"
+          ? category.nameArabic ||
+            category.categoryNameArabic ||
+            category.nameAr ||
+            category.nameEnglish ||
+            category.categoryNameEnglish ||
+            "-"
+          : category.nameEnglish ||
+            category.categoryNameEnglish ||
+            category.nameEn ||
+            category.nameArabic ||
+            category.categoryNameArabic ||
+            "-"
+      )
+      .join("، ")
+  }
+
   const getPageNumbers = () => {
-    const pages = []
     const totalPages = pagination?.totalPages || 1
     const currentPage = pagination?.page || 1
+    const pages = []
 
-    // Show up to 3 page numbers on mobile, 5 on desktop
-    const maxPages = window.innerWidth < 768 ? 3 : 5
+    const maxPages = 5
     let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2))
     let endPage = Math.min(totalPages, startPage + maxPages - 1)
 
@@ -120,137 +315,208 @@ function Department() {
       startPage = Math.max(1, endPage - maxPages + 1)
     }
 
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
+    for (let page = startPage; page <= endPage; page++) {
+      pages.push(page)
     }
 
     return pages
   }
 
-  // Mobile card component for each department
-  const DepartmentCard = ({ department }) => (
-    <div
-      className={`p-4 rounded-lg border mb-3 ${
-        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+  const hasPrevious =
+    pagination?.hasPreviousPage ?? pagination?.hasPrevious ?? pagination?.page > 1
+
+  const hasNext =
+    pagination?.hasNextPage ??
+    pagination?.hasNext ??
+    pagination?.page < pagination?.totalPages
+
+  const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
+    const toneMap = {
+      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+      green:
+        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+      yellow:
+        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+      purple:
+        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+      orange:
+        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+    }
+
+    return (
+      <div className={`${theme.cardSoft} p-4`}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
+            <p className="text-2xl font-extrabold text-[var(--color-text)]">
+              {value ?? 0}
+            </p>
+          </div>
+
+          <div
+            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+              toneMap[tone] || toneMap.blue
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const StatusBadge = ({ active }) => (
+    <span
+      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+        active ? theme.successBadge : theme.dangerBadge
       }`}
     >
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3
-            className={`font-semibold text-lg ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {department.nameArabic}
-          </h3>
-          <p
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-          >
-            {department.nameEnglish}
-          </p>
-          {department.code && (
-            <p
-              className={`text-xs mt-1 px-2 py-1 rounded-full inline-block ${
-                isDark
-                  ? "bg-purple-900 text-purple-300"
-                  : "bg-purple-100 text-purple-800"
-              }`}
-            >
-              {department.code}
-            </p>
-          )}
-        </div>
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            department.isActive
-              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-          }`}
-        >
-          {department.isActive
-            ? t("department.status.active")
-            : t("department.status.inactive")}
-        </span>
-      </div>
+      {active ? <CheckCircle size={13} /> : <XCircle size={13} />}
+      {active
+        ? t("department.status.active") || "Active"
+        : t("department.status.inactive") || "Inactive"}
+    </span>
+  )
 
-      <div className="grid grid-cols-1 gap-2 text-sm mb-3">
-        <div className="flex items-center gap-2">
-          <Link2 size={14} className="text-gray-500" />
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("department.table.linkedCategories")}:
-          </span>
-          <span className={`${isDark ? "text-gray-200" : "text-gray-800"}`}>
-            {department.linkedCategoriesCount || 0}
-          </span>
-        </div>
-        {department.createdAt && (
-          <div className="flex items-center gap-2">
-            <Calendar size={14} className="text-gray-500" />
-            <span
-              className={`font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              {t("department.table.createdAt")}:
-            </span>
-            <span
-              className={`text-xs ${
-                isDark ? "text-gray-200" : "text-gray-800"
-              }`}
-            >
-              {formatDate(department.createdAt)}
-            </span>
+  const ManagerBadge = ({ department }) => {
+    const managerName = getManagerName(department)
+    const hasManager = managerName && managerName !== "-"
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+          hasManager
+            ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/50 dark:text-purple-200 dark:border-purple-700"
+            : "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/50 dark:text-slate-200 dark:border-slate-700"
+        }`}
+      >
+        <UserCheck size={13} />
+        {hasManager
+          ? managerName
+          : currentLang === "ar"
+          ? "بدون مدير"
+          : "No Manager"}
+      </span>
+    )
+  }
+
+  const DepartmentMobileCard = ({ department }) => (
+    <div className={`${theme.card} p-4`}>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+            <Building2 size={22} />
           </div>
-        )}
+
+          <div>
+            <h3 className="font-extrabold text-[var(--color-text)]">
+              {getDepartmentName(department)}
+            </h3>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              {getDepartmentSubName(department)}
+            </p>
+
+            <p className="text-xs text-[var(--color-text-muted)] mt-1 font-mono">
+              {department.code || "-"}
+            </p>
+          </div>
+        </div>
+
+        <StatusBadge active={department.isActive} />
       </div>
 
-      <div className="flex gap-2 justify-end">
-        <Link to={`/admin-panel/department/${department.id}`}>
-          <button
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
-            title={t("department.actions.view")}
-          >
-            <Eye size={16} />
-          </button>
-        </Link>
-        <Link to={`/admin-panel/department/edit/${department.id}`}>
-          <button
-            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
-            title={t("department.actions.edit")}
-          >
-            <Edit size={16} />
-          </button>
-        </Link>
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className={`${theme.cardSoft} p-3 text-center`}>
+          <Link2 className="w-4 h-4 mx-auto mb-1 text-blue-700 dark:text-blue-300" />
+          <p className="font-bold text-[var(--color-text)]">
+            {getLinkedCategoriesCount(department)}
+          </p>
+          <p className="text-[10px] text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "تخصصات" : "Categories"}
+          </p>
+        </div>
 
-        <button
-          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
-          title={t("department.actions.delete")}
-          onClick={() => {
-            setToDelete({
-              id: department.id,
-              name:
-                language === "en"
-                  ? department.nameEnglish
-                  : department.nameArabic,
-            })
-            setModalOpen(true)
-          }}
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className={`${theme.cardSoft} p-3 text-center`}>
+          <Shield className="w-4 h-4 mx-auto mb-1 text-purple-700 dark:text-purple-300" />
+          <p className="font-bold text-[var(--color-text)]">
+            {getManagerName(department) !== "-" ? 1 : 0}
+          </p>
+          <p className="text-[10px] text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "مدير" : "Manager"}
+          </p>
+        </div>
+
+        <div className={`${theme.cardSoft} p-3 text-center`}>
+          <MapPin className="w-4 h-4 mx-auto mb-1 text-green-700 dark:text-green-300" />
+          <p className="font-bold text-[var(--color-text)]">
+            {getGeoFenceCount(department)}
+          </p>
+          <p className="text-[10px] text-[var(--color-text-muted)]">
+            GeoFence
+          </p>
+        </div>
+      </div>
+
+      <div className={`${theme.cardSoft} p-3 mb-4`}>
+        <p className="text-xs text-[var(--color-text-muted)] mb-1">
+          {currentLang === "ar" ? "المدير" : "Manager"}
+        </p>
+        <p className="text-sm font-bold text-[var(--color-text)]">
+          {getManagerName(department)}
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 pt-3 border-t border-[var(--color-border)]">
+        <p className="text-xs text-[var(--color-text-muted)]">
+          {formatDate(department.createdAt)}
+        </p>
+
+        <div className="flex gap-2">
+          <Link to={`/admin-panel/department/${department.id}`}>
+            <button
+              type="button"
+              className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+            >
+              <Eye size={16} />
+            </button>
+          </Link>
+
+          <Link to={`/admin-panel/department/edit/${department.id}`}>
+            <button
+              type="button"
+              className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg"
+            >
+              <Edit size={16} />
+            </button>
+          </Link>
+
+          <button
+            type="button"
+            className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg"
+            onClick={() => {
+              setToDelete({
+                id: department.id,
+                name: getDepartmentName(department),
+              })
+              setModalOpen(true)
+            }}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
     </div>
   )
 
+  const tableHeadClass =
+    "px-4 py-3 text-sm font-bold text-[var(--color-text)] border-b border-[var(--color-border)] whitespace-nowrap"
+
+  const tableCellClass =
+    "px-4 py-4 text-sm text-[var(--color-text)] border-b border-[var(--color-border)] align-middle"
+
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <DeleteDepartmentModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -258,478 +524,555 @@ function Department() {
         info={toDelete}
         departmentName={toDelete.name}
       />
+
       <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {t("department.title")}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl font-extrabold text-[var(--color-text)] flex items-center gap-3">
+                <span className="w-12 h-12 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                  <Building2 className="w-7 h-7" />
+                </span>
+                {t("department.title") || "Departments"}
               </h1>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Link to="/admin-panel/department/create">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors cursor-pointer flex-1 sm:flex-none justify-center">
-                    <Plus size={20} />
-                    <span className="hidden sm:inline">
-                      {t("department.addNew")}
-                    </span>
-                    <span className="sm:hidden">{t("department.add")}</span>
-                  </button>
-                </Link>
-                {/* Mobile table toggle */}
+
+              <p className="text-sm text-[var(--color-text-muted)] mt-2">
+                {currentLang === "ar"
+                  ? "إدارة الأقسام، المديرين، التخصصات المرتبطة، ونطاقات الحضور."
+                  : "Manage departments, managers, linked categories, and attendance geofences."}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={refreshData}
+                className={theme.secondaryButton}
+              >
+                <RefreshCw size={16} />
+                {currentLang === "ar" ? "تحديث" : "Refresh"}
+              </button>
+
+              <Link to="/admin-panel/department/create">
+                <button type="button" className={`${theme.primaryButton} gap-2`}>
+                  <Plus size={18} />
+                  {t("department.actions.addNew") || "Add Department"}
+                </button>
+              </Link>
+            </div>
+          </div>
+
+          {error && (
+            <div className={`${theme.card} p-4 mb-5 border-red-500/30`}>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-red-700 dark:text-red-300 text-sm font-semibold">
+                  {error.message || String(error)}
+                </p>
+
                 <button
-                  onClick={() => setShowMobileTable(!showMobileTable)}
-                  className={`md:hidden px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
-                    showMobileTable
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        }`
-                  }`}
+                  type="button"
+                  onClick={() => dispatch(clearError())}
+                  className="text-red-700 dark:text-red-300"
                 >
-                  {showMobileTable ? <X size={20} /> : <Menu size={20} />}
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-4 mb-6">
+            <SummaryCard
+              icon={Building2}
+              title={currentLang === "ar" ? "إجمالي الأقسام" : "Departments"}
+              value={summary.total}
+              tone="blue"
+            />
+
+            <SummaryCard
+              icon={CheckCircle}
+              title={currentLang === "ar" ? "نشطة" : "Active"}
+              value={summary.active}
+              tone="green"
+            />
+
+            <SummaryCard
+              icon={XCircle}
+              title={currentLang === "ar" ? "غير نشطة" : "Inactive"}
+              value={summary.inactive}
+              tone="red"
+            />
+
+            <SummaryCard
+              icon={UserCheck}
+              title={currentLang === "ar" ? "لها مدير" : "With Manager"}
+              value={summary.withManagers}
+              tone="purple"
+            />
+
+            <SummaryCard
+              icon={Shield}
+              title={currentLang === "ar" ? "بدون مدير" : "No Manager"}
+              value={summary.withoutManagers}
+              tone="yellow"
+            />
+
+            <SummaryCard
+              icon={Link2}
+              title={currentLang === "ar" ? "روابط تخصصات" : "Category Links"}
+              value={summary.linkedCategories}
+              tone="orange"
+            />
+
+            <SummaryCard
+              icon={Building}
+              title={currentLang === "ar" ? "غير مرتبطة" : "Unlinked"}
+              value={summary.unlinked}
+              tone="red"
+            />
+          </div>
+
+          <div className={`${theme.card} p-4 mb-6`}>
+            <div className="flex flex-col xl:flex-row gap-4">
+              <div className="flex-1 flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-[var(--color-bg-soft)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)]">
+                  <Search size={20} />
+                </div>
+
+                <input
+                  type="text"
+                  placeholder={
+                    t("department.search.placeholder") ||
+                    "Search by name, code, manager..."
+                  }
+                  value={searchInput}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowFilters((prev) => !prev)}
+                  className={`${theme.secondaryButton} gap-2`}
+                >
+                  <SlidersHorizontal size={17} />
+                  {t("department.filters.title") || "Filters"}
                 </button>
               </div>
             </div>
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <div className="flex justify-between items-center">
-                  <span>{error.message}</span>
-                  <button
-                    onClick={() => dispatch(clearError())}
-                    className="text-red-500 hover:text-red-700"
+            {showFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 pt-4 mt-4 border-t border-[var(--color-border)]">
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "الكود" : "Code"}
+                  </label>
+
+                  <input
+                    type="text"
+                    value={filters?.code || ""}
+                    onChange={(e) => handleFilterChange("code", e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    placeholder="DEP-001"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {t("department.filters.status") || "Status"}
+                  </label>
+
+                  <select
+                    value={filters?.isActive === "" ? "" : String(filters?.isActive)}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : e.target.value === "true"
+                      handleFilterChange("isActive", value)
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
                   >
-                    ×
+                    <option value="">
+                      {currentLang === "ar" ? "كل الحالات" : "All Status"}
+                    </option>
+                    <option value="true">
+                      {t("department.status.active") || "Active"}
+                    </option>
+                    <option value="false">
+                      {t("department.status.inactive") || "Inactive"}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "المدير" : "Manager"}
+                  </label>
+
+                  <select
+                    value={filters?.hasManager === "" ? "" : String(filters?.hasManager)}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : e.target.value === "true"
+                      handleFilterChange("hasManager", value)
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  >
+                    <option value="">
+                      {currentLang === "ar" ? "الكل" : "All"}
+                    </option>
+                    <option value="true">
+                      {currentLang === "ar" ? "لها مدير" : "Has Manager"}
+                    </option>
+                    <option value="false">
+                      {currentLang === "ar" ? "بدون مدير" : "No Manager"}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "التخصص المرتبط" : "Linked Category"}
+                  </label>
+
+                  <select
+                    value={filters?.linkedToCategoryId || ""}
+                    onChange={(e) =>
+                      handleFilterChange("linkedToCategoryId", e.target.value)
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  >
+                    <option value="">
+                      {currentLang === "ar" ? "كل التخصصات" : "All Categories"}
+                    </option>
+
+                    {safeCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {currentLang === "ar"
+                          ? category.nameArabic || category.nameEnglish
+                          : category.nameEnglish || category.nameArabic}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "الارتباط" : "Linking"}
+                  </label>
+
+                  <select
+                    value={filters?.isUnlinked === "" ? "" : String(filters?.isUnlinked)}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === "" ? "" : e.target.value === "true"
+                      handleFilterChange("isUnlinked", value)
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  >
+                    <option value="">
+                      {currentLang === "ar" ? "الكل" : "All"}
+                    </option>
+                    <option value="false">
+                      {currentLang === "ar" ? "مرتبطة" : "Linked"}
+                    </option>
+                    <option value="true">
+                      {currentLang === "ar" ? "غير مرتبطة" : "Unlinked"}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "من تاريخ" : "Created From"}
+                  </label>
+
+                  <input
+                    type="date"
+                    value={filters?.createdFrom || ""}
+                    onChange={(e) =>
+                      handleFilterChange("createdFrom", e.target.value)
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "إلى تاريخ" : "Created To"}
+                  </label>
+
+                  <input
+                    type="date"
+                    value={filters?.createdTo || ""}
+                    onChange={(e) =>
+                      handleFilterChange("createdTo", e.target.value)
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "ترتيب حسب" : "Order By"}
+                  </label>
+
+                  <select
+                    value={filters?.orderBy || "nameArabic"}
+                    onChange={(e) => handleFilterChange("orderBy", e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  >
+                    <option value="nameArabic">
+                      {currentLang === "ar" ? "الاسم العربي" : "Arabic Name"}
+                    </option>
+                    <option value="nameEnglish">
+                      {currentLang === "ar" ? "الاسم الإنجليزي" : "English Name"}
+                    </option>
+                    <option value="code">
+                      {currentLang === "ar" ? "الكود" : "Code"}
+                    </option>
+                    <option value="createdAt">
+                      {currentLang === "ar" ? "تاريخ الإنشاء" : "Created At"}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                    {currentLang === "ar" ? "الاتجاه" : "Direction"}
+                  </label>
+
+                  <select
+                    value={String(filters?.orderDesc ?? true)}
+                    onChange={(e) =>
+                      handleFilterChange("orderDesc", e.target.value === "true")
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                  >
+                    <option value="true">
+                      {currentLang === "ar" ? "تنازلي" : "Descending"}
+                    </option>
+                    <option value="false">
+                      {currentLang === "ar" ? "تصاعدي" : "Ascending"}
+                    </option>
+                  </select>
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={handleClearFilters}
+                    className={`${theme.secondaryButton} w-full gap-2`}
+                  >
+                    <Filter size={16} />
+                    {currentLang === "ar" ? "مسح الفلاتر" : "Clear Filters"}
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Search and Filters */}
-          <div
-            className={`rounded-lg shadow-sm border mb-6 ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
-            <div className="p-4">
-              {/* Search Bar */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="flex-1 flex items-center gap-2">
-                  {/* Search Icon Container - Completely separate from input */}
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-200 ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700 text-gray-400"
-                        : "border-gray-300 bg-white text-gray-500"
-                    }`}
-                  >
-                    <Search size={20} />
-                  </div>
-
-                  {/* Input Container */}
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder={t("department.search.placeholder")}
-                      value={searchInput}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                          : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
-                      }`}
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-2 rounded-lg border transition-colors cursor-pointer flex items-center gap-2 justify-center sm:justify-start ${
-                    showFilters
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark
-                            ? "border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-200 hover:border-gray-400"
-                        }`
-                  }`}
-                >
-                  <Filter size={20} />
-                  {t("department.filters.title")}
-                </button>
-              </div>
-
-              {/* Advanced Filters */}
-              {showFilters && (
-                <div
-                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t ${
-                    isDark ? "border-gray-600" : "border-gray-200"
-                  }`}
-                >
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("department.filters.status")}
-                    </label>
-                    <select
-                      value={
-                        filters.isActive === null
-                          ? "all"
-                          : filters.isActive.toString()
-                      }
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === "all"
-                            ? null
-                            : e.target.value === "true"
-                        handleFilterChange("isActive", value)
-                      }}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="all">{t("department.status.all")}</option>
-                      <option value="true">
-                        {t("department.status.active")}
-                      </option>
-                      <option value="false">
-                        {t("department.status.inactive")}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("department.filters.orderBy")}
-                    </label>
-                    <select
-                      value={filters.orderBy || "nameArabic"}
-                      onChange={(e) =>
-                        handleFilterChange("orderBy", e.target.value)
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="nameArabic">
-                        {t("department.filters.sortBy.nameArabic")}
-                      </option>
-                      <option value="nameEnglish">
-                        {t("department.filters.sortBy.nameEnglish")}
-                      </option>
-                      <option value="code">
-                        {t("department.filters.sortBy.code")}
-                      </option>
-                      <option value="createdAt">
-                        {t("department.filters.sortBy.createdAt")}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("department.filters.orderDirection")}
-                    </label>
-                    <select
-                      value={
-                        filters.orderDesc
-                          ? filters.orderDesc.toString()
-                          : "false"
-                      }
-                      onChange={(e) =>
-                        handleFilterChange(
-                          "orderDesc",
-                          e.target.value === "true"
-                        )
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="false">
-                        {t("department.filters.ascending")}
-                      </option>
-                      <option value="true">
-                        {t("department.filters.descending")}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-2 lg:col-span-1">
-                    <button
-                      onClick={handleClearFilters}
-                      className={`px-4 py-2 rounded-lg border transition-colors cursor-pointer ${
-                        isDark
-                          ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {t("department.filters.clear")}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile Cards View */}
-          <div className={`md:hidden ${showMobileTable ? "hidden" : "block"}`}>
+          <div className="md:hidden space-y-4">
             {loadingGetDepartments ? (
-              <div className="text-center p-8">
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span
-                    className={`${isRTL ? "mr-3" : "ml-3"} ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {t("department.loading")}
-                  </span>
-                </div>
-              </div>
-            ) : departments.length === 0 ? (
-              <div
-                className={`text-center p-8 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {t("department.noData")}
-              </div>
+              <LoadingBlock
+                text={t("gettingData.departments") || "Loading departments..."}
+              />
+            ) : safeDepartments.length === 0 ? (
+              <EmptyBlock
+                text={t("department.noData") || "No departments found"}
+              />
             ) : (
-              departments.map((department) => (
-                <DepartmentCard key={department.id} department={department} />
+              safeDepartments.map((department) => (
+                <DepartmentMobileCard
+                  key={department.id}
+                  department={department}
+                />
               ))
             )}
           </div>
 
-          {/* Desktop Table View */}
-          <div
-            className={`hidden md:block ${showMobileTable ? "md:hidden" : ""} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border`}
-          >
+          <div className={`${theme.card} hidden md:block overflow-hidden`}>
             <div className="overflow-x-auto">
-              <table className="w-full text-center">
-                <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("department.table.code")}
+              <table className="w-full min-w-[1200px]">
+                <thead className="bg-[var(--color-surface-muted)]">
+                  <tr>
+                    <th className={`${tableHeadClass} text-center`}>
+                      {currentLang === "ar" ? "الكود" : "Code"}
                     </th>
+
                     <th
-                      className={`${
+                      className={`${tableHeadClass} ${
                         isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {t("department.table.nameArabic")}
+                      {currentLang === "ar" ? "القسم" : "Department"}
                     </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("department.table.nameEnglish")}
+
+                    <th className={`${tableHeadClass} text-center`}>
+                      {currentLang === "ar" ? "الحالة" : "Status"}
                     </th>
+
                     <th
-                      className={`${
+                      className={`${tableHeadClass} ${
                         isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {t("department.table.status")}
+                      {currentLang === "ar" ? "المدير" : "Manager"}
                     </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("department.table.linkedCategories")}
+
+                    <th className={`${tableHeadClass} text-center`}>
+                      {currentLang === "ar" ? "التخصصات" : "Categories"}
                     </th>
+
                     <th
-                      className={`${
+                      className={`${tableHeadClass} ${
                         isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
                       }`}
                     >
-                      {t("department.table.actions")}
+                      {currentLang === "ar" ? "أسماء التخصصات" : "Category Names"}
+                    </th>
+
+                    <th className={`${tableHeadClass} text-center`}>
+                      GeoFence
+                    </th>
+
+                    <th className={`${tableHeadClass} text-center`}>
+                      {currentLang === "ar" ? "تاريخ الإنشاء" : "Created At"}
+                    </th>
+
+                    <th className={`${tableHeadClass} text-center`}>
+                      {currentLang === "ar" ? "إجراءات" : "Actions"}
                     </th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {loadingGetDepartments ? (
                     <tr>
-                      <td colSpan="6" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-3" : "ml-3"} ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("department.loading")}
-                          </span>
-                        </div>
+                      <td colSpan="9" className="p-8">
+                        <LoadingBlock
+                          text={
+                            t("gettingData.departments") ||
+                            "Loading departments..."
+                          }
+                        />
                       </td>
                     </tr>
-                  ) : departments.length === 0 ? (
+                  ) : safeDepartments.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan="6"
-                        className={`text-center p-8 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {t("department.noData")}
+                      <td colSpan="9" className="p-8">
+                        <EmptyBlock
+                          text={t("department.noData") || "No departments found"}
+                        />
                       </td>
                     </tr>
                   ) : (
-                    departments.map((department) => (
-                      <tr
-                        key={department.id}
-                        className={`border-b transition-colors hover:cursor-pointer ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
-                      >
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          <div className="flex items-center gap-1">
-                            <Hash size={14} className="text-gray-500" />
+                    safeDepartments.map((department) => (
+                      <tr key={department.id} className={theme.hoverRow}>
+                        <td className={`${tableCellClass} text-center`}>
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[var(--color-bg-soft)] border border-[var(--color-border)] font-mono font-bold">
+                            <Hash size={13} />
                             {department.code || "-"}
-                          </div>
-                        </td>
-                        <td
-                          className={`p-4 font-semibold ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {department.nameArabic}
-                        </td>
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {department.nameEnglish}
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              department.isActive
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                            }`}
-                          >
-                            {department.isActive
-                              ? t("department.status.active")
-                              : t("department.status.inactive")}
                           </span>
                         </td>
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          <div className="flex items-center gap-1">
-                            <Link2 size={14} className="text-gray-500" />
-                            {department.linkedCategoriesCount || 0}
+
+                        <td className={tableCellClass}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                              <Building2 size={20} />
+                            </div>
+
+                            <div>
+                              <p className="font-extrabold text-[var(--color-text)]">
+                                {getDepartmentName(department)}
+                              </p>
+                              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                                {getDepartmentSubName(department)}
+                              </p>
+                            </div>
                           </div>
                         </td>
-                        <td className="p-4">
-                          <div className="flex gap-2">
-                            <Link
-                              to={`/admin-panel/department/${department.id}`}
-                            >
+
+                        <td className={`${tableCellClass} text-center`}>
+                          <StatusBadge active={department.isActive} />
+                        </td>
+
+                        <td className={tableCellClass}>
+                          <ManagerBadge department={department} />
+                        </td>
+
+                        <td className={`${tableCellClass} text-center`}>
+                          <Link to={`/admin-panel/department/${department.id}`}>
+                            <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700">
+                              <Link2 size={13} />
+                              {getLinkedCategoriesCount(department)}
+                            </span>
+                          </Link>
+                        </td>
+
+                        <td className={tableCellClass}>
+                          <span className="text-[var(--color-text-muted)]">
+                            {getCategoryNames(department)}
+                          </span>
+                        </td>
+
+                        <td className={`${tableCellClass} text-center`}>
+                          <span
+                            className={`inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+                              getGeoFenceCount(department) > 0
+                                ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700"
+                                : "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/50 dark:text-slate-200 dark:border-slate-700"
+                            }`}
+                          >
+                            <MapPin size={13} />
+                            {getGeoFenceCount(department)}
+                          </span>
+                        </td>
+
+                        <td
+                          className={`${tableCellClass} text-center text-[var(--color-text-muted)]`}
+                        >
+                          <div className="inline-flex items-center gap-1">
+                            <Calendar size={14} />
+                            {formatDate(department.createdAt)}
+                          </div>
+                        </td>
+
+                        <td className={`${tableCellClass} text-center`}>
+                          <div className="flex justify-center gap-2">
+                            <Link to={`/admin-panel/department/${department.id}`}>
                               <button
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("department.actions.view")}
+                                type="button"
+                                className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                                title={currentLang === "ar" ? "عرض" : "View"}
                               >
                                 <Eye size={16} />
                               </button>
                             </Link>
+
                             <Link
                               to={`/admin-panel/department/edit/${department.id}`}
                             >
                               <button
-                                className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("department.actions.edit")}
+                                type="button"
+                                className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                title={currentLang === "ar" ? "تعديل" : "Edit"}
                               >
                                 <Edit size={16} />
                               </button>
                             </Link>
-                            <Link
-                              to={`/admin-panel/department/geofence/${department.id}`}
-                            >
-                              <button
-                                className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("geoFence.actions.create")}
-                              >
-                                <PlusIcon size={16} />
-                              </button>
-                            </Link>
 
                             <button
+                              type="button"
                               onClick={() => {
                                 setToDelete({
                                   id: department.id,
-                                  name:
-                                    language === "en"
-                                      ? department.nameEnglish
-                                      : department.nameArabic,
+                                  name: getDepartmentName(department),
                                 })
                                 setModalOpen(true)
                               }}
-                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
-                              title={t("department.actions.delete")}
+                              className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                              title={currentLang === "ar" ? "حذف" : "Delete"}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -743,251 +1086,79 @@ function Department() {
             </div>
           </div>
 
-          {/* Mobile Table View (when toggled) */}
-          <div
-            className={`md:hidden ${showMobileTable ? "block" : "hidden"} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border overflow-hidden`}
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-center">
-                <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("department.table.name")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("department.table.status")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("department.table.actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loadingGetDepartments ? (
-                    <tr>
-                      <td colSpan="3" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-2" : "ml-2"} text-sm ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("department.loading")}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : departments.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className={`text-center p-8 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {t("department.noData")}
-                      </td>
-                    </tr>
-                  ) : (
-                    departments.map((department) => (
-                      <tr
-                        key={department.id}
-                        className={`border-b transition-colors cursor-pointer ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
-                      >
-                        <td className="p-2">
-                          <div>
-                            <div
-                              className={`font-semibold ${
-                                isDark ? "text-white" : "text-gray-900"
-                              }`}
-                            >
-                              {department.nameArabic}
-                            </div>
-                            <div
-                              className={`text-xs ${
-                                isDark ? "text-gray-400" : "text-gray-500"
-                              }`}
-                            >
-                              {department.code || "بدون رمز"}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-2">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              department.isActive
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                            }`}
-                          >
-                            {department.isActive
-                              ? t("department.status.active")
-                              : t("department.status.inactive")}
-                          </span>
-                        </td>
-                        <td className="p-2">
-                          <div className="flex gap-1">
-                            <Link
-                              to={`/admin-panel/department/${department.id}`}
-                            >
-                              <button className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded transition-colors cursor-pointer">
-                                <Eye size={14} />
-                              </button>
-                            </Link>
-                            <Link
-                              to={`/admin-panel/department/edit/${department.id}`}
-                            >
-                              <button className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded transition-colors cursor-pointer">
-                                <Edit size={14} />
-                              </button>
-                            </Link>
-
-                            <button
-                              className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors cursor-pointer"
-                              onClick={() => {
-                                setToDelete({
-                                  id: department.id,
-                                  name:
-                                    language === "en"
-                                      ? department.nameEnglish
-                                      : department.nameArabic,
-                                })
-                                setModalOpen(true)
-                              }}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Pagination */}
           {pagination && pagination.totalPages > 1 && (
-            <div
-              className={`border-t p-4 mt-6 ${
-                isDark
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-white border-gray-200"
-              } rounded-lg`}
-            >
+            <div className={`${theme.card} p-4 mt-6`}>
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex flex-col sm:flex-row items-center gap-4 text-sm">
-                  <span
-                    className={`${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
-                    {t("displayRange", {
-                      start: (pagination.page - 1) * pagination.pageSize + 1,
-                      end: Math.min(
-                        pagination.page * pagination.pageSize,
-                        pagination.totalCount
-                      ),
-                      total: pagination.totalCount,
-                    })}
+                <div className="text-sm text-[var(--color-text-muted)]">
+                  {currentLang === "ar" ? "عرض" : "Showing"}{" "}
+                  <span className="font-bold text-[var(--color-text)]">
+                    {(pagination.page - 1) * pagination.pageSize + 1}
+                  </span>{" "}
+                  -{" "}
+                  <span className="font-bold text-[var(--color-text)]">
+                    {Math.min(
+                      pagination.page * pagination.pageSize,
+                      pagination.totalCount
+                    )}
+                  </span>{" "}
+                  {currentLang === "ar" ? "من" : "of"}{" "}
+                  <span className="font-bold text-[var(--color-text)]">
+                    {pagination.totalCount}
                   </span>
-
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={pagination.pageSize}
-                      onChange={(e) => handlePageSizeChange(e.target.value)}
-                      className={`p-1 border rounded text-sm ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="50">50</option>
-                    </select>
-                    <span
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {t("department.pagination.itemsPerPage")}
-                    </span>
-                  </div>
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={!pagination.hasPreviousPage}
-                    className={`p-2 rounded-lg border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isDark
-                        ? "border-gray-600 hover:bg-gray-700"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                <div className="flex items-center gap-2">
+                  <select
+                    value={pagination.pageSize}
+                    onChange={(e) => handlePageSizeChange(e.target.value)}
+                    className="px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
                   >
-                    <ChevronRight size={16} />
+                    {[5, 10, 20, 50].map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={!hasPrevious}
+                    className={theme.secondaryButton}
+                  >
+                    {isRTL ? (
+                      <ChevronRight size={16} />
+                    ) : (
+                      <ChevronLeft size={16} />
+                    )}
                   </button>
 
-                  {getPageNumbers().map((pageNum) => (
+                  {getPageNumbers().map((page) => (
                     <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`px-2 sm:px-3 py-2 rounded-lg transition-colors cursor-pointer text-sm ${
-                        pageNum === pagination.page
-                          ? "bg-blue-600 text-white"
-                          : isDark
-                          ? "border border-gray-600 hover:bg-gray-700 text-gray-300"
-                          : "border border-gray-300 hover:bg-gray-50 text-gray-700"
+                      key={page}
+                      type="button"
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-2 rounded-lg border transition-colors ${
+                        page === pagination.page
+                          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                          : "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-bg-soft)]"
                       }`}
                     >
-                      {pageNum}
+                      {page}
                     </button>
                   ))}
 
                   <button
+                    type="button"
                     onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={!pagination.hasNextPage}
-                    className={`p-2 rounded-lg border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isDark
-                        ? "border-gray-600 hover:bg-gray-700"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    disabled={!hasNext}
+                    className={theme.secondaryButton}
                   >
-                    <ChevronLeft size={16} />
+                    {isRTL ? (
+                      <ChevronLeft size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -995,6 +1166,24 @@ function Department() {
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function LoadingBlock({ text }) {
+  return (
+    <div className="flex items-center justify-center gap-3 py-8 text-[var(--color-text-muted)]">
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[var(--color-primary)]" />
+      <span className="text-sm font-semibold">{text}</span>
+    </div>
+  )
+}
+
+function EmptyBlock({ text }) {
+  return (
+    <div className="text-center py-10 text-[var(--color-text-muted)]">
+      <Building2 className="w-12 h-12 mx-auto mb-3 opacity-60" />
+      <p className="text-sm font-semibold">{text}</p>
     </div>
   )
 }

@@ -1,47 +1,311 @@
 import { createSlice } from "@reduxjs/toolkit"
-import UseInitialStates from "../../hooks/use-initial-state"
 import {
   createDepartment,
   getDepartments,
   getDepartmentById,
   updateDepartment,
   deleteDepartment,
+
+  getDepartmentCategories,
+  getAvailableDepartmentsForCategory,
+  getDepartmentsByCategory,
+  linkDepartmentToCategory,
+  unlinkDepartmentFromCategory,
+
+  getDepartmentManagers,
+  getDepartmentsWithManagers,
   updateManagerPermission,
   removeDepManager,
   assignDepManager,
-  availabelDepartmentsForCategory,
-  linkDepartmentToCategory,
-  getDepartmentByCategory,
-  unlinkDepartmentFromCategory,
+
   getDepartmentMonthList,
   getDepartmentMonthView,
-  getDepartmentRosterCalender,
-  createGoFence,
-  getDepartmentGoefences,
-  deleteFence,
-  getGeofFence,
-  editGeofence,
-} from "../act/actDepartment"
-import i18next from "i18next"
-import "../../translation/i18n"
+  getDepartmentRosterCalendar,
+  getDepartmentRosterStructure,
 
-const { initialStateDepartments } = UseInitialStates()
+  createGeoFence,
+  getDepartmentGeoFences,
+  getGeoFence,
+  editGeoFence,
+  deleteGeoFence,
+} from "../act/actDepartment"
+
+const initialState = {
+  // =========================
+  // Department List
+  // =========================
+  departments: [],
+  pagination: null,
+  filters: {
+    search: "",
+    code: "",
+    categoryId: "",
+    linkedToCategoryId: "",
+    isUnlinked: "",
+    hasManager: "",
+    isActive: "",
+    createdFrom: "",
+    createdTo: "",
+    includeManager: true,
+    includeCategories: true,
+    includeSubDepartments: true,
+    includeStatistics: true,
+    includeCategory: true,
+    orderBy: "nameArabic",
+    orderDesc: true,
+    page: 1,
+    pageSize: 10,
+  },
+  loadingGetDepartments: false,
+  error: null,
+  message: "",
+  timestamp: null,
+
+  // =========================
+  // Single Department
+  // =========================
+  selectedDepartment: null,
+  loadingGetSingleDepartment: false,
+  loadingGetDepartmentById: false,
+  singleDepartmentError: null,
+
+  // Used in auth/permission checks in existing pages
+  departmentLinkedIds: [],
+
+  // =========================
+  // Create / Update / Delete
+  // =========================
+  loadingCreateDepartment: false,
+  createError: null,
+  createSuccess: false,
+  createMessage: "",
+
+  loadingUpdateDepartment: false,
+  updateError: null,
+  updateSuccess: false,
+  updateMessage: "",
+
+  loadingDeleteDepartment: false,
+  deleteError: null,
+  deleteSuccess: false,
+  deleteMessage: "",
+  deletedDepartmentId: null,
+
+  // =========================
+  // Department Categories
+  // =========================
+  departmentCategories: [],
+  departmentCategoriesPagination: null,
+  loadingGetDepartmentCategories: false,
+  departmentCategoriesError: null,
+
+  availableDepartmentsForCategory: [],
+  availableDepartmentsForCategoryPagination: null,
+  loadingGetAvailableDepartmentsForCategory: false,
+  availableDepartmentsForCategoryError: null,
+
+  departmentsByCategory: [],
+  departmentsByCategoryPagination: null,
+  loadingGetDepartmentsByCategory: false,
+  departmentsByCategoryError: null,
+
+  loadingLinkDepartmentToCategory: false,
+  linkDepartmentToCategoryError: null,
+  linkDepartmentToCategorySuccess: false,
+  linkDepartmentToCategoryMessage: "",
+
+  loadingUnlinkDepartment: false,
+  loadingUnlinkDepartmentFromCategory: false,
+  unlinkDepartmentFromCategoryError: null,
+  unlinkDepartmentFromCategorySuccess: false,
+  unlinkDepartmentFromCategoryMessage: "",
+
+  // =========================
+  // Department Managers
+  // =========================
+  departmentManagers: [],
+  departmentManagersPagination: null,
+  loadingGetDepartmentManagers: false,
+  departmentManagersError: null,
+
+  departmentsWithManagers: [],
+  departmentsWithManagersPagination: null,
+  loadingGetDepartmentsWithManagers: false,
+  departmentsWithManagersError: null,
+
+  loadingAssignManager: false,
+  assignManagerError: null,
+  assignManagerSuccess: false,
+  assignManagerMessage: "",
+
+  loadingRemoveManager: false,
+  removeManagerError: null,
+  removeManagerSuccess: false,
+  removeManagerMessage: "",
+
+  loadingUpdateManagerPermission: false,
+  updateManagerPermissionError: null,
+  updateManagerPermissionSuccess: false,
+  updateManagerPermissionMessage: "",
+
+  // =========================
+  // Department Month / Calendar
+  // =========================
+  departmentMonthList: [],
+  loadingGetDepartmentMonthList: false,
+  departmentMonthListError: null,
+
+  departmentMonthView: null,
+  loadingGetDepartmentMonthView: false,
+  departmentMonthViewError: null,
+
+  currentDepartment: null,
+  departmentTotals: null,
+
+  departmentRosterCalendar: [],
+  departmentRosterData: [],
+  rosterLookup: {},
+  loadingGetDepartmentRosterCalendar: false,
+
+  // Backward-compatible typo used by old DepartmentCalender.jsx
+  loadinGetDepartmentCalender: false,
+
+  departmentRosterCalendarError: null,
+
+  // New recommended endpoint for one roster
+  departmentRosterStructure: null,
+  loadingGetDepartmentRosterStructure: false,
+  departmentRosterStructureError: null,
+
+  // =========================
+  // GeoFence
+  // =========================
+  geofences: [],
+  selectedGeoFence: null,
+
+  loadingCreateGeoFence: false,
+  createGeoFenceError: null,
+  createGeoFenceSuccess: false,
+  createGeoFenceMessage: "",
+
+  loadingGetDepartmentGeofences: false,
+  loadingGetDepartmentGeoFences: false,
+  getDepartmentGeoFencesError: null,
+
+  loadingGetGeoFence: false,
+  getGeoFenceError: null,
+
+  loadingEditGeoFence: false,
+  editGeoFenceError: null,
+  editGeoFenceSuccess: false,
+  editGeoFenceMessage: "",
+
+  loadingDeleteGeoFence: false,
+  deleteGeoFenceError: null,
+  deleteGeoFenceSuccess: false,
+  deleteGeoFenceMessage: "",
+}
+
+const extractData = (payload) => payload?.data ?? payload ?? null
+
+const extractList = (payload) => {
+  const data = extractData(payload)
+
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.items)) return data.items
+  if (Array.isArray(data?.rows)) return data.rows
+  if (Array.isArray(data?.data)) return data.data
+
+  return []
+}
+
+const extractPagination = (payload) => {
+  const data = extractData(payload)
+
+  if (!data || Array.isArray(data)) return null
+
+  return {
+    totalCount: data.totalCount ?? data.totalRecords ?? data.count ?? 0,
+    page: data.page ?? data.currentPage ?? 1,
+    pageSize: data.pageSize ?? 10,
+    totalPages: data.totalPages ?? 1,
+    hasNextPage: data.hasNext ?? data.hasNextPage ?? false,
+    hasPreviousPage: data.hasPrevious ?? data.hasPreviousPage ?? false,
+    hasNext: data.hasNext ?? data.hasNextPage ?? false,
+    hasPrevious: data.hasPrevious ?? data.hasPreviousPage ?? false,
+  }
+}
+
+const extractMessage = (payload, fallback = "") => {
+  return (
+    payload?.messageAr ||
+    payload?.messageEn ||
+    payload?.message ||
+    fallback
+  )
+}
+
+const normalizeError = (payload, fallback = "حدث خطأ") => {
+  if (!payload) {
+    return {
+      message: fallback,
+      errors: [],
+      status: null,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  if (typeof payload === "string") {
+    return {
+      message: payload,
+      errors: [],
+      status: null,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  return {
+    message:
+      payload.message ||
+      payload.messageAr ||
+      payload.messageEn ||
+      fallback,
+    messageAr: payload.messageAr,
+    messageEn: payload.messageEn,
+    errors: payload.errors || [],
+    status: payload.status,
+    data: payload.data,
+    timestamp: payload.timestamp || new Date().toISOString(),
+  }
+}
 
 export const departmentSlice = createSlice({
   name: "departmentSlice",
-  initialState: initialStateDepartments,
+  initialState,
   reducers: {
-    // Department filters
+    // =========================
+    // Filters
+    // =========================
     setFilters: (state, action) => {
-      state.filters = { ...state.filters, ...action.payload }
+      state.filters = {
+        ...state.filters,
+        ...action.payload,
+      }
     },
+
     clearFilters: (state) => {
       state.filters = {
         search: "",
+        code: "",
         categoryId: "",
-        isActive: null,
-        createdFrom: null,
-        createdTo: null,
+        linkedToCategoryId: "",
+        isUnlinked: "",
+        hasManager: "",
+        isActive: "",
+        createdFrom: "",
+        createdTo: "",
+        includeManager: true,
+        includeCategories: true,
         includeSubDepartments: true,
         includeStatistics: true,
         includeCategory: true,
@@ -51,601 +315,1025 @@ export const departmentSlice = createSlice({
         pageSize: 10,
       }
     },
+
     setCurrentPage: (state, action) => {
       state.filters.page = action.payload
     },
+
     setPageSize: (state, action) => {
       state.filters.pageSize = action.payload
       state.filters.page = 1
     },
+
     setCategoryFilter: (state, action) => {
       state.filters.categoryId = action.payload
       state.filters.page = 1
     },
 
-    // Department data actions
+    setLinkedCategoryFilter: (state, action) => {
+      state.filters.linkedToCategoryId = action.payload
+      state.filters.page = 1
+    },
+
     clearDepartments: (state) => {
       state.departments = []
       state.pagination = null
       state.error = null
     },
+
     clearError: (state) => {
       state.error = null
     },
 
-    // Department success/error clearing actions
+    // =========================
+    // Create / Update / Delete
+    // =========================
     clearCreateSuccess: (state) => {
       state.createSuccess = false
       state.createMessage = ""
     },
+
     clearUpdateSuccess: (state) => {
       state.updateSuccess = false
       state.updateMessage = ""
     },
+
     clearDeleteSuccess: (state) => {
       state.deleteSuccess = false
       state.deleteMessage = ""
+      state.deletedDepartmentId = null
     },
 
-    // Department form reset actions
     resetCreateForm: (state) => {
       state.loadingCreateDepartment = false
       state.createError = null
       state.createSuccess = false
       state.createMessage = ""
     },
+
     resetUpdateForm: (state) => {
       state.loadingUpdateDepartment = false
       state.updateError = null
       state.updateSuccess = false
       state.updateMessage = ""
     },
+
     resetDeleteForm: (state) => {
       state.loadingDeleteDepartment = false
       state.deleteError = null
       state.deleteSuccess = false
       state.deleteMessage = ""
+      state.deletedDepartmentId = null
     },
 
-    // Single department actions
+    // =========================
+    // Single Department
+    // =========================
     clearSingleDepartment: (state) => {
       state.selectedDepartment = null
+      state.currentDepartment = null
+      state.departmentTotals = null
       state.singleDepartmentError = null
     },
+
     clearSingleDepartmentError: (state) => {
       state.singleDepartmentError = null
     },
+
+    // =========================
+    // Department Categories
+    // =========================
+    clearDepartmentCategories: (state) => {
+      state.departmentCategories = []
+      state.departmentCategoriesPagination = null
+      state.departmentCategoriesError = null
+    },
+
+    clearAvailableDepartmentsForCategory: (state) => {
+      state.availableDepartmentsForCategory = []
+      state.availableDepartmentsForCategoryPagination = null
+      state.availableDepartmentsForCategoryError = null
+    },
+
+    clearDepartmentsByCategory: (state) => {
+      state.departmentsByCategory = []
+      state.departmentsByCategoryPagination = null
+      state.departmentsByCategoryError = null
+    },
+
+    clearLinkDepartmentToCategoryState: (state) => {
+      state.loadingLinkDepartmentToCategory = false
+      state.linkDepartmentToCategoryError = null
+      state.linkDepartmentToCategorySuccess = false
+      state.linkDepartmentToCategoryMessage = ""
+    },
+
+    clearUnlinkDepartmentFromCategoryState: (state) => {
+      state.loadingUnlinkDepartment = false
+      state.loadingUnlinkDepartmentFromCategory = false
+      state.unlinkDepartmentFromCategoryError = null
+      state.unlinkDepartmentFromCategorySuccess = false
+      state.unlinkDepartmentFromCategoryMessage = ""
+    },
+
+    // =========================
+    // Managers
+    // =========================
+    clearDepartmentManagers: (state) => {
+      state.departmentManagers = []
+      state.departmentManagersPagination = null
+      state.departmentManagersError = null
+    },
+
+    clearDepartmentsWithManagers: (state) => {
+      state.departmentsWithManagers = []
+      state.departmentsWithManagersPagination = null
+      state.departmentsWithManagersError = null
+    },
+
+    clearAssignManagerState: (state) => {
+      state.loadingAssignManager = false
+      state.assignManagerError = null
+      state.assignManagerSuccess = false
+      state.assignManagerMessage = ""
+    },
+
+    clearRemoveManagerState: (state) => {
+      state.loadingRemoveManager = false
+      state.removeManagerError = null
+      state.removeManagerSuccess = false
+      state.removeManagerMessage = ""
+    },
+
+    clearUpdateManagerPermissionState: (state) => {
+      state.loadingUpdateManagerPermission = false
+      state.updateManagerPermissionError = null
+      state.updateManagerPermissionSuccess = false
+      state.updateManagerPermissionMessage = ""
+    },
+
+    // =========================
+    // Month / Calendar / Structure
+    // =========================
+    clearDepartmentMonthList: (state) => {
+      state.departmentMonthList = []
+      state.departmentMonthListError = null
+    },
+
+    clearDepartmentMonthView: (state) => {
+      state.departmentMonthView = null
+      state.currentDepartment = null
+      state.departmentCategories = []
+      state.departmentTotals = null
+      state.departmentMonthViewError = null
+    },
+
+    clearDepartmentRosterCalendar: (state) => {
+      state.departmentRosterCalendar = []
+      state.departmentRosterData = []
+      state.rosterLookup = {}
+      state.departmentRosterCalendarError = null
+    },
+
+    clearDepartmentRosterStructure: (state) => {
+      state.departmentRosterStructure = null
+      state.departmentRosterStructureError = null
+      state.departmentRosterData = []
+      state.departmentRosterCalendar = []
+      state.rosterLookup = {}
+    },
+
+    // =========================
+    // GeoFence
+    // =========================
+    clearGeoFences: (state) => {
+      state.geofences = []
+      state.getDepartmentGeoFencesError = null
+    },
+
+    clearSelectedGeoFence: (state) => {
+      state.selectedGeoFence = null
+      state.getGeoFenceError = null
+    },
+
+    clearCreateGeoFenceState: (state) => {
+      state.loadingCreateGeoFence = false
+      state.createGeoFenceError = null
+      state.createGeoFenceSuccess = false
+      state.createGeoFenceMessage = ""
+    },
+
+    clearEditGeoFenceState: (state) => {
+      state.loadingEditGeoFence = false
+      state.editGeoFenceError = null
+      state.editGeoFenceSuccess = false
+      state.editGeoFenceMessage = ""
+    },
+
+    clearDeleteGeoFenceState: (state) => {
+      state.loadingDeleteGeoFence = false
+      state.deleteGeoFenceError = null
+      state.deleteGeoFenceSuccess = false
+      state.deleteGeoFenceMessage = ""
+    },
   },
+
   extraReducers: (builder) => {
     builder
+      // =========================
       // Get Departments
+      // =========================
       .addCase(getDepartments.pending, (state) => {
         state.loadingGetDepartments = true
         state.error = null
       })
+
       .addCase(getDepartments.fulfilled, (state, action) => {
         state.loadingGetDepartments = false
         state.error = null
 
-        const response = action.payload
-        if (response.success) {
-          state.departments = response.data.items
-          state.pagination = {
-            totalCount: response.data.totalCount,
-            page: response.data.page,
-            pageSize: response.data.pageSize,
-            totalPages: response.data.totalPages,
-            hasNextPage: response.data.hasNext,
-            hasPreviousPage: response.data.hasPrevious,
-          }
-          state.message = response.messageAr || response.messageEn
-          state.timestamp = response.timestamp
-        }
+        state.departments = extractList(action.payload)
+        state.pagination = extractPagination(action.payload)
+        state.message = extractMessage(action.payload)
+        state.timestamp = action.payload?.timestamp || null
       })
+
       .addCase(getDepartments.rejected, (state, action) => {
         state.loadingGetDepartments = false
         state.departments = []
         state.pagination = null
-        state.error = {
-          message:
-            action.payload?.message || i18next.t("department.fetchError"),
-          errors: action.payload?.errors || [],
-          timestamp: new Date().toISOString(),
-        }
-      })
-
-      .addCase(availabelDepartmentsForCategory.pending, (state) => {
-        state.loadingGetDepartments = true
-        state.error = null
-      })
-      .addCase(availabelDepartmentsForCategory.fulfilled, (state, action) => {
-        state.loadingGetDepartments = false
-        state.error = null
-
-        const response = action.payload
-        if (response.success) {
-          state.departments = response.data
-          state.pagination = {
-            totalCount: response.data.totalCount,
-            page: response.data.page,
-            pageSize: response.data.pageSize,
-            totalPages: response.data.totalPages,
-            hasNextPage: response.data.hasNext,
-            hasPreviousPage: response.data.hasPrevious,
-          }
-          state.message = response.messageAr || response.messageEn
-          state.timestamp = response.timestamp
-        }
-      })
-      .addCase(availabelDepartmentsForCategory.rejected, (state, action) => {
-        state.loadingGetDepartments = false
-        state.departments = []
-        state.pagination = null
-        state.error = {
-          message:
-            action.payload?.message || i18next.t("department.fetchError"),
-          errors: action.payload?.errors || [],
-          timestamp: new Date().toISOString(),
-        }
-      })
-      .addCase(linkDepartmentToCategory.pending, (state) => {
-        state.loadingLinkDepartmentToCategory = true
-      })
-      .addCase(linkDepartmentToCategory.fulfilled, (state, action) => {
-        state.loadingLinkDepartmentToCategory = false
-
-        const { depId } = action.payload
-        const dep = state.departments.find((d) => d.id === depId)
-        if (!dep) return // لو مش لاقيه، مافيش تعديل
-
-        // ضيف القسم المرتبط للقائمة
-        state.departmentsByCategory.push(dep)
-        state.departmentLinkedIds.push(depId)
-        localStorage.setItem(
-          "departmentLinkedIds",
-          JSON.stringify(state.departmentLinkedIds)
-        )
-        // شيله من قائمة الأقسام غير المرتبطة
-        state.departments = state.departments.filter((d) => d.id !== depId)
-      })
-      .addCase(linkDepartmentToCategory.rejected, (state, action) => {
-        state.loadingLinkDepartmentToCategory = false
-      })
-      .addCase(unlinkDepartmentFromCategory.pending, (state) => {
-        state.loadingUnlinkDepartment = true
-      })
-      .addCase(unlinkDepartmentFromCategory.fulfilled, (state, action) => {
-        state.loadingUnlinkDepartment = false
-        const { depId } = action.payload
-        const dep = state.departmentsByCategory.find((dep) => dep.id == depId)
-        state.departments.push(dep)
-        state.departmentsByCategory = state.departmentsByCategory.filter(
-          (dep) => dep.id !== depId
-        )
-        state.departmentLinkedIds = state.departmentLinkedIds.filter(
-          (id) => id != depId
-        )
-        localStorage.setItem(
-          "departmentLinkedIds",
-          JSON.stringify(state.departmentLinkedIds)
+        state.error = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب الأقسام"
         )
       })
-      .addCase(unlinkDepartmentFromCategory.rejected, (state, action) => {
-        state.loadingUnlinkDepartment = false
+
+      // =========================
+      // Get Department By Id
+      // =========================
+      .addCase(getDepartmentById.pending, (state) => {
+        state.loadingGetSingleDepartment = true
+        state.loadingGetDepartmentById = true
+        state.singleDepartmentError = null
       })
 
-      .addCase(getDepartmentByCategory.pending, (state) => {
-        state.loadingGetDepartmentsByCategory = true
-      })
-      .addCase(getDepartmentByCategory.fulfilled, (state, action) => {
-        state.loadingGetDepartmentsByCategory = false
-        state.departmentsByCategory = action.payload.data
-        const Ids = action.payload.data.map((cat) => cat.id)
-        state.departmentLinkedIds = Ids
-        localStorage.setItem("departmentLinkedIds", JSON.stringify(Ids))
-      })
-      .addCase(getDepartmentByCategory.rejected, (state, action) => {
-        state.loadingGetDepartmentsByCategory = false
+      .addCase(getDepartmentById.fulfilled, (state, action) => {
+        state.loadingGetSingleDepartment = false
+        state.loadingGetDepartmentById = false
+        state.selectedDepartment = extractData(action.payload)
+        state.currentDepartment = extractData(action.payload)
+        state.singleDepartmentError = null
       })
 
+      .addCase(getDepartmentById.rejected, (state, action) => {
+        state.loadingGetSingleDepartment = false
+        state.loadingGetDepartmentById = false
+        state.selectedDepartment = null
+        state.currentDepartment = null
+        state.singleDepartmentError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب بيانات القسم"
+        )
+      })
+
+      // =========================
       // Create Department
+      // =========================
       .addCase(createDepartment.pending, (state) => {
         state.loadingCreateDepartment = true
         state.createError = null
         state.createSuccess = false
+        state.createMessage = ""
       })
+
       .addCase(createDepartment.fulfilled, (state, action) => {
         state.loadingCreateDepartment = false
+        state.createSuccess = true
+        state.createMessage = extractMessage(
+          action.payload,
+          "تم إنشاء القسم بنجاح"
+        )
         state.createError = null
 
-        const response = action.payload
-        if (response.success) {
-          state.createSuccess = true
-          state.createMessage = response.messageAr || response.messageEn
-
-          if (state.filters.page === 1) {
-            state.departments.unshift(response.data)
-            if (state.pagination) {
-              state.pagination.totalCount += 1
-              state.pagination.totalPages = Math.ceil(
-                state.pagination.totalCount / state.pagination.pageSize
-              )
-            }
-          }
+        const createdDepartment = extractData(action.payload)
+        if (createdDepartment?.id) {
+          state.departments.unshift(createdDepartment)
         }
       })
+
       .addCase(createDepartment.rejected, (state, action) => {
         state.loadingCreateDepartment = false
         state.createSuccess = false
-        state.createError = {
-          message: action.payload?.message || "حدث خطأ في إنشاء القسم",
-          errors: action.payload?.errors || [],
-          timestamp: new Date().toISOString(),
-        }
+        state.createError = normalizeError(
+          action.payload,
+          "حدث خطأ في إنشاء القسم"
+        )
       })
 
-      // Get Single Department
-      .addCase(getDepartmentById.pending, (state) => {
-        state.loadingGetSingleDepartment = true
-        state.singleDepartmentError = null
-      })
-      .addCase(getDepartmentById.fulfilled, (state, action) => {
-        state.loadingGetSingleDepartment = false
-        state.singleDepartmentError = null
-
-        const response = action.payload
-        if (response.success) {
-          state.selectedDepartment = response.data
-          state.message = response.messageAr || response.messageEn
-          state.timestamp = response.timestamp
-        }
-      })
-      .addCase(getDepartmentById.rejected, (state, action) => {
-        state.loadingGetSingleDepartment = false
-        state.selectedDepartment = null
-
-        const payload = action.payload
-        let errorMessage = "حدث خطأ في جلب القسم"
-
-        if (payload?.status === 404) {
-          errorMessage = payload.message || "القسم غير موجود"
-        } else if (payload?.status === 403) {
-          errorMessage = payload.message || "ليس لديك صلاحية للوصول لهذا القسم"
-        } else if (payload?.message) {
-          errorMessage = payload.message
-        }
-
-        state.singleDepartmentError = {
-          message: errorMessage,
-          errors: payload?.errors || [],
-          status: payload?.status,
-          timestamp: new Date().toISOString(),
-        }
-      })
-
+      // =========================
       // Update Department
+      // =========================
       .addCase(updateDepartment.pending, (state) => {
         state.loadingUpdateDepartment = true
         state.updateError = null
         state.updateSuccess = false
+        state.updateMessage = ""
       })
+
       .addCase(updateDepartment.fulfilled, (state, action) => {
         state.loadingUpdateDepartment = false
+        state.updateSuccess = true
+        state.updateMessage = extractMessage(
+          action.payload,
+          "تم تحديث القسم بنجاح"
+        )
         state.updateError = null
 
-        const response = action.payload
-        if (response.success) {
-          state.updateSuccess = true
-          state.updateMessage = response.messageAr || response.messageEn
-          state.selectedDepartment = response.data
+        const updatedDepartment = extractData(action.payload)
 
-          const departmentIndex = state.departments.findIndex(
-            (dept) => dept.id === response.data.id
+        if (updatedDepartment?.id) {
+          state.selectedDepartment = updatedDepartment
+          state.currentDepartment = updatedDepartment
+          state.departments = state.departments.map((department) =>
+            Number(department.id) === Number(updatedDepartment.id)
+              ? updatedDepartment
+              : department
           )
-          if (departmentIndex !== -1) {
-            state.departments[departmentIndex] = response.data
-          }
         }
       })
+
       .addCase(updateDepartment.rejected, (state, action) => {
         state.loadingUpdateDepartment = false
         state.updateSuccess = false
-
-        const payload = action.payload
-        let errorMessage = "حدث خطأ في تحديث القسم"
-
-        if (payload?.status === 404) {
-          errorMessage = payload.message || "القسم غير موجود"
-        } else if (payload?.status === 403) {
-          errorMessage = payload.message || "ليس لديك صلاحية لتحديث هذا القسم"
-        } else if (payload?.status === 400) {
-          errorMessage = payload.message || "بيانات غير صحيحة أو عدم تطابق ID"
-        } else if (payload?.message) {
-          errorMessage = payload.message
-        }
-
-        state.updateError = {
-          message: errorMessage,
-          errors: payload?.errors || [],
-          status: payload?.status,
-          timestamp: new Date().toISOString(),
-        }
-      })
-      .addCase(updateManagerPermission.pending, (state) => {
-        state.loadingUpdateManagerPermission = true
-        state.updateError = null
-        state.updateSuccess = false
-      })
-      .addCase(updateManagerPermission.fulfilled, (state, action) => {
-        state.loadingUpdateManagerPermission = false
-        state.updateError = null
-
-        const response = action.payload
-        if (response.success) {
-          state.updateSuccess = true
-          state.updateMessage = response.messageAr || response.messageEn
-          state.selectedDepartment = response.data
-
-          const departmentIndex = state.departments.findIndex(
-            (dept) => dept.id === response.data.id
-          )
-          if (departmentIndex !== -1) {
-            state.departments[departmentIndex] = response.data
-          }
-        }
-      })
-      .addCase(updateManagerPermission.rejected, (state, action) => {
-        state.loadingUpdateManagerPermission = false
-        state.updateSuccess = false
-
-        const payload = action.payload
-        let errorMessage = "حدث خطأ في تحديث القسم"
-
-        if (payload?.status === 404) {
-          errorMessage = payload.message || "القسم غير موجود"
-        } else if (payload?.status === 403) {
-          errorMessage = payload.message || "ليس لديك صلاحية لتحديث هذا القسم"
-        } else if (payload?.status === 400) {
-          errorMessage = payload.message || "بيانات غير صحيحة أو عدم تطابق ID"
-        } else if (payload?.message) {
-          errorMessage = payload.message
-        }
-
-        state.updateError = {
-          message: errorMessage,
-          errors: payload?.errors || [],
-          status: payload?.status,
-          timestamp: new Date().toISOString(),
-        }
-      })
-      .addCase(removeDepManager.pending, (state) => {
-        state.loadingRemoveManager = true
-      })
-      .addCase(removeDepManager.fulfilled, (state, action) => {
-        state.loadingRemoveManager = false
-        state.selectedDepartment.manager = null
-        state.selectedDepartment.hasManager = false
-      })
-      .addCase(removeDepManager.rejected, (state, action) => {
-        state.loadingRemoveManager = false
-      })
-      .addCase(assignDepManager.pending, (state) => {
-        state.loadingAssignManager = true
-      })
-      .addCase(assignDepManager.fulfilled, (state, action) => {
-        state.loadingAssignManager = false
-      })
-      .addCase(assignDepManager.rejected, (state, action) => {
-        state.loadingAssignManager = false
-      })
-      .addCase(getDepartmentMonthList.pending, (state) => {
-        state.loadinGetDepartmentMonthList = true
-        state.departmentMonthListError = null
-      })
-      .addCase(getDepartmentMonthList.fulfilled, (state, action) => {
-        state.loadinGetDepartmentMonthList = false
-        state.departmentMonthList = action.payload.data || []
-        state.departmentMonthListError = null
-        console.log("Department monthly list data:", action.payload.data)
-      })
-      .addCase(getDepartmentMonthList.rejected, (state, action) => {
-        state.loadinGetDepartmentMonthList = false
-        state.departmentMonthListError = action.payload
-        state.departmentMonthList = []
-      })
-      .addCase(getDepartmentRosterCalender.pending, (state) => {
-        state.loadinGetDepartmentCalender = true
-      })
-      .addCase(getDepartmentRosterCalender.fulfilled, (state, action) => {
-        state.loadinGetDepartmentCalender = false
-        // Store the roster data indexed by rosterId for easy filtering
-        state.departmentRosterData = action.payload.data.perRoster || []
-
-        state.rosterLookup = {}
-        if (action.payload.data) {
-          action.payload.data.perRoster.forEach((roster) => {
-            if (roster.rosterId) {
-              state.rosterLookup[roster.rosterId] = roster
-            }
-          })
-        }
-
-        console.log("action.payload", action.payload)
-      })
-      .addCase(getDepartmentRosterCalender.rejected, (state, action) => {
-        state.loadinGetDepartmentCalender = false
-        state.error = action.payload || action.error?.message
-      })
-      .addCase(getDepartmentMonthView.pending, (state) => {
-        state.loadingGetDepartmentMonthView = true
-        state.error = null
-      })
-      .addCase(getDepartmentMonthView.fulfilled, (state, action) => {
-        state.loadingGetDepartmentMonthView = false
-        state.error = null
-
-        // Store the complete response data
-        state.departmentMonthView = action.payload.data
-
-        // You can also destructure and store specific parts if needed
-        const { data } = action.payload
-        state.currentDepartment = {
-          id: data.departmentId,
-          nameAr: data.departmentNameAr,
-          nameEn: data.departmentNameEn,
-          month: data.month,
-          year: data.year,
-        }
-
-        // Store categories and rosters
-        state.departmentCategories = data.categories
-        state.departmentTotals = data.totals
-        state.totalRosters = data.totalRosters
-        state.lastUpdated = data.lastUpdated
-        state.hasMissingData = data.hasMissingData
-        state.warnings = data.warnings
-      })
-      .addCase(getDepartmentMonthView.rejected, (state, action) => {
-        state.loadingGetDepartmentMonthView = false
-        state.error = action.payload
-
-        // Reset data on error
-        state.departmentMonthView = null
-        state.currentDepartment = null
-        state.departmentCategories = []
-        state.departmentTotals = null
-      })
-      .addCase(createGoFence.pending, (state) => {
-        state.loadingCreateGofence = true
-      })
-      .addCase(createGoFence.fulfilled, (state, action) => {
-        state.loadingCreateGofence = false
-      })
-      .addCase(createGoFence.rejected, (state, action) => {
-        state.loadingCreateGofence = false
-        state.error = action.payload
-      })
-      .addCase(getDepartmentGoefences.pending, (state) => {
-        state.loadingGetDepartmentGeofences = true
-      })
-      .addCase(getDepartmentGoefences.fulfilled, (state, action) => {
-        state.loadingGetDepartmentGeofences = false
-        state.geofences = action.payload.data
-      })
-      .addCase(getDepartmentGoefences.rejected, (state, action) => {
-        state.loadingGetDepartmentGeofences = false
-        state.error = action.payload
-      })
-      .addCase(deleteFence.pending, (state) => {
-        state.loadingDeleteGeoFence = true
-      })
-      .addCase(deleteFence.fulfilled, (state, action) => {
-        state.loadingDeleteGeoFence = false
-      })
-      .addCase(deleteFence.rejected, (state, action) => {
-        state.loadingDeleteGeoFence = false
-        state.error = action.payload
-      })
-      .addCase(editGeofence.pending, (state) => {
-        state.loadingEditGeoFence = true
-      })
-      .addCase(editGeofence.fulfilled, (state, action) => {
-        state.loadingEditGeoFence = false
-      })
-      .addCase(editGeofence.rejected, (state, action) => {
-        state.loadingEditGeoFence = false
-        state.error = action.payload
-      })
-      .addCase(getGeofFence.pending, (state) => {
-        state.loadingGetGeofence = true
-      })
-      .addCase(getGeofFence.fulfilled, (state, action) => {
-        state.loadingGetGeofence = false
-        state.singleGeoFence = action.payload.data
-      })
-      .addCase(getGeofFence.rejected, (state, action) => {
-        state.loadingGetGeofence = false
-        state.error = action.payload
+        state.updateError = normalizeError(
+          action.payload,
+          "حدث خطأ في تحديث القسم"
+        )
       })
 
+      // =========================
       // Delete Department
+      // =========================
       .addCase(deleteDepartment.pending, (state) => {
         state.loadingDeleteDepartment = true
         state.deleteError = null
         state.deleteSuccess = false
+        state.deleteMessage = ""
+        state.deletedDepartmentId = null
       })
+
       .addCase(deleteDepartment.fulfilled, (state, action) => {
         state.loadingDeleteDepartment = false
+        state.deleteSuccess = true
+        state.deleteMessage = extractMessage(
+          action.payload,
+          "تم حذف القسم بنجاح"
+        )
         state.deleteError = null
 
-        const response = action.payload
-        if (response.success) {
-          state.deleteSuccess = true
-          state.deleteMessage = response.messageAr || response.messageEn
-          console.log(Number(localStorage.getItem("deletedDepartmentId")))
-          state.departments = state.departments.filter(
-            (dept) =>
-              dept.id != Number(localStorage.getItem("deletedDepartmentId"))
-          )
+        const deletedId =
+          action.payload?.deletedDepartmentId || action.meta?.arg?.id
 
-          if (state.pagination) {
-            state.pagination.totalCount -= 1
-            state.pagination.totalPages = Math.ceil(
-              state.pagination.totalCount / state.pagination.pageSize
-            )
-          }
-
-          if (state.selectedDepartment?.id === response.deletedDepartmentId) {
-            state.selectedDepartment = null
-          }
-        }
+        state.deletedDepartmentId = deletedId
+        state.departments = state.departments.filter(
+          (department) => Number(department.id) !== Number(deletedId)
+        )
       })
+
       .addCase(deleteDepartment.rejected, (state, action) => {
         state.loadingDeleteDepartment = false
         state.deleteSuccess = false
+        state.deleteError = normalizeError(
+          action.payload,
+          "حدث خطأ في حذف القسم"
+        )
+      })
 
-        const payload = action.payload
-        let errorMessage = "حدث خطأ في حذف القسم"
+      // =========================
+      // Department Categories
+      // =========================
+      .addCase(getDepartmentCategories.pending, (state) => {
+        state.loadingGetDepartmentCategories = true
+        state.departmentCategoriesError = null
+      })
 
-        if (payload?.status === 404) {
-          errorMessage = payload.message || "القسم غير موجود"
-        } else if (payload?.status === 403) {
-          errorMessage = payload.message || "ليس لديك صلاحية لحذف هذا القسم"
-        } else if (payload?.status === 400) {
-          errorMessage =
-            payload.message || "بيانات غير صحيحة أو سبب الحذف مطلوب"
-        } else if (payload?.message) {
-          errorMessage = payload.message
+      .addCase(getDepartmentCategories.fulfilled, (state, action) => {
+        state.loadingGetDepartmentCategories = false
+        state.departmentCategories = extractList(action.payload)
+        state.departmentCategoriesPagination = extractPagination(action.payload)
+        state.departmentCategoriesError = null
+      })
+
+      .addCase(getDepartmentCategories.rejected, (state, action) => {
+        state.loadingGetDepartmentCategories = false
+        state.departmentCategories = []
+        state.departmentCategoriesPagination = null
+        state.departmentCategoriesError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب تخصصات القسم"
+        )
+      })
+
+      .addCase(getAvailableDepartmentsForCategory.pending, (state) => {
+        state.loadingGetAvailableDepartmentsForCategory = true
+        state.loadingGetDepartments = true
+        state.availableDepartmentsForCategoryError = null
+      })
+
+      .addCase(getAvailableDepartmentsForCategory.fulfilled, (state, action) => {
+        state.loadingGetAvailableDepartmentsForCategory = false
+        state.loadingGetDepartments = false
+
+        state.availableDepartmentsForCategory = extractList(action.payload)
+        state.departments = extractList(action.payload)
+        state.availableDepartmentsForCategoryPagination = extractPagination(
+          action.payload
+        )
+        state.pagination = extractPagination(action.payload)
+        state.availableDepartmentsForCategoryError = null
+      })
+
+      .addCase(getAvailableDepartmentsForCategory.rejected, (state, action) => {
+        state.loadingGetAvailableDepartmentsForCategory = false
+        state.loadingGetDepartments = false
+
+        state.availableDepartmentsForCategory = []
+        state.departments = []
+        state.availableDepartmentsForCategoryPagination = null
+        state.pagination = null
+        state.availableDepartmentsForCategoryError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب الأقسام المتاحة للتخصص"
+        )
+        state.error = state.availableDepartmentsForCategoryError
+      })
+
+      .addCase(getDepartmentsByCategory.pending, (state) => {
+        state.loadingGetDepartmentsByCategory = true
+        state.departmentsByCategoryError = null
+      })
+
+      .addCase(getDepartmentsByCategory.fulfilled, (state, action) => {
+        state.loadingGetDepartmentsByCategory = false
+        state.departmentsByCategory = extractList(action.payload)
+        state.departmentsByCategoryPagination = extractPagination(action.payload)
+        state.departmentsByCategoryError = null
+      })
+
+      .addCase(getDepartmentsByCategory.rejected, (state, action) => {
+        state.loadingGetDepartmentsByCategory = false
+        state.departmentsByCategory = []
+        state.departmentsByCategoryPagination = null
+        state.departmentsByCategoryError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب أقسام التخصص"
+        )
+      })
+
+      .addCase(linkDepartmentToCategory.pending, (state) => {
+        state.loadingLinkDepartmentToCategory = true
+        state.linkDepartmentToCategoryError = null
+        state.linkDepartmentToCategorySuccess = false
+        state.linkDepartmentToCategoryMessage = ""
+      })
+
+      .addCase(linkDepartmentToCategory.fulfilled, (state, action) => {
+        state.loadingLinkDepartmentToCategory = false
+        state.linkDepartmentToCategorySuccess = true
+        state.linkDepartmentToCategoryMessage = extractMessage(
+          action.payload,
+          "تم ربط القسم بالتخصص بنجاح"
+        )
+        state.linkDepartmentToCategoryError = null
+
+        const departmentId =
+          action.payload?.departmentId ||
+          action.meta?.arg?.id ||
+          action.meta?.arg?.departmentId
+
+        state.availableDepartmentsForCategory =
+          state.availableDepartmentsForCategory.filter(
+            (department) => Number(department.id) !== Number(departmentId)
+          )
+
+        state.departments = state.departments.filter(
+          (department) => Number(department.id) !== Number(departmentId)
+        )
+      })
+
+      .addCase(linkDepartmentToCategory.rejected, (state, action) => {
+        state.loadingLinkDepartmentToCategory = false
+        state.linkDepartmentToCategorySuccess = false
+        state.linkDepartmentToCategoryError = normalizeError(
+          action.payload,
+          "حدث خطأ في ربط القسم بالتخصص"
+        )
+      })
+
+      .addCase(unlinkDepartmentFromCategory.pending, (state) => {
+        state.loadingUnlinkDepartment = true
+        state.loadingUnlinkDepartmentFromCategory = true
+        state.unlinkDepartmentFromCategoryError = null
+        state.unlinkDepartmentFromCategorySuccess = false
+        state.unlinkDepartmentFromCategoryMessage = ""
+      })
+
+      .addCase(unlinkDepartmentFromCategory.fulfilled, (state, action) => {
+        state.loadingUnlinkDepartment = false
+        state.loadingUnlinkDepartmentFromCategory = false
+        state.unlinkDepartmentFromCategorySuccess = true
+        state.unlinkDepartmentFromCategoryMessage = extractMessage(
+          action.payload,
+          "تم إلغاء ربط القسم بالتخصص بنجاح"
+        )
+        state.unlinkDepartmentFromCategoryError = null
+
+        const departmentId =
+          action.payload?.departmentId ||
+          action.meta?.arg?.id ||
+          action.meta?.arg?.departmentId
+
+        state.departmentsByCategory = state.departmentsByCategory.filter(
+          (department) => Number(department.id) !== Number(departmentId)
+        )
+      })
+
+      .addCase(unlinkDepartmentFromCategory.rejected, (state, action) => {
+        state.loadingUnlinkDepartment = false
+        state.loadingUnlinkDepartmentFromCategory = false
+        state.unlinkDepartmentFromCategorySuccess = false
+        state.unlinkDepartmentFromCategoryError = normalizeError(
+          action.payload,
+          "حدث خطأ في إلغاء ربط القسم بالتخصص"
+        )
+      })
+
+      // =========================
+      // Department Managers
+      // =========================
+      .addCase(getDepartmentManagers.pending, (state) => {
+        state.loadingGetDepartmentManagers = true
+        state.departmentManagersError = null
+      })
+
+      .addCase(getDepartmentManagers.fulfilled, (state, action) => {
+        state.loadingGetDepartmentManagers = false
+        state.departmentManagers = extractList(action.payload)
+        state.departmentManagersPagination = extractPagination(action.payload)
+        state.departmentManagersError = null
+      })
+
+      .addCase(getDepartmentManagers.rejected, (state, action) => {
+        state.loadingGetDepartmentManagers = false
+        state.departmentManagers = []
+        state.departmentManagersPagination = null
+        state.departmentManagersError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب مديري الأقسام"
+        )
+      })
+
+      .addCase(getDepartmentsWithManagers.pending, (state) => {
+        state.loadingGetDepartmentsWithManagers = true
+        state.departmentsWithManagersError = null
+      })
+
+      .addCase(getDepartmentsWithManagers.fulfilled, (state, action) => {
+        state.loadingGetDepartmentsWithManagers = false
+        state.departmentsWithManagers = extractList(action.payload)
+        state.departmentsWithManagersPagination =
+          extractPagination(action.payload)
+        state.departmentsWithManagersError = null
+      })
+
+      .addCase(getDepartmentsWithManagers.rejected, (state, action) => {
+        state.loadingGetDepartmentsWithManagers = false
+        state.departmentsWithManagers = []
+        state.departmentsWithManagersPagination = null
+        state.departmentsWithManagersError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب الأقسام التي لها مديرين"
+        )
+      })
+
+      .addCase(assignDepManager.pending, (state) => {
+        state.loadingAssignManager = true
+        state.assignManagerError = null
+        state.assignManagerSuccess = false
+        state.assignManagerMessage = ""
+      })
+
+      .addCase(assignDepManager.fulfilled, (state, action) => {
+        state.loadingAssignManager = false
+        state.assignManagerSuccess = true
+        state.assignManagerMessage = extractMessage(
+          action.payload,
+          "تم تعيين مدير القسم بنجاح"
+        )
+        state.assignManagerError = null
+      })
+
+      .addCase(assignDepManager.rejected, (state, action) => {
+        state.loadingAssignManager = false
+        state.assignManagerSuccess = false
+        state.assignManagerError = normalizeError(
+          action.payload,
+          "حدث خطأ في تعيين مدير القسم"
+        )
+      })
+
+      .addCase(removeDepManager.pending, (state) => {
+        state.loadingRemoveManager = true
+        state.removeManagerError = null
+        state.removeManagerSuccess = false
+        state.removeManagerMessage = ""
+      })
+
+      .addCase(removeDepManager.fulfilled, (state, action) => {
+        state.loadingRemoveManager = false
+        state.removeManagerSuccess = true
+        state.removeManagerMessage = extractMessage(
+          action.payload,
+          "تم إزالة مدير القسم بنجاح"
+        )
+        state.removeManagerError = null
+
+        if (state.selectedDepartment?.manager) {
+          state.selectedDepartment.manager = null
         }
 
-        state.deleteError = {
-          message: errorMessage,
-          errors: payload?.errors || [],
-          status: payload?.status,
-          timestamp: new Date().toISOString(),
+        if (state.selectedDepartment?.departmentManager) {
+          state.selectedDepartment.departmentManager = null
         }
+
+        if (state.selectedDepartment) {
+          state.selectedDepartment.hasManager = false
+        }
+      })
+
+      .addCase(removeDepManager.rejected, (state, action) => {
+        state.loadingRemoveManager = false
+        state.removeManagerSuccess = false
+        state.removeManagerError = normalizeError(
+          action.payload,
+          "حدث خطأ في إزالة مدير القسم"
+        )
+      })
+
+      .addCase(updateManagerPermission.pending, (state) => {
+        state.loadingUpdateManagerPermission = true
+        state.updateManagerPermissionError = null
+        state.updateManagerPermissionSuccess = false
+        state.updateManagerPermissionMessage = ""
+      })
+
+      .addCase(updateManagerPermission.fulfilled, (state, action) => {
+        state.loadingUpdateManagerPermission = false
+        state.updateManagerPermissionSuccess = true
+        state.updateManagerPermissionMessage = extractMessage(
+          action.payload,
+          "تم تحديث صلاحيات المدير بنجاح"
+        )
+        state.updateManagerPermissionError = null
+      })
+
+      .addCase(updateManagerPermission.rejected, (state, action) => {
+        state.loadingUpdateManagerPermission = false
+        state.updateManagerPermissionSuccess = false
+        state.updateManagerPermissionError = normalizeError(
+          action.payload,
+          "حدث خطأ في تحديث صلاحيات مدير القسم"
+        )
+      })
+
+      // =========================
+      // Month List
+      // =========================
+      .addCase(getDepartmentMonthList.pending, (state) => {
+        state.loadingGetDepartmentMonthList = true
+        state.departmentMonthListError = null
+      })
+
+      .addCase(getDepartmentMonthList.fulfilled, (state, action) => {
+        state.loadingGetDepartmentMonthList = false
+        state.departmentMonthList = extractList(action.payload)
+        state.departmentMonthListError = null
+      })
+
+      .addCase(getDepartmentMonthList.rejected, (state, action) => {
+        state.loadingGetDepartmentMonthList = false
+        state.departmentMonthList = []
+        state.departmentMonthListError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب شهور القسم"
+        )
+      })
+
+      // =========================
+      // Month View
+      // =========================
+      .addCase(getDepartmentMonthView.pending, (state) => {
+        state.loadingGetDepartmentMonthView = true
+        state.departmentMonthViewError = null
+      })
+
+      .addCase(getDepartmentMonthView.fulfilled, (state, action) => {
+        state.loadingGetDepartmentMonthView = false
+
+        const data = extractData(action.payload)
+
+        state.departmentMonthView = data
+        state.currentDepartment = data
+          ? {
+              id: data.departmentId,
+              nameArabic: data.departmentNameAr,
+              nameAr: data.departmentNameAr,
+              nameEnglish: data.departmentNameEn,
+              nameEn: data.departmentNameEn,
+            }
+          : null
+
+        state.departmentCategories = Array.isArray(data?.categories)
+          ? data.categories
+          : []
+        state.departmentTotals = data?.totals || null
+        state.departmentMonthViewError = null
+      })
+
+      .addCase(getDepartmentMonthView.rejected, (state, action) => {
+        state.loadingGetDepartmentMonthView = false
+        state.departmentMonthView = null
+        state.currentDepartment = null
+        state.departmentCategories = []
+        state.departmentTotals = null
+        state.departmentMonthViewError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب عرض الشهر للقسم"
+        )
+        state.error = state.departmentMonthViewError
+      })
+
+      // =========================
+      // Roster Calendar - multi-roster endpoint
+      // =========================
+      .addCase(getDepartmentRosterCalendar.pending, (state) => {
+        state.loadingGetDepartmentRosterCalendar = true
+        state.loadinGetDepartmentCalender = true
+        state.departmentRosterCalendarError = null
+      })
+
+      .addCase(getDepartmentRosterCalendar.fulfilled, (state, action) => {
+        state.loadingGetDepartmentRosterCalendar = false
+        state.loadinGetDepartmentCalender = false
+
+        const data = extractData(action.payload)
+        const list = Array.isArray(data) ? data : data?.items || data?.data || []
+
+        state.departmentRosterCalendar = list
+        state.departmentRosterData = list
+        state.rosterLookup = data?.rosterLookup || {}
+        state.departmentRosterCalendarError = null
+      })
+
+      .addCase(getDepartmentRosterCalendar.rejected, (state, action) => {
+        state.loadingGetDepartmentRosterCalendar = false
+        state.loadinGetDepartmentCalender = false
+        state.departmentRosterCalendar = []
+        state.departmentRosterData = []
+        state.rosterLookup = {}
+        state.departmentRosterCalendarError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب تقويم القسم"
+        )
+        state.error = state.departmentRosterCalendarError
+      })
+
+      // =========================
+      // Roster Structure - recommended for one roster
+      // =========================
+      .addCase(getDepartmentRosterStructure.pending, (state) => {
+        state.loadingGetDepartmentRosterStructure = true
+        state.loadinGetDepartmentCalender = true
+        state.departmentRosterStructureError = null
+      })
+
+      .addCase(getDepartmentRosterStructure.fulfilled, (state, action) => {
+        state.loadingGetDepartmentRosterStructure = false
+        state.loadinGetDepartmentCalender = false
+
+        const data = extractData(action.payload)
+
+        state.departmentRosterStructure = data || null
+        state.departmentRosterStructureError = null
+
+        if (data) {
+          state.departmentRosterData = [data]
+          state.departmentRosterCalendar = [data]
+          state.rosterLookup = {
+            [data.rosterId]: {
+              title: data.rosterTitle,
+              startDate: data.startDate,
+              endDate: data.endDate,
+            },
+          }
+        } else {
+          state.departmentRosterData = []
+          state.departmentRosterCalendar = []
+          state.rosterLookup = {}
+        }
+      })
+
+      .addCase(getDepartmentRosterStructure.rejected, (state, action) => {
+        state.loadingGetDepartmentRosterStructure = false
+        state.loadinGetDepartmentCalender = false
+        state.departmentRosterStructure = null
+        state.departmentRosterData = []
+        state.departmentRosterCalendar = []
+        state.rosterLookup = {}
+        state.departmentRosterStructureError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب هيكل روستر القسم"
+        )
+        state.error = state.departmentRosterStructureError
+      })
+
+      // =========================
+      // GeoFence Create
+      // =========================
+      .addCase(createGeoFence.pending, (state) => {
+        state.loadingCreateGeoFence = true
+        state.createGeoFenceError = null
+        state.createGeoFenceSuccess = false
+        state.createGeoFenceMessage = ""
+      })
+
+      .addCase(createGeoFence.fulfilled, (state, action) => {
+        state.loadingCreateGeoFence = false
+        state.createGeoFenceSuccess = true
+        state.createGeoFenceMessage = extractMessage(
+          action.payload,
+          "تم إنشاء نطاق الحضور بنجاح"
+        )
+        state.createGeoFenceError = null
+
+        const createdFence = extractData(action.payload)
+        if (createdFence?.id) {
+          state.geofences.unshift(createdFence)
+        }
+      })
+
+      .addCase(createGeoFence.rejected, (state, action) => {
+        state.loadingCreateGeoFence = false
+        state.createGeoFenceSuccess = false
+        state.createGeoFenceError = normalizeError(
+          action.payload,
+          "حدث خطأ في إنشاء نطاق الحضور"
+        )
+      })
+
+      // =========================
+      // GeoFence List
+      // =========================
+      .addCase(getDepartmentGeoFences.pending, (state) => {
+        state.loadingGetDepartmentGeofences = true
+        state.loadingGetDepartmentGeoFences = true
+        state.getDepartmentGeoFencesError = null
+      })
+
+      .addCase(getDepartmentGeoFences.fulfilled, (state, action) => {
+        state.loadingGetDepartmentGeofences = false
+        state.loadingGetDepartmentGeoFences = false
+        state.geofences = extractList(action.payload)
+        state.getDepartmentGeoFencesError = null
+      })
+
+      .addCase(getDepartmentGeoFences.rejected, (state, action) => {
+        state.loadingGetDepartmentGeofences = false
+        state.loadingGetDepartmentGeoFences = false
+        state.geofences = []
+        state.getDepartmentGeoFencesError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب نطاقات الحضور"
+        )
+      })
+
+      // =========================
+      // GeoFence Single
+      // =========================
+      .addCase(getGeoFence.pending, (state) => {
+        state.loadingGetGeoFence = true
+        state.getGeoFenceError = null
+      })
+
+      .addCase(getGeoFence.fulfilled, (state, action) => {
+        state.loadingGetGeoFence = false
+        state.selectedGeoFence = extractData(action.payload)
+        state.getGeoFenceError = null
+      })
+
+      .addCase(getGeoFence.rejected, (state, action) => {
+        state.loadingGetGeoFence = false
+        state.selectedGeoFence = null
+        state.getGeoFenceError = normalizeError(
+          action.payload,
+          "حدث خطأ في جلب نطاق الحضور"
+        )
+      })
+
+      // =========================
+      // GeoFence Edit
+      // =========================
+      .addCase(editGeoFence.pending, (state) => {
+        state.loadingEditGeoFence = true
+        state.editGeoFenceError = null
+        state.editGeoFenceSuccess = false
+        state.editGeoFenceMessage = ""
+      })
+
+      .addCase(editGeoFence.fulfilled, (state, action) => {
+        state.loadingEditGeoFence = false
+        state.editGeoFenceSuccess = true
+        state.editGeoFenceMessage = extractMessage(
+          action.payload,
+          "تم تعديل نطاق الحضور بنجاح"
+        )
+        state.editGeoFenceError = null
+
+        const updatedFence = extractData(action.payload)
+
+        if (updatedFence?.id) {
+          state.selectedGeoFence = updatedFence
+          state.geofences = state.geofences.map((fence) =>
+            Number(fence.id) === Number(updatedFence.id)
+              ? updatedFence
+              : fence
+          )
+        }
+      })
+
+      .addCase(editGeoFence.rejected, (state, action) => {
+        state.loadingEditGeoFence = false
+        state.editGeoFenceSuccess = false
+        state.editGeoFenceError = normalizeError(
+          action.payload,
+          "حدث خطأ في تعديل نطاق الحضور"
+        )
+      })
+
+      // =========================
+      // GeoFence Delete
+      // =========================
+      .addCase(deleteGeoFence.pending, (state) => {
+        state.loadingDeleteGeoFence = true
+        state.deleteGeoFenceError = null
+        state.deleteGeoFenceSuccess = false
+        state.deleteGeoFenceMessage = ""
+      })
+
+      .addCase(deleteGeoFence.fulfilled, (state, action) => {
+        state.loadingDeleteGeoFence = false
+        state.deleteGeoFenceSuccess = true
+        state.deleteGeoFenceMessage = extractMessage(
+          action.payload,
+          "تم حذف نطاق الحضور بنجاح"
+        )
+        state.deleteGeoFenceError = null
+
+        const fenceId = action.payload?.fenceId || action.meta?.arg?.fenceId
+
+        state.geofences = state.geofences.filter(
+          (fence) => Number(fence.id) !== Number(fenceId)
+        )
+      })
+
+      .addCase(deleteGeoFence.rejected, (state, action) => {
+        state.loadingDeleteGeoFence = false
+        state.deleteGeoFenceSuccess = false
+        state.deleteGeoFenceError = normalizeError(
+          action.payload,
+          "حدث خطأ في حذف نطاق الحضور"
+        )
       })
   },
 })
 
 export const {
-  // Department filters
+  // Filters
   setFilters,
   clearFilters,
   setCurrentPage,
   setPageSize,
   setCategoryFilter,
+  setLinkedCategoryFilter,
 
   // Department data
   clearDepartments,
   clearError,
 
-  // Department success/error clearing
+  // Create / update / delete
   clearCreateSuccess,
   clearUpdateSuccess,
   clearDeleteSuccess,
-
-  // Department form resets
   resetCreateForm,
   resetUpdateForm,
   resetDeleteForm,
@@ -653,15 +1341,64 @@ export const {
   // Single department
   clearSingleDepartment,
   clearSingleDepartmentError,
+
+  // Department categories
+  clearDepartmentCategories,
+  clearAvailableDepartmentsForCategory,
+  clearDepartmentsByCategory,
+  clearLinkDepartmentToCategoryState,
+  clearUnlinkDepartmentFromCategoryState,
+
+  // Managers
+  clearDepartmentManagers,
+  clearDepartmentsWithManagers,
+  clearAssignManagerState,
+  clearRemoveManagerState,
+  clearUpdateManagerPermissionState,
+
+  // Month / calendar / structure
+  clearDepartmentMonthList,
+  clearDepartmentMonthView,
+  clearDepartmentRosterCalendar,
+  clearDepartmentRosterStructure,
+
+  // GeoFence
+  clearGeoFences,
+  clearSelectedGeoFence,
+  clearCreateGeoFenceState,
+  clearEditGeoFenceState,
+  clearDeleteGeoFenceState,
 } = departmentSlice.actions
 
 export default departmentSlice.reducer
 
-// Export async thunks
 export {
-  getDepartments,
   createDepartment,
+  getDepartments,
   getDepartmentById,
   updateDepartment,
   deleteDepartment,
+
+  getDepartmentCategories,
+  getAvailableDepartmentsForCategory,
+  getDepartmentsByCategory,
+  linkDepartmentToCategory,
+  unlinkDepartmentFromCategory,
+
+  getDepartmentManagers,
+  getDepartmentsWithManagers,
+  updateManagerPermission,
+  removeDepManager,
+  assignDepManager,
+
+  getDepartmentMonthList,
+  getDepartmentMonthView,
+  getDepartmentRosterCalendar,
+  getDepartmentRosterStructure,
+
+  createGeoFence,
+  getDepartmentGeoFences,
+  getGeoFence,
+  editGeoFence,
+  deleteGeoFence,
 }

@@ -4,10 +4,13 @@ import { useParams, Link } from "react-router-dom"
 import {
   autoAcceptRequests,
   getRosterById,
+  getRosterAttendanceReport,
+  getRosterAttendanceSummary,
 } from "../../../state/act/actRosterManagement"
 import { useTranslation } from "react-i18next"
 import LoadingGetData from "../../../components/LoadingGetData"
 import ModalUpdateRosterStatus from "../../../components/modals/ModalUpdateRosterStatus"
+import RosterAttendanceTab from "./RosterAttendanceTab"
 import {
   ArrowLeft,
   ArrowRight,
@@ -43,15 +46,20 @@ function RosterDetails() {
   const theme = getPageTheme()
 
   const [statusModalOpen, setStatusModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("details")
   const [statusToUpdate, setStatusToUpdate] = useState({
     id: null,
     title: "",
     currentStatus: "",
   })
 
-  const { selectedRoster, loading, errors } = useSelector(
-    (state) => state.rosterManagement
-  )
+  const {
+    selectedRoster,
+    loading,
+    errors,
+    rosterAttendanceReport,
+    rosterAttendanceSummary,
+  } = useSelector((state) => state.rosterManagement)
 
   const { loginRoleResponseDto } = useSelector((state) => state.auth)
 
@@ -92,6 +100,8 @@ function RosterDetails() {
   useEffect(() => {
     if (rosterId) {
       dispatch(getRosterById({ rosterId }))
+      dispatch(getRosterAttendanceReport({ rosterId }))
+      dispatch(getRosterAttendanceSummary({ rosterId }))
     }
   }, [dispatch, rosterId, statusModalOpen])
 
@@ -221,7 +231,9 @@ function RosterDetails() {
   )
 
   const DateRow = ({ icon: Icon, iconClass, bgClass, label, value }) => (
-    <div className={`flex items-center justify-between p-3 rounded-xl ${bgClass}`}>
+    <div
+      className={`flex items-center justify-between p-3 rounded-xl ${bgClass}`}
+    >
       <div className="flex items-center">
         <Icon className={`h-5 w-5 ${iconClass} ${isRTL ? "ml-2" : "mr-2"}`} />
 
@@ -234,17 +246,34 @@ function RosterDetails() {
     </div>
   )
 
-  if (loading.fetch) {
+  const TabButton = ({ id, icon: Icon, label }) => (
+    <button
+      type="button"
+      onClick={() => setActiveTab(id)}
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+        activeTab === id
+          ? "bg-[var(--color-primary)] text-white"
+          : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text)]"
+      }`}
+    >
+      <Icon size={16} />
+      {label}
+    </button>
+  )
+
+  if (loading?.fetch) {
     return <LoadingGetData text={t("gettingData.roster")} />
   }
 
-  if (errors.general) {
+  if (errors?.general) {
     return (
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-4xl mx-auto">
           <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
-              <div className="text-red-500 text-lg mb-4">{errors.general}</div>
+              <div className="text-red-500 text-lg mb-4">
+                {errors.general}
+              </div>
 
               {loginRoleResponseDto?.roleNameEn === "System Administrator" && (
                 <Link to="/admin-panel/rosters" className={theme.primaryButton}>
@@ -431,442 +460,490 @@ function RosterDetails() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className={`${theme.card} p-6`}>
-              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 flex items-center">
-                <Info
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    iconColors.info
-                  }`}
-                />
-                {t("roster.details.basicInfo")}
-              </h2>
+        <div className={`${theme.card} p-4 mb-6`}>
+          <div className="flex flex-wrap gap-2">
+            <TabButton
+              id="details"
+              icon={Info}
+              label={
+                currentLang === "ar" ? "تفاصيل الروستر" : "Roster Details"
+              }
+            />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InfoField label={t("roster.form.title")}>
-                  {selectedRoster.title}
-                </InfoField>
+            <TabButton
+              id="attendance"
+              icon={Activity}
+              label={currentLang === "ar" ? "الحضور" : "Attendance"}
+            />
+          </div>
+        </div>
 
-                <InfoField label={t("roster.form.category")}>
-                  {selectedRoster.categoryName}
-                </InfoField>
+        {activeTab === "details" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className={`${theme.card} p-6`}>
+                <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 flex items-center">
+                  <Info
+                    className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
+                      iconColors.info
+                    }`}
+                  />
+                  {t("roster.details.basicInfo")}
+                </h2>
 
-                <InfoField label={t("roster.form.month")}>
-                  {selectedRoster.month}/{selectedRoster.year}
-                </InfoField>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InfoField label={t("roster.form.title")}>
+                    {selectedRoster.title}
+                  </InfoField>
 
-                <InfoField label={t("roster.dayss")}>
-                  <div className="flex items-center">
-                    <Calendar
-                      className={`${iconColors.muted} ${
-                        isRTL ? "ml-2" : "mr-2"
-                      }`}
-                      size={18}
-                    />
-                    <span>
-                      {selectedRoster.totalDays} {t("roster.dayss")}
+                  <InfoField label={t("roster.form.category")}>
+                    {selectedRoster.categoryName}
+                  </InfoField>
+
+                  <InfoField label={t("roster.form.month")}>
+                    {selectedRoster.month}/{selectedRoster.year}
+                  </InfoField>
+
+                  <InfoField label={t("roster.dayss")}>
+                    <div className="flex items-center">
+                      <Calendar
+                        className={`${iconColors.muted} ${
+                          isRTL ? "ml-2" : "mr-2"
+                        }`}
+                        size={18}
+                      />
+                      <span>
+                        {selectedRoster.totalDays} {t("roster.dayss")}
+                      </span>
+                    </div>
+                  </InfoField>
+
+                  <InfoField label={t("roster.form.submissionDeadline")}>
+                    <div className="flex items-center">
+                      <AlertCircle
+                        className={`${iconColors.deadline} ${
+                          isRTL ? "ml-2" : "mr-2"
+                        }`}
+                        size={18}
+                      />
+                      <span>
+                        {formatDate(selectedRoster.submissionDeadline)}
+                      </span>
+                    </div>
+                  </InfoField>
+
+                  <InfoField label={t("roster.table.status")}>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${statusInfo.color}`}
+                    >
+                      <StatusIcon
+                        size={14}
+                        className={isRTL ? "ml-1" : "mr-1"}
+                      />
+                      {statusInfo.name}
                     </span>
-                  </div>
-                </InfoField>
+                  </InfoField>
 
-                <InfoField label={t("roster.form.submissionDeadline")}>
-                  <div className="flex items-center">
-                    <AlertCircle
-                      className={`${iconColors.deadline} ${
-                        isRTL ? "ml-2" : "mr-2"
-                      }`}
-                      size={18}
-                    />
-                    <span>{formatDate(selectedRoster.submissionDeadline)}</span>
-                  </div>
-                </InfoField>
+                  {selectedRoster.description && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
+                        {t("roster.form.description")}
+                      </label>
 
-                <InfoField label={t("roster.table.status")}>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${statusInfo.color}`}
-                  >
-                    <StatusIcon
-                      size={14}
-                      className={isRTL ? "ml-1" : "mr-1"}
-                    />
-                    {statusInfo.name}
-                  </span>
-                </InfoField>
+                      <div className={`${theme.cardSoft} p-3`}>
+                        <div className="flex items-start">
+                          <FileText
+                            className={`h-5 w-5 ${iconColors.file} ${
+                              isRTL ? "ml-2" : "mr-2"
+                            } mt-0.5 flex-shrink-0`}
+                          />
 
-                {selectedRoster.description && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
-                      {t("roster.form.description")}
-                    </label>
-
-                    <div className={`${theme.cardSoft} p-3`}>
-                      <div className="flex items-start">
-                        <FileText
-                          className={`h-5 w-5 ${iconColors.file} ${
-                            isRTL ? "ml-2" : "mr-2"
-                          } mt-0.5 flex-shrink-0`}
-                        />
-
-                        <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
-                          {selectedRoster.description}
-                        </p>
+                          <p className="text-sm text-[var(--color-text-muted)] leading-relaxed">
+                            {selectedRoster.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className={`${theme.card} p-6`}>
-              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 flex items-center">
-                <TrendingUp
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    iconColors.info
-                  }`}
-                />
-                {t("roster.details.progress")}
-              </h2>
+              <div className={`${theme.card} p-6`}>
+                <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 flex items-center">
+                  <TrendingUp
+                    className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
+                      iconColors.info
+                    }`}
+                  />
+                  {t("roster.details.progress")}
+                </h2>
 
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-semibold text-[var(--color-text-muted)]">
-                    {t("roster.completionPercentage")}
-                  </span>
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-semibold text-[var(--color-text-muted)]">
+                      {t("roster.completionPercentage")}
+                    </span>
 
-                  <span
-                    className={`text-sm font-bold ${getProgressTextColor(
-                      selectedRoster.completionPercentage
-                    )}`}
-                  >
-                    {Math.round(selectedRoster.completionPercentage)}%
-                  </span>
+                    <span
+                      className={`text-sm font-bold ${getProgressTextColor(
+                        selectedRoster.completionPercentage
+                      )}`}
+                    >
+                      {Math.round(selectedRoster.completionPercentage)}%
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-[var(--color-bg-soft)] rounded-full h-3 overflow-hidden">
+                    <div
+                      className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(
+                        selectedRoster.completionPercentage
+                      )}`}
+                      style={{
+                        width: `${Math.min(
+                          selectedRoster.completionPercentage,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
                 </div>
 
-                <div className="w-full bg-[var(--color-bg-soft)] rounded-full h-3 overflow-hidden">
-                  <div
-                    className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <StatBox
+                    icon={Building}
+                    iconClass={iconColors.calendar}
+                    bgClass="bg-blue-50 dark:bg-blue-900/20"
+                    value={selectedRoster.departmentsCount}
+                    label={t("roster.departments")}
+                  />
+
+                  <StatBox
+                    icon={Briefcase}
+                    iconClass={iconColors.briefcase}
+                    bgClass="bg-green-50 dark:bg-green-900/20"
+                    value={selectedRoster.shiftsCount}
+                    label={t("roster.shifts")}
+                  />
+
+                  <StatBox
+                    icon={Timer}
+                    iconClass={iconColors.timer}
+                    bgClass="bg-purple-50 dark:bg-purple-900/20"
+                    value={selectedRoster.workingHoursCount}
+                    label={t("roster.workingHours.title")}
+                  />
+
+                  <StatBox
+                    icon={Target}
+                    iconClass={iconColors.target}
+                    bgClass="bg-orange-50 dark:bg-orange-900/20"
+                    value={`${Math.round(
                       selectedRoster.completionPercentage
-                    )}`}
-                    style={{
-                      width: `${Math.min(
-                        selectedRoster.completionPercentage,
-                        100
-                      )}%`,
-                    }}
+                    )}%`}
+                    label={t("roster.completed")}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatBox
-                  icon={Building}
-                  iconClass={iconColors.calendar}
-                  bgClass="bg-blue-50 dark:bg-blue-900/20"
-                  value={selectedRoster.departmentsCount}
-                  label={t("roster.departments")}
-                />
+              <div className={`${theme.card} p-6`}>
+                <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 flex items-center">
+                  <Settings
+                    className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
+                      iconColors.settings
+                    }`}
+                  />
+                  {t("roster.details.settings")}
+                </h2>
 
-                <StatBox
-                  icon={Briefcase}
-                  iconClass={iconColors.briefcase}
-                  bgClass="bg-green-50 dark:bg-green-900/20"
-                  value={selectedRoster.shiftsCount}
-                  label={t("roster.shifts")}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
+                      {t("roster.form.allowLeaveRequests")}
+                    </label>
 
-                <StatBox
-                  icon={Timer}
-                  iconClass={iconColors.timer}
-                  bgClass="bg-purple-50 dark:bg-purple-900/20"
-                  value={selectedRoster.workingHoursCount}
-                  label={t("roster.workingHours.title")}
-                />
+                    <BooleanBadge value={selectedRoster.allowLeaveRequests} />
+                  </div>
 
-                <StatBox
-                  icon={Target}
-                  iconClass={iconColors.target}
-                  bgClass="bg-orange-50 dark:bg-orange-900/20"
-                  value={`${Math.round(selectedRoster.completionPercentage)}%`}
-                  label={t("roster.completed")}
-                />
-              </div>
-            </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
+                      {t("roster.form.allowSwapRequests")}
+                    </label>
 
-            <div className={`${theme.card} p-6`}>
-              <h2 className="text-xl font-semibold text-[var(--color-text)] mb-6 flex items-center">
-                <Settings
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    iconColors.settings
-                  }`}
-                />
-                {t("roster.details.settings")}
-              </h2>
+                    <BooleanBadge value={selectedRoster.allowSwapRequests} />
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
-                    {t("roster.form.allowLeaveRequests")}
-                  </label>
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
+                      {t("roster.form.autoAcceptRequests")}
+                    </label>
 
-                  <BooleanBadge value={selectedRoster.allowLeaveRequests} />
-                </div>
+                    <div className="flex items-center gap-3">
+                      <BooleanBadge value={selectedRoster.autoAcceptRequests} />
 
-                <div>
-                  <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
-                    {t("roster.form.allowSwapRequests")}
-                  </label>
-
-                  <BooleanBadge value={selectedRoster.allowSwapRequests} />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-[var(--color-text-muted)] mb-2">
-                    {t("roster.form.autoAcceptRequests")}
-                  </label>
-
-                  <div className="flex items-center gap-3">
-                    <BooleanBadge value={selectedRoster.autoAcceptRequests} />
-
-                    <button
-                      type="button"
-                      onClick={changeAutoAcceptedStatus}
-                      disabled={loading.update}
-                      className="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      {loading.update ? (
-                        <>
-                          <div
-                            className={`animate-spin h-4 w-4 rounded-full border-b-2 border-white ${
-                              isRTL ? "ml-2" : "mr-2"
-                            }`}
-                          />
-                          {t("roster.actions.updating")}
-                        </>
-                      ) : (
-                        <>
-                          <Edit
-                            size={14}
-                            className={isRTL ? "ml-1.5" : "mr-1.5"}
-                          />
-                          {t("roster.actions.change")}
-                        </>
-                      )}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={changeAutoAcceptedStatus}
+                        disabled={loading?.update}
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {loading?.update ? (
+                          <>
+                            <div
+                              className={`animate-spin h-4 w-4 rounded-full border-b-2 border-white ${
+                                isRTL ? "ml-2" : "mr-2"
+                              }`}
+                            />
+                            {t("roster.actions.updating")}
+                          </>
+                        ) : (
+                          <>
+                            <Edit
+                              size={14}
+                              className={isRTL ? "ml-1.5" : "mr-1.5"}
+                            />
+                            {t("roster.actions.change")}
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-6">
-            <div className={`${theme.card} p-6`}>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center">
-                <Activity
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    iconColors.activity
-                  }`}
-                />
-                {t("roster.details.quickActions")}
-              </h3>
+            <div className="space-y-6">
+              <div className={`${theme.card} p-6`}>
+                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center">
+                  <Activity
+                    className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
+                      iconColors.activity
+                    }`}
+                  />
+                  {t("roster.details.quickActions")}
+                </h3>
 
-              <div className="space-y-3">
-                <Link to={`/admin-panel/rosters/departments`} className="block">
+                <div className="space-y-3">
+                  <Link
+                    to={`/admin-panel/rosters/departments`}
+                    className="block"
+                  >
+                    <button
+                      type="button"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                    >
+                      <Building size={18} />
+                      {t("roster.actions.manageRoster")}
+                    </button>
+                  </Link>
+
                   <button
                     type="button"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                    onClick={openStatusModal}
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
                   >
-                    <Building size={18} />
-                    {t("roster.actions.manageRoster")}
+                    <Settings size={18} />
+                    {t("roster.actions.updateStatus")}
                   </button>
-                </Link>
 
-                <button
-                  type="button"
-                  onClick={openStatusModal}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
-                >
-                  <Settings size={18} />
-                  {t("roster.actions.updateStatus")}
-                </button>
-
-                <Link
-                  to={`/admin-panel/rosters/${selectedRoster.id}/edit`}
-                  className="block"
-                >
-                  <button
-                    type="button"
-                    className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                  <Link
+                    to={`/admin-panel/rosters/${selectedRoster.id}/edit`}
+                    className="block"
                   >
-                    <Edit size={18} />
-                    {t("roster.actions.editRoster")}
-                  </button>
-                </Link>
+                    <button
+                      type="button"
+                      className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                    >
+                      <Edit size={18} />
+                      {t("roster.actions.editRoster")}
+                    </button>
+                  </Link>
 
-                <Link
-                  to={`/admin-panel/rosters/${selectedRoster.id}/doctors`}
-                  className="block"
-                >
-                  <button
-                    type="button"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                  <Link
+                    to={`/admin-panel/rosters/${selectedRoster.id}/doctors`}
+                    className="block"
                   >
-                    <User size={18} />
-                    {t("roster.actions.doctors")}
-                  </button>
-                </Link>
-
-                <Link
-                  to={`/admin-panel/rosters/${selectedRoster.id}/manage-doctors`}
-                  className="block"
-                >
-                  <button
-                    type="button"
-                    className="w-full relative rounded-lg p-[2px] bg-gradient-to-r from-pink-500 via-yellow-400 to-blue-400 transition-all duration-200 transform hover:scale-105"
-                  >
-                    <span className="flex items-center justify-center gap-2 w-full h-full bg-gray-900 rounded-md p-3 text-white">
+                    <button
+                      type="button"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                    >
                       <User size={18} />
-                      {t("roster.actions.manageDoctors")}
-                    </span>
-                  </button>
-                </Link>
+                      {t("roster.actions.doctors")}
+                    </button>
+                  </Link>
 
-                <Link
-                  to={`/admin-panel/rosters/${selectedRoster.id}/working-hours`}
-                  className="block"
-                >
-                  <button
-                    type="button"
-                    className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                  <Link
+                    to={`/admin-panel/rosters/${selectedRoster.id}/manage-doctors`}
+                    className="block"
                   >
-                    <Clock size={16} />
-                    {t("roster.workingHours.title")}
-                  </button>
-                </Link>
+                    <button
+                      type="button"
+                      className="w-full relative rounded-lg p-[2px] bg-gradient-to-r from-pink-500 via-yellow-400 to-blue-400 transition-all duration-200 transform hover:scale-105"
+                    >
+                      <span className="flex items-center justify-center gap-2 w-full h-full bg-gray-900 rounded-md p-3 text-white">
+                        <User size={18} />
+                        {t("roster.actions.manageDoctors")}
+                      </span>
+                    </button>
+                  </Link>
+
+                  <Link
+                    to={`/admin-panel/rosters/${selectedRoster.id}/working-hours`}
+                    className="block"
+                  >
+                    <button
+                      type="button"
+                      className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                    >
+                      <Clock size={16} />
+                      {t("roster.workingHours.title")}
+                    </button>
+                  </Link>
+                </div>
               </div>
-            </div>
 
-            <div className={`${theme.card} p-6`}>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center">
-                <Calendar
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    iconColors.calendar
-                  }`}
-                />
-                {t("roster.details.dateInfo")}
-              </h3>
+              <div className={`${theme.card} p-6`}>
+                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center">
+                  <Calendar
+                    className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
+                      iconColors.calendar
+                    }`}
+                  />
+                  {t("roster.details.dateInfo")}
+                </h3>
 
-              <div className="space-y-4">
-                <DateRow
-                  icon={PlusCircle}
-                  iconClass={iconColors.plus}
-                  bgClass="bg-green-50 dark:bg-green-900/20"
-                  label={t("roster.details.startDate")}
-                  value={formatDate(selectedRoster.startDate)}
-                />
+                <div className="space-y-4">
+                  <DateRow
+                    icon={PlusCircle}
+                    iconClass={iconColors.plus}
+                    bgClass="bg-green-50 dark:bg-green-900/20"
+                    label={t("roster.details.startDate")}
+                    value={formatDate(selectedRoster.startDate)}
+                  />
 
-                <DateRow
-                  icon={XCircle}
-                  iconClass={iconColors.danger}
-                  bgClass="bg-red-50 dark:bg-red-900/20"
-                  label={t("roster.details.endDate")}
-                  value={formatDate(selectedRoster.endDate)}
-                />
+                  <DateRow
+                    icon={XCircle}
+                    iconClass={iconColors.danger}
+                    bgClass="bg-red-50 dark:bg-red-900/20"
+                    label={t("roster.details.endDate")}
+                    value={formatDate(selectedRoster.endDate)}
+                  />
 
-                <DateRow
-                  icon={AlertCircle}
-                  iconClass={iconColors.deadline}
-                  bgClass="bg-orange-50 dark:bg-orange-900/20"
-                  label={t("roster.details.deadline")}
-                  value={formatDate(selectedRoster.submissionDeadline)}
-                />
+                  <DateRow
+                    icon={AlertCircle}
+                    iconClass={iconColors.deadline}
+                    bgClass="bg-orange-50 dark:bg-orange-900/20"
+                    label={t("roster.details.deadline")}
+                    value={formatDate(selectedRoster.submissionDeadline)}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className={`${theme.card} p-6`}>
-              <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center">
-                <Clock
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    iconColors.calendar
-                  }`}
-                />
-                {t("roster.details.auditInfo")}
-              </h3>
+              <div className={`${theme.card} p-6`}>
+                <h3 className="text-lg font-semibold text-[var(--color-text)] mb-4 flex items-center">
+                  <Clock
+                    className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
+                      iconColors.calendar
+                    }`}
+                  />
+                  {t("roster.details.auditInfo")}
+                </h3>
 
-              <div className="space-y-4">
-                <InfoField label={t("roster.details.createdAt")}>
-                  <p className="text-sm">{formatDate(selectedRoster.createdAt)}</p>
-                </InfoField>
-
-                {selectedRoster.createdByName && (
-                  <InfoField label={t("roster.details.createdBy")}>
-                    <div className="flex items-center">
-                      <User
-                        className={`h-4 w-4 ${iconColors.muted} ${
-                          isRTL ? "ml-2" : "mr-2"
-                        }`}
-                      />
-                      <span className="text-sm">
-                        {selectedRoster.createdByName}
-                      </span>
-                    </div>
+                <div className="space-y-4">
+                  <InfoField label={t("roster.details.createdAt")}>
+                    <p className="text-sm">
+                      {formatDate(selectedRoster.createdAt)}
+                    </p>
                   </InfoField>
-                )}
 
-                {selectedRoster.updatedAt && (
-                  <InfoField label={t("roster.details.updatedAt")}>
-                    <p className="text-sm">{formatDate(selectedRoster.updatedAt)}</p>
-                  </InfoField>
-                )}
+                  {selectedRoster.createdByName && (
+                    <InfoField label={t("roster.details.createdBy")}>
+                      <div className="flex items-center">
+                        <User
+                          className={`h-4 w-4 ${iconColors.muted} ${
+                            isRTL ? "ml-2" : "mr-2"
+                          }`}
+                        />
+                        <span className="text-sm">
+                          {selectedRoster.createdByName}
+                        </span>
+                      </div>
+                    </InfoField>
+                  )}
 
-                {selectedRoster.updatedByName && (
-                  <InfoField label={t("roster.details.updatedBy")}>
-                    <div className="flex items-center">
-                      <User
-                        className={`h-4 w-4 ${iconColors.muted} ${
-                          isRTL ? "ml-2" : "mr-2"
-                        }`}
-                      />
-                      <span className="text-sm">
-                        {selectedRoster.updatedByName}
-                      </span>
-                    </div>
-                  </InfoField>
-                )}
+                  {selectedRoster.updatedAt && (
+                    <InfoField label={t("roster.details.updatedAt")}>
+                      <p className="text-sm">
+                        {formatDate(selectedRoster.updatedAt)}
+                      </p>
+                    </InfoField>
+                  )}
 
-                {selectedRoster.publishedAt && (
-                  <InfoField label={t("roster.details.publishedAt")}>
-                    <div className="flex items-center">
-                      <CheckCircle
-                        className={`h-4 w-4 ${iconColors.success} ${
-                          isRTL ? "ml-2" : "mr-2"
-                        }`}
-                      />
-                      <span className="text-sm">
-                        {formatDate(selectedRoster.publishedAt)}
-                      </span>
-                    </div>
-                  </InfoField>
-                )}
+                  {selectedRoster.updatedByName && (
+                    <InfoField label={t("roster.details.updatedBy")}>
+                      <div className="flex items-center">
+                        <User
+                          className={`h-4 w-4 ${iconColors.muted} ${
+                            isRTL ? "ml-2" : "mr-2"
+                          }`}
+                        />
+                        <span className="text-sm">
+                          {selectedRoster.updatedByName}
+                        </span>
+                      </div>
+                    </InfoField>
+                  )}
 
-                {selectedRoster.closedAt && (
-                  <InfoField label={t("roster.details.closedAt")}>
-                    <div className="flex items-center">
-                      <XCircle
-                        className={`h-4 w-4 ${iconColors.danger} ${
-                          isRTL ? "ml-2" : "mr-2"
-                        }`}
-                      />
-                      <span className="text-sm">
-                        {formatDate(selectedRoster.closedAt)}
-                      </span>
-                    </div>
-                  </InfoField>
-                )}
+                  {selectedRoster.publishedAt && (
+                    <InfoField label={t("roster.details.publishedAt")}>
+                      <div className="flex items-center">
+                        <CheckCircle
+                          className={`h-4 w-4 ${iconColors.success} ${
+                            isRTL ? "ml-2" : "mr-2"
+                          }`}
+                        />
+                        <span className="text-sm">
+                          {formatDate(selectedRoster.publishedAt)}
+                        </span>
+                      </div>
+                    </InfoField>
+                  )}
+
+                  {selectedRoster.closedAt && (
+                    <InfoField label={t("roster.details.closedAt")}>
+                      <div className="flex items-center">
+                        <XCircle
+                          className={`h-4 w-4 ${iconColors.danger} ${
+                            isRTL ? "ml-2" : "mr-2"
+                          }`}
+                        />
+                        <span className="text-sm">
+                          {formatDate(selectedRoster.closedAt)}
+                        </span>
+                      </div>
+                    </InfoField>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === "attendance" && (
+          <RosterAttendanceTab
+            report={rosterAttendanceReport}
+            summary={rosterAttendanceSummary}
+            loading={
+              loading?.rosterAttendanceReport ||
+              loading?.rosterAttendanceSummary
+            }
+            error={
+              errors?.rosterAttendanceReport ||
+              errors?.rosterAttendanceSummary
+            }
+            currentLang={currentLang}
+            isRTL={isRTL}
+          />
+        )}
       </div>
     </div>
   )

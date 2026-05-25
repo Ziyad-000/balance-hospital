@@ -884,3 +884,57 @@ export const getStatusName = (status) => {
       return "Unknown"
   }
 }
+
+// ===================================================================
+// ROSTER ATTENDANCE REPORTS
+// ===================================================================
+
+const unwrapApiResponse = (response) => {
+  return response?.data?.data || response?.data
+}
+
+export const getRosterAttendanceReport = createAsyncThunk(
+  "rosterManagement/getRosterAttendanceReport",
+  async (
+    { rosterId, departmentId, doctorId, scientificDegreeId },
+    { rejectWithValue }
+  ) => {
+    try {
+      const params = buildQueryParams({
+        departmentId,
+        doctorId,
+        scientificDegreeId,
+      })
+
+      const url = `/api/v1/ScheduleReporting/attendance/roster/${rosterId}${
+        params ? `?${params}` : ""
+      }`
+
+      const res = await axiosInstance.get(url, {
+        headers: getAuthHeaders(),
+      })
+
+      return unwrapApiResponse(res)
+    } catch (error) {
+      return handleError(error, rejectWithValue)
+    }
+  }
+)
+
+export const getRosterAttendanceSummary = createAsyncThunk(
+  "rosterManagement/getRosterAttendanceSummary",
+  async ({ rosterId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/Attendance/roster/${rosterId}/summary`,
+        {
+          headers: getAuthHeaders(),
+        }
+      )
+
+      return unwrapApiResponse(res)
+    } catch (error) {
+      return handleError(error, rejectWithValue)
+    }
+  }
+)

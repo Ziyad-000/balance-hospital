@@ -60,6 +60,9 @@ import {
   getDoctorsRequests,
   autoAcceptRequests,
   getRosterTree,
+
+  getRosterAttendanceReport,
+  getRosterAttendanceSummary,
 } from "../act/actRosterManagement"
 import i18next from "i18next"
 
@@ -68,6 +71,11 @@ import i18next from "i18next"
 // ===================================================================
 
 const initialState = {
+
+  // Additional
+  rosterAttendanceReport: null,
+  rosterAttendanceSummary: null,
+  
   // ===== ROSTER DATA (بيانات الروستر) =====
   rosters: [],
   selectedRoster: null,
@@ -135,6 +143,9 @@ const initialState = {
   shiftContractingTypes: {},
   // ===== LOADING STATES (حالات التحميل) =====
   loading: {
+
+    rosterAttendanceReport: false,
+    rosterAttendanceSummary: false,
     // Phase Operations
     createBasic: false,
     addShifts: false,
@@ -183,6 +194,8 @@ const initialState = {
     // Search Operations
     search: false,
     schedule: false,
+
+    
   },
 
   // ===== SUCCESS STATES (حالات النجاح) =====
@@ -209,6 +222,8 @@ const initialState = {
 
   // ===== ERROR STATES (حالات الأخطاء) =====
   errors: {
+    rosterAttendanceReport: null,
+    rosterAttendanceSummary: null,
     general: null,
     rosterTree: null,
     workingHours: null,
@@ -258,6 +273,17 @@ const rosterManagementSlice = createSlice({
   name: "rosterManagement",
   initialState,
   reducers: {
+
+
+    clearRosterAttendanceReport: (state) => {
+      state.rosterAttendanceReport = null
+      state.rosterAttendanceSummary = null
+      state.loading.rosterAttendanceReport = false
+      state.loading.rosterAttendanceSummary = false
+      state.errors.rosterAttendanceReport = null
+      state.errors.rosterAttendanceSummary = null
+    },
+
     // ===== ERROR MANAGEMENT (إدارة الأخطاء) =====
     clearAllErrors: (state) => {
       Object.keys(state.errors).forEach((key) => {
@@ -519,6 +545,45 @@ const rosterManagementSlice = createSlice({
   },
 
   extraReducers: (builder) => {
+
+    // ===================================================================
+// ROSTER ATTENDANCE REPORT
+// ===================================================================
+builder
+  .addCase(getRosterAttendanceReport.pending, (state) => {
+    state.loading.rosterAttendanceReport = true
+    state.errors.rosterAttendanceReport = null
+  })
+  .addCase(getRosterAttendanceReport.fulfilled, (state, action) => {
+    state.loading.rosterAttendanceReport = false
+    state.rosterAttendanceReport = action.payload || null
+    state.errors.rosterAttendanceReport = null
+  })
+  .addCase(getRosterAttendanceReport.rejected, (state, action) => {
+    state.loading.rosterAttendanceReport = false
+    state.errors.rosterAttendanceReport =
+      action.payload || "Failed to load roster attendance report"
+  })
+
+// ===================================================================
+// ROSTER ATTENDANCE SUMMARY
+// ===================================================================
+builder
+  .addCase(getRosterAttendanceSummary.pending, (state) => {
+    state.loading.rosterAttendanceSummary = true
+    state.errors.rosterAttendanceSummary = null
+  })
+  .addCase(getRosterAttendanceSummary.fulfilled, (state, action) => {
+    state.loading.rosterAttendanceSummary = false
+    state.rosterAttendanceSummary = action.payload || null
+    state.errors.rosterAttendanceSummary = null
+  })
+  .addCase(getRosterAttendanceSummary.rejected, (state, action) => {
+    state.loading.rosterAttendanceSummary = false
+    state.errors.rosterAttendanceSummary =
+      action.payload || "Failed to load roster attendance summary"
+  })
+
     // ===================================================================
     // PHASE 1: BASIC STRUCTURE (المرحلة 1: الهيكل الأساسي)
     // ===================================================================
@@ -1276,6 +1341,9 @@ const rosterManagementSlice = createSlice({
 // ===================================================================
 
 export const {
+
+  clearRosterAttendanceReport,
+  
   // Error Management
   clearAllErrors,
   clearSpecificError,

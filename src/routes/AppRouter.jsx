@@ -13,9 +13,11 @@ import AdminPanelIndex from "../pages/adminPanel/homePanel.jsx"
 import SpecifyRole from "../pages/adminPanel/specifyRole.jsx"
 
 const Leaves = lazy(() => import("../pages/adminPanel/category/Leaves.jsx"))
+
 const DoctorReports = lazy(() =>
   import("../pages/adminPanel/reports/doctorReports.jsx")
 )
+
 const Dashboard = lazy(() => import("../pages/adminPanel/dashboard/index.jsx"))
 
 const Notification = lazy(() => import("../pages/adminPanel/notification"))
@@ -32,22 +34,31 @@ const EditDoctorData = lazy(() =>
 const EditWorkingHour = lazy(() =>
   import("../pages/adminPanel/roster/editWorkingHours")
 )
+
 const DoctorSchedule = lazy(() =>
   import("../pages/adminPanel/roster/doctorSchedule")
 )
+
 const AssignDoctor = lazy(() =>
   import("../pages/adminPanel/roster/assignDoctor")
 )
+
 const WorkingHours = lazy(() =>
   import("../pages/adminPanel/roster/workingHours")
 )
-const WorkingHour = lazy(() => import("../pages/adminPanel/roster/workingHour"))
+
+const WorkingHour = lazy(() =>
+  import("../pages/adminPanel/roster/workingHour")
+)
+
 const EditWorkingHours = lazy(() =>
   import("../pages/adminPanel/roster/editWorkingHours")
 )
+
 const RosterDepartments = lazy(() =>
   import("../pages/adminPanel/roster/rosterDepartments")
 )
+
 const GenerateWorkingHours = lazy(() =>
   import("../pages/adminPanel/roster/generateWorkingHours")
 )
@@ -56,7 +67,7 @@ const GenerateWorkingHours = lazy(() =>
 const RootLayout = lazy(() => import("../pages/rootLayout"))
 const ErrorPage = lazy(() => import("../pages/error"))
 
-// Public Pages (No authentication required)
+// Public Pages
 const Home = lazy(() => import("../pages/home"))
 const Login = lazy(() => import("../pages/auth/login"))
 const SignUp = lazy(() => import("../pages/auth/signup"))
@@ -67,60 +78,87 @@ const LoginSelection = lazy(() => import("../pages/auth/loginRoleSelection"))
 // Admin Panel Main Component
 const AdminPanel = lazy(() => import("../pages/adminPanel"))
 
+// Users Management Components
+const Users = lazy(() => import("../pages/adminPanel/users"))
+
+const SpecificUser = lazy(() =>
+  import("../pages/adminPanel/users/specificUser")
+)
+
+const DoctorAnalytics = lazy(() =>
+  import("../pages/adminPanel/users/doctorAnalytics")
+)
+
 // Category Management Components
 const Category = lazy(() => import("../pages/adminPanel/category"))
 const Reports = lazy(() => import("../pages/adminPanel/reports"))
+
 const DoctorDetails = lazy(() =>
   import("../pages/adminPanel/category/doctorData.jsx")
 )
+
 const CreateCategory = lazy(() =>
   import("../pages/adminPanel/category/createCategory")
 )
+
 const SpecificCategory = lazy(() =>
   import("../pages/adminPanel/category/specificCategory")
 )
+
 const EditCategory = lazy(() =>
   import("../pages/adminPanel/category/editCategory")
 )
 
 // Department Management Components
 const Department = lazy(() => import("../pages/adminPanel/department"))
+
 const CreateDepartment = lazy(() =>
   import("../pages/adminPanel/department/createDepartment")
 )
+
 const CreateGoFence = lazy(() =>
   import("../pages/adminPanel/department/geofence/create/index.jsx")
 )
+
 const EditGoFence = lazy(() =>
   import("../pages/adminPanel/department/geofence/edit/index.jsx")
 )
+
 const EditDepartment = lazy(() =>
   import("../pages/adminPanel/department/editDepartment")
 )
+
 const SpecificDepartment = lazy(() =>
   import("../pages/adminPanel/department/specificDepartment")
 )
+
 const DepartmentCalender = lazy(() =>
   import("../pages/adminPanel/department/departmentCalender")
 )
+
 const DepartmentMonth = lazy(() =>
   import("../pages/adminPanel/department/departmentMonth")
 )
+
 const CreateDepartmentSpecificCategory = lazy(() =>
   import("../pages/adminPanel/department/createDepartmentSpecificCategory")
 )
 
 // Sub-Department Management Components
 const SubDepartment = lazy(() => import("../pages/adminPanel/subDepartment"))
+
 const CreateSubDepartment = lazy(() =>
   import("../pages/adminPanel/subDepartment/createSubDepartment")
 )
+
 const EditSubDepartment = lazy(() =>
   import("../pages/adminPanel/subDepartment/editSubDepartment")
 )
+
 const SpecificSubDepartment = lazy(() =>
   import("../pages/adminPanel/subDepartment/specificSubDepartment")
 )
+
 const CreateSubDepartmentSpecificDepartment = lazy(() =>
   import("../pages/adminPanel/subDepartment/createSpecificSubDepartment")
 )
@@ -129,12 +167,15 @@ const CreateSubDepartmentSpecificDepartment = lazy(() =>
 const ContractingTypes = lazy(() =>
   import("../pages/adminPanel/contractingTypes")
 )
+
 const CreateContractingType = lazy(() =>
   import("../pages/adminPanel/contractingTypes/createContractingType")
 )
+
 const EditContractingType = lazy(() =>
   import("../pages/adminPanel/contractingTypes/editContractingType")
 )
+
 const SpecificContractingType = lazy(() =>
   import("../pages/adminPanel/contractingTypes/specificContractingType")
 )
@@ -143,24 +184,30 @@ const SpecificContractingType = lazy(() =>
 const ScientificDegrees = lazy(() =>
   import("../pages/adminPanel/scientificDegree")
 )
+
 const CreateScientificDegree = lazy(() =>
   import("../pages/adminPanel/scientificDegree/createScientificDegree")
 )
+
 const EditScientificDegree = lazy(() =>
   import("../pages/adminPanel/scientificDegree/editScientificDegree")
 )
+
 const SpecificScientificDegree = lazy(() =>
   import("../pages/adminPanel/scientificDegree/specificScientificDegree")
 )
 
 // Shift Hours Management Components
 const ShiftHours = lazy(() => import("../pages/adminPanel/shiftHours"))
+
 const CreateShiftHourType = lazy(() =>
   import("../pages/adminPanel/shiftHours/createShiftHours")
 )
+
 const SpecificShiftHoursType = lazy(() =>
   import("../pages/adminPanel/shiftHours/specificShiftHours")
 )
+
 const EditShiftHourType = lazy(() =>
   import("../pages/adminPanel/shiftHours/editShiftHours")
 )
@@ -169,15 +216,19 @@ const EditShiftHourType = lazy(() =>
 const ManagementRoles = lazy(() =>
   import("../pages/adminPanel/managementRoles")
 )
+
 const UserAssignmentHistory = lazy(() =>
   import("../pages/adminPanel/managementRoles/userAssignmentHistory.jsx")
 )
+
 const SpecifiedManagementRole = lazy(() =>
   import("../pages/adminPanel/managementRoles/specifiedManagementRole")
 )
+
 const UserRoleHistory = lazy(() =>
   import("../pages/adminPanel/managementRoles/userAssignmentHistory.jsx")
 )
+
 // const CreateManagementRole = lazy(() =>
 //   import("../pages/adminPanel/managementRoles/createManagementRole")
 // )
@@ -193,178 +244,240 @@ const UserRoleHistory = lazy(() =>
 
 // Roster Management Components
 const roster = lazy(() => import("../pages/adminPanel/roster"))
+
 const CreateRoster = lazy(() =>
   import("../pages/adminPanel/roster/createRoster")
 )
+
 const DoctorPerRoster = lazy(() =>
   import("../pages/adminPanel/roster/doctorsPerRoster.jsx")
 )
+
 const ManageDoctors = lazy(() =>
   import("../pages/adminPanel/roster/manageDoctors.jsx")
 )
+
 const RosterDetails = lazy(() =>
   import("../pages/adminPanel/roster/rosterDetails")
 )
+
 const EditRoster = lazy(() => import("../pages/adminPanel/roster/editRoster"))
 
 // =============================================================================
 // PROTECTED COMPONENTS WITH PERMISSIONS
 // =============================================================================
 
-// Main Admin Panel (Authentication required only)
+// Main Admin Panel
 const ProtectedAdminPanel = withGuard(AdminPanel)
 
-// Category Management (Requires userCanManageCategory permission)
+// Users Management
+const ProtectedUsers = withGuard(Users, [
+  "userCanManageRole",
+  "userCanManageCategory",
+  "userCanManageDepartments",
+])
+
+const ProtectedSpecificUser = withGuard(SpecificUser, [
+  "userCanManageRole",
+  "userCanManageCategory",
+  "userCanManageDepartments",
+])
+
+const ProtectedDoctorAnalytics = withGuard(DoctorAnalytics, [
+  "userCanManageRole",
+  "userCanManageCategory",
+  "userCanManageDepartments",
+])
+
+// Category Management
 const ProtectedCategory = withGuard(Category, "userCanManageCategory")
 const ProtectedLeaves = withGuard(Leaves, "userCanManageCategory")
 const ProtedReports = withGuard(Reports, "userCanManageCategory")
 const ProtedDoctorReports = withGuard(DoctorReports, "userCanManageCategory")
 const ProtectedDashboard = withGuard(Dashboard, "userCanManageRostors")
 const ProtectedDocotrDetails = withGuard(DoctorDetails)
+
 const ProtectedEditDoctorData = withGuard(
   EditDoctorData,
   "userCanManageCategory"
 )
+
 const ProtectedCreateCategory = withGuard(
   CreateCategory,
   "userCanManageCategory"
 )
+
 const ProtectedSpecificCategory = withGuard(
   SpecificCategory,
   "userCanManageCategory"
 )
+
 const ProtectedEditCategory = withGuard(EditCategory, "userCanManageCategory")
 
 const ProtectedDoctorPerRoster = withGuard(
   DoctorPerRoster,
   "userCanManageCategory"
 )
-const ProtectedManageDoctors = withGuard(ManageDoctors, "userCanManageCategory")
 
-// Department Management (Requires userCanManageDepartments permission)
+const ProtectedManageDoctors = withGuard(
+  ManageDoctors,
+  "userCanManageCategory"
+)
+
+// Department Management
 const ProtectedDepartment = withGuard(Department, "userCanManageDepartments")
+
 const ProtectedCreateDepartment = withGuard(
   CreateDepartment,
   "userCanManageDepartments"
 )
+
 const ProtectedCreateGoFence = withGuard(
   CreateGoFence,
   "userCanManageDepartments"
 )
-const ProtectedEditGeoFence = withGuard(EditGoFence, "userCanManageDepartments")
+
+const ProtectedEditGeoFence = withGuard(
+  EditGoFence,
+  "userCanManageDepartments"
+)
+
 const ProtectedEditDepartment = withGuard(EditDepartment, [
   "userCanManageCategory",
   "userCanManageDepartments",
 ])
+
 const ProtectedSpecificDepartment = withGuard(SpecificDepartment, [
   "userCanManageCategory",
   "userCanManageDepartments",
 ])
+
 const ProtectedDepartmentCalender = withGuard(DepartmentCalender, [
   "userCanManageCategory",
   "userCanManageDepartments",
 ])
+
 const ProtectedMonthDepartment = withGuard(DepartmentMonth, [
   "userCanManageCategory",
   "userCanManageDepartments",
 ])
+
 // const ProtectedEditManagerPermission = withGuard(
 //   EditManagerPermission,
 //   "userCanManageDepartments"
 // )
+
 const ProtectedAssignDepartmentManager = withGuard(AssignDepartmentManager, [
   "userCanManageCategory",
   "userCanManageDepartments",
 ])
+
 const ProtectedCreateDepartmentSpecificCategory = withGuard(
   CreateDepartmentSpecificCategory,
   "userCanManageDepartments"
 )
 
-// Sub-Department Management (Requires userCanManageSubDepartments permission)
+// Sub-Department Management
 const ProtectedSubDepartment = withGuard(
   SubDepartment,
   "userCanManageSubDepartments"
 )
+
 const ProtectedCreateSubDepartment = withGuard(
   CreateSubDepartment,
   "userCanManageSubDepartments"
 )
+
 const ProtectedEditSubDepartment = withGuard(
   EditSubDepartment,
   "userCanManageSubDepartments"
 )
+
 const ProtectedSpecificSubDepartment = withGuard(
   SpecificSubDepartment,
   "userCanManageSubDepartments"
 )
+
 const ProtectedCreateSubDepartmentSpecificDepartment = withGuard(
   CreateSubDepartmentSpecificDepartment,
   "userCanManageSubDepartments"
 )
 
-// Contracting Types Management (Requires userCanContractingType permission)
+// Contracting Types Management
 const ProtectedContractingTypes = withGuard(
   ContractingTypes,
   "userCanContractingType"
 )
+
 const ProtectedCreateContractingType = withGuard(
   CreateContractingType,
   "userCanContractingType"
 )
+
 const ProtectedEditContractingType = withGuard(
   EditContractingType,
   "userCanContractingType"
 )
+
 const ProtectedSpecificContractingType = withGuard(
   SpecificContractingType,
   "userCanContractingType"
 )
 
-// Scientific Degrees Management (Requires userCanScientificDegree permission)
+// Scientific Degrees Management
 const ProtectedScientificDegrees = withGuard(
   ScientificDegrees,
   "userCanScientificDegree"
 )
+
 const ProtectedCreateScientificDegree = withGuard(
   CreateScientificDegree,
   "userCanScientificDegree"
 )
+
 const ProtectedEditScientificDegree = withGuard(
   EditScientificDegree,
   "userCanScientificDegree"
 )
+
 const ProtectedSpecificScientificDegree = withGuard(
   SpecificScientificDegree,
   "userCanScientificDegree"
 )
 
-// Shift Hours Management (Requires userCanShiftHoursType permission)
+// Shift Hours Management
 const ProtectedShiftHours = withGuard(ShiftHours, "userCanShiftHoursType")
+
 const ProtectedCreateShiftHourType = withGuard(
   CreateShiftHourType,
   "userCanShiftHoursType"
 )
+
 const ProtectedSpecificShiftHoursType = withGuard(
   SpecificShiftHoursType,
   "userCanShiftHoursType"
 )
+
 const ProtectedEditShiftHourType = withGuard(
   EditShiftHourType,
   "userCanShiftHoursType"
 )
 
-// Management Roles (Requires userCanManageRole permission)
+// Management Roles
 const ProtectedManagementRoles = withGuard(ManagementRoles, "userCanManageRole")
+
 const ProtectedUserManagementRoleHistory = withGuard(
   UserAssignmentHistory,
   "userCanManageRole"
 )
+
 const ProtectedSpecifiedManagementRole = withGuard(
   SpecifiedManagementRole,
   "userCanManageRole"
 )
+
 const ProtectedUserHistory = withGuard(UserRoleHistory, "userCanManageRole")
+
 // const ProtectedCreateManagementRole = withGuard(
 //   CreateManagementRole,
 //   "userCanManageRole"
@@ -382,11 +495,12 @@ const ProtectedUserHistory = withGuard(UserRoleHistory, "userCanManageRole")
 //   "userCanManageRole"
 // )
 
-// Roster Management (Requires userCanManageRostors permission)
+// Roster Management
 const ProtectedRoster = withGuard(roster, "userCanManageRostors")
 const ProtectedCreateRoster = withGuard(CreateRoster, "userCanManageRostors")
 const ProtectedRosterDetails = withGuard(RosterDetails, "userCanManageRostors")
 const ProtectedEditRoster = withGuard(EditRoster, "userCanManageRostors")
+
 const ProtectedRosterDepartments = withGuard(
   RosterDepartments,
   "userCanManageRostors"
@@ -396,13 +510,17 @@ const ProtectedGenerateWorkingHours = withGuard(
   GenerateWorkingHours,
   "userCanManageRostors"
 )
+
 const ProtectedWorkingHours = withGuard(WorkingHours, "userCanManageRostors")
+
 const ProtectedEditWorkingHour = withGuard(
   EditWorkingHour,
   "userCanManageRostors"
 )
+
 const ProtectedWorkingHour = withGuard(WorkingHour, "userCanManageRostors")
 const ProtectedAssignDoctor = withGuard(AssignDoctor, "userCanManageRostors")
+
 const ProtectedDoctorSchedule = withGuard(
   DoctorSchedule,
   "userCanManageCategory"
@@ -412,7 +530,6 @@ const ProtectedDoctorSchedule = withGuard(
 // UTILITY FUNCTIONS
 // =============================================================================
 
-// Wrapper for Suspense with loading fallback
 const withSuspense = (Comp) => (
   <Suspense fallback={<Loader />}>
     <Comp />
@@ -430,33 +547,85 @@ const router = createBrowserRouter([
     errorElement: withSuspense(ErrorPage),
     children: [
       // ========== PUBLIC ROUTES ==========
-      { index: true, element: withSuspense(Home) },
-      { path: "login", element: withSuspense(Login) },
-      { path: "role-select", element: withSuspense(LoginSelection) },
-      { path: "signup", element: withSuspense(SignUp) },
-      { path: "forget-password", element: withSuspense(ForgetPassword) },
-      { path: "reset-password", element: withSuspense(ResetPassword) },
+      {
+        index: true,
+        element: withSuspense(Home),
+      },
+      {
+        path: "login",
+        element: withSuspense(Login),
+      },
+      {
+        path: "role-select",
+        element: withSuspense(LoginSelection),
+      },
+      {
+        path: "signup",
+        element: withSuspense(SignUp),
+      },
+      {
+        path: "forget-password",
+        element: withSuspense(ForgetPassword),
+      },
+      {
+        path: "reset-password",
+        element: withSuspense(ResetPassword),
+      },
+      {
+        path: "specify-role",
+        element: withSuspense(SpecifyRole),
+      },
 
-      { path: "specify-role", element: withSuspense(SpecifyRole) },
       // ========== PROTECTED ADMIN PANEL ==========
       {
         path: "admin-panel",
-        element: withSuspense(ProtectedAdminPanel), // Authentication required for entire admin panel
+        element: withSuspense(ProtectedAdminPanel),
         children: [
-          // Default route - Shows categories by default
-          { index: true, element: withSuspense(AdminPanelIndex) },
-          { path: "notifications", element: withSuspense(Notification) },
+          // Default route
+          {
+            index: true,
+            element: withSuspense(AdminPanelIndex),
+          },
+          {
+            path: "notifications",
+            element: withSuspense(Notification),
+          },
+
+          // ========== USERS MANAGEMENT ==========
+          {
+            path: "users",
+            element: withSuspense(ProtectedUsers),
+          },
+          {
+            path: "users/doctor-analytics/:doctorId",
+            element: withSuspense(ProtectedDoctorAnalytics),
+          },
+          {
+            path: "users/:id",
+            element: withSuspense(ProtectedSpecificUser),
+          },
 
           // ========== CATEGORY MANAGEMENT ==========
-          // Permission Required: userCanManageCategory
-          { path: "categories", element: withSuspense(ProtectedCategory) },
-          { path: "leaves/:catId", element: withSuspense(ProtectedLeaves) },
-          { path: "reports", element: withSuspense(ProtedReports) },
+          {
+            path: "categories",
+            element: withSuspense(ProtectedCategory),
+          },
+          {
+            path: "leaves/:catId",
+            element: withSuspense(ProtectedLeaves),
+          },
+          {
+            path: "reports",
+            element: withSuspense(ProtedReports),
+          },
           {
             path: "reports/doctor/:docId",
             element: withSuspense(ProtedDoctorReports),
           },
-          { path: "dashboard", element: withSuspense(ProtectedDashboard) },
+          {
+            path: "dashboard",
+            element: withSuspense(ProtectedDashboard),
+          },
           {
             path: "doctors/:id",
             element: withSuspense(ProtectedDocotrDetails),
@@ -479,8 +648,10 @@ const router = createBrowserRouter([
           },
 
           // ========== DEPARTMENT MANAGEMENT ==========
-          // Permission Required: userCanManageDepartments
-          { path: "departments", element: withSuspense(ProtectedDepartment) },
+          {
+            path: "departments",
+            element: withSuspense(ProtectedDepartment),
+          },
           {
             path: "department/create",
             element: withSuspense(ProtectedCreateDepartment),
@@ -497,7 +668,6 @@ const router = createBrowserRouter([
             path: "department/edit/:depId",
             element: withSuspense(ProtectedEditDepartment),
           },
-
           {
             path: "department/:depId",
             element: withSuspense(ProtectedSpecificDepartment),
@@ -524,7 +694,6 @@ const router = createBrowserRouter([
           },
 
           // ========== SUB-DEPARTMENT MANAGEMENT ==========
-          // Permission Required: userCanManageSubDepartments
           {
             path: "sub-department/create-specific",
             element: withSuspense(
@@ -549,7 +718,6 @@ const router = createBrowserRouter([
           },
 
           // ========== CONTRACTING TYPES MANAGEMENT ==========
-          // Permission Required: userCanContractingType
           {
             path: "contracting-types",
             element: withSuspense(ProtectedContractingTypes),
@@ -568,7 +736,6 @@ const router = createBrowserRouter([
           },
 
           // ========== SCIENTIFIC DEGREES MANAGEMENT ==========
-          // Permission Required: userCanScientificDegree
           {
             path: "scientific-degrees",
             element: withSuspense(ProtectedScientificDegrees),
@@ -587,7 +754,6 @@ const router = createBrowserRouter([
           },
 
           // ========== SHIFT HOURS MANAGEMENT ==========
-          // Permission Required: userCanShiftHoursType
           {
             path: "shift-hours-types",
             element: withSuspense(ProtectedShiftHours),
@@ -606,7 +772,6 @@ const router = createBrowserRouter([
           },
 
           // ========== MANAGEMENT ROLES ==========
-          // Permission Required: userCanManageRole
           {
             path: "management-roles",
             element: withSuspense(ProtectedManagementRoles),
@@ -641,8 +806,10 @@ const router = createBrowserRouter([
           // },
 
           // ========== ROSTER MANAGEMENT ==========
-          // Permission Required: userCanManageRostors
-          { path: "rosters", element: withSuspense(ProtectedRoster) },
+          {
+            path: "rosters",
+            element: withSuspense(ProtectedRoster),
+          },
           {
             path: "rosters/create",
             element: withSuspense(ProtectedCreateRoster),
@@ -657,12 +824,10 @@ const router = createBrowserRouter([
           },
 
           // ========== ROSTER WORKFLOW - PHASE-BASED ==========
-          // All roster workflow routes require userCanManageRostors permission
           {
             path: "rosters/departments",
             element: withSuspense(ProtectedRosterDepartments),
           },
-
           {
             path: "rosters/working-hours/generate",
             element: withSuspense(ProtectedGenerateWorkingHours),
@@ -696,8 +861,7 @@ const router = createBrowserRouter([
             element: withSuspense(ProtectedManageDoctors),
           },
 
-          // ========== FUTURE ROUTES (COMMENTED FOR REFERENCE) ==========
-          // Uncomment and add protection when implementing these features
+          // ========== FUTURE ROUTES ==========
           // {
           //   path: "rosters/:rosterId/working-hours/:workingHoursId",
           //   element: withSuspense(WorkingHourDetails),

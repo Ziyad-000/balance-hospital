@@ -216,16 +216,18 @@ function Category() {
 
   const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneMap = {
-      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+      blue:
+        "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20",
       green:
-        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+        "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]",
+      red:
+        "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]",
       yellow:
-        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
       purple:
-        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+        "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border border-[var(--color-purple-border)]",
       orange:
-        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
     }
 
     return (
@@ -289,7 +291,7 @@ function Category() {
 
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Building className="w-4 h-4 mx-auto mb-1 text-blue-700 dark:text-blue-300" />
+          <Building className="w-4 h-4 mx-auto mb-1 text-[var(--color-primary)]" />
           <p className="font-bold text-[var(--color-text)]">
             {category.departmentsCount ?? 0}
           </p>
@@ -299,7 +301,7 @@ function Category() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Users className="w-4 h-4 mx-auto mb-1 text-green-700 dark:text-green-300" />
+          <Users className="w-4 h-4 mx-auto mb-1 text-[var(--color-success)]" />
           <p className="font-bold text-[var(--color-text)]">
             {getUsersCount(category)}
           </p>
@@ -309,7 +311,7 @@ function Category() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Clock className="w-4 h-4 mx-auto mb-1 text-yellow-700 dark:text-yellow-300" />
+          <Clock className="w-4 h-4 mx-auto mb-1 text-[var(--color-warning)]" />
           <p className="font-bold text-[var(--color-text)]">
             {getPendingCount(category)}
           </p>
@@ -328,7 +330,7 @@ function Category() {
           <Link to={`/admin-panel/category/${category.id}`}>
             <button
               type="button"
-              className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+              className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-lg"
               title={t("categories.actions.view")}
             >
               <Eye size={16} />
@@ -338,7 +340,7 @@ function Category() {
           <Link to={`/admin-panel/category/edit/${category.id}`}>
             <button
               type="button"
-              className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg"
+              className="p-2 text-[var(--color-success)] hover:bg-[var(--color-success-soft)] rounded-lg"
               title={t("categories.actions.edit")}
             >
               <Edit size={16} />
@@ -347,7 +349,7 @@ function Category() {
 
           <button
             type="button"
-            className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg"
+            className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg"
             title={t("categories.actions.delete")}
             onClick={() => {
               setToDelete({
@@ -411,16 +413,16 @@ function Category() {
         </div>
 
         {error && (
-          <div className={`${theme.card} p-4 mb-5 border-red-500/30`}>
+          <div className="p-4 mb-5 rounded-2xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-red-700 dark:text-red-300 text-sm font-semibold">
+              <p className="text-[var(--color-danger)] text-sm font-semibold">
                 {error.message || String(error)}
               </p>
 
               <button
                 type="button"
                 onClick={() => dispatch(clearError())}
-                className="text-red-700 dark:text-red-300"
+                className="text-[var(--color-danger)]"
               >
                 <X size={18} />
               </button>
@@ -683,7 +685,7 @@ function Category() {
 
                       <td className={`${tableCellClass} text-center`}>
                         <Link to={`/admin-panel/category/${category.id}`}>
-                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700">
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/25">
                             <Building size={13} />
                             {category.departmentsCount ?? 0}
                           </span>
@@ -692,7 +694,7 @@ function Category() {
 
                       <td className={`${tableCellClass} text-center`}>
                         <Link to={`/admin-panel/category/${category.id}`}>
-                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700">
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
                             <Users size={13} />
                             {getUsersCount(category)}
                           </span>
@@ -701,7 +703,7 @@ function Category() {
 
                       <td className={`${tableCellClass} text-center`}>
                         <Link to={`/admin-panel/category/${category.id}`}>
-                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700">
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]">
                             <Clock size={13} />
                             {getPendingCount(category)}
                           </span>
@@ -712,7 +714,7 @@ function Category() {
                         <div className="flex items-center gap-2">
                           <UserCheck
                             size={16}
-                            className="text-purple-700 dark:text-purple-300"
+                            className="text-[var(--color-purple)]"
                           />
                           <span className="text-[var(--color-text-muted)]">
                             {getChiefName(category)}
@@ -729,7 +731,7 @@ function Category() {
                           <Link to={`/admin-panel/category/${category.id}`}>
                             <button
                               type="button"
-                              className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                              className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-lg transition-colors"
                               title={t("categories.actions.view") || "View"}
                             >
                               <Eye size={16} />
@@ -739,7 +741,7 @@ function Category() {
                           <Link to={`/admin-panel/category/edit/${category.id}`}>
                             <button
                               type="button"
-                              className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                              className="p-2 text-[var(--color-success)] hover:bg-[var(--color-success-soft)] rounded-lg transition-colors"
                               title={t("categories.actions.edit") || "Edit"}
                             >
                               <Edit size={16} />
@@ -755,7 +757,7 @@ function Category() {
                               })
                               setModalOpen(true)
                             }}
-                            className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                            className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
                             title={t("categories.actions.delete") || "Delete"}
                           >
                             <Trash2 size={16} />
@@ -821,7 +823,7 @@ function Category() {
                     className={`px-3 py-2 rounded-lg border transition-colors ${
                       pageNum === pagination.page
                         ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                        : "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-bg-soft)]"
+                        : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-surface-muted)]"
                     }`}
                   >
                     {pageNum}

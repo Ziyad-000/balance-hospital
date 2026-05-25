@@ -5,7 +5,7 @@ export const getPageTheme = () => ({
   container: "max-w-7xl mx-auto",
 
   card:
-    "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-2xl shadow-[var(--shadow-md)] transition-colors duration-300",
+    "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-2xl shadow-[var(--shadow-sm)] transition-colors duration-300",
 
   cardSoft:
     "bg-[var(--color-surface-muted)] text-[var(--color-text)] border border-[var(--color-border)] rounded-xl transition-colors duration-300",
@@ -14,7 +14,7 @@ export const getPageTheme = () => ({
     "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-xl shadow-[var(--shadow-sm)]",
 
   header:
-    "bg-[var(--color-surface-elevated)] text-[var(--color-text)] border-b border-[var(--color-border)]",
+    "bg-[var(--color-surface)] text-[var(--color-text)] border-b border-[var(--color-border)]",
 
   title: "text-[var(--color-text)] font-bold",
 
@@ -29,40 +29,49 @@ export const getPageTheme = () => ({
     "bg-[var(--color-secondary-soft)] text-[var(--color-secondary)] rounded-xl",
 
   input:
-    "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]",
+    "w-full min-h-[42px] px-3 py-2 bg-[var(--color-input-bg)] text-[var(--color-text)] border border-[var(--color-border-strong)] rounded-lg placeholder:text-[var(--color-text-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors",
 
   select:
-    "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]",
+    "w-full min-h-[42px] px-3 py-2 bg-[var(--color-input-bg)] text-[var(--color-text)] border border-[var(--color-border-strong)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors",
 
   textarea:
-    "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]",
+    "w-full min-h-[96px] px-3 py-2 bg-[var(--color-input-bg)] text-[var(--color-text)] border border-[var(--color-border-strong)] rounded-lg placeholder:text-[var(--color-text-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors",
 
   primaryButton:
-    "inline-flex items-center justify-center px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+    "inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[40px] bg-[var(--color-primary)] text-white border border-[var(--color-primary)] rounded-lg font-semibold hover:bg-[var(--color-primary-hover)] hover:border-[var(--color-primary-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
 
   secondaryButton:
-    "inline-flex items-center justify-center px-4 py-2 bg-[var(--color-surface-muted)] text-[var(--color-text)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-bg-soft)] transition-colors",
+    "inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[40px] bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] rounded-lg font-semibold hover:bg-[var(--color-surface-muted)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+
+  ghostButton:
+    "inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[40px] bg-transparent text-[var(--color-text-muted)] border border-transparent rounded-lg font-semibold hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
 
   dangerButton:
-    "inline-flex items-center justify-center px-4 py-2 bg-[var(--color-danger)] text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+    "inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[40px] bg-[var(--color-danger)] text-white border border-[var(--color-danger)] rounded-lg font-semibold hover:bg-[var(--color-danger-hover)] hover:border-[var(--color-danger-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+
+  activeTab:
+    "bg-[var(--color-primary)] text-white border border-[var(--color-primary)]",
+
+  inactiveTab:
+    "bg-[var(--color-surface)] text-[var(--color-text-muted)] border border-[var(--color-border-strong)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]",
 
   successBadge:
-    "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20",
+    "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]",
 
   warningBadge:
-    "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
+    "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
 
   dangerBadge:
-    "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+    "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]",
 
   infoBadge:
-    "bg-[var(--color-info-soft)] text-[var(--color-info)] border border-[var(--color-info)]/20",
+    "bg-[var(--color-info-soft)] text-[var(--color-info)] border border-[var(--color-info-border)]",
 
   neutralBadge:
-    "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+    "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
 
   hoverRow:
-    "hover:bg-[var(--color-bg-soft)] transition-colors",
+    "hover:bg-[var(--color-surface-muted)] transition-colors",
 
   divider: "border-[var(--color-border)]",
 })

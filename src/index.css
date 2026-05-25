@@ -1,105 +1,194 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Balance Hospital UI Theme
-   Clean, consistent light/dark palette
+   Hospital Admin Dashboard Theme
+   Clean Light / Dark Mode
+   Strong readable colors without ugly saturation
    ============================================================ */
 
-/* ---------- Light Mode Defaults ---------- */
+/* ============================================================
+   Light Mode
+   ============================================================ */
+
 :root {
   color-scheme: light;
 
-  --color-bg: #f6f8fb;
-  --color-bg-soft: #eef3f8;
+  /* Page backgrounds */
+  --color-bg: #eef2f7;
+  --color-bg-soft: #e5ebf3;
+
+  /* Surfaces */
   --color-surface: #ffffff;
-  --color-surface-elevated: #ffffff;
-  --color-surface-muted: #f8fafc;
+  --color-surface-elevated: #f8fafc;
+  --color-surface-muted: #f1f5f9;
 
-  --color-border: #d9e2ec;
-  --color-border-strong: #cbd5e1;
+  /* Inputs */
+  --color-input-bg: #ffffff;
 
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
-  --color-text-soft: #94a3b8;
+  /* Borders */
+  --color-border: #d0d7e2;
+  --color-border-strong: #aeb8c7;
 
+  /* Text */
+  --color-text: #111827;
+  --color-text-muted: #4b5563;
+  --color-text-soft: #6b7280;
+
+  /* Primary / Brand */
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1e40af;
   --color-primary-soft: #dbeafe;
+  --color-primary-muted: #eff6ff;
+  --color-ring: rgba(37, 99, 235, 0.24);
 
-  --color-secondary: #0f766e;
-  --color-secondary-hover: #0d5f59;
-  --color-secondary-soft: #ccfbf1;
+  /* Secondary */
+  --color-secondary: #475569;
+  --color-secondary-hover: #334155;
+  --color-secondary-soft: #e2e8f0;
 
-  --color-success: #16a34a;
+  /* Success */
+  --color-success: #15803d;
+  --color-success-hover: #166534;
   --color-success-soft: #dcfce7;
+  --color-success-border: #86efac;
 
-  --color-warning: #d97706;
+  /* Warning */
+  --color-warning: #b45309;
+  --color-warning-hover: #92400e;
   --color-warning-soft: #fef3c7;
+  --color-warning-border: #facc15;
 
+  /* Danger */
   --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
   --color-danger-soft: #fee2e2;
+  --color-danger-border: #fca5a5;
 
-  --color-info: #0284c7;
+  /* Info */
+  --color-info: #0369a1;
+  --color-info-hover: #075985;
   --color-info-soft: #e0f2fe;
+  --color-info-border: #7dd3fc;
 
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 18px 45px rgba(15, 23, 42, 0.12);
+  /* Purple */
+  --color-purple: #7c3aed;
+  --color-purple-hover: #6d28d9;
+  --color-purple-soft: #ede9fe;
+  --color-purple-border: #c4b5fd;
 
+  /* Neutral badges */
+  --color-neutral: #374151;
+  --color-neutral-soft: #f3f4f6;
+  --color-neutral-border: #d1d5db;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 1px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.10);
+  --shadow-lg: 0 18px 36px rgba(15, 23, 42, 0.14);
+
+  /* Radius */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
 
+  /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
 }
 
-/* ---------- Dark Mode ---------- */
+/* ============================================================
+   Dark Mode
+   ============================================================ */
+
 html.dark,
 body.dark,
 [data-theme="dark"],
 .dark {
   color-scheme: dark;
 
-  --color-bg: #0b1120;
+  /* Page backgrounds */
+  --color-bg: #0f172a;
   --color-bg-soft: #111827;
-  --color-surface: #111827;
-  --color-surface-elevated: #1f2937;
-  --color-surface-muted: #0f172a;
 
-  --color-border: #273449;
-  --color-border-strong: #334155;
+  /* Surfaces */
+  --color-surface: #1e293b;
+  --color-surface-elevated: #273449;
+  --color-surface-muted: #334155;
 
+  /* Inputs */
+  --color-input-bg: #111827;
+
+  /* Borders */
+  --color-border: #3f4d63;
+  --color-border-strong: #64748b;
+
+  /* Text */
   --color-text: #f8fafc;
   --color-text-muted: #cbd5e1;
   --color-text-soft: #94a3b8;
 
-  --color-primary: #60a5fa;
-  --color-primary-hover: #93c5fd;
-  --color-primary-soft: rgba(96, 165, 250, 0.16);
+  /* Primary / Brand */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-primary-active: #93c5fd;
+  --color-primary-soft: rgba(59, 130, 246, 0.18);
+  --color-primary-muted: rgba(59, 130, 246, 0.10);
+  --color-ring: rgba(59, 130, 246, 0.32);
 
-  --color-secondary: #2dd4bf;
-  --color-secondary-hover: #5eead4;
-  --color-secondary-soft: rgba(45, 212, 191, 0.14);
+  /* Secondary */
+  --color-secondary: #cbd5e1;
+  --color-secondary-hover: #f8fafc;
+  --color-secondary-soft: rgba(148, 163, 184, 0.16);
 
+  /* Success */
   --color-success: #4ade80;
-  --color-success-soft: rgba(74, 222, 128, 0.14);
+  --color-success-hover: #86efac;
+  --color-success-soft: rgba(74, 222, 128, 0.16);
+  --color-success-border: rgba(74, 222, 128, 0.38);
 
+  /* Warning */
   --color-warning: #fbbf24;
+  --color-warning-hover: #fcd34d;
   --color-warning-soft: rgba(251, 191, 36, 0.16);
+  --color-warning-border: rgba(251, 191, 36, 0.38);
 
+  /* Danger */
   --color-danger: #f87171;
+  --color-danger-hover: #fca5a5;
   --color-danger-soft: rgba(248, 113, 113, 0.16);
+  --color-danger-border: rgba(248, 113, 113, 0.38);
 
+  /* Info */
   --color-info: #38bdf8;
-  --color-info-soft: rgba(56, 189, 248, 0.14);
+  --color-info-hover: #7dd3fc;
+  --color-info-soft: rgba(56, 189, 248, 0.16);
+  --color-info-border: rgba(56, 189, 248, 0.38);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.35);
+  /* Purple */
+  --color-purple: #a78bfa;
+  --color-purple-hover: #c4b5fd;
+  --color-purple-soft: rgba(167, 139, 250, 0.16);
+  --color-purple-border: rgba(167, 139, 250, 0.38);
+
+  /* Neutral badges */
+  --color-neutral: #e5e7eb;
+  --color-neutral-soft: rgba(148, 163, 184, 0.14);
+  --color-neutral-border: rgba(148, 163, 184, 0.34);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.18);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.34);
+  --shadow-lg: 0 18px 36px rgba(0, 0, 0, 0.46);
 }
 
-/* ---------- Base ---------- */
+/* ============================================================
+   Base
+   ============================================================ */
+
 * {
   box-sizing: border-box;
 }
@@ -112,10 +201,7 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 32rem),
-    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.08), transparent 28rem),
-    var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-text);
   font-family:
     Inter,
@@ -126,6 +212,13 @@ body {
   transition:
     background-color var(--transition-normal),
     color var(--transition-normal);
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 button,
@@ -141,12 +234,36 @@ textarea {
   font: inherit;
 }
 
-::selection {
-  background: var(--color-primary-soft);
-  color: var(--color-text);
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* ---------- Reusable App Classes ---------- */
+::selection {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+/* ============================================================
+   App Layout Helpers
+   ============================================================ */
+
+.app,
+.app-layout,
+.layout,
+.main-layout,
+.page,
+.page-container,
+.content,
+.main-content,
 .app-bg,
 .page-bg,
 .dashboard-bg {
@@ -154,16 +271,23 @@ textarea {
   color: var(--color-text) !important;
 }
 
-.app-surface,
+/* ============================================================
+   Cards / Panels
+   ============================================================ */
+
 .card,
 .panel,
+.widget,
+.section,
+.dashboard-card,
 .modal-content,
 .dropdown-menu,
-.signin-card {
+.signin-card,
+.app-surface {
   background: var(--color-surface) !important;
   color: var(--color-text) !important;
-  border-color: var(--color-border) !important;
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-sm);
 }
 
 .app-surface-elevated,
@@ -171,32 +295,66 @@ textarea {
 .menu,
 .sidebar,
 .navbar {
-  background: var(--color-surface-elevated) !important;
+  background: var(--color-surface) !important;
   color: var(--color-text) !important;
   border-color: var(--color-border) !important;
 }
 
+.card:hover,
+.dashboard-card:hover,
+.widget:hover,
+.panel:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================================
+   Text Helpers
+   ============================================================ */
+
 .muted,
 .text-muted,
 .subtitle,
-.description {
+.description,
+.helper-text,
+.secondary-text,
+.read-the-docs {
   color: var(--color-text-muted) !important;
 }
 
-/* ---------- Forms ---------- */
+.text-soft {
+  color: var(--color-text-soft) !important;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* ============================================================
+   Forms
+   ============================================================ */
+
 input,
 select,
 textarea,
 .signin-input,
 .form-control {
-  background: var(--color-surface) !important;
+  background: var(--color-input-bg) !important;
   color: var(--color-text) !important;
-  border: 1px solid var(--color-border) !important;
+  border: 1px solid var(--color-border-strong) !important;
   border-radius: var(--radius-sm);
+  min-height: 42px;
+  padding: 0.6rem 0.8rem;
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 input::placeholder,
@@ -211,34 +369,230 @@ textarea:focus,
 .form-control:focus {
   outline: none !important;
   border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 3px var(--color-primary-soft) !important;
+  box-shadow: 0 0 0 3px var(--color-ring) !important;
 }
 
-/* ---------- Buttons ---------- */
-.btn-primary,
-button[type="submit"] {
-  background: var(--color-primary) !important;
-  color: #ffffff !important;
-  border-color: var(--color-primary) !important;
+select option {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+
+.btn,
+.btn-secondary,
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
   transition:
     background-color var(--transition-fast),
-    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
-.btn-primary:hover,
-button[type="submit"]:hover:not(:disabled) {
+.btn-primary {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-primary) !important;
+}
+
+.btn-primary:hover:not(:disabled) {
   background: var(--color-primary-hover) !important;
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-primary-hover) !important;
 }
 
-button:disabled,
-.btn-disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.btn-secondary,
+.btn-outline {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border-strong) !important;
 }
 
-/* ---------- Tables ---------- */
+.btn-secondary:hover:not(:disabled),
+.btn-outline:hover:not(:disabled) {
+  background: var(--color-surface-muted) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+
+.btn-danger {
+  background: var(--color-danger) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-danger) !important;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-danger-hover) !important;
+  border-color: var(--color-danger-hover) !important;
+}
+
+/* ============================================================
+   Tabs
+   Use these with theme.activeTab / theme.inactiveTab
+   ============================================================ */
+
+.tab-btn-active {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.tab-btn-active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.tab-btn-inactive {
+  background: var(--color-surface) !important;
+  color: var(--color-text-muted) !important;
+  border: 1px solid var(--color-border-strong) !important;
+}
+
+.tab-btn-inactive svg {
+  color: var(--color-text-muted) !important;
+  stroke: var(--color-text-muted) !important;
+}
+
+.tab-btn-inactive:hover {
+  background: var(--color-surface-muted) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.tab-btn-inactive:hover svg {
+  color: var(--color-primary) !important;
+  stroke: var(--color-primary) !important;
+}
+
+/* ============================================================
+   Badges / Pills
+   ============================================================ */
+
+.badge,
+.status-badge,
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border: 1px solid transparent;
+}
+
+.badge-primary,
+.status-primary {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary-active) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.badge-success,
+.status-success {
+  background: var(--color-success-soft) !important;
+  color: var(--color-success) !important;
+  border-color: var(--color-success-border) !important;
+}
+
+.badge-warning,
+.status-warning {
+  background: var(--color-warning-soft) !important;
+  color: var(--color-warning) !important;
+  border-color: var(--color-warning-border) !important;
+}
+
+.badge-danger,
+.status-danger {
+  background: var(--color-danger-soft) !important;
+  color: var(--color-danger) !important;
+  border-color: var(--color-danger-border) !important;
+}
+
+.badge-info,
+.status-info {
+  background: var(--color-info-soft) !important;
+  color: var(--color-info) !important;
+  border-color: var(--color-info-border) !important;
+}
+
+.badge-purple,
+.status-purple {
+  background: var(--color-purple-soft) !important;
+  color: var(--color-purple) !important;
+  border-color: var(--color-purple-border) !important;
+}
+
+.badge-neutral,
+.status-neutral {
+  background: var(--color-neutral-soft) !important;
+  color: var(--color-neutral) !important;
+  border-color: var(--color-neutral-border) !important;
+}
+
+/* ============================================================
+   Icon Boxes
+   ============================================================ */
+
+.icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  width: 3rem;
+  height: 3rem;
+}
+
+.icon-box-primary {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary) !important;
+}
+
+.icon-box-success {
+  background: var(--color-success-soft) !important;
+  color: var(--color-success) !important;
+}
+
+.icon-box-warning {
+  background: var(--color-warning-soft) !important;
+  color: var(--color-warning) !important;
+}
+
+.icon-box-danger {
+  background: var(--color-danger-soft) !important;
+  color: var(--color-danger) !important;
+}
+
+.icon-box-info {
+  background: var(--color-info-soft) !important;
+  color: var(--color-info) !important;
+}
+
+.icon-box-purple {
+  background: var(--color-purple-soft) !important;
+  color: var(--color-purple) !important;
+}
+
+.icon-box svg {
+  stroke: currentColor;
+}
+
+/* ============================================================
+   Tables
+   ============================================================ */
+
 table {
   width: 100%;
   border-collapse: separate;
@@ -258,7 +612,6 @@ th {
 
 th,
 td {
-  text-align: center !important;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -267,43 +620,75 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: var(--color-bg-soft) !important;
+  background: var(--color-surface-muted) !important;
 }
 
-/* ---------- Badges / Status ---------- */
-.badge,
-.status-badge {
-  border-radius: 999px;
-  padding: 0.25rem 0.65rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+/* ============================================================
+   SweetAlert2
+   ============================================================ */
+
+.swal2-popup {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
-.badge-success,
-.status-success {
-  background: var(--color-success-soft) !important;
-  color: var(--color-success) !important;
+.swal2-title {
+  color: var(--color-text) !important;
 }
 
-.badge-warning,
-.status-warning {
-  background: var(--color-warning-soft) !important;
-  color: var(--color-warning) !important;
+.swal2-html-container {
+  color: var(--color-text-muted) !important;
 }
 
-.badge-danger,
-.status-danger {
-  background: var(--color-danger-soft) !important;
-  color: var(--color-danger) !important;
+.swal2-confirm {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--color-primary) !important;
 }
 
-.badge-info,
-.status-info {
-  background: var(--color-info-soft) !important;
-  color: var(--color-info) !important;
+.swal2-confirm:hover {
+  background: var(--color-primary-hover) !important;
 }
 
-/* ---------- Notifications ---------- */
+.swal2-cancel {
+  background: var(--color-danger) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--color-danger) !important;
+}
+
+.swal2-cancel:hover {
+  background: var(--color-danger-hover) !important;
+}
+
+/* ============================================================
+   Toastify
+   ============================================================ */
+
+.Toastify__toast {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.Toastify__toast-body {
+  color: var(--color-text) !important;
+}
+
+.Toastify__close-button {
+  color: var(--color-text-muted) !important;
+}
+
+/* ============================================================
+   Notifications
+   ============================================================ */
+
 .notification-item {
   background: var(--color-surface) !important;
   color: var(--color-text) !important;
@@ -311,7 +696,7 @@ tbody tr:hover {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   transition:
-    transform 0.3s ease,
+    transform var(--transition-normal),
     background-color var(--transition-normal),
     border-color var(--transition-normal),
     box-shadow var(--transition-normal);
@@ -322,7 +707,10 @@ tbody tr:hover {
   box-shadow: var(--shadow-md);
 }
 
-/* ---------- Scrollbar ---------- */
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -340,6 +728,28 @@ tbody tr:hover {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-soft);
+}
+
+/* ============================================================
+   Logo Support
+   ============================================================ */
+
+.logo {
+  height: 4.5rem;
+  padding: 1rem;
+  will-change: filter;
+  transition:
+    filter 300ms ease,
+    transform 300ms ease;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 1.25rem rgba(37, 99, 235, 0.28));
+  transform: translateY(-1px);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 1.25rem rgba(20, 184, 166, 0.28));
 }
 
 /* ============================================================
@@ -381,7 +791,7 @@ tbody tr:hover {
   }
 
   50% {
-    transform: scale(1.2);
+    transform: scale(1.15);
   }
 
   100% {
@@ -392,7 +802,7 @@ tbody tr:hover {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 
   to {
@@ -411,4 +821,13 @@ tbody tr:hover {
 
 .notification-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* ============================================================
+   Safety Overrides
+   ============================================================ */
+
+.app *,
+#root * {
+  -webkit-tap-highlight-color: transparent;
 }

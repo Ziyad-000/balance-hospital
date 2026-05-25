@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit"
+
 import modeSlice from "./slices/mode"
 import authSlice from "./slices/auth"
 import categorySlice from "./slices/category"
@@ -8,7 +9,8 @@ import subDepartmentSlice from "./slices/subDepartment"
 import contractingTypeSlice from "./slices/contractingType"
 import scientificDegreeSlice from "./slices/scientificDegree"
 import managementRolesSlice from "./slices/managementRole"
-import usersSlice from "./slices/user"
+import userSlice from "./slices/user"
+import usersReducer from "./slices/users"
 import rosterManagementSlice from "./slices/roster"
 import notificationsSlice from "./slices/notification"
 import reportSlice from "./slices/reports"
@@ -25,7 +27,13 @@ export const store = configureStore({
     scientificDegree: scientificDegreeSlice,
     shiftHour: shiftHoursTypeSlice,
     managementRoles: managementRolesSlice,
-    users: usersSlice,
+
+    // القديم لو فيه صفحات شغالة عليه
+    user: userSlice,
+
+    // الجديد لقسم Users اللي بنعمله دلوقتي
+    users: usersReducer,
+
     rosterManagement: rosterManagementSlice,
     notifications: notificationsSlice,
     reports: reportSlice,

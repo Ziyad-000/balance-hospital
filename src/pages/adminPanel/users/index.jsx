@@ -1474,8 +1474,8 @@ function TabButton({ id, activeTab, setActiveTab, icon: Icon, label, count }) {
       onClick={() => setActiveTab(id)}
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
         isActive
-          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-[var(--shadow-sm)]"
-          : "bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
+          ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
+          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] active:bg-[var(--color-primary-active)]"
       }`}
     >
       <Icon size={16} />

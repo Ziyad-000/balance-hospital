@@ -60,6 +60,18 @@ function Roster() {
   const language = i18n.language
   const isRTL = language === "ar"
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
   useEffect(() => {
     setSearchInput(ui.filters.search || "")
   }, [ui.filters.search])
@@ -170,7 +182,7 @@ function Roster() {
       },
       DRAFT_READY: {
         color:
-          "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20",
+          "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-success)]/20",
         name: t("roster.status.draftReady"),
       },
       PUBLISHED: {
@@ -222,7 +234,7 @@ function Roster() {
   const ActionButton = ({ children, title, tone = "primary", onClick }) => {
     const toneClasses = {
       primary:
-        "text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)]",
+        "text-[var(--color-primary)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]",
       warning:
         "text-[var(--color-warning)] hover:bg-[var(--color-warning-soft)]",
       success:
@@ -266,7 +278,7 @@ function Roster() {
       {compact && (
         <button
           onClick={() => navigate("/admin-panel/rosters/create")}
-          className={`${theme.primaryButton} text-sm`}
+          className={`${defaultButtonClass} text-sm`}
           type="button"
         >
           <Plus size={14} className={isRTL ? "ml-1" : "mr-1"} />
@@ -280,7 +292,7 @@ function Roster() {
     <div className="text-center p-8">
       <div className="flex items-center justify-center">
         <div
-          className={`animate-spin rounded-full border-b-2 border-[var(--color-primary)] ${
+          className={`animate-spin rounded-full border-b-2 border-[var(--color-success)] ${
             small ? "h-6 w-6" : "h-8 w-8"
           }`}
         />
@@ -409,8 +421,8 @@ function Roster() {
                 onClick={() => setShowMobileTable(!showMobileTable)}
                 className={`md:hidden px-3 py-2 rounded-lg border transition-colors ${
                   showMobileTable
-                    ? "bg-[var(--color-primary-soft)] border-[var(--color-primary)] text-[var(--color-primary)]"
-                    : "border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
+                    ? "bg-[var(--color-primary-soft)] border-[var(--color-success)] text-[var(--color-success)]"
+                    : defaultButtonClass
                 }`}
                 type="button"
               >
@@ -458,8 +470,8 @@ function Roster() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 justify-center sm:justify-start ${
                   showFilters
-                    ? "bg-[var(--color-primary-soft)] border-[var(--color-primary)] text-[var(--color-primary)]"
-                    : "border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
+                    ? "bg-[var(--color-primary-soft)] border-[var(--color-success)] text-[var(--color-success)]"
+                    : defaultButtonClass
                 }`}
                 type="button"
               >
@@ -588,7 +600,7 @@ function Roster() {
                 <div className="sm:col-span-2 lg:col-span-4">
                   <button
                     onClick={() => dispatch(clearFilters())}
-                    className={theme.secondaryButton}
+                    className={defaultButtonClass}
                     type="button"
                   >
                     {t("roster.filters.clear")}
@@ -685,7 +697,7 @@ function Roster() {
                     return (
                       <tr
                         key={roster.id}
-                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] transition-colors"
+                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
                       >
                         <td className="p-4">
                           <div className="font-semibold text-[var(--color-text)]">
@@ -822,7 +834,7 @@ function Roster() {
                     return (
                       <tr
                         key={roster.id}
-                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] transition-colors"
+                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
                       >
                         <td className="p-2">
                           <div className="font-semibold text-xs text-[var(--color-text)]">
@@ -934,7 +946,7 @@ function Roster() {
                 <button
                   onClick={() => handlePageChange(ui.filters.page - 1)}
                   disabled={!pagination.hasPreviousPage}
-                  className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   type="button"
                 >
                   <ChevronRight size={16} />
@@ -946,8 +958,8 @@ function Roster() {
                     onClick={() => handlePageChange(pageNum)}
                     className={`px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm border ${
                       pageNum == ui.filters.page
-                        ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                        : "border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] text-[var(--color-text)]"
+                        ? selectedButtonClass
+                        : "border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] text-[var(--color-text)]"
                     }`}
                     type="button"
                   >
@@ -958,7 +970,7 @@ function Roster() {
                 <button
                   onClick={() => handlePageChange(ui.filters.page + 1)}
                   disabled={!pagination.hasNextPage}
-                  className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   type="button"
                 >
                   <ChevronLeft size={16} />

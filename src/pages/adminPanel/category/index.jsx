@@ -214,6 +214,16 @@ function Category() {
   const tableCellClass =
     "px-4 py-4 text-sm text-[var(--color-text)] border-b border-[var(--color-border)] align-middle"
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
+
+
   const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneMap = {
       blue:
@@ -330,7 +340,7 @@ function Category() {
           <Link to={`/admin-panel/category/${category.id}`}>
             <button
               type="button"
-              className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-lg"
+              className={iconButtonClass}
               title={t("categories.actions.view")}
             >
               <Eye size={16} />
@@ -340,7 +350,7 @@ function Category() {
           <Link to={`/admin-panel/category/edit/${category.id}`}>
             <button
               type="button"
-              className="p-2 text-[var(--color-success)] hover:bg-[var(--color-success-soft)] rounded-lg"
+              className={iconButtonClass}
               title={t("categories.actions.edit")}
             >
               <Edit size={16} />
@@ -349,7 +359,7 @@ function Category() {
 
           <button
             type="button"
-            className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg"
+            className={dangerIconButtonClass}
             title={t("categories.actions.delete")}
             onClick={() => {
               setToDelete({
@@ -397,14 +407,14 @@ function Category() {
             <button
               type="button"
               onClick={refreshData}
-              className={theme.secondaryButton}
+              className={defaultButtonClass}
             >
               <RefreshCw size={16} />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
             </button>
 
             <Link to="/admin-panel/category/create">
-              <button type="button" className={`${theme.primaryButton} gap-2`}>
+              <button type="button" className={`${defaultButtonClass} gap-2`}>
                 <Plus size={18} />
                 {t("categories.actions.addNew") || "Add New Category"}
               </button>
@@ -494,7 +504,7 @@ function Category() {
               <button
                 type="button"
                 onClick={() => setShowFilters((prev) => !prev)}
-                className={`${theme.secondaryButton} gap-2`}
+                className={`${defaultButtonClass} gap-2`}
               >
                 <SlidersHorizontal size={17} />
                 {t("categories.filters.title") || "Filters"}
@@ -583,7 +593,7 @@ function Category() {
                     dispatch(clearFilters())
                     setSearchInput("")
                   }}
-                  className={`${theme.secondaryButton} w-full gap-2`}
+                  className={`${defaultButtonClass} w-full gap-2`}
                 >
                   <Filter size={16} />
                   {t("contractingTypes.filters.clear") || "Clear"}
@@ -731,7 +741,7 @@ function Category() {
                           <Link to={`/admin-panel/category/${category.id}`}>
                             <button
                               type="button"
-                              className="p-2 text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] rounded-lg transition-colors"
+                              className={iconButtonClass}
                               title={t("categories.actions.view") || "View"}
                             >
                               <Eye size={16} />
@@ -741,7 +751,7 @@ function Category() {
                           <Link to={`/admin-panel/category/edit/${category.id}`}>
                             <button
                               type="button"
-                              className="p-2 text-[var(--color-success)] hover:bg-[var(--color-success-soft)] rounded-lg transition-colors"
+                              className={iconButtonClass}
                               title={t("categories.actions.edit") || "Edit"}
                             >
                               <Edit size={16} />
@@ -757,7 +767,7 @@ function Category() {
                               })
                               setModalOpen(true)
                             }}
-                            className="p-2 text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)] rounded-lg transition-colors"
+                            className={dangerIconButtonClass}
                             title={t("categories.actions.delete") || "Delete"}
                           >
                             <Trash2 size={16} />
@@ -810,7 +820,7 @@ function Category() {
                   type="button"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={!hasPrevious}
-                  className={theme.secondaryButton}
+                  className={defaultButtonClass}
                 >
                   {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                 </button>
@@ -822,8 +832,8 @@ function Category() {
                     onClick={() => handlePageChange(pageNum)}
                     className={`px-3 py-2 rounded-lg border transition-colors ${
                       pageNum === pagination.page
-                        ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                        : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-surface-muted)]"
+                        ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
+                        : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
                     }`}
                   >
                     {pageNum}
@@ -834,7 +844,7 @@ function Category() {
                   type="button"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={!hasNext}
-                  className={theme.secondaryButton}
+                  className={defaultButtonClass}
                 >
                   {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </button>

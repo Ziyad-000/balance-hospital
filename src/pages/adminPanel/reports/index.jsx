@@ -120,100 +120,135 @@ function Reports() {
 
   const [dateRangeError, setDateRangeError] = useState("")
 
+  const primaryActionButton =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedActionButton =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border bg-[var(--color-success)] text-white border-[var(--color-success)] shadow-sm transition-colors"
+
+  const smallActionButton =
+    "inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const iconButton =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors cursor-pointer"
+
+  const inputClass =
+    "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-success)]/20 focus:border-[var(--color-success)] transition-colors"
+
+  const labelClass =
+    "block text-xs font-black text-[var(--color-text)] mb-1.5"
+
   const iconColors = {
-    calendar: "text-blue-700 dark:text-blue-300",
-    filter: "text-blue-700 dark:text-blue-300",
-    view: "text-blue-700 dark:text-blue-300",
-    users: "text-blue-700 dark:text-blue-300",
-    building: "text-green-700 dark:text-green-300",
-    briefcase: "text-purple-700 dark:text-purple-300",
-    degree: "text-orange-700 dark:text-orange-300",
-    user: "text-blue-700 dark:text-blue-300",
-    phone: "text-green-700 dark:text-green-300",
-    hash: "text-slate-700 dark:text-slate-300",
-    id: "text-cyan-700 dark:text-cyan-300",
-    file: "text-slate-700 dark:text-slate-300",
-    refresh: "text-slate-700 dark:text-slate-300",
-    danger: "text-red-700 dark:text-red-300",
-    success: "text-green-700 dark:text-green-300",
-    warning: "text-yellow-700 dark:text-yellow-300",
-    muted: "text-slate-600 dark:text-slate-300",
-    chart: "text-blue-700 dark:text-blue-300",
-    activity: "text-purple-700 dark:text-purple-300",
+    calendar: "text-blue-500 dark:text-blue-500",
+    filter: "text-blue-100 dark:text-blue-500",
+    view: "text-blue-800 dark:text-blue-500",
+    users: "text-blue-800 dark:text-blue-500",
+    building: "text-emerald-800 dark:text-emerald-500",
+    briefcase: "text-violet-800 dark:text-violet-500",
+    degree: "text-orange-800 dark:text-orange-500",
+    user: "text-blue-800 dark:text-blue-500",
+    phone: "text-emerald-800 dark:text-emerald-500",
+    hash: "text-slate-800 dark:text-slate-500",
+    id: "text-cyan-800 dark:text-cyan-500",
+    file: "text-slate-800 dark:text-slate-500",
+    refresh: "text-slate-800 dark:text-slate-500",
+    danger: "text-red-800 dark:text-red-500",
+    success: "text-emerald-800 dark:text-emerald-500",
+    warning: "text-amber-800 dark:text-amber-500",
+    muted: "text-slate-700 dark:text-slate-300",
+    chart: "text-blue-800 dark:text-blue-500",
+    activity: "text-violet-800 dark:text-violet-500",
   }
 
   const iconBg = {
-    calendar: "bg-blue-100 dark:bg-blue-900/50",
-    filter: "bg-blue-100 dark:bg-blue-900/50",
-    view: "bg-blue-100 dark:bg-blue-900/50",
-    users: "bg-blue-100 dark:bg-blue-900/50",
-    building: "bg-green-100 dark:bg-green-900/50",
-    briefcase: "bg-purple-100 dark:bg-purple-900/50",
-    degree: "bg-orange-100 dark:bg-orange-900/50",
-    user: "bg-blue-100 dark:bg-blue-900/50",
-    phone: "bg-green-100 dark:bg-green-900/50",
-    hash: "bg-slate-100 dark:bg-slate-800/80",
-    id: "bg-cyan-100 dark:bg-cyan-900/50",
-    file: "bg-slate-100 dark:bg-slate-800/80",
-    refresh: "bg-slate-100 dark:bg-slate-800/80",
-    danger: "bg-red-100 dark:bg-red-900/50",
-    success: "bg-green-100 dark:bg-green-900/50",
-    warning: "bg-yellow-100 dark:bg-yellow-900/50",
-    chart: "bg-blue-100 dark:bg-blue-900/50",
-    activity: "bg-purple-100 dark:bg-purple-900/50",
+    calendar:
+      "bg-blue-200 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
+    filter:
+      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
+    view:
+      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
+    users:
+      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
+    building:
+      "bg-emerald-100 dark:bg-emerald-900/5 border border-emerald-300 dark:border-emerald-700",
+    briefcase:
+      "bg-violet-100 dark:bg-violet-900/5 border border-violet-300 dark:border-violet-700",
+    degree:
+      "bg-orange-100 dark:bg-orange-900/5 border border-orange-300 dark:border-orange-700",
+    user:
+      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
+    phone:
+      "bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-700",
+    hash:
+      "bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600",
+    id: "bg-cyan-100 dark:bg-cyan-900/50 border border-cyan-300 dark:border-cyan-700",
+    file:
+      "bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600",
+    refresh:
+      "bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600",
+    danger:
+      "bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700",
+    success:
+      "bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-700",
+    warning:
+      "bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700",
+    chart:
+      "bg-blue-100 dark:bg-blue-900/50 border border-blue-300 dark:border-blue-700",
+    activity:
+      "bg-violet-100 dark:bg-violet-900/50 border border-violet-300 dark:border-violet-700",
   }
 
   const shiftPalette = [
-    {
-      bg: "bg-blue-100 dark:bg-blue-900/50",
-      border: "border-blue-300 dark:border-blue-700",
-      text: "text-blue-800 dark:text-blue-200",
-      badge: "bg-blue-700 dark:bg-blue-500",
-      ring: "ring-blue-300 dark:ring-blue-700",
-    },
-    {
-      bg: "bg-green-100 dark:bg-green-900/50",
-      border: "border-green-300 dark:border-green-700",
-      text: "text-green-800 dark:text-green-200",
-      badge: "bg-green-700 dark:bg-green-500",
-      ring: "ring-green-300 dark:ring-green-700",
-    },
-    {
-      bg: "bg-purple-100 dark:bg-purple-900/50",
-      border: "border-purple-300 dark:border-purple-700",
-      text: "text-purple-800 dark:text-purple-200",
-      badge: "bg-purple-700 dark:bg-purple-500",
-      ring: "ring-purple-300 dark:ring-purple-700",
-    },
-    {
-      bg: "bg-orange-100 dark:bg-orange-900/50",
-      border: "border-orange-300 dark:border-orange-700",
-      text: "text-orange-800 dark:text-orange-200",
-      badge: "bg-orange-700 dark:bg-orange-500",
-      ring: "ring-orange-300 dark:ring-orange-700",
-    },
-    {
-      bg: "bg-cyan-100 dark:bg-cyan-900/50",
-      border: "border-cyan-300 dark:border-cyan-700",
-      text: "text-cyan-800 dark:text-cyan-200",
-      badge: "bg-cyan-700 dark:bg-cyan-500",
-      ring: "ring-cyan-300 dark:ring-cyan-700",
-    },
-    {
-      bg: "bg-pink-100 dark:bg-pink-900/50",
-      border: "border-pink-300 dark:border-pink-700",
-      text: "text-pink-800 dark:text-pink-200",
-      badge: "bg-pink-700 dark:bg-pink-500",
-      ring: "ring-pink-300 dark:ring-pink-700",
-    },
-    {
-      bg: "bg-indigo-100 dark:bg-indigo-900/50",
-      border: "border-indigo-300 dark:border-indigo-700",
-      text: "text-indigo-800 dark:text-indigo-200",
-      badge: "bg-indigo-700 dark:bg-indigo-500",
-      ring: "ring-indigo-300 dark:ring-indigo-700",
-    },
-  ]
+  {
+    bg: "bg-blue-50 dark:bg-blue-950/40",
+    border: "border-blue-400 dark:border-blue-600",
+    text: "text-blue-950 dark:text-blue-100",
+    badge: "bg-blue-700 dark:bg-blue-500",
+    ring: "ring-blue-200 dark:ring-blue-800",
+  },
+  {
+    bg: "bg-emerald-50 dark:bg-emerald-950/40",
+    border: "border-emerald-400 dark:border-emerald-600",
+    text: "text-emerald-950 dark:text-emerald-100",
+    badge: "bg-emerald-700 dark:bg-emerald-500",
+    ring: "ring-emerald-200 dark:ring-emerald-800",
+  },
+  {
+    bg: "bg-violet-50 dark:bg-violet-950/40",
+    border: "border-violet-400 dark:border-violet-600",
+    text: "text-violet-950 dark:text-violet-100",
+    badge: "bg-violet-700 dark:bg-violet-500",
+    ring: "ring-violet-200 dark:ring-violet-800",
+  },
+  {
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+    border: "border-amber-400 dark:border-amber-600",
+    text: "text-amber-950 dark:text-amber-100",
+    badge: "bg-amber-700 dark:bg-amber-500",
+    ring: "ring-amber-200 dark:ring-amber-800",
+  },
+  {
+    bg: "bg-cyan-50 dark:bg-cyan-950/40",
+    border: "border-cyan-400 dark:border-cyan-600",
+    text: "text-cyan-950 dark:text-cyan-100",
+    badge: "bg-cyan-700 dark:bg-cyan-500",
+    ring: "ring-cyan-200 dark:ring-cyan-800",
+  },
+  {
+    bg: "bg-rose-50 dark:bg-rose-950/40",
+    border: "border-rose-400 dark:border-rose-600",
+    text: "text-rose-950 dark:text-rose-100",
+    badge: "bg-rose-700 dark:bg-rose-500",
+    ring: "ring-rose-200 dark:ring-rose-800",
+  },
+  {
+    bg: "bg-indigo-50 dark:bg-indigo-950/40",
+    border: "border-indigo-400 dark:border-indigo-600",
+    text: "text-indigo-950 dark:text-indigo-100",
+    badge: "bg-indigo-700 dark:bg-indigo-500",
+    ring: "ring-indigo-200 dark:ring-indigo-800",
+  },
+]
 
   const getDaysInMonth = (month, year) => {
     return new Date(year, month, 0).getDate()
@@ -458,78 +493,81 @@ function Reports() {
     return payload?.rows || []
   }
 
-  const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors"
-
-  const labelClass =
-    "block text-xs font-bold text-[var(--color-text)] mb-1.5"
-
   const HeaderIcon = ({ icon: Icon, bgClass, iconClass }) => (
     <div
-      className={`w-9 h-9 rounded-xl flex items-center justify-center ${bgClass}`}
+      className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${bgClass}`}
     >
-      <Icon className={`w-5 h-5 ${iconClass}`} />
+      <Icon className={`w-5 h-5 shrink-0 ${iconClass}`} />
     </div>
   )
 
   const SummaryCard = ({ title, value, tone, icon: Icon }) => {
     const toneMap = {
       doctors: {
-        bg: iconBg.users,
-        icon: iconColors.users,
-        text: "text-blue-700 dark:text-blue-300",
+        box: "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700",
+        icon: "bg-blue-600 text-white dark:bg-blue-500",
+        value: "text-blue-900 dark:text-blue-500",
       },
       records: {
-        bg: iconBg.briefcase,
-        icon: iconColors.briefcase,
-        text: "text-purple-700 dark:text-purple-300",
+        box: "bg-violet-100 text-violet-900 border-violet-300 dark:bg-violet-900/50 dark:text-violet-100 dark:border-violet-700",
+        icon: "bg-violet-600 text-white dark:bg-violet-500",
+        value: "text-violet-900 dark:text-violet-500",
       },
       start: {
-        bg: iconBg.success,
-        icon: iconColors.success,
-        text: "text-green-700 dark:text-green-300",
+        box: "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-700",
+        icon: "bg-emerald-600 text-white dark:bg-emerald-500",
+        value: "text-emerald-900 dark:text-emerald-500",
       },
       end: {
-        bg: iconBg.degree,
-        icon: iconColors.degree,
-        text: "text-orange-700 dark:text-orange-300",
-      },
-      danger: {
-        bg: iconBg.danger,
-        icon: iconColors.danger,
-        text: "text-red-700 dark:text-red-300",
+        box: "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-900/50 dark:text-orange-100 dark:border-orange-700",
+        icon: "bg-orange-600 text-white dark:bg-orange-500",
+        value: "text-orange-900 dark:text-orange-500",
       },
       warning: {
-        bg: iconBg.warning,
-        icon: iconColors.warning,
-        text: "text-yellow-700 dark:text-yellow-300",
+        box: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/50 dark:text-amber-100 dark:border-amber-700",
+        icon: "bg-amber-600 text-white dark:bg-amber-500",
+        value: "text-amber-900 dark:text-amber-500",
       },
       chart: {
-        bg: iconBg.chart,
-        icon: iconColors.chart,
-        text: "text-blue-700 dark:text-blue-300",
+        box: "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700",
+        icon: "bg-blue-600 text-white dark:bg-blue-500",
+        value: "text-blue-900 dark:text-blue-500",
       },
       activity: {
-        bg: iconBg.activity,
-        icon: iconColors.activity,
-        text: "text-purple-700 dark:text-purple-300",
+        box: "bg-violet-100 text-violet-900 border-violet-300 dark:bg-violet-900/50 dark:text-violet-100 dark:border-violet-700",
+        icon: "bg-violet-600 text-white dark:bg-violet-500",
+        value: "text-violet-900 dark:text-violet-500",
       },
     }
 
     const selectedTone = toneMap[tone] || toneMap.doctors
 
     return (
-      <div className={`${theme.cardSoft} p-4`}>
+      <div
+        className={`${theme.cardSoft} p-4 border border-[var(--color-border-strong)] overflow-hidden`}
+      >
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
-            <p className={`text-2xl font-bold ${selectedTone.text}`}>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm font-black text-[var(--color-text-muted)] truncate">
+              {title}
+            </p>
+
+            <p
+              className={`mt-1 text-base sm:text-xl xl:text-2xl font-black tracking-tight truncate ${selectedTone.value}`}
+              title={String(value ?? 0)}
+            >
               {value ?? 0}
             </p>
           </div>
 
-          <div className={`p-3 rounded-xl ${selectedTone.bg}`}>
-            <Icon className={`w-5 h-5 ${selectedTone.icon}`} />
+          <div
+            className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-sm ${selectedTone.box}`}
+          >
+            <div
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 ${selectedTone.icon}`}
+            >
+              <Icon className="w-5 h-5 shrink-0" />
+            </div>
           </div>
         </div>
       </div>
@@ -537,91 +575,78 @@ function Reports() {
   }
 
   const DoctorMeta = ({ icon: Icon, iconClass, children }) => (
-    <span className="inline-flex items-center gap-1">
-      <Icon size={14} className={iconClass} />
+    <span className="inline-flex items-center gap-1 font-bold">
+      <Icon size={14} className={`shrink-0 ${iconClass}`} />
       {children}
     </span>
   )
 
   const ScheduleShiftCell = ({ row, shift, day, compact = false }) => {
-    if (!shift) {
-      return (
-        <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-bg-soft)] text-slate-500 dark:text-slate-300 border border-[var(--color-border)]">
-          -
-        </span>
-      )
-    }
+  if (!shift) {
+    return (
+      <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)] font-black">
+        -
+      </span>
+    )
+  }
 
-    const shiftTone = getShiftTone(shift)
+  const shiftTone = getShiftTone(shift)
 
-    const title = [
-      `${currentLang === "ar" ? "اليوم" : "Day"}: ${day}`,
-      `${currentLang === "ar" ? "الطبيب" : "Doctor"}: ${getDoctorName(row)}`,
-      `${currentLang === "ar" ? "كود الشفت" : "Shift Code"}: ${shift.code}`,
-      `${currentLang === "ar" ? "القسم" : "Department"}: ${getDepartmentName(
-        shift
-      )}`,
-      `${currentLang === "ar" ? "رقم القسم" : "Department ID"}: ${
-        shift.departmentId
-      }`,
-    ].join("\n")
+  const title = [
+    `${currentLang === "ar" ? "اليوم" : "Day"}: ${day}`,
+    `${currentLang === "ar" ? "الطبيب" : "Doctor"}: ${getDoctorName(row)}`,
+    `${currentLang === "ar" ? "كود الشفت" : "Shift Code"}: ${shift.code}`,
+    `${currentLang === "ar" ? "القسم" : "Department"}: ${getDepartmentName(
+      shift
+    )}`,
+  ].join("\n")
 
-    if (compact) {
-      return (
-        <div
-          title={title}
-          className={`mx-auto inline-flex items-center justify-center rounded-xl border shadow-sm hover:shadow-md hover:scale-105 transition-all cursor-help ring-1 ${shiftTone.bg} ${shiftTone.border} ${shiftTone.ring}`}
-        >
-          <span
-            className={`inline-flex items-center justify-center min-w-[46px] px-3 py-2 rounded-xl text-xs font-extrabold text-white ${shiftTone.badge}`}
-          >
-            {shift.code}
-          </span>
-        </div>
-      )
-    }
-
+  if (compact) {
     return (
       <div
         title={title}
-        className={`w-full rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-help ring-1 ${shiftTone.bg} ${shiftTone.border} ${shiftTone.ring} p-3 min-h-[118px]`}
+        className={`mx-auto inline-flex items-center justify-center rounded-xl border shadow-sm hover:shadow-md hover:scale-105 transition-all cursor-help ${shiftTone.bg} ${shiftTone.border}`}
       >
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <span
-            className={`inline-flex items-center justify-center min-w-12 px-3 py-1.5 rounded-xl text-xs font-extrabold text-white ${shiftTone.badge}`}
-          >
-            {shift.code}
-          </span>
-
-          <span
-            className={`shrink-0 px-2 py-1 rounded-full text-[10px] font-extrabold border ${shiftTone.bg} ${shiftTone.border} ${shiftTone.text}`}
-          >
-            #{shift.departmentId}
-          </span>
-        </div>
-
-        <p className={`text-sm font-extrabold leading-5 ${shiftTone.text}`}>
-          {getDepartmentName(shift)}
-        </p>
-
-        <p className="text-[11px] mt-2 text-[var(--color-text-muted)]">
-          {currentLang === "ar" ? "جدول شفتات فقط" : "Schedule only"}
-        </p>
+        <span
+          className={`inline-flex items-center justify-center min-w-[42px] px-2.5 py-1.5 rounded-lg text-xs font-black text-white ${shiftTone.badge}`}
+        >
+          {shift.code}
+        </span>
       </div>
     )
   }
+
+  return (
+    <div
+      title={title}
+      className={`w-full rounded-xl border shadow-sm hover:shadow-md transition-all cursor-help ${shiftTone.bg} ${shiftTone.border} p-2 min-h-[30px]`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p
+          className={`text-xs font-black leading-4 line-clamp-2 flex-1 pt-0.5 ${shiftTone.text}`}
+        >
+          {getDepartmentName(shift)}
+        </p>
+
+        <span
+          className={`inline-flex items-center justify-center shrink-0 min-w-10 px-2 py-1 rounded-full text-[11px] font-black text-white ${shiftTone.badge}`}
+        >
+          {shift.code}
+        </span>
+      </div>
+    </div>
+  )
+}
 
   const ViewModeButton = ({ mode, icon: Icon, label }) => (
     <button
       type="button"
       onClick={() => setViewMode(mode)}
-      className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-        viewMode === mode
-          ? "bg-[var(--color-primary)] text-white"
-          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
+      className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-black border transition-colors ${
+        viewMode === mode ? selectedActionButton : primaryActionButton
       }`}
     >
-      <Icon size={16} />
+      <Icon size={16} className="shrink-0" />
       {label}
     </button>
   )
@@ -642,9 +667,9 @@ function Reports() {
     if (attendanceSummaryError) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <FileText className="w-12 h-12 mx-auto mb-4 text-red-700 dark:text-red-300" />
+          <FileText className="w-12 h-12 mx-auto mb-4 text-[var(--color-danger)]" />
 
-          <h3 className="text-xl font-bold text-[var(--color-text)]">
+          <h3 className="text-xl font-black text-[var(--color-text)]">
             {currentLang === "ar"
               ? "تعذر تحميل ملخص الحضور"
               : "Failed to load attendance summary"}
@@ -660,7 +685,7 @@ function Reports() {
     if (!attendanceSummary) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <FileText className="w-12 h-12 mx-auto mb-4 text-slate-600 dark:text-slate-300" />
+          <FileText className="w-12 h-12 mx-auto mb-4 text-[var(--color-text-muted)]" />
 
           <p className="text-[var(--color-text-muted)]">
             {currentLang === "ar"
@@ -678,9 +703,9 @@ function Reports() {
       <div className="space-y-6">
         <div className={`${theme.card} p-6`}>
           <div className="flex items-center gap-3 mb-5">
-            <BarChart3 className="w-6 h-6 text-blue-700 dark:text-blue-300" />
+            <BarChart3 className="w-6 h-6 shrink-0 text-blue-800 dark:text-blue-200" />
 
-            <h2 className="text-2xl font-bold text-[var(--color-text)]">
+            <h2 className="text-2xl font-black text-[var(--color-text)]">
               {currentLang === "ar" ? "ملخص الحضور" : "Attendance Summary"}
             </h2>
           </div>
@@ -732,8 +757,8 @@ function Reports() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className={`${theme.card} p-6`}>
-            <h3 className="text-xl font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <Building className="w-5 h-5 text-green-700 dark:text-green-300" />
+            <h3 className="text-xl font-black text-[var(--color-text)] mb-4 flex items-center gap-2">
+              <Building className="w-5 h-5 shrink-0 text-emerald-800 dark:text-emerald-200" />
               {currentLang === "ar" ? "إحصائيات الأقسام" : "Department Stats"}
             </h3>
 
@@ -741,24 +766,24 @@ function Reports() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[var(--color-surface-muted)]">
-                    <tr className="border-b border-[var(--color-border)]">
+                    <tr className="border-b border-[var(--color-border-strong)]">
                       <th
-                        className={`p-3 text-sm font-bold text-[var(--color-text)] text-${
+                        className={`p-3 text-sm font-black text-[var(--color-text)] text-${
                           isRTL ? "right" : "left"
                         }`}
                       >
                         {currentLang === "ar" ? "القسم" : "Department"}
                       </th>
 
-                      <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                      <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                         {currentLang === "ar" ? "الأطباء" : "Doctors"}
                       </th>
 
-                      <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                      <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                         {currentLang === "ar" ? "الحضور" : "Attendance"}
                       </th>
 
-                      <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                      <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                         {currentLang === "ar" ? "التأخير" : "Late"}
                       </th>
                     </tr>
@@ -770,23 +795,23 @@ function Reports() {
                         key={item.departmentId || index}
                         className={`border-b border-[var(--color-border)] ${theme.hoverRow}`}
                       >
-                        <td className="p-3 text-sm font-bold text-[var(--color-text)]">
+                        <td className="p-3 text-sm font-black text-[var(--color-text)]">
                           {currentLang === "ar"
                             ? item.departmentNameAr
                             : item.departmentNameEn}
                         </td>
 
-                        <td className="p-3 text-center text-[var(--color-text-muted)]">
+                        <td className="p-3 text-center font-bold text-[var(--color-text-muted)]">
                           {item.doctorCount ?? 0}
                         </td>
 
                         <td className="p-3 text-center">
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700">
+                          <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-700">
                             {item.attendanceRate ?? 0}%
                           </span>
                         </td>
 
-                        <td className="p-3 text-center text-[var(--color-text-muted)]">
+                        <td className="p-3 text-center font-bold text-[var(--color-text-muted)]">
                           {item.totalLateDays ?? 0}
                         </td>
                       </tr>
@@ -795,7 +820,7 @@ function Reports() {
                 </table>
               </div>
             ) : (
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="text-sm font-semibold text-[var(--color-text-muted)]">
                 {currentLang === "ar"
                   ? "لا توجد إحصائيات أقسام"
                   : "No department stats"}
@@ -804,8 +829,8 @@ function Reports() {
           </div>
 
           <div className={`${theme.card} p-6`}>
-            <h3 className="text-xl font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-orange-700 dark:text-orange-300" />
+            <h3 className="text-xl font-black text-[var(--color-text)] mb-4 flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 shrink-0 text-orange-800 dark:text-orange-200" />
               {currentLang === "ar"
                 ? "إحصائيات الدرجات العلمية"
                 : "Degree Stats"}
@@ -816,29 +841,29 @@ function Reports() {
                 {degreeStats.map((item, index) => (
                   <div
                     key={item.scientificDegreeId || index}
-                    className={`${theme.cardSoft} p-4 flex items-center justify-between gap-4`}
+                    className={`${theme.cardSoft} p-4 flex items-center justify-between gap-4 border border-[var(--color-border)]`}
                   >
                     <div>
-                      <p className="font-bold text-[var(--color-text)]">
+                      <p className="font-black text-[var(--color-text)]">
                         {currentLang === "ar"
                           ? item.degreeNameAr
                           : item.degreeNameEn}
                       </p>
 
-                      <p className="text-sm text-[var(--color-text-muted)]">
+                      <p className="text-sm font-semibold text-[var(--color-text-muted)]">
                         {item.doctorCount ?? 0}{" "}
                         {currentLang === "ar" ? "طبيب" : "doctors"}
                       </p>
                     </div>
 
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700">
                       {item.attendanceRate ?? 0}%
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="text-sm font-semibold text-[var(--color-text-muted)]">
                 {currentLang === "ar"
                   ? "لا توجد إحصائيات درجات علمية"
                   : "No degree stats"}
@@ -868,9 +893,9 @@ function Reports() {
     if (getReportsAttendError) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <Activity className="w-14 h-14 mx-auto mb-4 text-red-700 dark:text-red-300" />
+          <Activity className="w-14 h-14 mx-auto mb-4 text-[var(--color-danger)]" />
 
-          <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">
+          <h3 className="text-xl font-black text-[var(--color-text)] mb-2">
             {currentLang === "ar"
               ? "تعذر تحميل تقرير الحضور الشهري"
               : "Failed to load monthly attendance"}
@@ -886,9 +911,9 @@ function Reports() {
     if (!rows.length) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <Activity className="w-14 h-14 mx-auto mb-4 text-blue-700 dark:text-blue-300" />
+          <Activity className="w-14 h-14 mx-auto mb-4 text-blue-800 dark:text-blue-200" />
 
-          <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">
+          <h3 className="text-xl font-black text-[var(--color-text)] mb-2">
             {currentLang === "ar"
               ? "تقرير الحضور الشهري التفصيلي"
               : "Monthly Attendance Matrix"}
@@ -906,16 +931,16 @@ function Reports() {
     return (
       <div className={`${theme.card} p-6`}>
         <div className="flex items-center gap-3 mb-5">
-          <Activity className="w-6 h-6 text-purple-700 dark:text-purple-300" />
+          <Activity className="w-6 h-6 shrink-0 text-violet-800 dark:text-violet-200" />
 
           <div>
-            <h2 className="text-2xl font-bold text-[var(--color-text)]">
+            <h2 className="text-2xl font-black text-[var(--color-text)]">
               {currentLang === "ar"
                 ? "تقرير الحضور الشهري"
                 : "Monthly Attendance Matrix"}
             </h2>
 
-            <p className="text-sm text-[var(--color-text-muted)]">
+            <p className="text-sm font-semibold text-[var(--color-text-muted)]">
               {currentLang === "ar"
                 ? "عرض عام للبيانات الراجعة من endpoint الحضور الشهري"
                 : "General view of rows returned from the monthly attendance endpoint"}
@@ -926,9 +951,9 @@ function Reports() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[var(--color-surface-muted)]">
-              <tr className="border-b border-[var(--color-border)]">
+              <tr className="border-b border-[var(--color-border-strong)]">
                 <th
-                  className={`p-3 text-sm font-bold text-[var(--color-text)] text-${
+                  className={`p-3 text-sm font-black text-[var(--color-text)] text-${
                     isRTL ? "right" : "left"
                   }`}
                 >
@@ -936,26 +961,26 @@ function Reports() {
                 </th>
 
                 <th
-                  className={`p-3 text-sm font-bold text-[var(--color-text)] text-${
+                  className={`p-3 text-sm font-black text-[var(--color-text)] text-${
                     isRTL ? "right" : "left"
                   }`}
                 >
                   {currentLang === "ar" ? "القسم" : "Department"}
                 </th>
 
-                <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                   {currentLang === "ar" ? "أيام مجدولة" : "Scheduled"}
                 </th>
 
-                <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                   {currentLang === "ar" ? "حضور" : "Worked"}
                 </th>
 
-                <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                   {currentLang === "ar" ? "غياب" : "Absent"}
                 </th>
 
-                <th className="p-3 text-sm font-bold text-[var(--color-text)] text-center">
+                <th className="p-3 text-sm font-black text-[var(--color-text)] text-center">
                   {currentLang === "ar" ? "نسبة الحضور" : "Rate"}
                 </th>
               </tr>
@@ -967,32 +992,32 @@ function Reports() {
                   key={`${row.doctorId || index}-${row.departmentId || index}`}
                   className={`border-b border-[var(--color-border)] ${theme.hoverRow}`}
                 >
-                  <td className="p-3 text-sm font-bold text-[var(--color-text)]">
+                  <td className="p-3 text-sm font-black text-[var(--color-text)]">
                     {currentLang === "ar"
                       ? row.doctorNameAr || row.doctorName
                       : row.doctorNameEn || row.doctorName}
                   </td>
 
-                  <td className="p-3 text-sm text-[var(--color-text-muted)]">
+                  <td className="p-3 text-sm font-semibold text-[var(--color-text-muted)]">
                     {currentLang === "ar"
                       ? row.departmentNameAr || row.departmentAr
                       : row.departmentNameEn || row.departmentEn}
                   </td>
 
-                  <td className="p-3 text-center text-[var(--color-text-muted)]">
+                  <td className="p-3 text-center font-semibold text-[var(--color-text-muted)]">
                     {row.totalScheduledDays ?? row.scheduledDays ?? "-"}
                   </td>
 
-                  <td className="p-3 text-center text-green-700 dark:text-green-300 font-bold">
+                  <td className="p-3 text-center text-emerald-800 dark:text-emerald-200 font-black">
                     {row.totalWorkedDays ?? row.workedDays ?? "-"}
                   </td>
 
-                  <td className="p-3 text-center text-red-700 dark:text-red-300 font-bold">
+                  <td className="p-3 text-center text-red-800 dark:text-red-200 font-black">
                     {row.totalAbsentDays ?? row.absentDays ?? "-"}
                   </td>
 
                   <td className="p-3 text-center">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700">
                       {row.attendanceRate ?? row.averageAttendanceRate ?? 0}%
                     </span>
                   </td>
@@ -1028,11 +1053,11 @@ function Reports() {
           <div className={`${theme.card} p-6`}>
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-300 dark:to-purple-300 bg-clip-text text-transparent pb-1">
+                <h1 className="text-3xl font-black text-[var(--color-text)] pb-1">
                   {t("reports.title") || "Monthly Reports"}
                 </h1>
 
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                <p className="mt-1 text-sm font-semibold text-[var(--color-text-muted)]">
                   {t("reports.subtitle") ||
                     "Schedule reporting, calendar views, and attendance summaries"}
                 </p>
@@ -1063,7 +1088,7 @@ function Reports() {
               iconClass={iconColors.filter}
             />
 
-            <h2 className="text-xl font-bold text-[var(--color-text)]">
+            <h2 className="text-xl font-black text-[var(--color-text)]">
               {t("reports.filters") || "Filters"}
             </h2>
           </div>
@@ -1102,7 +1127,7 @@ function Reports() {
               <label className={labelClass}>
                 <Calendar
                   size={14}
-                  className={`inline ${isRTL ? "ml-1" : "mr-1"} ${
+                  className={`inline shrink-0 ${isRTL ? "ml-1" : "mr-1"} ${
                     iconColors.calendar
                   }`}
                 />
@@ -1128,7 +1153,7 @@ function Reports() {
               <label className={labelClass}>
                 <Calendar
                   size={14}
-                  className={`inline ${isRTL ? "ml-1" : "mr-1"} ${
+                  className={`inline shrink-0 ${isRTL ? "ml-1" : "mr-1"} ${
                     iconColors.calendar
                   }`}
                 />
@@ -1154,7 +1179,7 @@ function Reports() {
               <label className={labelClass}>
                 <Building
                   size={14}
-                  className={`inline ${isRTL ? "ml-1" : "mr-1"} ${
+                  className={`inline shrink-0 ${isRTL ? "ml-1" : "mr-1"} ${
                     iconColors.building
                   }`}
                 />
@@ -1187,7 +1212,7 @@ function Reports() {
               <label className={labelClass}>
                 <User
                   size={14}
-                  className={`inline ${isRTL ? "ml-1" : "mr-1"} ${
+                  className={`inline shrink-0 ${isRTL ? "ml-1" : "mr-1"} ${
                     iconColors.user
                   }`}
                 />
@@ -1228,12 +1253,12 @@ function Reports() {
                     type="button"
                     onClick={() => handleDoctorPageChange(doctorPage - 1)}
                     disabled={doctorPage === 1 || loading?.list}
-                    className="px-2 py-1 text-xs rounded-lg bg-[var(--color-bg-soft)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className={smallActionButton}
                   >
                     {t("categories.pagination.previous") || "Previous"}
                   </button>
 
-                  <span className="text-xs text-[var(--color-text-muted)]">
+                  <span className="text-xs font-black text-[var(--color-text-muted)]">
                     {doctorPage}/{usersPagination.totalPages}
                   </span>
 
@@ -1243,7 +1268,7 @@ function Reports() {
                     disabled={
                       usersPagination.totalPages === doctorPage || loading?.list
                     }
-                    className="px-2 py-1 text-xs rounded-lg bg-[var(--color-bg-soft)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className={smallActionButton}
                   >
                     {t("categories.pagination.next") || "Next"}
                   </button>
@@ -1255,7 +1280,7 @@ function Reports() {
               <label className={labelClass}>
                 <GraduationCap
                   size={14}
-                  className={`inline ${isRTL ? "ml-1" : "mr-1"} ${
+                  className={`inline shrink-0 ${isRTL ? "ml-1" : "mr-1"} ${
                     iconColors.degree
                   }`}
                 />
@@ -1288,7 +1313,7 @@ function Reports() {
               <label className={labelClass}>
                 <Briefcase
                   size={14}
-                  className={`inline ${isRTL ? "ml-1" : "mr-1"} ${
+                  className={`inline shrink-0 ${isRTL ? "ml-1" : "mr-1"} ${
                     iconColors.briefcase
                   }`}
                 />
@@ -1316,7 +1341,7 @@ function Reports() {
             </div>
           </div>
 
-          <div className={`${theme.cardSoft} mt-4 p-4`}>
+          <div className={`${theme.cardSoft} mt-4 p-4 border border-[var(--color-border)]`}>
             <div className="flex items-center gap-2 mb-3">
               <HeaderIcon
                 icon={Calendar}
@@ -1324,7 +1349,7 @@ function Reports() {
                 iconClass={iconColors.calendar}
               />
 
-              <h3 className="text-base font-bold text-[var(--color-text)]">
+              <h3 className="text-base font-black text-[var(--color-text)]">
                 {t("reports.dateRange") || "Date Range"}
               </h3>
             </div>
@@ -1372,19 +1397,17 @@ function Reports() {
                 <button
                   type="button"
                   onClick={applyDateRange}
-                  className="w-full sm:w-auto px-5 py-2 rounded-lg text-sm font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md bg-blue-600 hover:bg-blue-700 text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                  className={`${primaryActionButton} w-full sm:w-auto`}
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    {t("reports.applyDateRange") || "Apply"}
-                  </span>
+                  <Filter className="w-4 h-4 shrink-0" />
+                  {t("reports.applyDateRange") || "Apply"}
                 </button>
               </div>
             </div>
 
             {dateRangeError && (
               <div className="mt-3 p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger)]/20 rounded-lg">
-                <p className="text-[var(--color-danger)] text-sm">
+                <p className="text-[var(--color-danger)] text-sm font-semibold">
                   {dateRangeError}
                 </p>
               </div>
@@ -1392,7 +1415,7 @@ function Reports() {
 
             {hasDateRangeFilter && (
               <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-[var(--color-info-soft)] border border-[var(--color-info)]/20 rounded-lg">
-                <p className="text-[var(--color-info)] text-sm flex-1">
+                <p className="text-[var(--color-info)] text-sm font-bold flex-1">
                   {t("reports.showingDays") || "Showing days"}:{" "}
                   {appliedDateRange.startDay} - {appliedDateRange.endDay}
                 </p>
@@ -1400,9 +1423,9 @@ function Reports() {
                 <button
                   type="button"
                   onClick={resetDateRange}
-                  className={theme.secondaryButton}
+                  className={primaryActionButton}
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-4 h-4 shrink-0" />
                   {t("common.reset") || "Reset"}
                 </button>
               </div>
@@ -1415,16 +1438,16 @@ function Reports() {
         ) : scheduleError ? (
           <div className={`${theme.card} p-8 text-center`}>
             <div
-              className={`w-20 h-20 ${iconBg.danger} rounded-full flex items-center justify-center mx-auto mb-6`}
+              className={`w-20 h-20 ${iconBg.file} rounded-full flex items-center justify-center mx-auto mb-6`}
             >
               <FileText className={`w-10 h-10 ${iconColors.danger}`} />
             </div>
 
-            <h3 className="text-2xl font-bold text-[var(--color-text)] mb-4">
+            <h3 className="text-2xl font-black text-[var(--color-text)] mb-4">
               {t("reports.error") || "Error Loading Reports"}
             </h3>
 
-            <p className="text-[var(--color-text-muted)] mb-8 text-lg">
+            <p className="text-[var(--color-text-muted)] mb-8 text-lg font-semibold">
               {scheduleError?.message || t("reports.error")}
             </p>
           </div>
@@ -1436,11 +1459,11 @@ function Reports() {
               <FileText className={`w-10 h-10 ${iconColors.file}`} />
             </div>
 
-            <h3 className="text-2xl font-bold text-[var(--color-text)] mb-4">
+            <h3 className="text-2xl font-black text-[var(--color-text)] mb-4">
               {t("reports.noData") || "No Reports Found"}
             </h3>
 
-            <p className="text-[var(--color-text-muted)] text-lg">
+            <p className="text-[var(--color-text-muted)] text-lg font-semibold">
               {t("reports.noDataDescription") ||
                 "No reports available for the selected filters."}
             </p>
@@ -1450,21 +1473,21 @@ function Reports() {
             <div className={`${theme.card} p-5 mb-5`}>
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
                 <div>
-                  <h2 className="text-2xl font-bold text-[var(--color-text)]">
+                  <h2 className="text-2xl font-black text-[var(--color-text)]">
                     {reports.monthName} {reports.year}
                   </h2>
 
-                  <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                  <p className="text-sm font-bold text-[var(--color-text-muted)] mt-1">
                     {t("reports.summary") || "Report Summary"}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20">
+                  <span className="px-3 py-1 rounded-full text-sm font-black bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20">
                     {filters.page} / {totalPages || 1}
                   </span>
 
-                  <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-xl p-1 flex-wrap">
+                  <div className="flex items-center gap-2 bg-[var(--color-surface-muted)] border border-[var(--color-border-strong)] rounded-2xl p-1.5 flex-wrap shadow-sm">
                     <ViewModeButton
                       mode="scheduleRows"
                       icon={Rows3}
@@ -1548,41 +1571,41 @@ function Reports() {
                         ? "border-l-2 border-[var(--color-border)] shadow-[-8px_0_14px_-12px_rgba(0,0,0,0.55)]"
                         : "border-r-2 border-[var(--color-border)] shadow-[8px_0_14px_-12px_rgba(0,0,0,0.55)]"
                     }`}
-                    style={{ width: "620px" }}
+                    style={{ width: "420px" }}
                   >
                     <table className="w-full table-fixed">
                       <thead className="bg-[var(--color-surface-muted)]">
-                        <tr className="border-b border-[var(--color-border)] h-[58px]">
+                        <tr className="border-b border-[var(--color-border-strong)] h-[58px]">
                           <th
-                            className={`px-4 py-3 text-${
+                            className={`px-3 py-3 text-${
                               currentLang === "ar" ? "right" : "left"
-                            } text-xs font-bold text-[var(--color-text)] uppercase tracking-wider`}
-                            style={{ width: "260px" }}
+                            } text-xs font-black text-[var(--color-text)] uppercase tracking-wider`}
+                            style={{ width: "210px" }}
                           >
                             {t("reports.table.doctor") || "Doctor"}
                           </th>
 
                           <th
-                            className={`px-4 py-3 text-${
+                            className={`px-2 py-3 text-${
                               currentLang === "ar" ? "right" : "left"
-                            } text-xs font-bold text-[var(--color-text)] uppercase tracking-wider`}
-                            style={{ width: "145px" }}
+                            } text-xs font-black text-[var(--color-text)] uppercase tracking-wider`}
+                            style={{ width: "80px" }}
                           >
                             {t("reports.table.category") || "Category"}
                           </th>
 
                           <th
-                            className={`px-4 py-3 text-${
+                            className={`px-2 py-3 text-${
                               currentLang === "ar" ? "right" : "left"
-                            } text-xs font-bold text-[var(--color-text)] uppercase tracking-wider`}
-                            style={{ width: "145px" }}
+                            } text-xs font-black text-[var(--color-text)] uppercase tracking-wider`}
+                            style={{ width: "80px" }}
                           >
                             {t("reports.table.department") || "Department"}
                           </th>
 
                           <th
-                            className="px-3 py-3 text-center text-xs font-bold text-[var(--color-text)] uppercase tracking-wider"
-                            style={{ width: "70px" }}
+                            className="px-2 py-3 text-center text-xs font-black text-[var(--color-text)] uppercase tracking-wider"
+                            style={{ width: "50px" }}
                           >
                             {t("categories.table.actions") || "View"}
                           </th>
@@ -1593,68 +1616,55 @@ function Reports() {
                         {reports.rows.map((row, index) => (
                           <tr
                             key={`fixed-${row.doctorId}-${index}`}
-                            className={`${theme.hoverRow} h-[92px]`}
+                            className={`${theme.hoverRow} h-[78px]`}
                           >
-                            <td className="px-4 py-3 align-middle">
+                            <td className="px-3 py-3 align-middle">
                               <div className="space-y-1">
-                                <div className="text-sm font-extrabold text-[var(--color-text)] leading-5 line-clamp-2">
+                                <div
+                                  className="text-sm font-black text-[var(--color-text)] leading-5 line-clamp-2"
+                                  title={getDoctorName(row)}
+                                >
                                   {getDoctorName(row)}
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[var(--color-text-muted)]">
-                                  <span className="inline-flex items-center gap-1">
-                                    <Hash
-                                      size={12}
-                                      className={iconColors.hash}
-                                    />
-                                    {row.printNumber}
-                                  </span>
-
-                                  <span className="inline-flex items-center gap-1">
-                                    <Phone
-                                      size={12}
-                                      className={iconColors.phone}
-                                    />
-                                    {row.mobile || "-"}
-                                  </span>
-                                </div>
-
-                                <div className="text-[11px] text-[var(--color-text-muted)] leading-4 line-clamp-1">
-                                  {row.nationalId || "-"}
+                                <div className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-text-muted)]">
+                                  <Phone
+                                    size={13}
+                                    className={`shrink-0 ${iconColors.phone}`}
+                                  />
+                                  {row.mobile || "-"}
                                 </div>
                               </div>
                             </td>
 
-                            <td className="px-4 py-3 align-middle">
-                              <div className="text-sm font-bold text-[var(--color-text)] line-clamp-2">
+                            <td className="px-2 py-3 align-middle">
+                              <div
+                                className="text-xs font-black text-[var(--color-text)] line-clamp-2"
+                                title={getCategoryName(row)}
+                              >
                                 {getCategoryName(row)}
                               </div>
-
-                              <div className="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1">
-                                {getScientificDegreeName(row)}
-                              </div>
                             </td>
 
-                            <td className="px-4 py-3 align-middle">
-                              <div className="text-sm font-bold text-[var(--color-text)] line-clamp-2">
+                            <td className="px-2 py-3 align-middle">
+                              <div
+                                className="text-xs font-black text-[var(--color-text)] line-clamp-2"
+                                title={getDepartmentsJoined(row)}
+                              >
                                 {getDepartmentsJoined(row)}
                               </div>
-
-                              <div className="text-xs text-[var(--color-text-muted)] mt-1 line-clamp-1">
-                                {getContractingTypeName(row)}
-                              </div>
                             </td>
 
-                            <td className="px-3 py-3 align-middle text-center">
+                            <td className="px-2 py-3 align-middle text-center">
                               <Link
                                 to={`/admin-panel/reports/doctor/${row.doctorId}`}
                               >
                                 <button
                                   type="button"
-                                  className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors cursor-pointer"
+                                  className={iconButton}
                                   title={t("categories.actions.view") || "View"}
                                 >
-                                  <Eye size={17} />
+                                  <Eye size={16} />
                                 </button>
                               </Link>
                             </td>
@@ -1667,19 +1677,19 @@ function Reports() {
                   <div className="flex-1 overflow-x-auto">
                     <table className="w-max min-w-full">
                       <thead className="bg-[var(--color-surface-muted)]">
-                        <tr className="border-b border-[var(--color-border)] h-[58px]">
+                        <tr className="border-b border-[var(--color-border-strong)] h-[58px]">
                           {daysArray.map((day) => (
                             <th
                               key={`day-head-${day}`}
-                              className="px-1 py-3 text-center text-xs font-bold text-[var(--color-text)] uppercase tracking-wider whitespace-nowrap"
-                              style={{ minWidth: "74px", width: "74px" }}
+                              className="px-1 py-3 text-center text-xs font-black text-[var(--color-text)] uppercase tracking-wider whitespace-nowrap"
+                              style={{ minWidth: "68px", width: "68px" }}
                             >
                               <div className="flex flex-col items-center">
-                                <span className="text-[10px] text-[var(--color-text-muted)]">
+                                <span className="text-[10px] font-bold text-[var(--color-text-muted)]">
                                   {t("reports.table.day") || "Day"}
                                 </span>
 
-                                <span className="text-blue-700 dark:text-blue-300 text-sm">
+                                <span className="text-blue-800 dark:text-blue-200 text-sm font-black">
                                   {day}
                                 </span>
                               </div>
@@ -1692,7 +1702,7 @@ function Reports() {
                         {reports.rows.map((row, index) => (
                           <tr
                             key={`days-${row.doctorId}-${index}`}
-                            className={`${theme.hoverRow} h-[92px]`}
+                            className={`${theme.hoverRow} h-[78px]`}
                           >
                             {daysArray.map((day) => {
                               const shift = getShiftByDay(row, day)
@@ -1701,7 +1711,7 @@ function Reports() {
                                 <td
                                   key={`day-${row.doctorId}-${index}-${day}`}
                                   className="px-1 py-3 text-center text-xs whitespace-nowrap text-[var(--color-text)] align-middle"
-                                  style={{ minWidth: "74px", width: "74px" }}
+                                  style={{ minWidth: "68px", width: "68px" }}
                                 >
                                   <ScheduleShiftCell
                                     row={row}
@@ -1724,19 +1734,19 @@ function Reports() {
             {viewMode === "scheduleCalendar" && (
               <div className="space-y-6">
                 {reports.rows.map((row) => (
-                  <div key={row.doctorId} className={`${theme.card} p-6`}>
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+                  <div key={row.doctorId} className={`${theme.card} p-5`}>
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
                       <div className="flex items-start gap-4">
                         <div className={`p-3 rounded-xl ${iconBg.user}`}>
-                          <User className={`w-6 h-6 ${iconColors.user}`} />
+                          <User className={`w-6 h-6 shrink-0 ${iconColors.user}`} />
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-bold text-[var(--color-text)]">
+                          <h3 className="text-lg font-black text-[var(--color-text)]">
                             {getDoctorName(row)}
                           </h3>
 
-                          <div className="flex flex-wrap gap-3 mt-2 text-sm text-[var(--color-text-muted)]">
+                          <div className="flex flex-wrap gap-3 mt-2 text-sm font-semibold text-[var(--color-text-muted)]">
                             <DoctorMeta
                               icon={Hash}
                               iconClass={iconColors.hash}
@@ -1773,11 +1783,11 @@ function Reports() {
                             </DoctorMeta>
                           </div>
 
-                          <div className="mt-2 flex flex-wrap gap-2 text-xs text-[var(--color-text-muted)]">
+                          <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-[var(--color-text-muted)]">
                             <span className="inline-flex items-center gap-1">
                               <BadgeCheck
                                 size={14}
-                                className={iconColors.users}
+                                className={`shrink-0 ${iconColors.users}`}
                               />
                               {getCategoryName(row)}
                             </span>
@@ -1785,7 +1795,7 @@ function Reports() {
                             <span className="inline-flex items-center gap-1">
                               <Building
                                 size={14}
-                                className={iconColors.building}
+                                className={`shrink-0 ${iconColors.building}`}
                               />
                               {getDepartmentsJoined(row)}
                             </span>
@@ -1794,44 +1804,35 @@ function Reports() {
                       </div>
 
                       <Link to={`/admin-panel/reports/doctor/${row.doctorId}`}>
-                        <button
-                          type="button"
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                        >
-                          <Eye size={16} />
+                        <button type="button" className={primaryActionButton}>
+                          <Eye size={16} className="shrink-0" />
                           {t("categories.actions.view") || "View"}
                         </button>
                       </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-7 gap-3">
                       {daysArray.map((day) => {
                         const shift = getShiftByDay(row, day)
 
                         return (
                           <div
                             key={`${row.doctorId}-${day}`}
-                            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] overflow-hidden"
+                            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden shadow-sm"
                           >
-                            <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-                              <div>
-                                <p className="text-xs font-bold text-[var(--color-text-muted)]">
+                            <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-black text-[var(--color-text-muted)]">
                                   {currentLang === "ar" ? "اليوم" : "Day"}
-                                </p>
+                                </span>
 
-                                <p className="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
+                                <span className="text-lg font-black text-[var(--color-text)]">
                                   {day}
-                                </p>
+                                </span>
                               </div>
-
-                              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
-                                {currentLang === "ar"
-                                  ? "جدول شفتات"
-                                  : "Schedule"}
-                              </span>
                             </div>
 
-                            <div className="p-3">
+                            <div className="p-2">
                               <ScheduleShiftCell
                                 row={row}
                                 shift={shift}
@@ -1858,12 +1859,12 @@ function Reports() {
                     type="button"
                     onClick={() => handlePageChange(filters.page - 1)}
                     disabled={filters.page <= 1}
-                    className="px-4 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={primaryActionButton}
                   >
                     {t("categories.pagination.previous") || "Previous"}
                   </button>
 
-                  <span className="text-sm text-[var(--color-text-muted)]">
+                  <span className="text-sm font-black text-[var(--color-text-muted)]">
                     {filters.page} / {totalPages}
                   </span>
 
@@ -1871,7 +1872,7 @@ function Reports() {
                     type="button"
                     onClick={() => handlePageChange(filters.page + 1)}
                     disabled={filters.page >= totalPages}
-                    className="px-4 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={primaryActionButton}
                   >
                     {t("categories.pagination.next") || "Next"}
                   </button>

@@ -66,35 +66,56 @@ function RosterDetails() {
   const isRTL = i18n.language === "ar"
   const currentLang = i18n.language || "ar"
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const rosterHeaderActionButtonClass =
+    "group inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors shadow-sm w-full h-full min-h-[42px] disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const rosterQuickActionButtonClass =
+    "group w-full inline-flex items-center justify-center gap-2 p-3 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors shadow-sm"
+
+  const rosterStatusActionButtonClass =
+    "group inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] hover:bg-[var(--color-success-hover)] hover:border-[var(--color-success-hover)] transition-colors shadow-sm w-full h-full min-h-[42px]"
+
   const iconColors = {
-    calendar: "text-blue-600 dark:text-blue-400",
-    info: "text-blue-600 dark:text-blue-400",
-    activity: "text-blue-600 dark:text-blue-400",
-    building: "text-green-600 dark:text-green-400",
-    plus: "text-green-600 dark:text-green-400",
-    briefcase: "text-green-600 dark:text-green-400",
-    settings: "text-purple-600 dark:text-purple-400",
-    timer: "text-purple-600 dark:text-purple-400",
-    target: "text-orange-600 dark:text-orange-400",
-    deadline: "text-orange-600 dark:text-orange-400",
-    success: "text-green-600 dark:text-green-400",
-    danger: "text-red-600 dark:text-red-400",
-    file: "text-slate-500 dark:text-slate-400",
+    calendar: "text-[var(--color-primary)]",
+    info: "text-[var(--color-primary)]",
+    activity: "text-[var(--color-primary)]",
+    building: "text-[var(--color-success)]",
+    plus: "text-[var(--color-success)]",
+    briefcase: "text-[var(--color-success)]",
+    settings: "text-[var(--color-purple)]",
+    timer: "text-[var(--color-purple)]",
+    target: "text-[var(--color-warning)]",
+    deadline: "text-[var(--color-warning)]",
+    success: "text-[var(--color-success)]",
+    danger: "text-[var(--color-danger)]",
+    file: "text-[var(--color-text-muted)]",
     muted: "text-[var(--color-text-muted)]",
   }
 
   const iconBg = {
-    calendar: "bg-blue-100 dark:bg-blue-900/30",
-    info: "bg-blue-100 dark:bg-blue-900/30",
-    activity: "bg-blue-100 dark:bg-blue-900/30",
-    building: "bg-green-100 dark:bg-green-900/30",
-    briefcase: "bg-green-100 dark:bg-green-900/30",
-    settings: "bg-purple-100 dark:bg-purple-900/30",
-    timer: "bg-purple-100 dark:bg-purple-900/30",
-    target: "bg-orange-100 dark:bg-orange-900/30",
-    success: "bg-green-100 dark:bg-green-900/30",
-    danger: "bg-red-100 dark:bg-red-900/30",
-    deadline: "bg-orange-100 dark:bg-orange-900/30",
+    calendar: "bg-[var(--color-primary-soft)]",
+    info: "bg-[var(--color-primary-soft)]",
+    activity: "bg-[var(--color-primary-soft)]",
+    building: "bg-[var(--color-success-soft)]",
+    briefcase: "bg-[var(--color-success-soft)]",
+    settings: "bg-[var(--color-purple-soft)]",
+    timer: "bg-[var(--color-purple-soft)]",
+    target: "bg-[var(--color-warning-soft)]",
+    success: "bg-[var(--color-success-soft)]",
+    danger: "bg-[var(--color-danger-soft)]",
+    deadline: "bg-[var(--color-warning-soft)]",
   }
 
   useEffect(() => {
@@ -128,7 +149,7 @@ function RosterDetails() {
       DRAFT_READY: {
         name: t("roster.status.draftReady"),
         color:
-          "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20",
+          "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-success)]/20",
         icon: Send,
       },
       PUBLISHED: {
@@ -155,17 +176,17 @@ function RosterDetails() {
   }
 
   const getProgressColor = (percentage) => {
-    if (percentage >= 80) return "bg-green-500"
-    if (percentage >= 50) return "bg-yellow-500"
-    if (percentage >= 25) return "bg-orange-500"
-    return "bg-red-500"
+    if (percentage >= 80) return "bg-[var(--color-success)]"
+    if (percentage >= 50) return "bg-[var(--color-warning)]"
+    if (percentage >= 25) return "bg-[var(--color-warning)]"
+    return "bg-[var(--color-danger)]"
   }
 
   const getProgressTextColor = (percentage) => {
-    if (percentage >= 80) return "text-green-600 dark:text-green-400"
-    if (percentage >= 50) return "text-yellow-600 dark:text-yellow-400"
-    if (percentage >= 25) return "text-orange-600 dark:text-orange-400"
-    return "text-red-600 dark:text-red-400"
+    if (percentage >= 80) return "text-[var(--color-success)]"
+    if (percentage >= 50) return "text-[var(--color-warning)]"
+    if (percentage >= 25) return "text-[var(--color-warning)]"
+    return "text-[var(--color-danger)]"
   }
 
   const changeAutoAcceptedStatus = () => {
@@ -252,8 +273,8 @@ function RosterDetails() {
       onClick={() => setActiveTab(id)}
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
         activeTab === id
-          ? "bg-[var(--color-primary)] text-white"
-          : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text)]"
+          ? selectedButtonClass
+          : defaultButtonClass
       }`}
     >
       <Icon size={16} />
@@ -271,12 +292,12 @@ function RosterDetails() {
         <div className="max-w-4xl mx-auto">
           <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
-              <div className="text-red-500 text-lg mb-4">
+              <div className="text-[var(--color-danger)] text-lg mb-4">
                 {errors.general}
               </div>
 
               {loginRoleResponseDto?.roleNameEn === "System Administrator" && (
-                <Link to="/admin-panel/rosters" className={theme.primaryButton}>
+                <Link to="/admin-panel/rosters" className={defaultButtonClass}>
                   {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
 
                   <span className={isRTL ? "mr-2" : "ml-2"}>
@@ -302,7 +323,7 @@ function RosterDetails() {
               </div>
 
               {loginRoleResponseDto?.roleNameEn === "System Administrator" && (
-                <Link to="/admin-panel/rosters" className={theme.primaryButton}>
+                <Link to="/admin-panel/rosters" className={defaultButtonClass}>
                   {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
 
                   <span className={isRTL ? "mr-2" : "ml-2"}>
@@ -355,7 +376,7 @@ function RosterDetails() {
               >
                 <button
                   type="button"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors w-full h-full justify-center min-h-[42px]"
+                  className={rosterHeaderActionButtonClass}
                 >
                   <Edit size={16} />
                   {t("roster.actions.edit")}
@@ -368,7 +389,7 @@ function RosterDetails() {
               >
                 <button
                   type="button"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors w-full h-full justify-center min-h-[42px]"
+                  className={rosterHeaderActionButtonClass}
                 >
                   <User size={16} />
                   {t("roster.actions.doctors")}
@@ -381,9 +402,9 @@ function RosterDetails() {
               >
                 <button
                   type="button"
-                  className="relative rounded-lg p-[2px] bg-gradient-to-r from-pink-500 via-yellow-400 to-blue-400 transition-transform duration-200 w-full h-full min-h-[42px]"
+                  className={rosterHeaderActionButtonClass}
                 >
-                  <span className="flex items-center gap-2 justify-center bg-gray-900 text-white px-4 py-2 rounded-md w-full h-full">
+                  <span className="flex items-center gap-2 justify-center w-full h-full">
                     <User size={16} />
                     {t("roster.actions.manageDoctors")}
                   </span>
@@ -396,7 +417,7 @@ function RosterDetails() {
               >
                 <button
                   type="button"
-                  className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg w-full h-full justify-center min-h-[42px]"
+                  className={rosterHeaderActionButtonClass}
                 >
                   <Clock size={16} />
                   {t("roster.workingHours.title")}
@@ -409,7 +430,7 @@ function RosterDetails() {
               >
                 <button
                   type="button"
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors w-full h-full justify-center min-h-[42px]"
+                  className={rosterHeaderActionButtonClass}
                 >
                   <Building size={16} />
                   {t("roster.actions.manageRoster")}
@@ -419,7 +440,7 @@ function RosterDetails() {
               <button
                 type="button"
                 onClick={openStatusModal}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors hover:opacity-80 cursor-pointer ${statusInfo.color} flex items-center gap-2 w-full sm:w-auto sm:flex-1 sm:min-w-[140px] lg:flex-initial justify-center min-h-[42px]`}
+                className={`${rosterStatusActionButtonClass} sm:w-auto sm:flex-1 sm:min-w-[140px] lg:flex-initial cursor-pointer`}
                 title={t("roster.actions.updateStatus")}
               >
                 <StatusIcon size={16} />
@@ -612,7 +633,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Building}
                     iconClass={iconColors.calendar}
-                    bgClass="bg-blue-50 dark:bg-blue-900/20"
+                    bgClass="bg-[var(--color-primary-soft)]"
                     value={selectedRoster.departmentsCount}
                     label={t("roster.departments")}
                   />
@@ -620,7 +641,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Briefcase}
                     iconClass={iconColors.briefcase}
-                    bgClass="bg-green-50 dark:bg-green-900/20"
+                    bgClass="bg-[var(--color-success-soft)]"
                     value={selectedRoster.shiftsCount}
                     label={t("roster.shifts")}
                   />
@@ -628,7 +649,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Timer}
                     iconClass={iconColors.timer}
-                    bgClass="bg-purple-50 dark:bg-purple-900/20"
+                    bgClass="bg-[var(--color-purple-soft)]"
                     value={selectedRoster.workingHoursCount}
                     label={t("roster.workingHours.title")}
                   />
@@ -636,7 +657,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Target}
                     iconClass={iconColors.target}
-                    bgClass="bg-orange-50 dark:bg-orange-900/20"
+                    bgClass="bg-[var(--color-warning-soft)]"
                     value={`${Math.round(
                       selectedRoster.completionPercentage
                     )}%`}
@@ -684,7 +705,7 @@ function RosterDetails() {
                         type="button"
                         onClick={changeAutoAcceptedStatus}
                         disabled={loading?.update}
-                        className="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 bg-[var(--color-primary)] hover:bg-[var(--color-success)] text-white disabled:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed"
                       >
                         {loading?.update ? (
                           <>
@@ -729,7 +750,7 @@ function RosterDetails() {
                   >
                     <button
                       type="button"
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                      className={rosterQuickActionButtonClass}
                     >
                       <Building size={18} />
                       {t("roster.actions.manageRoster")}
@@ -739,7 +760,7 @@ function RosterDetails() {
                   <button
                     type="button"
                     onClick={openStatusModal}
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                    className={rosterStatusActionButtonClass}
                   >
                     <Settings size={18} />
                     {t("roster.actions.updateStatus")}
@@ -751,7 +772,7 @@ function RosterDetails() {
                   >
                     <button
                       type="button"
-                      className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                      className={rosterQuickActionButtonClass}
                     >
                       <Edit size={18} />
                       {t("roster.actions.editRoster")}
@@ -764,7 +785,7 @@ function RosterDetails() {
                   >
                     <button
                       type="button"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                      className={rosterQuickActionButtonClass}
                     >
                       <User size={18} />
                       {t("roster.actions.doctors")}
@@ -777,9 +798,9 @@ function RosterDetails() {
                   >
                     <button
                       type="button"
-                      className="w-full relative rounded-lg p-[2px] bg-gradient-to-r from-pink-500 via-yellow-400 to-blue-400 transition-all duration-200 transform hover:scale-105"
+                      className={rosterQuickActionButtonClass}
                     >
-                      <span className="flex items-center justify-center gap-2 w-full h-full bg-gray-900 rounded-md p-3 text-white">
+                      <span className="flex items-center justify-center gap-2 w-full h-full">
                         <User size={18} />
                         {t("roster.actions.manageDoctors")}
                       </span>
@@ -792,7 +813,7 @@ function RosterDetails() {
                   >
                     <button
                       type="button"
-                      className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white p-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-105"
+                      className={rosterQuickActionButtonClass}
                     >
                       <Clock size={16} />
                       {t("roster.workingHours.title")}
@@ -815,7 +836,7 @@ function RosterDetails() {
                   <DateRow
                     icon={PlusCircle}
                     iconClass={iconColors.plus}
-                    bgClass="bg-green-50 dark:bg-green-900/20"
+                    bgClass="bg-[var(--color-success-soft)]"
                     label={t("roster.details.startDate")}
                     value={formatDate(selectedRoster.startDate)}
                   />
@@ -823,7 +844,7 @@ function RosterDetails() {
                   <DateRow
                     icon={XCircle}
                     iconClass={iconColors.danger}
-                    bgClass="bg-red-50 dark:bg-red-900/20"
+                    bgClass="bg-[var(--color-danger-soft)]"
                     label={t("roster.details.endDate")}
                     value={formatDate(selectedRoster.endDate)}
                   />
@@ -831,7 +852,7 @@ function RosterDetails() {
                   <DateRow
                     icon={AlertCircle}
                     iconClass={iconColors.deadline}
-                    bgClass="bg-orange-50 dark:bg-orange-900/20"
+                    bgClass="bg-[var(--color-warning-soft)]"
                     label={t("roster.details.deadline")}
                     value={formatDate(selectedRoster.submissionDeadline)}
                   />

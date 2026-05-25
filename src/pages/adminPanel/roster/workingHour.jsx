@@ -41,6 +41,18 @@ function WorkingHour() {
   const currentLang = i18next.language
   const isRTL = currentLang === "ar"
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
   const handleNavigateToSchedule = (doctor) => {
     navigate(`/admin-panel/rosters/doctors/${doctor.doctorId}`)
   }
@@ -64,42 +76,42 @@ function WorkingHour() {
   }
 
   const getFillColor = (percentage) => {
-    if (percentage >= 80) return "text-green-600 dark:text-green-400"
-    if (percentage >= 50) return "text-yellow-600 dark:text-yellow-400"
-    if (percentage >= 25) return "text-orange-600 dark:text-orange-400"
-    return "text-red-600 dark:text-red-400"
+    if (percentage >= 80) return "text-[var(--color-success)]"
+    if (percentage >= 50) return "text-[var(--color-warning)]"
+    if (percentage >= 25) return "text-[var(--color-warning)]"
+    return "text-[var(--color-danger)]"
   }
 
   const getFillBgColor = (percentage) => {
-    if (percentage >= 80) return "bg-green-500"
-    if (percentage >= 50) return "bg-yellow-500"
-    if (percentage >= 25) return "bg-orange-500"
-    return "bg-red-500"
+    if (percentage >= 80) return "bg-[var(--color-success)]"
+    if (percentage >= 50) return "bg-[var(--color-warning)]"
+    if (percentage >= 25) return "bg-[var(--color-warning)]"
+    return "bg-[var(--color-danger)]"
   }
 
   const iconColors = {
-    clock: "text-blue-600 dark:text-blue-400",
-    calendar: "text-blue-600 dark:text-blue-400",
-    target: "text-blue-600 dark:text-blue-400",
-    userCheck: "text-green-600 dark:text-green-400",
-    building: "text-green-600 dark:text-green-400",
-    users: "text-orange-600 dark:text-orange-400",
-    briefcase: "text-purple-600 dark:text-purple-400",
-    user: "text-orange-600 dark:text-orange-400",
-    file: "text-slate-500 dark:text-slate-400",
-    danger: "text-red-600 dark:text-red-400",
-    success: "text-green-600 dark:text-green-400",
+    clock: "text-[var(--color-primary)]",
+    calendar: "text-[var(--color-primary)]",
+    target: "text-[var(--color-primary)]",
+    userCheck: "text-[var(--color-success)]",
+    building: "text-[var(--color-success)]",
+    users: "text-[var(--color-warning)]",
+    briefcase: "text-[var(--color-purple)]",
+    user: "text-[var(--color-warning)]",
+    file: "text-[var(--color-text-muted)]",
+    danger: "text-[var(--color-danger)]",
+    success: "text-[var(--color-success)]",
   }
 
   const iconBg = {
-    clock: "bg-blue-100 dark:bg-blue-900/30",
-    target: "bg-blue-100 dark:bg-blue-900/30",
-    userCheck: "bg-green-100 dark:bg-green-900/30",
-    building: "bg-green-100 dark:bg-green-900/30",
-    users: "bg-orange-100 dark:bg-orange-900/30",
-    briefcase: "bg-purple-100 dark:bg-purple-900/30",
-    user: "bg-orange-100 dark:bg-orange-900/30",
-    file: "bg-slate-100 dark:bg-slate-800",
+    clock: "bg-[var(--color-primary-soft)]",
+    target: "bg-[var(--color-primary-soft)]",
+    userCheck: "bg-[var(--color-success-soft)]",
+    building: "bg-[var(--color-success-soft)]",
+    users: "bg-[var(--color-warning-soft)]",
+    briefcase: "bg-[var(--color-purple-soft)]",
+    user: "bg-[var(--color-warning-soft)]",
+    file: "bg-[var(--color-neutral-soft)]",
   }
 
   const InfoRow = ({ icon: Icon, iconClass, label, value, subValue }) => (
@@ -150,15 +162,15 @@ function WorkingHour() {
         <div className="max-w-6xl mx-auto">
           <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <AlertCircle className="h-12 w-12 text-[var(--color-danger)] mx-auto mb-4" />
 
-              <div className="text-red-500 text-lg mb-4">
+              <div className="text-[var(--color-danger)] text-lg mb-4">
                 {errors.workingHours}
               </div>
 
               <button
                 onClick={() => navigate(-1)}
-                className={theme.primaryButton}
+                className={defaultButtonClass}
                 type="button"
               >
                 {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
@@ -211,7 +223,7 @@ function WorkingHour() {
                     `/admin-panel/rosters/working-hours/${workingHourId}/edit`
                   )
                 }
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-success)] text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <Edit size={16} />
@@ -224,7 +236,7 @@ function WorkingHour() {
                     `/admin-panel/rosters/working-hours/${workingHourId}/assign-doctors`
                   )
                 }
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-[var(--color-success)] hover:bg-[var(--color-success-hover)] text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <UserPlus size={16} />
@@ -458,8 +470,8 @@ function WorkingHour() {
                           <span
                             className={`text-xs px-2 py-1 rounded-full border ${
                               doctor.assignmentMethod === "MANUAL"
-                                ? "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
-                                : "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"
+                                ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border-[var(--color-primary)]/25"
+                                : "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
                             }`}
                           >
                             {doctor.assignmentMethod}
@@ -467,7 +479,7 @@ function WorkingHour() {
 
                           <button
                             onClick={() => handleNavigateToSchedule(doctor)}
-                            className="px-3 py-1 text-xs rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                            className="px-3 py-1 text-xs rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-success)] text-white transition-colors"
                             type="button"
                           >
                             {t("roster.doctorSchedule.title")}

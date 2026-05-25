@@ -37,6 +37,7 @@ import {
 import ApproveRequestModal from "../../../components/modals/ApprovalRequest"
 import RejectRequestModal from "../../../components/modals/RejectRequest"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 function ManageDoctors() {
   const { id } = useParams()
@@ -63,6 +64,7 @@ function ManageDoctors() {
   }
 
   const { t, i18n } = useTranslation()
+  const theme = getPageTheme()
 
   const doctorRequests = useSelector(selectDoctorRequests)
   const isLoading = useSelector(selectDoctorRequestsLoading)
@@ -74,6 +76,18 @@ function ManageDoctors() {
   // Get current language direction
   const isRTL = i18n.language === "ar"
   const currentLang = i18n.language || "ar"
+
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
   const isDark = mymode === "dark"
 
   useEffect(() => {
@@ -102,20 +116,20 @@ function ManageDoctors() {
     switch (status) {
       case "Pending":
         return isDark
-          ? "bg-yellow-900/30 text-yellow-400 border-yellow-500/30"
-          : "bg-yellow-100 text-yellow-800 border-yellow-300"
+          ? "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning-border)]"
+          : "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning-border)]"
       case "Approved":
         return isDark
-          ? "bg-green-900/30 text-green-400 border-green-500/30"
-          : "bg-green-100 text-green-800 border-green-300"
+          ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
+          : "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
       case "Rejected":
         return isDark
-          ? "bg-red-900/30 text-red-400 border-red-500/30"
-          : "bg-red-100 text-red-800 border-red-300"
+          ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
+          : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
       default:
         return isDark
-          ? "bg-gray-700 text-gray-300 border-gray-600"
-          : "bg-gray-100 text-gray-800 border-gray-300"
+          ? "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]"
+          : "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-[var(--color-border)]"
     }
   }
 
@@ -157,7 +171,7 @@ function ManageDoctors() {
 
   return (
     <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
+      className={`min-h-screen p-6 ${isDark ? "bg-[var(--color-bg)]" : "bg-[var(--color-bg)]"}`}
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="max-w-7xl mx-auto">
@@ -168,8 +182,8 @@ function ManageDoctors() {
               to={`/admin-panel/rosters/${id}`}
               className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
                 isDark
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "text-[var(--color-text-muted)] hover:text-white"
+                  : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               } transition-colors`}
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
@@ -182,33 +196,33 @@ function ManageDoctors() {
           <div className="flex items-center gap-4 mb-4">
             <div
               className={`p-3 ${
-                isDark ? "bg-gray-700" : "bg-blue-100"
+                isDark ? "bg-[var(--color-surface-muted)]" : "bg-[var(--color-primary-soft)]"
               } rounded-lg`}
             >
               <UserCheck
                 className={`h-8 w-8 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
+                  isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
                 }`}
               />
             </div>
             <div>
               <h1
                 className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
+                  isDark ? "text-white" : "text-[var(--color-text)]"
                 } mb-2`}
               >
                 {t("doctorRequests.title")}
               </h1>
               <h3
                 className={`text-xl sm:text-xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
+                  isDark ? "text-white" : "text-[var(--color-text)]"
                 } mb-2`}
               >
                 {doctorRequests?.rosterTitle}
               </h3>
               <p
                 className={`text-sm ${
-                  isDark ? "text-gray-300" : "text-gray-600"
+                  isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                 }`}
               >
                 {t("doctorRequests.description")}
@@ -226,10 +240,10 @@ function ManageDoctors() {
                 onClick={() => handleStatusChange(value)}
                 className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${
                   currentStatus === value
-                    ? "bg-blue-600 text-white border-blue-600"
+                    ? selectedButtonClass
                     : isDark
-                    ? "bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                    ? "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
+                    : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
                 }`}
               >
                 {getStatusIcon(key)}
@@ -244,23 +258,23 @@ function ManageDoctors() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div
               className={`${
-                isDark ? "bg-gray-800" : "bg-white"
+                isDark ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface)]"
               } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
+                isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
               } p-6`}
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-white" : "text-gray-900"
+                      isDark ? "text-white" : "text-[var(--color-text)]"
                     }`}
                   >
                     {doctorRequests.totalRequests}
                   </p>
                   <p
                     className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
+                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                     }`}
                   >
                     {t("doctorRequests.stats.totalRequests")}
@@ -268,7 +282,7 @@ function ManageDoctors() {
                 </div>
                 <Badge
                   className={`h-8 w-8 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
+                    isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
                   }`}
                 />
               </div>
@@ -276,23 +290,23 @@ function ManageDoctors() {
 
             <div
               className={`${
-                isDark ? "bg-gray-800" : "bg-white"
+                isDark ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface)]"
               } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
+                isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
               } p-6`}
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-yellow-400" : "text-yellow-600"
+                      isDark ? "text-[var(--color-warning)]" : "text-[var(--color-warning)]"
                     }`}
                   >
                     {doctorRequests.pendingRequests}
                   </p>
                   <p
                     className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
+                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                     }`}
                   >
                     {t("doctorRequests.status.pending")}
@@ -300,7 +314,7 @@ function ManageDoctors() {
                 </div>
                 <Clock
                   className={`h-8 w-8 ${
-                    isDark ? "text-yellow-400" : "text-yellow-600"
+                    isDark ? "text-[var(--color-warning)]" : "text-[var(--color-warning)]"
                   }`}
                 />
               </div>
@@ -308,23 +322,23 @@ function ManageDoctors() {
 
             <div
               className={`${
-                isDark ? "bg-gray-800" : "bg-white"
+                isDark ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface)]"
               } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
+                isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
               } p-6`}
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-green-400" : "text-green-600"
+                      isDark ? "text-[var(--color-success)]" : "text-[var(--color-success)]"
                     }`}
                   >
                     {doctorRequests.approvedRequests}
                   </p>
                   <p
                     className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
+                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                     }`}
                   >
                     {t("doctorRequests.status.approved")}
@@ -332,7 +346,7 @@ function ManageDoctors() {
                 </div>
                 <CheckCircle
                   className={`h-8 w-8 ${
-                    isDark ? "text-green-400" : "text-green-600"
+                    isDark ? "text-[var(--color-success)]" : "text-[var(--color-success)]"
                   }`}
                 />
               </div>
@@ -340,23 +354,23 @@ function ManageDoctors() {
 
             <div
               className={`${
-                isDark ? "bg-gray-800" : "bg-white"
+                isDark ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface)]"
               } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
+                isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
               } p-6`}
             >
               <div className="flex items-center justify-between">
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-red-400" : "text-red-600"
+                      isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
                     }`}
                   >
                     {doctorRequests.rejectedRequests}
                   </p>
                   <p
                     className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-600"
+                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                     }`}
                   >
                     {t("doctorRequests.status.rejected")}
@@ -364,7 +378,7 @@ function ManageDoctors() {
                 </div>
                 <Ban
                   className={`h-8 w-8 ${
-                    isDark ? "text-red-400" : "text-red-600"
+                    isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
                   }`}
                 />
               </div>
@@ -379,17 +393,17 @@ function ManageDoctors() {
               <div
                 key={dateGroup.date}
                 className={`${
-                  isDark ? "bg-gray-800" : "bg-white"
+                  isDark ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface)]"
                 } rounded-lg shadow-sm border ${
-                  isDark ? "border-gray-700" : "border-gray-200"
+                  isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
                 }`}
               >
                 {/* Collapsible Date Header */}
                 <div
                   className={`p-6 border-b ${
-                    isDark ? "border-gray-700" : "border-gray-200"
+                    isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
                   } cursor-pointer hover:${
-                    isDark ? "bg-gray-700/50" : "bg-gray-50"
+                    isDark ? "bg-[var(--color-surface-muted)]/50" : "bg-[var(--color-bg)]"
                   } transition-colors`}
                   onClick={() => toggleDateCollapse(dateGroup.date)}
                 >
@@ -397,26 +411,26 @@ function ManageDoctors() {
                     <div className="flex items-center gap-4">
                       <div
                         className={`p-3 ${
-                          isDark ? "bg-blue-900/30" : "bg-blue-100"
+                          isDark ? "bg-[var(--color-primary-soft)]" : "bg-[var(--color-primary-soft)]"
                         } rounded-lg`}
                       >
                         <Calendar
                           className={`h-6 w-6 ${
-                            isDark ? "text-blue-400" : "text-blue-600"
+                            isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
                           }`}
                         />
                       </div>
                       <div>
                         <h2
                           className={`text-xl font-bold ${
-                            isDark ? "text-white" : "text-gray-900"
+                            isDark ? "text-white" : "text-[var(--color-text)]"
                           }`}
                         >
                           {formatDate(dateGroup.date)}
                         </h2>
                         <p
                           className={`text-sm ${
-                            isDark ? "text-gray-400" : "text-gray-600"
+                            isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                           }`}
                         >
                           {dateGroup.dayOfWeekName}
@@ -424,7 +438,7 @@ function ManageDoctors() {
                         <div className="flex items-center gap-4 mt-1">
                           <span
                             className={`text-xs ${
-                              isDark ? "text-gray-400" : "text-gray-600"
+                              isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                             }`}
                           >
                             {t("doctorRequests.stats.total")}:{" "}
@@ -445,13 +459,13 @@ function ManageDoctors() {
                       {collapsedDates[dateGroup.date] ? (
                         <ChevronDown
                           className={`h-5 w-5 ${
-                            isDark ? "text-gray-400" : "text-gray-600"
+                            isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                           } transition-transform duration-200`}
                         />
                       ) : (
                         <ChevronRight
                           className={`h-5 w-5 ${
-                            isDark ? "text-gray-400" : "text-gray-600"
+                            isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                           } transition-transform duration-200`}
                         />
                       )}
@@ -467,8 +481,8 @@ function ManageDoctors() {
                         key={request.id}
                         className={`p-4 rounded-lg border ${
                           isDark
-                            ? "bg-gray-700/50 border-gray-600"
-                            : "bg-gray-50 border-gray-200"
+                            ? "bg-[var(--color-surface-muted)]/50 border-[var(--color-border)]"
+                            : "bg-[var(--color-bg)] border-[var(--color-border)]"
                         }`}
                       >
                         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -478,12 +492,12 @@ function ManageDoctors() {
                               <div className="flex items-center gap-2">
                                 <User
                                   className={`h-5 w-5 ${
-                                    isDark ? "text-blue-400" : "text-blue-600"
+                                    isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
                                   }`}
                                 />
                                 <h3
                                   className={`text-lg font-medium ${
-                                    isDark ? "text-white" : "text-gray-900"
+                                    isDark ? "text-white" : "text-[var(--color-text)]"
                                   }`}
                                 >
                                   {currentLang === "en"
@@ -509,20 +523,20 @@ function ManageDoctors() {
                               <div className="flex items-center gap-2">
                                 <Building
                                   className={`h-4 w-4 ${
-                                    isDark ? "text-green-400" : "text-green-600"
+                                    isDark ? "text-[var(--color-success)]" : "text-[var(--color-success)]"
                                   }`}
                                 />
                                 <div>
                                   <span
                                     className={`text-xs font-medium ${
-                                      isDark ? "text-gray-400" : "text-gray-500"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                                     }`}
                                   >
                                     {t("doctorRequests.fields.department")}:
                                   </span>
                                   <p
                                     className={`text-sm ${
-                                      isDark ? "text-gray-300" : "text-gray-900"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text)]"
                                     }`}
                                   >
                                     {i18n.language == "en"
@@ -536,21 +550,21 @@ function ManageDoctors() {
                                 <Briefcase
                                   className={`h-4 w-4 ${
                                     isDark
-                                      ? "text-purple-400"
-                                      : "text-purple-600"
+                                      ? "text-[var(--color-purple)]"
+                                      : "text-[var(--color-purple)]"
                                   }`}
                                 />
                                 <div>
                                   <span
                                     className={`text-xs font-medium ${
-                                      isDark ? "text-gray-400" : "text-gray-500"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                                     }`}
                                   >
                                     {t("doctorRequests.fields.shift")}:
                                   </span>
                                   <p
                                     className={`text-sm ${
-                                      isDark ? "text-gray-300" : "text-gray-900"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text)]"
                                     }`}
                                   >
                                     {request.shiftTypeName}
@@ -562,21 +576,21 @@ function ManageDoctors() {
                                 <Clock
                                   className={`h-4 w-4 ${
                                     isDark
-                                      ? "text-orange-400"
-                                      : "text-orange-600"
+                                      ? "text-[var(--color-warning)]"
+                                      : "text-[var(--color-warning)]"
                                   }`}
                                 />
                                 <div>
                                   <span
                                     className={`text-xs font-medium ${
-                                      isDark ? "text-gray-400" : "text-gray-500"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                                     }`}
                                   >
                                     {t("doctorRequests.fields.time")}:
                                   </span>
                                   <p
                                     className={`text-sm ${
-                                      isDark ? "text-gray-300" : "text-gray-900"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text)]"
                                     }`}
                                   >
                                     {formatTime(request.startTime)} -{" "}
@@ -596,14 +610,14 @@ function ManageDoctors() {
                                 <div>
                                   <span
                                     className={`text-xs font-medium ${
-                                      isDark ? "text-gray-400" : "text-gray-500"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                                     }`}
                                   >
                                     {t("doctorRequests.fields.hours")}:
                                   </span>
                                   <p
                                     className={`text-sm ${
-                                      isDark ? "text-gray-300" : "text-gray-900"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text)]"
                                     }`}
                                   >
                                     {request.shiftHours}h
@@ -620,14 +634,14 @@ function ManageDoctors() {
                               />
                               <span
                                 className={`text-xs font-medium ${
-                                  isDark ? "text-gray-400" : "text-gray-500"
+                                  isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                                 }`}
                               >
                                 {t("doctorRequests.fields.type")}:
                               </span>
                               <span
                                 className={`text-sm ${
-                                  isDark ? "text-gray-300" : "text-gray-900"
+                                  isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text)]"
                                 }`}
                               >
                                 {request.contractingTypeName}
@@ -639,15 +653,15 @@ function ManageDoctors() {
                                 <div className="flex items-start gap-2">
                                   <FileText
                                     className={`h-4 w-4 mt-0.5 ${
-                                      isDark ? "text-gray-400" : "text-gray-500"
+                                      isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                                     }`}
                                   />
                                   <div>
                                     <span
                                       className={`text-xs font-medium ${
                                         isDark
-                                          ? "text-gray-400"
-                                          : "text-gray-500"
+                                          ? "text-[var(--color-text-muted)]"
+                                          : "text-[var(--color-text-muted)]"
                                       }`}
                                     >
                                       {t("doctorRequests.fields.notes")}:
@@ -655,8 +669,8 @@ function ManageDoctors() {
                                     <p
                                       className={`text-sm ${
                                         isDark
-                                          ? "text-gray-300"
-                                          : "text-gray-700"
+                                          ? "text-[var(--color-text-muted)]"
+                                          : "text-[var(--color-text)]"
                                       } mt-1`}
                                     >
                                       {request.notes}
@@ -675,13 +689,13 @@ function ManageDoctors() {
                                 <div className="flex items-start gap-2">
                                   <AlertCircle
                                     className={`h-4 w-4 mt-0.5 ${
-                                      isDark ? "text-red-400" : "text-red-600"
+                                      isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
                                     }`}
                                   />
                                   <div>
                                     <span
                                       className={`text-xs font-medium ${
-                                        isDark ? "text-red-400" : "text-red-600"
+                                        isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
                                       }`}
                                     >
                                       {t("doctorRequests.fields.issues")}:
@@ -695,15 +709,15 @@ function ManageDoctors() {
                                           key={index}
                                           className={`text-sm ${
                                             isDark
-                                              ? "text-red-300"
-                                              : "text-red-700"
+                                              ? "text-[var(--color-danger)]"
+                                              : "text-[var(--color-danger)]"
                                           } flex items-center`}
                                         >
                                           <span
                                             className={`w-2 h-2 ${
                                               isDark
-                                                ? "bg-red-400"
-                                                : "bg-red-400"
+                                                ? "bg-[var(--color-danger)]"
+                                                : "bg-[var(--color-danger)]"
                                             } rounded-full ${
                                               isRTL ? "ml-2" : "mr-2"
                                             } flex-shrink-0`}
@@ -719,7 +733,7 @@ function ManageDoctors() {
 
                             <div
                               className={`text-xs ${
-                                isDark ? "text-gray-400" : "text-gray-500"
+                                isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
                               }`}
                             >
                               {t("doctorRequests.fields.requestedAt")}:{" "}
@@ -738,7 +752,7 @@ function ManageDoctors() {
                                   loadingStates[`approve_${request.id}`] ||
                                   isApproving
                                 }
-                                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                                className="bg-[var(--color-success)] hover:bg-[var(--color-success-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
                               >
                                 {loadingStates[`approve_${request.id}`] ? (
                                   <>
@@ -777,7 +791,7 @@ function ManageDoctors() {
                                   loadingStates[`reject_${request.id}`] ||
                                   isRejecting
                                 }
-                                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                                className="bg-[var(--color-danger)] hover:bg-[var(--color-danger)] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
                               >
                                 {loadingStates[`reject_${request.id}`] ? (
                                   <>
@@ -823,19 +837,19 @@ function ManageDoctors() {
         ) : (
           <div
             className={`${
-              isDark ? "bg-gray-800" : "bg-white"
+              isDark ? "bg-[var(--color-surface)]" : "bg-[var(--color-surface)]"
             } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
+              isDark ? "border-[var(--color-border)]" : "border-[var(--color-border)]"
             } p-12 text-center`}
           >
             <UserCheck
               className={`h-12 w-12 mx-auto mb-4 ${
-                isDark ? "text-gray-500" : "text-gray-400"
+                isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
               }`}
             />
             <p
               className={`text-lg ${
-                isDark ? "text-gray-400" : "text-gray-500"
+                isDark ? "text-[var(--color-text-muted)]" : "text-[var(--color-text-muted)]"
               }`}
             >
               {t("doctorRequests.noRequests", {

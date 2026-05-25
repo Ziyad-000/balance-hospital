@@ -57,6 +57,60 @@ function SpecificDepartment() {
   const currentLang = i18n.language || "ar"
   const isRTL = currentLang === "ar"
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+
+  const dangerButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-danger)] border-[var(--color-border-strong)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const toneMap = {
+    blue: {
+      bg: "bg-[var(--color-primary-soft)]",
+      text: "text-[var(--color-primary)]",
+      border: "border-[var(--color-primary)]/25",
+    },
+    green: {
+      bg: "bg-[var(--color-success-soft)]",
+      text: "text-[var(--color-success)]",
+      border: "border-[var(--color-success-border)]",
+    },
+    red: {
+      bg: "bg-[var(--color-danger-soft)]",
+      text: "text-[var(--color-danger)]",
+      border: "border-[var(--color-danger-border)]",
+    },
+    yellow: {
+      bg: "bg-[var(--color-warning-soft)]",
+      text: "text-[var(--color-warning)]",
+      border: "border-[var(--color-warning-border)]",
+    },
+    purple: {
+      bg: "bg-[var(--color-purple-soft)]",
+      text: "text-[var(--color-purple)]",
+      border: "border-[var(--color-purple-border)]",
+    },
+    orange: {
+      bg: "bg-[var(--color-warning-soft)]",
+      text: "text-[var(--color-warning)]",
+      border: "border-[var(--color-warning-border)]",
+    },
+    neutral: {
+      bg: "bg-[var(--color-neutral-soft)]",
+      text: "text-[var(--color-neutral)]",
+      border: "border-[var(--color-neutral-border)]",
+    },
+  }
+
+
   const { loginRoleResponseDto, departmentManagerId } = useSelector(
     (state) => state.auth
   )
@@ -279,27 +333,27 @@ function SpecificDepartment() {
 
     if (value >= 90) {
       return {
-        text: "text-green-700 dark:text-green-300",
-        bg: "bg-green-100 dark:bg-green-900/50",
-        border: "border-green-300 dark:border-green-700",
-        bar: "bg-green-600 dark:bg-green-400",
+        text: "text-[var(--color-success)]",
+        bg: "bg-[var(--color-success-soft)]",
+        border: "border-[var(--color-success-border)]",
+        bar: "bg-[var(--color-success)]",
       }
     }
 
     if (value >= 70) {
       return {
-        text: "text-yellow-700 dark:text-yellow-300",
-        bg: "bg-yellow-100 dark:bg-yellow-900/50",
-        border: "border-yellow-300 dark:border-yellow-700",
-        bar: "bg-yellow-600 dark:bg-yellow-400",
+        text: "text-[var(--color-warning)]",
+        bg: "bg-[var(--color-warning-soft)]",
+        border: "border-[var(--color-warning-border)]",
+        bar: "bg-[var(--color-warning)]",
       }
     }
 
     return {
-      text: "text-red-700 dark:text-red-300",
-      bg: "bg-red-100 dark:bg-red-900/50",
-      border: "border-red-300 dark:border-red-700",
-      bar: "bg-red-600 dark:bg-red-400",
+      text: "text-[var(--color-danger)]",
+      bg: "bg-[var(--color-danger-soft)]",
+      border: "border-[var(--color-danger-border)]",
+      bar: "bg-[var(--color-danger)]",
     }
   }
 
@@ -346,18 +400,7 @@ function SpecificDepartment() {
   )
 
   const StatCard = ({ icon: Icon, title, value, tone = "blue" }) => {
-    const toneMap = {
-      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-      green:
-        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
-      yellow:
-        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
-      purple:
-        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-      orange:
-        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
-    }
+    const toneStyle = toneMap[tone] || toneMap.blue
 
     return (
       <div className={`${theme.cardSoft} p-4`}>
@@ -370,9 +413,7 @@ function SpecificDepartment() {
           </div>
 
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-              toneMap[tone] || toneMap.blue
-            }`}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center border ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
           >
             <Icon className="w-5 h-5" />
           </div>
@@ -386,8 +427,8 @@ function SpecificDepartment() {
       <span
         className={`w-7 h-7 rounded-lg flex items-center justify-center ${
           enabled
-            ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-            : "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+            ? "bg-[var(--color-success-soft)] text-[var(--color-success)]"
+            : "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
         }`}
       >
         {enabled ? <CheckCircle size={15} /> : <XCircle size={15} />}
@@ -401,31 +442,31 @@ function SpecificDepartment() {
     </div>
   )
 
-  const TabButton = ({ id: tabId, icon: Icon, label, count }) => (
-    <button
-      type="button"
-      onClick={() => setActiveTab(tabId)}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
-        activeTab === tabId
-          ? "bg-[var(--color-primary)] text-white"
-          : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text)]"
-      }`}
-    >
-      <Icon size={16} />
-      {label}
-      {count !== undefined && (
-        <span
-          className={`px-2 py-0.5 rounded-full text-[11px] ${
-            activeTab === tabId
-              ? "bg-white/20 text-white"
-              : "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
-          }`}
-        >
-          {count}
-        </span>
-      )}
-    </button>
-  )
+  const TabButton = ({ id: tabId, icon: Icon, label, count }) => {
+    const isActive = activeTab === tabId
+
+    return (
+      <button
+        type="button"
+        onClick={() => setActiveTab(tabId)}
+        className={isActive ? selectedButtonClass : defaultButtonClass}
+      >
+        <Icon size={16} />
+        {label}
+        {count !== undefined && (
+          <span
+            className={`px-2 py-0.5 rounded-full text-[11px] ${
+              isActive
+                ? "bg-white/20 text-white"
+                : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+            }`}
+          >
+            {count}
+          </span>
+        )}
+      </button>
+    )
+  }
 
   const renderOverviewTab = () => (
     <div className="space-y-6">
@@ -469,7 +510,7 @@ function SpecificDepartment() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className={`${theme.card} p-6 xl:col-span-2`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <Info className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+            <Info className="w-5 h-5 text-[var(--color-primary)]" />
             {currentLang === "ar" ? "بيانات القسم" : "Department Information"}
           </h2>
 
@@ -541,7 +582,7 @@ function SpecificDepartment() {
 
         <div className={`${theme.card} p-6`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+            <Shield className="w-5 h-5 text-[var(--color-purple)]" />
             {currentLang === "ar" ? "إجراءات سريعة" : "Quick Actions"}
           </h2>
 
@@ -553,7 +594,7 @@ function SpecificDepartment() {
               >
                 <button
                   type="button"
-                  className={`${theme.primaryButton} w-full gap-2`}
+                  className={`${defaultButtonClass} w-full`}
                 >
                   <Edit size={16} />
                   {currentLang === "ar" ? "تعديل القسم" : "Edit Department"}
@@ -564,7 +605,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={() => setActiveTab("manager")}
-              className={`${theme.secondaryButton} w-full gap-2`}
+              className={`${defaultButtonClass} w-full`}
             >
               <UserCog size={16} />
               {currentLang === "ar" ? "إدارة المدير" : "Manage Manager"}
@@ -573,7 +614,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={() => setActiveTab("rosters")}
-              className={`${theme.secondaryButton} w-full gap-2`}
+              className={`${defaultButtonClass} w-full`}
             >
               <CalendarDays size={16} />
               {currentLang === "ar" ? "روسترات القسم" : "Department Rosters"}
@@ -582,7 +623,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={() => setActiveTab("geofence")}
-              className={`${theme.secondaryButton} w-full gap-2`}
+              className={`${defaultButtonClass} w-full`}
             >
               <MapPin size={16} />
               GeoFence
@@ -597,7 +638,7 @@ function SpecificDepartment() {
     <div className="space-y-5">
       <div className={`${theme.card} p-4`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-          <Link2 className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+          <Link2 className="w-5 h-5 text-[var(--color-primary)]" />
           {currentLang === "ar" ? "التخصصات المرتبطة" : "Linked Categories"}
         </h2>
 
@@ -617,7 +658,7 @@ function SpecificDepartment() {
           }
         />
       ) : departmentCategoriesError ? (
-        <div className={`${theme.card} p-6 text-red-700 dark:text-red-300`}>
+        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
           {departmentCategoriesError?.message}
         </div>
       ) : linkedCategories.length === 0 ? (
@@ -656,7 +697,7 @@ function SpecificDepartment() {
                     <Link to={`/admin-panel/category/${categoryId}`}>
                       <button
                         type="button"
-                        className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                        className={iconButtonClass}
                       >
                         <Eye size={16} />
                       </button>
@@ -679,7 +720,7 @@ function SpecificDepartment() {
       <div className="space-y-5">
         <div className={`${theme.card} p-4`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-            <UserCog className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+            <UserCog className="w-5 h-5 text-[var(--color-purple)]" />
             {currentLang === "ar" ? "مدير القسم" : "Department Manager"}
           </h2>
 
@@ -718,7 +759,7 @@ function SpecificDepartment() {
                     <button
                       type="button"
                       onClick={handleAssignManager}
-                      className={theme.secondaryButton}
+                      className={defaultButtonClass}
                     >
                       <UserPlus size={16} />
                       {currentLang === "ar" ? "تغيير المدير" : "Change Manager"}
@@ -727,7 +768,7 @@ function SpecificDepartment() {
                     <button
                       type="button"
                       onClick={handleRemoveManager}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-red-600 hover:bg-red-700 text-white transition-colors"
+                      className={dangerButtonClass}
                     >
                       <UserX size={16} />
                       {currentLang === "ar" ? "إزالة المدير" : "Remove Manager"}
@@ -799,7 +840,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={handleAssignManager}
-              className={theme.primaryButton}
+              className={defaultButtonClass}
             >
               <UserPlus size={16} />
               {currentLang === "ar" ? "تعيين مدير" : "Assign Manager"}
@@ -816,7 +857,7 @@ function SpecificDepartment() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-orange-700 dark:text-orange-300" />
+              <CalendarDays className="w-5 h-5 text-[var(--color-warning)]" />
               {currentLang === "ar"
                 ? "شهور وروسترات القسم"
                 : "Department Months & Rosters"}
@@ -832,7 +873,7 @@ function SpecificDepartment() {
           <button
             type="button"
             onClick={() => dispatch(getDepartmentMonthList({ departmentId: id }))}
-            className={theme.secondaryButton}
+            className={defaultButtonClass}
           >
             <RefreshCw size={16} />
             {currentLang === "ar" ? "تحديث" : "Refresh"}
@@ -849,7 +890,7 @@ function SpecificDepartment() {
           }
         />
       ) : departmentMonthListError ? (
-        <div className={`${theme.card} p-6 text-red-700 dark:text-red-300`}>
+        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
           {departmentMonthListError?.message ||
             (currentLang === "ar"
               ? "تعذر تحميل شهور القسم"
@@ -877,7 +918,7 @@ function SpecificDepartment() {
                 type="button"
                 key={`${item.month}-${item.year}-${index}`}
                 onClick={() => openDepartmentMonth(item)}
-                className={`${theme.card} p-5 text-start hover:shadow-md transition-all`}
+                className={`${theme.card} p-5 text-start border border-[var(--color-border)] hover:border-[var(--color-success)] hover:shadow-md transition-all`}
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
@@ -891,7 +932,7 @@ function SpecificDepartment() {
                     </p>
                   </div>
 
-                  <Eye className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+                  <Eye className="w-5 h-5 text-[var(--color-primary)]" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -925,8 +966,8 @@ function SpecificDepartment() {
                     value={shortfall}
                     valueClass={
                       shortfall > 0
-                        ? "text-red-700 dark:text-red-300"
-                        : "text-green-700 dark:text-green-300"
+                        ? "text-[var(--color-danger)]"
+                        : "text-[var(--color-success)]"
                     }
                   />
                 </div>
@@ -949,7 +990,7 @@ function SpecificDepartment() {
                 </div>
 
                 {shortfall > 0 && (
-                  <div className="mt-4 flex items-start gap-2 text-xs text-yellow-800 dark:text-yellow-200">
+                  <div className="mt-4 flex items-start gap-2 text-xs text-[var(--color-warning)]">
                     <AlertTriangle size={15} className="mt-0.5" />
                     <span>
                       {currentLang === "ar"
@@ -969,7 +1010,7 @@ function SpecificDepartment() {
   const renderGeoFenceTab = () => (
     <div className="space-y-5">
       {getDepartmentGeoFencesError && (
-        <div className={`${theme.card} p-4 text-red-700 dark:text-red-300`}>
+        <div className={`${theme.card} p-4 text-[var(--color-danger)]`}>
           {getDepartmentGeoFencesError?.message}
         </div>
       )}
@@ -1013,7 +1054,7 @@ function SpecificDepartment() {
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-5xl mx-auto">
           <div className={`${theme.card} p-8 text-center`}>
-            <XCircle className="w-14 h-14 text-red-700 dark:text-red-300 mx-auto mb-4" />
+            <XCircle className="w-14 h-14 text-[var(--color-danger)] mx-auto mb-4" />
 
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
               {currentLang === "ar"
@@ -1029,7 +1070,7 @@ function SpecificDepartment() {
               <button
                 type="button"
                 onClick={() => navigate("/admin-panel/departments")}
-                className={theme.primaryButton}
+                className={defaultButtonClass}
               >
                 {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
                 {currentLang === "ar" ? "رجوع للأقسام" : "Back to Departments"}
@@ -1080,7 +1121,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={() => navigate("/admin-panel/departments")}
-              className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-success)]"
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
               {currentLang === "ar" ? "رجوع للأقسام" : "Back to Departments"}
@@ -1091,7 +1132,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={refreshData}
-              className={theme.secondaryButton}
+              className={defaultButtonClass}
             >
               <RefreshCw size={16} />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
@@ -1099,7 +1140,7 @@ function SpecificDepartment() {
 
             {canManageDepartment && roleName !== "Category Head" && (
               <Link to={`/admin-panel/department/edit/${selectedDepartment.id}`}>
-                <button type="button" className={theme.primaryButton}>
+                <button type="button" className={defaultButtonClass}>
                   <Edit size={16} />
                   {currentLang === "ar" ? "تعديل" : "Edit"}
                 </button>
@@ -1154,7 +1195,7 @@ function SpecificDepartment() {
                   </span>
 
                   {hasManager && (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-900/50 dark:text-purple-200 dark:border-purple-700">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-purple-soft)] text-[var(--color-purple)] border border-[var(--color-purple-border)]">
                       {getManagerName()}
                     </span>
                   )}

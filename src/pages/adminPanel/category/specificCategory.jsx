@@ -377,8 +377,7 @@ const SpecificCategory = () => {
       return {
         label: currentLang === "ar" ? "قيد المراجعة" : "Pending",
         icon: Clock,
-        className:
-          "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+        className: theme.warningBadge,
       }
     }
 
@@ -386,8 +385,7 @@ const SpecificCategory = () => {
       return {
         label: currentLang === "ar" ? "مقبول" : "Approved",
         icon: CheckCircle,
-        className:
-          "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+        className: theme.successBadge,
       }
     }
 
@@ -395,8 +393,7 @@ const SpecificCategory = () => {
       return {
         label: currentLang === "ar" ? "مرفوض" : "Rejected",
         icon: XCircle,
-        className:
-          "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+        className: theme.dangerBadge,
       }
     }
 
@@ -648,44 +645,62 @@ const SpecificCategory = () => {
     rosters.length,
   ])
 
-  const TabButton = ({ id: tabId, icon: Icon, label, count }) => (
-    <button
-      type="button"
-      onClick={() => setActiveTab(tabId)}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
-        activeTab === tabId
-          ? "bg-[var(--color-primary)] text-white"
-          : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text)]"
-      }`}
-    >
-      <Icon size={16} />
-      {label}
-      {count !== undefined && (
-        <span
-          className={`px-2 py-0.5 rounded-full text-[11px] ${
-            activeTab === tabId
-              ? "bg-white/20 text-white"
-              : "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
-          }`}
-        >
-          {count}
-        </span>
-      )}
-    </button>
-  )
+  const defaultButton =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const iconButton =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerButton =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-[var(--color-danger)] border-[var(--color-danger-border)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerIconButton =
+    "p-2 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const TabButton = ({ id: tabId, icon: Icon, label, count }) => {
+    const isActive = activeTab === tabId
+
+    return (
+      <button
+        type="button"
+        onClick={() => setActiveTab(tabId)}
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${
+          isActive
+            ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
+            : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)]"
+        }`}
+      >
+        <Icon size={16} />
+        {label}
+        {count !== undefined && (
+          <span
+            className={`px-2 py-0.5 rounded-full text-[11px] border ${
+              isActive
+                ? "bg-white/20 text-white border-white/20"
+                : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]"
+            }`}
+          >
+            {count}
+          </span>
+        )}
+      </button>
+    )
+  }
 
   const StatCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneClass = {
-      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+      blue:
+        "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20",
       green:
-        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+        "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]",
       yellow:
-        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
       purple:
-        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+        "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border border-[var(--color-purple-border)]",
       orange:
-        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
-      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
+      red:
+        "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]",
     }
 
     return (
@@ -752,7 +767,7 @@ const SpecificCategory = () => {
             type="button"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className={theme.secondaryButton}
+            className={defaultButton}
           >
             {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
           </button>
@@ -761,7 +776,7 @@ const SpecificCategory = () => {
             type="button"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className={theme.secondaryButton}
+            className={defaultButton}
           >
             {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
           </button>
@@ -777,8 +792,8 @@ const SpecificCategory = () => {
       )}
 
       {(categoryDetailsError || categoryStatisticsError) && (
-        <div className={`${theme.card} p-4 border-red-500/30`}>
-          <p className="text-red-700 dark:text-red-300">
+        <div className={`${theme.card} p-4 border-[var(--color-danger-border)]`}>
+          <p className="text-[var(--color-danger)]">
             {categoryDetailsError?.message || categoryStatisticsError?.message}
           </p>
         </div>
@@ -831,7 +846,7 @@ const SpecificCategory = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className={`${theme.card} p-6 xl:col-span-2`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+            <FileText className="w-5 h-5 text-[var(--color-primary)]" />
             {currentLang === "ar" ? "بيانات التخصص" : "Category Information"}
           </h2>
 
@@ -867,13 +882,13 @@ const SpecificCategory = () => {
 
         <div className={`${theme.card} p-6`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+            <BarChart3 className="w-5 h-5 text-[var(--color-purple)]" />
             {currentLang === "ar" ? "إجراءات سريعة" : "Quick Actions"}
           </h2>
 
           <div className="space-y-3">
             <Link to={`/admin-panel/category/edit/${id}`} className="block">
-              <button type="button" className={`${theme.primaryButton} w-full gap-2`}>
+              <button type="button" className={`${defaultButton} w-full`}>
                 <Edit size={16} />
                 {currentLang === "ar" ? "تعديل التخصص" : "Edit Category"}
               </button>
@@ -882,7 +897,7 @@ const SpecificCategory = () => {
             <button
               type="button"
               onClick={() => setActiveTab("doctors")}
-              className={`${theme.secondaryButton} w-full gap-2`}
+              className={`${defaultButton} w-full`}
             >
               <Users size={16} />
               {currentLang === "ar" ? "عرض الدكاترة" : "View Doctors"}
@@ -891,7 +906,7 @@ const SpecificCategory = () => {
             <button
               type="button"
               onClick={() => setActiveTab("requests")}
-              className={`${theme.secondaryButton} w-full gap-2`}
+              className={`${defaultButton} w-full`}
             >
               <Clock size={16} />
               {currentLang === "ar" ? "طلبات الانضمام" : "Join Requests"}
@@ -900,7 +915,7 @@ const SpecificCategory = () => {
             <button
               type="button"
               onClick={() => navigate(`/admin-panel/leaves/${id}`)}
-              className={`${theme.secondaryButton} w-full gap-2`}
+              className={`${defaultButton} w-full`}
             >
               <ExternalLink size={16} />
               {currentLang === "ar" ? "إجازات التخصص" : "Category Leaves"}
@@ -926,7 +941,7 @@ const SpecificCategory = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-              <Users className="w-5 h-5 text-green-700 dark:text-green-300" />
+              <Users className="w-5 h-5 text-[var(--color-success)]" />
               {currentLang === "ar" ? "الدكاترة المعتمدين" : "Approved Doctors"}
             </h2>
             <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -959,7 +974,7 @@ const SpecificCategory = () => {
                   })
                 )
               }
-              className={theme.secondaryButton}
+              className={defaultButton}
             >
               <RefreshCw size={16} />
             </button>
@@ -970,7 +985,7 @@ const SpecificCategory = () => {
       {loadingGetCategoryDoctors ? (
         <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الدكاترة..." : "Loading doctors..."} />
       ) : categoryDoctorsError ? (
-        <div className={`${theme.card} p-6 text-red-700 dark:text-red-300`}>
+        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
           {categoryDoctorsError?.message}
         </div>
       ) : approvedDoctors.length === 0 ? (
@@ -1076,7 +1091,7 @@ const SpecificCategory = () => {
                             <Link to={`/admin-panel/category/doctor/${doctorId}`}>
                               <button
                                 type="button"
-                                className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                                className={iconButton}
                               >
                                 <Eye size={16} />
                               </button>
@@ -1086,7 +1101,7 @@ const SpecificCategory = () => {
                               <Link to={`/admin-panel/category/doctor/${doctorId}/edit`}>
                                 <button
                                   type="button"
-                                  className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg"
+                                  className={iconButton}
                                 >
                                   <Edit size={16} />
                                 </button>
@@ -1118,7 +1133,7 @@ const SpecificCategory = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-              <Clock className="w-5 h-5 text-yellow-700 dark:text-yellow-300" />
+              <Clock className="w-5 h-5 text-[var(--color-warning)]" />
               {currentLang === "ar" ? "طلبات انضمام الدكاترة" : "Doctor Join Requests"}
             </h2>
             <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -1150,7 +1165,7 @@ const SpecificCategory = () => {
                   })
                 )
               }
-              className={theme.secondaryButton}
+              className={defaultButton}
             >
               <RefreshCw size={16} />
             </button>
@@ -1161,7 +1176,7 @@ const SpecificCategory = () => {
       {loadingGetCategoryPendingRequests ? (
         <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الطلبات..." : "Loading requests..."} />
       ) : categoryPendingRequestsError ? (
-        <div className={`${theme.card} p-6 text-red-700 dark:text-red-300`}>
+        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
           {categoryPendingRequestsError?.message}
         </div>
       ) : pendingRequests.length === 0 ? (
@@ -1253,7 +1268,7 @@ const SpecificCategory = () => {
                             <Link to={`/admin-panel/category/doctor/${userId}`}>
                               <button
                                 type="button"
-                                className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                                className={iconButton}
                               >
                                 <Eye size={16} />
                               </button>
@@ -1265,7 +1280,7 @@ const SpecificCategory = () => {
                                   type="button"
                                   disabled={loadingApproveRequest || loadingRejectRequest}
                                   onClick={() => handleApproveRequest(request)}
-                                  className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg disabled:opacity-50"
+                                  className={iconButton}
                                 >
                                   <Check size={16} />
                                 </button>
@@ -1274,7 +1289,7 @@ const SpecificCategory = () => {
                                   type="button"
                                   disabled={loadingApproveRequest || loadingRejectRequest}
                                   onClick={() => handleRejectRequest(request)}
-                                  className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg disabled:opacity-50"
+                                  className={dangerIconButton}
                                 >
                                   <X size={16} />
                                 </button>
@@ -1322,7 +1337,7 @@ const SpecificCategory = () => {
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <div className={`${theme.card} p-6`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-          <Building className="w-5 h-5 text-green-700 dark:text-green-300" />
+          <Building className="w-5 h-5 text-[var(--color-success)]" />
           {currentLang === "ar" ? "الأقسام المرتبطة" : "Linked Departments"}
         </h2>
 
@@ -1359,7 +1374,7 @@ const SpecificCategory = () => {
                         unlinkDepId === departmentId || loadingUnlinkDepartment
                       }
                       onClick={() => handleUnlinkDepartment(departmentId)}
-                      className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg disabled:opacity-50"
+                      className={dangerIconButton}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -1373,7 +1388,7 @@ const SpecificCategory = () => {
 
       <div className={`${theme.card} p-6`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-          <LinkIcon className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+          <LinkIcon className="w-5 h-5 text-[var(--color-primary)]" />
           {currentLang === "ar" ? "أقسام متاحة للربط" : "Available Departments"}
         </h2>
 
@@ -1408,7 +1423,7 @@ const SpecificCategory = () => {
                         loadingLinkDepartmentToCategory
                       }
                       onClick={() => handleLinkDepartment(departmentId)}
-                      className={theme.primaryButton}
+                      className={defaultButton}
                     >
                       <LinkIcon size={16} />
                       {currentLang === "ar" ? "ربط" : "Link"}
@@ -1428,7 +1443,7 @@ const SpecificCategory = () => {
       <div className={`${theme.card} p-4 flex items-center justify-between gap-3 flex-wrap`}>
         <div>
           <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-orange-700 dark:text-orange-300" />
+            <Calendar className="w-5 h-5 text-[var(--color-warning)]" />
             {currentLang === "ar" ? "روسترات التخصص" : "Category Rosters"}
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -1439,7 +1454,7 @@ const SpecificCategory = () => {
         </div>
 
         <Link to="/admin-panel/rosters/create">
-          <button type="button" className={theme.primaryButton}>
+          <button type="button" className={defaultButton}>
             {currentLang === "ar" ? "إنشاء روستر" : "Create Roster"}
           </button>
         </Link>
@@ -1516,7 +1531,7 @@ const SpecificCategory = () => {
                         <Link to={`/admin-panel/rosters/${roster.id}`}>
                           <button
                             type="button"
-                            className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                            className={iconButton}
                           >
                             <Eye size={16} />
                           </button>
@@ -1537,7 +1552,7 @@ const SpecificCategory = () => {
     <div className="space-y-5">
       <div className={`${theme.card} p-4`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-          <Award className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+          <Award className="w-5 h-5 text-[var(--color-purple)]" />
           {currentLang === "ar" ? "رؤساء التخصص" : "Category Heads"}
         </h2>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -1564,7 +1579,7 @@ const SpecificCategory = () => {
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-5xl mx-auto">
           <div className={`${theme.card} p-8 text-center`}>
-            <XCircle className="w-14 h-14 text-red-700 dark:text-red-300 mx-auto mb-4" />
+            <XCircle className="w-14 h-14 text-[var(--color-danger)] mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
               {currentLang === "ar" ? "تعذر تحميل التخصص" : "Failed to load category"}
             </h2>
@@ -1574,7 +1589,7 @@ const SpecificCategory = () => {
             <button
               type="button"
               onClick={() => navigate("/admin-panel/categories")}
-              className={theme.primaryButton}
+              className={defaultButton}
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
               {currentLang === "ar" ? "رجوع للتخصصات" : "Back to Categories"}
@@ -1620,7 +1635,7 @@ const SpecificCategory = () => {
             <button
               type="button"
               onClick={refreshCategoryData}
-              className={theme.secondaryButton}
+              className={defaultButton}
             >
               <RefreshCw size={16} />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
@@ -1628,7 +1643,7 @@ const SpecificCategory = () => {
 
             {canManageCategory && (
               <Link to={`/admin-panel/category/edit/${id}`}>
-                <button type="button" className={theme.primaryButton}>
+                <button type="button" className={defaultButton}>
                   <Edit size={16} />
                   {currentLang === "ar" ? "تعديل" : "Edit"}
                 </button>

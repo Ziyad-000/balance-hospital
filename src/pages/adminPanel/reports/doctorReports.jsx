@@ -60,38 +60,54 @@ function DoctorReports() {
   const { mymode } = useSelector((state) => state.mode)
   const isDark = mymode === "dark"
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border bg-[var(--color-success)] text-white border-[var(--color-success)] shadow-sm transition-colors"
+
+  const smallButtonClass =
+    "inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const iconActionButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors cursor-pointer"
+
+  const exportButtonClass =
+    "inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-extrabold border bg-[var(--color-success)] text-white border-[var(--color-success)] hover:bg-[var(--color-success-hover)] hover:border-[var(--color-success-hover)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+
   const iconColors = {
-    user: "text-blue-700 dark:text-blue-300",
-    mail: "text-cyan-700 dark:text-cyan-300",
-    phone: "text-green-700 dark:text-green-300",
-    id: "text-slate-700 dark:text-slate-300",
-    award: "text-purple-700 dark:text-purple-300",
-    calendar: "text-blue-700 dark:text-blue-300",
-    check: "text-green-700 dark:text-green-300",
-    clock: "text-yellow-700 dark:text-yellow-300",
-    activity: "text-purple-700 dark:text-purple-300",
-    chart: "text-blue-700 dark:text-blue-300",
-    file: "text-indigo-700 dark:text-indigo-300",
-    filter: "text-blue-700 dark:text-blue-300",
-    danger: "text-red-700 dark:text-red-300",
-    warning: "text-orange-700 dark:text-orange-300",
-    muted: "text-slate-600 dark:text-slate-300",
+    user: "text-blue-900 dark:text-blue-500",
+    mail: "text-cyan-900 dark:text-cyan-500",
+    phone: "text-emerald-900 dark:text-emerald-500",
+    id: "text-slate-900 dark:text-slate-500",
+    award: "text-violet-900 dark:text-violet-500",
+    calendar: "text-blue-900 dark:text-blue-500",
+    check: "text-emerald-900 dark:text-emerald-500",
+    clock: "text-amber-900 dark:text-amber-500",
+    activity: "text-violet-900 dark:text-violet-500",
+    chart: "text-blue-900 dark:text-blue-500",
+    file: "text-indigo-900 dark:text-indigo-500",
+    filter: "text-blue-900 dark:text-blue-500",
+    danger: "text-red-900 dark:text-red-500",
+    warning: "text-orange-900 dark:text-orange-500",
+    muted: "text-slate-800 dark:text-slate-200",
   }
 
   const iconBg = {
-    user: "bg-blue-100 dark:bg-blue-900/50",
-    mail: "bg-cyan-100 dark:bg-cyan-900/50",
-    phone: "bg-green-100 dark:bg-green-900/50",
-    id: "bg-slate-100 dark:bg-slate-800/80",
-    award: "bg-purple-100 dark:bg-purple-900/50",
-    calendar: "bg-blue-100 dark:bg-blue-900/50",
-    check: "bg-green-100 dark:bg-green-900/50",
-    clock: "bg-yellow-100 dark:bg-yellow-900/50",
-    activity: "bg-purple-100 dark:bg-purple-900/50",
-    chart: "bg-blue-100 dark:bg-blue-900/50",
-    file: "bg-indigo-100 dark:bg-indigo-900/50",
-    danger: "bg-red-100 dark:bg-red-900/50",
-    warning: "bg-orange-100 dark:bg-orange-900/50",
+    user: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
+    mail: "bg-cyan-200 dark:bg-cyan-900/7 border border-cyan-400 dark:border-cyan-500",
+    phone: "bg-emerald-200 dark:bg-emerald-900/70 border border-emerald-400 dark:border-emerald-500",
+    id: "bg-slate-200 dark:bg-slate-800 border border-slate-400 dark:border-slate-500",
+    award: "bg-violet-200 dark:bg-violet-900/70 border border-violet-400 dark:border-violet-500",
+    calendar: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
+    check: "bg-emerald-200 dark:bg-emerald-900/7 border border-emerald-400 dark:border-emerald-500",
+    clock: "bg-amber-200 dark:bg-amber-900/7 border border-amber-400 dark:border-amber-500",
+    activity: "bg-violet-200 dark:bg-violet-900/7 border border-violet-400 dark:border-violet-500",
+    chart: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
+    file: "bg-indigo-200 dark:bg-indigo-900/7 border border-indigo-400 dark:border-indigo-500",
+    filter: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
+    danger: "bg-red-200 dark:bg-red-900/70 border border-red-400 dark:border-red-500",
+    warning: "bg-orange-200 dark:bg-orange-900/70 border border-orange-400 dark:border-orange-500",
   }
 
   useEffect(() => {
@@ -139,11 +155,11 @@ function DoctorReports() {
   const getComplianceStatusColor = (status) => {
     const statusColors = {
       OVER_ASSIGNED:
-        "bg-orange-100 text-orange-800 border border-orange-300 dark:bg-orange-900/50 dark:text-orange-200 dark:border-orange-700",
+        "bg-orange-100 text-orange-900 border border-orange-400 dark:bg-orange-900/70 dark:text-orange-500 dark:border-orange-500",
       COMPLIANT:
-        "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+        "bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-900/70 dark:text-emerald-500 dark:border-emerald-500",
       UNDER_ASSIGNED:
-        "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+        "bg-red-100 text-red-900 border border-red-400 dark:bg-red-900/70 dark:text-red-500 dark:border-red-500",
     }
 
     return (
@@ -155,18 +171,18 @@ function DoctorReports() {
   const getAttendanceStatusColor = (status) => {
     const statusColors = {
       OnTime:
-        "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+        "bg-emerald-200 text-emerald-950 border-2 border-emerald-500 dark:bg-emerald-800/80 dark:text-white dark:border-emerald-400 shadow-sm",
       Late:
-        "bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+        "bg-amber-200 text-amber-950 border-2 border-amber-500 dark:bg-amber-800/80 dark:text-white dark:border-amber-400 shadow-sm",
       Absent:
-        "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+        "bg-red-200 text-red-950 border-2 border-red-500 dark:bg-red-800/80 dark:text-white dark:border-red-400 shadow-sm",
       EarlyCheckout:
-        "bg-orange-100 text-orange-800 border border-orange-300 dark:bg-orange-900/50 dark:text-orange-200 dark:border-orange-700",
+        "bg-orange-200 text-orange-950 border-2 border-orange-500 dark:bg-orange-800/80 dark:text-white dark:border-orange-400 shadow-sm",
     }
 
     return (
       statusColors[status] ||
-      "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+      "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-2 border-[var(--color-border-strong)] shadow-sm"
     )
   }
 
@@ -174,41 +190,41 @@ function DoctorReports() {
     const tones = {
       OnTime: {
         icon: CheckCircle,
-        iconClass: "text-green-700 dark:text-green-300",
-        bgClass: "bg-green-100 dark:bg-green-900/50",
-        borderClass: "border-green-300 dark:border-green-700",
-        labelClass: "text-green-800 dark:text-green-200",
+        iconClass: "text-emerald-950 dark:text-white",
+        bgClass: "bg-emerald-200 dark:bg-emerald-800/80",
+        borderClass: "border-emerald-500 dark:border-emerald-400",
+        labelClass: "text-emerald-950 dark:text-white",
       },
       Late: {
         icon: Clock,
-        iconClass: "text-yellow-700 dark:text-yellow-300",
-        bgClass: "bg-yellow-100 dark:bg-yellow-900/50",
-        borderClass: "border-yellow-300 dark:border-yellow-700",
-        labelClass: "text-yellow-800 dark:text-yellow-200",
+        iconClass: "text-amber-950 dark:text-white",
+        bgClass: "bg-amber-200 dark:bg-amber-800/80",
+        borderClass: "border-amber-500 dark:border-amber-400",
+        labelClass: "text-amber-950 dark:text-white",
       },
       Absent: {
         icon: XCircle,
-        iconClass: "text-red-700 dark:text-red-300",
-        bgClass: "bg-red-100 dark:bg-red-900/50",
-        borderClass: "border-red-300 dark:border-red-700",
-        labelClass: "text-red-800 dark:text-red-200",
+        iconClass: "text-red-950 dark:text-white",
+        bgClass: "bg-red-200 dark:bg-red-800/80",
+        borderClass: "border-red-500 dark:border-red-400",
+        labelClass: "text-red-950 dark:text-white",
       },
       EarlyCheckout: {
         icon: AlertCircle,
-        iconClass: "text-orange-700 dark:text-orange-300",
-        bgClass: "bg-orange-100 dark:bg-orange-900/50",
-        borderClass: "border-orange-300 dark:border-orange-700",
-        labelClass: "text-orange-800 dark:text-orange-200",
+        iconClass: "text-orange-950 dark:text-white",
+        bgClass: "bg-orange-200 dark:bg-orange-800/80",
+        borderClass: "border-orange-500 dark:border-orange-400",
+        labelClass: "text-orange-950 dark:text-white",
       },
     }
 
     return (
       tones[status] || {
         icon: Activity,
-        iconClass: "text-slate-700 dark:text-slate-300",
-        bgClass: "bg-slate-100 dark:bg-slate-800/80",
-        borderClass: "border-slate-300 dark:border-slate-700",
-        labelClass: "text-slate-700 dark:text-slate-300",
+        iconClass: "text-slate-900 dark:text-slate-100",
+        bgClass: "bg-slate-200 dark:bg-slate-700",
+        borderClass: "border-slate-400 dark:border-slate-500",
+        labelClass: "text-slate-900 dark:text-slate-100",
       }
     )
   }
@@ -281,46 +297,46 @@ function DoctorReports() {
   }
 
   const StatCard = ({ icon: Icon, value, label, hint, tone = "calendar" }) => (
-    <div className={`${theme.card} p-5`}>
+    <div className={`${theme.card} p-5 border border-[var(--color-border-strong)] overflow-hidden`}>
       <div className="flex items-center justify-between gap-4 mb-3">
         <div
-          className={`w-12 h-12 ${iconBg[tone]} rounded-xl flex items-center justify-center`}
+          className={`w-14 h-14 ${iconBg[tone]} rounded-2xl flex items-center justify-center shrink-0 shadow-sm`}
         >
-          <Icon className={`w-6 h-6 ${iconColors[tone]}`} />
+          <Icon className={`w-7 h-7 shrink-0 ${iconColors[tone]}`} />
         </div>
 
-        <span className="text-3xl font-extrabold text-[var(--color-text)]">
+        <span className="min-w-0 text-2xl md:text-3xl font-black tracking-tight text-[var(--color-text)] truncate">
           {value ?? 0}
         </span>
       </div>
 
-      <h3 className="text-sm font-semibold text-[var(--color-text-muted)]">
+      <h3 className="text-sm font-black text-[var(--color-text-muted)]">
         {label}
       </h3>
 
       {hint && (
-        <p className="text-xs mt-2 text-[var(--color-text-muted)]">{hint}</p>
+        <p className="text-xs mt-2 font-bold text-[var(--color-text-muted)]">{hint}</p>
       )}
     </div>
   )
 
   const InfoItem = ({ icon: Icon, iconClass, label, value }) => (
     <div className="flex items-center gap-3 min-w-0">
-      <Icon className={`w-5 h-5 flex-shrink-0 ${iconClass}`} />
+      <Icon className={`w-5 h-5 shrink-0 ${iconClass}`} />
 
       <div className="min-w-0">
-        <p className="text-xs font-semibold text-[var(--color-text-muted)]">
+        <p className="text-xs font-black text-[var(--color-text-muted)]">
           {label}
         </p>
 
-        <p className="text-sm text-[var(--color-text)] truncate">{value}</p>
+        <p className="text-sm font-bold text-[var(--color-text)] truncate">{value}</p>
       </div>
     </div>
   )
 
   const AttendanceStatusBadge = ({ status }) => (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-bold ${getAttendanceStatusColor(
+      className={`px-3 py-1 rounded-full text-xs font-black ${getAttendanceStatusColor(
         status
       )}`}
     >
@@ -334,33 +350,33 @@ function DoctorReports() {
 
     return (
       <div
-        className={`rounded-xl border p-3 ${tone.bgClass} ${tone.borderClass}`}
+        className={`rounded-xl border-2 p-3 shadow-sm ${tone.bgClass} ${tone.borderClass}`}
       >
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <StatusIcon className={`w-4 h-4 ${tone.iconClass}`} />
+            <StatusIcon className={`w-4 h-4 shrink-0 ${tone.iconClass}`} />
             <span className={`text-xs font-extrabold ${tone.labelClass}`}>
               {record.status}
             </span>
           </div>
 
           {record.lateMinutes > 0 && (
-            <span className="text-[10px] font-bold text-yellow-800 dark:text-yellow-200 bg-yellow-200 dark:bg-yellow-900/60 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold text-amber-900 dark:text-amber-100 bg-amber-200 dark:bg-amber-900/70 px-2 py-0.5 rounded-full">
               +{record.lateMinutes}m
             </span>
           )}
         </div>
 
         <div className="space-y-1 text-[11px]">
-          <p className="font-bold text-[var(--color-text)] truncate">
+          <p className="font-black text-[var(--color-text)] truncate">
             {getLocalized(record.departmentNameAr, record.departmentNameEn)}
           </p>
 
-          <p className="text-[var(--color-text-muted)] truncate">
+          <p className="font-bold text-[var(--color-text-muted)] truncate">
             {getLocalized(record.shiftTypeNameAr, record.shiftTypeNameEn)}
           </p>
 
-          <div className="flex items-center justify-between gap-2 text-[var(--color-text-muted)]">
+          <div className="flex items-center justify-between gap-2 font-bold text-[var(--color-text-muted)]">
             <span>{formatTime(record.timeIn)}</span>
             <span>→</span>
             <span>{formatTime(record.timeOut)}</span>
@@ -392,7 +408,7 @@ function DoctorReports() {
               <AlertCircle className={`w-10 h-10 ${iconColors.danger}`} />
             </div>
 
-            <h3 className="text-2xl font-bold text-[var(--color-text)] mb-4">
+            <h3 className="text-2xl font-black text-[var(--color-text)] mb-4">
               {t("doctorReport.error.title")}
             </h3>
 
@@ -403,7 +419,7 @@ function DoctorReports() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className={defaultButtonClass}
             >
               {t("common.goBack")}
             </button>
@@ -424,14 +440,14 @@ function DoctorReports() {
               <FileText className={`w-10 h-10 ${iconColors.file}`} />
             </div>
 
-            <h3 className="text-2xl font-bold text-[var(--color-text)] mb-4">
+            <h3 className="text-2xl font-black text-[var(--color-text)] mb-4">
               {t("doctorReport.notFound.title")}
             </h3>
 
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className={theme.secondaryButton}
+              className={defaultButtonClass}
             >
               {t("common.goBack")}
             </button>
@@ -454,7 +470,7 @@ function DoctorReports() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 transition-colors duration-200 font-semibold"
+              className="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-success)] transition-colors duration-200 font-bold"
             >
               {currentLang === "en" ? (
                 <ArrowLeft className="w-5 h-5" />
@@ -468,9 +484,9 @@ function DoctorReports() {
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className={`${theme.secondaryButton} shadow-sm`}
+                className={defaultButtonClass}
               >
-                <Filter size={18} className={iconColors.filter} />
+                <Filter size={18} className={`shrink-0 ${iconColors.filter}`} />
                 <span>{t("reports.filters") || "Filters"}</span>
               </button>
 
@@ -479,9 +495,9 @@ function DoctorReports() {
                 onClick={() =>
                   exportDoctorReportToExcel(report, currentLang, t)
                 }
-                className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
+                className={exportButtonClass}
               >
-                <Download size={18} />
+                <Download size={18} className="shrink-0" />
                 <span>{t("reports.export.title") || "Export"}</span>
               </button>
             </div>
@@ -525,7 +541,7 @@ function DoctorReports() {
                   <button
                     type="button"
                     onClick={handleApplyFilters}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all duration-200 font-semibold"
+                    className={`${defaultButtonClass} flex-1`}
                   >
                     {t("department.filters.apply") || "Apply"}
                   </button>
@@ -533,7 +549,7 @@ function DoctorReports() {
                   <button
                     type="button"
                     onClick={handleClearFilters}
-                    className="flex-1 bg-[var(--color-bg-soft)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text)] border border-[var(--color-border)] px-5 py-2 rounded-lg transition-all duration-200 font-semibold"
+                    className={`${defaultButtonClass} flex-1`}
                   >
                     {t("department.filters.clear") || "Clear"}
                   </button>
@@ -552,7 +568,7 @@ function DoctorReports() {
                 </div>
 
                 <div>
-                  <h1 className="text-3xl font-extrabold text-[var(--color-text)] mb-2">
+                  <h1 className="text-3xl font-black text-[var(--color-text)] mb-2">
                     {getLocalized(report.nameAr, report.nameEn)}
                   </h1>
 
@@ -563,14 +579,14 @@ function DoctorReports() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <span className="px-4 py-2 rounded-full text-sm font-bold bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-900/50 dark:text-purple-200 dark:border-purple-700">
+                <span className="px-4 py-2 rounded-full text-sm font-bold bg-violet-100 text-violet-900 border border-violet-400 dark:bg-violet-900/70 dark:text-violet-100 dark:border-violet-500">
                   {getLocalized(
                     report.scientificDegreeNameAr,
                     report.scientificDegreeNameEn
                   )}
                 </span>
 
-                <span className="px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700">
+                <span className="px-4 py-2 rounded-full text-sm font-bold bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-900/70 dark:text-emerald-100 dark:border-emerald-500">
                   {getLocalized(
                     report.contractingTypeNameAr,
                     report.contractingTypeNameEn
@@ -606,7 +622,7 @@ function DoctorReports() {
 
         {report.rolesSummary && (
           <div className={`${theme.card} p-6 mb-6`}>
-            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
               <Award className={`w-6 h-6 ${iconColors.award}`} />
               {t("doctorReport.roles.title") || "Roles & Permissions"}
             </h2>
@@ -644,7 +660,7 @@ function DoctorReports() {
 
         {report.rolesHistory && report.rolesHistory.length > 0 && (
           <div className={`${theme.card} p-6 mb-6`}>
-            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
               <ShieldCheck className={`w-6 h-6 ${iconColors.award}`} />
               {t("managementRoles.tabs.history") || "Role History"}
             </h2>
@@ -758,7 +774,7 @@ function DoctorReports() {
         </div>
 
         <div className={`${theme.card} p-6 mb-6`}>
-          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-3">
+          <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
             <BarChart3 className={`w-6 h-6 ${iconColors.chart}`} />
             {t("doctorReport.hoursAnalysis.title")}
           </h2>
@@ -769,7 +785,7 @@ function DoctorReports() {
                 {t("doctorReport.hoursAnalysis.totalAssignedHours")}
               </h3>
 
-              <p className="text-3xl font-extrabold text-[var(--color-text)]">
+              <p className="text-3xl font-black text-[var(--color-text)]">
                 {report.hoursAnalysis.totalAssignedHours}
               </p>
             </div>
@@ -779,7 +795,7 @@ function DoctorReports() {
                 {t("doctorReport.hoursAnalysis.totalWorkedHours")}
               </h3>
 
-              <p className="text-3xl font-extrabold text-[var(--color-text)]">
+              <p className="text-3xl font-black text-[var(--color-text)]">
                 {report.hoursAnalysis.totalWorkedHours}
               </p>
             </div>
@@ -790,7 +806,7 @@ function DoctorReports() {
               </h3>
 
               <div className="flex items-center gap-3 flex-wrap">
-                <p className="text-3xl font-extrabold text-[var(--color-text)]">
+                <p className="text-3xl font-black text-[var(--color-text)]">
                   {report.hoursAnalysis.compliancePercentage.toFixed(1)}%
                 </p>
 
@@ -864,10 +880,10 @@ function DoctorReports() {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold ${
                           roster.compliancePercentage >= 90
-                            ? "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700"
+                            ? "bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-900/70 dark:text-emerald-100 dark:border-emerald-500"
                             : roster.compliancePercentage >= 70
-                            ? "bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700"
-                            : "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700"
+                            ? "bg-amber-100 text-amber-900 border border-amber-400 dark:bg-amber-900/70 dark:text-amber-100 dark:border-amber-500"
+                            : "bg-red-100 text-red-900 border border-red-400 dark:bg-red-900/70 dark:text-red-100 dark:border-red-500"
                         }`}
                       >
                         {roster.compliancePercentage.toFixed(1)}%
@@ -881,60 +897,60 @@ function DoctorReports() {
         </div>
 
         <div className={`${theme.card} p-6 mb-6`}>
-          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-3">
+          <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
             <CheckCircle className={`w-6 h-6 ${iconColors.check}`} />
             {t("doctorReport.attendanceChart.title")}
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-5 rounded-xl bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700">
+            <div className="p-5 rounded-xl bg-emerald-200 dark:bg-emerald-800/80 border-2 border-emerald-500 dark:border-emerald-400 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <CheckCircle className="w-5 h-5 text-green-700 dark:text-green-300" />
-                <span className="text-2xl font-extrabold text-green-700 dark:text-green-300">
+                <CheckCircle className="w-5 h-5 text-emerald-950 dark:text-white" />
+                <span className="text-2xl font-black text-emerald-950 dark:text-white">
                   {report.attendanceChart.onTime}
                 </span>
               </div>
 
-              <p className="text-sm font-semibold text-green-800 dark:text-green-200">
+              <p className="text-sm font-black text-emerald-950 dark:text-white">
                 {t("doctorReport.attendanceChart.onTime")}
               </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-yellow-100 dark:bg-yellow-900/50 border border-yellow-300 dark:border-yellow-700">
+            <div className="p-5 rounded-xl bg-amber-200 dark:bg-amber-800/80 border-2 border-amber-500 dark:border-amber-400 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <Clock className="w-5 h-5 text-yellow-700 dark:text-yellow-300" />
-                <span className="text-2xl font-extrabold text-yellow-700 dark:text-yellow-300">
+                <Clock className="w-5 h-5 text-amber-950 dark:text-white" />
+                <span className="text-2xl font-black text-amber-950 dark:text-white">
                   {report.attendanceChart.late}
                 </span>
               </div>
 
-              <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+              <p className="text-sm font-black text-amber-950 dark:text-white">
                 {t("doctorReport.attendanceChart.late")}
               </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700">
+            <div className="p-5 rounded-xl bg-red-200 dark:bg-red-800/80 border-2 border-red-500 dark:border-red-400 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <XCircle className="w-5 h-5 text-red-700 dark:text-red-300" />
-                <span className="text-2xl font-extrabold text-red-700 dark:text-red-300">
+                <XCircle className="w-5 h-5 text-red-950 dark:text-white" />
+                <span className="text-2xl font-black text-red-950 dark:text-white">
                   {report.attendanceChart.absent}
                 </span>
               </div>
 
-              <p className="text-sm font-semibold text-red-800 dark:text-red-200">
+              <p className="text-sm font-black text-red-950 dark:text-white">
                 {t("doctorReport.attendanceChart.absent")}
               </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-orange-100 dark:bg-orange-900/50 border border-orange-300 dark:border-orange-700">
+            <div className="p-5 rounded-xl bg-orange-200 dark:bg-orange-800/80 border-2 border-orange-500 dark:border-orange-400 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <AlertCircle className="w-5 h-5 text-orange-700 dark:text-orange-300" />
-                <span className="text-2xl font-extrabold text-orange-700 dark:text-orange-300">
+                <AlertCircle className="w-5 h-5 text-orange-950 dark:text-white" />
+                <span className="text-2xl font-black text-orange-950 dark:text-white">
                   {report.attendanceChart.earlyCheckout}
                 </span>
               </div>
 
-              <p className="text-sm font-semibold text-orange-800 dark:text-orange-200">
+              <p className="text-sm font-black text-orange-950 dark:text-white">
                 {t("doctorReport.attendanceChart.earlyCheckout")}
               </p>
             </div>
@@ -942,7 +958,7 @@ function DoctorReports() {
         </div>
 
         <div className={`${theme.card} p-6 mb-6`}>
-          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-3">
+          <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
             <Calendar className={`w-6 h-6 ${iconColors.award}`} />
             {t("doctorReport.monthlyDistribution.title")}
           </h2>
@@ -993,7 +1009,7 @@ function DoctorReports() {
         {report.attendanceRecords && report.attendanceRecords.length > 0 && (
           <div className={`${theme.card} p-6 mb-6`}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-[var(--color-text)] flex items-center gap-3">
+              <h2 className="text-2xl font-black text-[var(--color-text)] flex items-center gap-3">
                 <Activity className={`w-6 h-6 ${iconColors.chart}`} />
                 {t("doctorReport.attendanceRecords.title")}
               </h2>
@@ -1004,8 +1020,8 @@ function DoctorReports() {
                   onClick={() => setAttendanceViewMode("rows")}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
                     attendanceViewMode === "rows"
-                      ? "bg-[var(--color-primary)] text-white"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
+                      ? "border bg-[var(--color-success)] text-white border-[var(--color-success)]"
+                      : "border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-success)]"
                   }`}
                 >
                   <Rows3 size={16} />
@@ -1017,8 +1033,8 @@ function DoctorReports() {
                   onClick={() => setAttendanceViewMode("calendar")}
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
                     attendanceViewMode === "calendar"
-                      ? "bg-[var(--color-primary)] text-white"
-                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
+                      ? "border bg-[var(--color-success)] text-white border-[var(--color-success)]"
+                      : "border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
                   }`}
                 >
                   <Grid3X3 size={16} />
@@ -1150,7 +1166,7 @@ function DoctorReports() {
                   {attendanceCalendarDays.map((dayItem) => (
                     <div
                       key={dayItem.dateKey}
-                      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3 min-h-[150px]"
+                      className="rounded-xl border-2 border-[var(--color-border-strong)] bg-[var(--color-surface)] p-3 min-h-[128px] shadow-sm"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -1160,15 +1176,12 @@ function DoctorReports() {
                             })}
                           </p>
 
-                          <p className="text-xl font-extrabold text-blue-700 dark:text-blue-300">
+                          <p className="text-xl font-black text-blue-950 dark:text-white">
                             {dayItem.day}
                           </p>
                         </div>
 
-                        <Calendar
-                          size={18}
-                          className={iconColors.calendar}
-                        />
+                        <Calendar size={18} className={`shrink-0 ${iconColors.calendar}`} />
                       </div>
 
                       {dayItem.records.length > 0 ? (
@@ -1181,7 +1194,7 @@ function DoctorReports() {
                           ))}
                         </div>
                       ) : (
-                        <div className="h-[80px] rounded-xl border border-dashed border-[var(--color-border)] flex items-center justify-center text-xs text-[var(--color-text-muted)]">
+                        <div className="h-[70px] rounded-xl border border-dashed border-[var(--color-border)] flex items-center justify-center text-xs font-bold text-[var(--color-text-muted)]">
                           {currentLang === "ar" ? "لا يوجد حضور" : "No record"}
                         </div>
                       )}
@@ -1195,7 +1208,7 @@ function DoctorReports() {
 
         {report.rosterAssignments && report.rosterAssignments.length > 0 && (
           <div className={`${theme.card} p-6 mb-6`}>
-            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
               <FileText className={`w-6 h-6 ${iconColors.file}`} />
               {t("doctorReport.rosterAssignments.title")}
             </h2>

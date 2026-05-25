@@ -330,19 +330,59 @@ function Department() {
     pagination?.hasNext ??
     pagination?.page < pagination?.totalPages
 
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  const iconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] active:text-white transition-colors"
+
+  const dangerIconButtonClass =
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+
+  const inputClass =
+    "w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors"
+
+  const searchInputClass =
+    "w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors"
+
   const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneMap = {
-      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-      green:
-        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
-      yellow:
-        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
-      purple:
-        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-      orange:
-        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+      blue: {
+        bg: "bg-[var(--color-primary-soft)]",
+        text: "text-[var(--color-primary)]",
+        border: "border-[var(--color-primary)]/25",
+      },
+      green: {
+        bg: "bg-[var(--color-success-soft)]",
+        text: "text-[var(--color-success)]",
+        border: "border-[var(--color-success-border)]",
+      },
+      red: {
+        bg: "bg-[var(--color-danger-soft)]",
+        text: "text-[var(--color-danger)]",
+        border: "border-[var(--color-danger-border)]",
+      },
+      yellow: {
+        bg: "bg-[var(--color-warning-soft)]",
+        text: "text-[var(--color-warning)]",
+        border: "border-[var(--color-warning-border)]",
+      },
+      purple: {
+        bg: "bg-[var(--color-purple-soft)]",
+        text: "text-[var(--color-purple)]",
+        border: "border-[var(--color-purple-border)]",
+      },
+      orange: {
+        bg: "bg-[var(--color-warning-soft)]",
+        text: "text-[var(--color-warning)]",
+        border: "border-[var(--color-warning-border)]",
+      },
     }
+
+    const toneStyle = toneMap[tone] || toneMap.blue
 
     return (
       <div className={`${theme.cardSoft} p-4`}>
@@ -355,9 +395,7 @@ function Department() {
           </div>
 
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-              toneMap[tone] || toneMap.blue
-            }`}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center border ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
           >
             <Icon className="w-5 h-5" />
           </div>
@@ -369,7 +407,7 @@ function Department() {
   const StatusBadge = ({ active }) => (
     <span
       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
-        active ? theme.successBadge : theme.dangerBadge
+        active ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]" : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
       }`}
     >
       {active ? <CheckCircle size={13} /> : <XCircle size={13} />}
@@ -387,8 +425,8 @@ function Department() {
       <span
         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
           hasManager
-            ? "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/50 dark:text-purple-200 dark:border-purple-700"
-            : "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/50 dark:text-slate-200 dark:border-slate-700"
+            ? "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border-[var(--color-purple-border)]"
+            : "bg-[var(--color-neutral-soft)] text-[var(--color-neutral)] border-[var(--color-neutral-border)]"
         }`}
       >
         <UserCheck size={13} />
@@ -428,7 +466,7 @@ function Department() {
 
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Link2 className="w-4 h-4 mx-auto mb-1 text-blue-700 dark:text-blue-300" />
+          <Link2 className="w-4 h-4 mx-auto mb-1 text-[var(--color-primary)]" />
           <p className="font-bold text-[var(--color-text)]">
             {getLinkedCategoriesCount(department)}
           </p>
@@ -438,7 +476,7 @@ function Department() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Shield className="w-4 h-4 mx-auto mb-1 text-purple-700 dark:text-purple-300" />
+          <Shield className="w-4 h-4 mx-auto mb-1 text-[var(--color-purple)]" />
           <p className="font-bold text-[var(--color-text)]">
             {getManagerName(department) !== "-" ? 1 : 0}
           </p>
@@ -448,7 +486,7 @@ function Department() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <MapPin className="w-4 h-4 mx-auto mb-1 text-green-700 dark:text-green-300" />
+          <MapPin className="w-4 h-4 mx-auto mb-1 text-[var(--color-success)]" />
           <p className="font-bold text-[var(--color-text)]">
             {getGeoFenceCount(department)}
           </p>
@@ -476,7 +514,7 @@ function Department() {
           <Link to={`/admin-panel/department/${department.id}`}>
             <button
               type="button"
-              className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+              className={iconButtonClass}
             >
               <Eye size={16} />
             </button>
@@ -485,7 +523,7 @@ function Department() {
           <Link to={`/admin-panel/department/edit/${department.id}`}>
             <button
               type="button"
-              className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg"
+              className={iconButtonClass}
             >
               <Edit size={16} />
             </button>
@@ -493,7 +531,7 @@ function Department() {
 
           <button
             type="button"
-            className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg"
+            className={dangerIconButtonClass}
             onClick={() => {
               setToDelete({
                 id: department.id,
@@ -547,32 +585,32 @@ function Department() {
               <button
                 type="button"
                 onClick={refreshData}
-                className={theme.secondaryButton}
+                className={defaultButtonClass}
               >
                 <RefreshCw size={16} />
                 {currentLang === "ar" ? "تحديث" : "Refresh"}
               </button>
 
               <Link to="/admin-panel/department/create">
-                <button type="button" className={`${theme.primaryButton} gap-2`}>
+                <button type="button" className={`${defaultButtonClass} gap-2`}>
                   <Plus size={18} />
-                  {t("department.actions.addNew") || "Add Department"}
+                  {"Add Department"}
                 </button>
               </Link>
             </div>
           </div>
 
           {error && (
-            <div className={`${theme.card} p-4 mb-5 border-red-500/30`}>
+            <div className={`${theme.card} p-4 mb-5 border-[var(--color-danger-border)]`}>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-red-700 dark:text-red-300 text-sm font-semibold">
+                <p className="text-[var(--color-danger)] text-sm font-semibold">
                   {error.message || String(error)}
                 </p>
 
                 <button
                   type="button"
                   onClick={() => dispatch(clearError())}
-                  className="text-red-700 dark:text-red-300"
+                  className="text-[var(--color-danger)]"
                 >
                   <X size={18} />
                 </button>
@@ -634,7 +672,7 @@ function Department() {
           <div className={`${theme.card} p-4 mb-6`}>
             <div className="flex flex-col xl:flex-row gap-4">
               <div className="flex-1 flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-[var(--color-bg-soft)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)]">
+                <div className="w-11 h-11 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-strong)] flex items-center justify-center text-[var(--color-text-muted)]">
                   <Search size={20} />
                 </div>
 
@@ -646,7 +684,7 @@ function Department() {
                   }
                   value={searchInput}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]"
+                  className={searchInputClass}
                 />
               </div>
 
@@ -654,7 +692,7 @@ function Department() {
                 <button
                   type="button"
                   onClick={() => setShowFilters((prev) => !prev)}
-                  className={`${theme.secondaryButton} gap-2`}
+                  className={`${defaultButtonClass} gap-2`}
                 >
                   <SlidersHorizontal size={17} />
                   {t("department.filters.title") || "Filters"}
@@ -673,7 +711,7 @@ function Department() {
                     type="text"
                     value={filters?.code || ""}
                     onChange={(e) => handleFilterChange("code", e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                     placeholder="DEP-001"
                   />
                 </div>
@@ -690,7 +728,7 @@ function Department() {
                         e.target.value === "" ? "" : e.target.value === "true"
                       handleFilterChange("isActive", value)
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   >
                     <option value="">
                       {currentLang === "ar" ? "كل الحالات" : "All Status"}
@@ -716,7 +754,7 @@ function Department() {
                         e.target.value === "" ? "" : e.target.value === "true"
                       handleFilterChange("hasManager", value)
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   >
                     <option value="">
                       {currentLang === "ar" ? "الكل" : "All"}
@@ -740,7 +778,7 @@ function Department() {
                     onChange={(e) =>
                       handleFilterChange("linkedToCategoryId", e.target.value)
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   >
                     <option value="">
                       {currentLang === "ar" ? "كل التخصصات" : "All Categories"}
@@ -768,7 +806,7 @@ function Department() {
                         e.target.value === "" ? "" : e.target.value === "true"
                       handleFilterChange("isUnlinked", value)
                     }}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   >
                     <option value="">
                       {currentLang === "ar" ? "الكل" : "All"}
@@ -793,7 +831,7 @@ function Department() {
                     onChange={(e) =>
                       handleFilterChange("createdFrom", e.target.value)
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   />
                 </div>
 
@@ -808,7 +846,7 @@ function Department() {
                     onChange={(e) =>
                       handleFilterChange("createdTo", e.target.value)
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   />
                 </div>
 
@@ -820,7 +858,7 @@ function Department() {
                   <select
                     value={filters?.orderBy || "nameArabic"}
                     onChange={(e) => handleFilterChange("orderBy", e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   >
                     <option value="nameArabic">
                       {currentLang === "ar" ? "الاسم العربي" : "Arabic Name"}
@@ -847,7 +885,7 @@ function Department() {
                     onChange={(e) =>
                       handleFilterChange("orderDesc", e.target.value === "true")
                     }
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                    className={inputClass}
                   >
                     <option value="true">
                       {currentLang === "ar" ? "تنازلي" : "Descending"}
@@ -862,7 +900,7 @@ function Department() {
                   <button
                     type="button"
                     onClick={handleClearFilters}
-                    className={`${theme.secondaryButton} w-full gap-2`}
+                    className={`${defaultButtonClass} w-full gap-2`}
                   >
                     <Filter size={16} />
                     {currentLang === "ar" ? "مسح الفلاتر" : "Clear Filters"}
@@ -1003,7 +1041,7 @@ function Department() {
 
                         <td className={`${tableCellClass} text-center`}>
                           <Link to={`/admin-panel/department/${department.id}`}>
-                            <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700">
+                            <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/25">
                               <Link2 size={13} />
                               {getLinkedCategoriesCount(department)}
                             </span>
@@ -1020,8 +1058,8 @@ function Department() {
                           <span
                             className={`inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
                               getGeoFenceCount(department) > 0
-                                ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700"
-                                : "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/50 dark:text-slate-200 dark:border-slate-700"
+                                ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
+                                : "bg-[var(--color-neutral-soft)] text-[var(--color-neutral)] border-[var(--color-neutral-border)]"
                             }`}
                           >
                             <MapPin size={13} />
@@ -1043,7 +1081,7 @@ function Department() {
                             <Link to={`/admin-panel/department/${department.id}`}>
                               <button
                                 type="button"
-                                className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                                className={iconButtonClass}
                                 title={currentLang === "ar" ? "عرض" : "View"}
                               >
                                 <Eye size={16} />
@@ -1055,7 +1093,7 @@ function Department() {
                             >
                               <button
                                 type="button"
-                                className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                                className={iconButtonClass}
                                 title={currentLang === "ar" ? "تعديل" : "Edit"}
                               >
                                 <Edit size={16} />
@@ -1071,7 +1109,7 @@ function Department() {
                                 })
                                 setModalOpen(true)
                               }}
-                              className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                              className={dangerIconButtonClass}
                               title={currentLang === "ar" ? "حذف" : "Delete"}
                             >
                               <Trash2 size={16} />
@@ -1124,7 +1162,7 @@ function Department() {
                     type="button"
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={!hasPrevious}
-                    className={theme.secondaryButton}
+                    className={defaultButtonClass}
                   >
                     {isRTL ? (
                       <ChevronRight size={16} />
@@ -1140,8 +1178,8 @@ function Department() {
                       onClick={() => handlePageChange(page)}
                       className={`px-3 py-2 rounded-lg border transition-colors ${
                         page === pagination.page
-                          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                          : "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-bg-soft)]"
+                          ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
+                          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)]"
                       }`}
                     >
                       {page}
@@ -1152,7 +1190,7 @@ function Department() {
                     type="button"
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={!hasNext}
-                    className={theme.secondaryButton}
+                    className={defaultButtonClass}
                   >
                     {isRTL ? (
                       <ChevronLeft size={16} />

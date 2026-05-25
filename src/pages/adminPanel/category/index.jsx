@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react"
+import React, { useEffect, useMemo, useState, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useTranslation } from "react-i18next"
-import "../../../styles/general.css"
-
+import { Link } from "react-router-dom"
 import {
   Search,
   Filter,
@@ -12,9 +11,19 @@ import {
   Edit,
   Trash2,
   Plus,
-  Menu,
   X,
+  RefreshCw,
+  Stethoscope,
+  Building,
+  Users,
+  UserCheck,
+  Clock,
+  BarChart3,
+  CheckCircle,
+  XCircle,
+  SlidersHorizontal,
 } from "lucide-react"
+
 import { getCategories } from "../../../state/act/actCategory"
 import {
   clearError,
@@ -23,39 +32,77 @@ import {
   setFilters,
   setPageSize,
 } from "../../../state/slices/category"
-import { Link } from "react-router-dom"
+
 import DeleteCategoryModal from "../../../components/modals/DeleteCategoryModal"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 function Category() {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
+
   const [modalOpen, setModalOpen] = useState(false)
   const [toDelete, setToDelete] = useState({ id: null, name: "" })
-  const { categories, pagination, filters, loadingGetCategories, error } =
-    useSelector((state) => state.category)
-  const { mymode } = useSelector((state) => state.mode)
-
-  const [searchInput, setSearchInput] = useState(filters.search)
+  const [searchInput, setSearchInput] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  const [showMobileTable, setShowMobileTable] = useState(false)
-
-  // Debounced search
   const [searchTimeout, setSearchTimeout] = useState(null)
 
-  // Check if we're in dark mode
-  const isDark = mymode === "dark"
+  const {
+    categories,
+    pagination,
+    filters,
+    loadingGetCategories,
+    error,
+  } = useSelector((state) => state.category)
 
-  // Check if current language is RTL
-  const language = i18n.language
-  const isRTL = language === "ar"
+  const currentLang = i18n.language || "ar"
+  const isRTL = currentLang === "ar"
 
-  // Fetch categories when filters change
   useEffect(() => {
-    dispatch(getCategories(filters))
+    setSearchInput(filters?.search || "")
+  }, [filters?.search])
+
+  useEffect(() => {
+    dispatch(
+      getCategories({
+        ...filters,
+        includeDepartments: true,
+        includeStatistics: true,
+        includeChief: true,
+      })
+    )
   }, [dispatch, filters])
 
-  // Handle search with debounce
+  const safeCategories = Array.isArray(categories) ? categories : []
+
+  const summary = useMemo(() => {
+    return {
+      totalCategories: pagination?.totalCount || safeCategories.length || 0,
+      activeCategories: safeCategories.filter((cat) => cat.isActive).length,
+      inactiveCategories: safeCategories.filter((cat) => !cat.isActive).length,
+      totalDepartments: safeCategories.reduce(
+        (sum, cat) => sum + Number(cat.departmentsCount || 0),
+        0
+      ),
+      totalUsers: safeCategories.reduce(
+        (sum, cat) => sum + Number(cat.usersCount || cat.doctorsCount || 0),
+        0
+      ),
+      pendingRequests: safeCategories.reduce(
+        (sum, cat) =>
+          sum +
+          Number(
+            cat.pendingRequestsCount ||
+              cat.pendingDoctorRequestsCount ||
+              cat.pendingDoctorsCount ||
+              0
+          ),
+        0
+      ),
+    }
+  }, [safeCategories, pagination])
+
   const handleSearchChange = useCallback(
     (value) => {
       setSearchInput(value)
@@ -66,37 +113,79 @@ function Category() {
 
       const timeout = setTimeout(() => {
         dispatch(setFilters({ search: value, page: 1 }))
-      }, 500)
+      }, 450)
 
       setSearchTimeout(timeout)
     },
     [dispatch, searchTimeout]
   )
 
-  // Handle filter changes
   const handleFilterChange = (key, value) => {
     dispatch(setFilters({ [key]: value, page: 1 }))
   }
 
-  // Handle pagination
   const handlePageChange = (newPage) => {
     dispatch(setCurrentPage(newPage))
   }
 
   const handlePageSizeChange = (newPageSize) => {
-    dispatch(setPageSize(parseInt(newPageSize)))
+    dispatch(setPageSize(Number(newPageSize)))
   }
 
-  // Format date
+  const refreshData = () => {
+    dispatch(
+      getCategories({
+        ...filters,
+        includeDepartments: true,
+        includeStatistics: true,
+        includeChief: true,
+      })
+    )
+  }
 
-  // Generate page numbers for pagination
+  const getCategoryName = (category) => {
+    return currentLang === "ar"
+      ? category.nameArabic || category.nameEnglish || "-"
+      : category.nameEnglish || category.nameArabic || "-"
+  }
+
+  const getCategorySubName = (category) => {
+    return currentLang === "ar"
+      ? category.nameEnglish || "-"
+      : category.nameArabic || "-"
+  }
+
+  const getChiefName = (category) => {
+    return (
+      category.categoryHeadName ||
+      category.categoryHeadNameAr ||
+      category.categoryHeadNameEn ||
+      category.chiefName ||
+      category.headName ||
+      category.managerName ||
+      "-"
+    )
+  }
+
+  const getUsersCount = (category) => {
+    return category.usersCount ?? category.doctorsCount ?? category.totalDoctors ?? 0
+  }
+
+  const getPendingCount = (category) => {
+    return (
+      category.pendingRequestsCount ??
+      category.pendingDoctorRequestsCount ??
+      category.pendingDoctorsCount ??
+      0
+    )
+  }
+
   const getPageNumbers = () => {
-    const pages = []
     const totalPages = pagination?.totalPages || 1
     const currentPage = pagination?.page || 1
+    const pages = []
 
-    // Show up to 3 page numbers on mobile, 5 on desktop
-    const maxPages = window.innerWidth < 768 ? 3 : 5
+    const maxPages = 5
     let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2))
     let endPage = Math.min(totalPages, startPage + maxPages - 1)
 
@@ -111,144 +200,172 @@ function Category() {
     return pages
   }
 
-  // Mobile card component for each category
-  const CategoryCard = ({ category }) => (
-    <div
-      className={`p-4 rounded-lg border mb-3 ${
-        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+  const hasPrevious =
+    pagination?.hasPreviousPage ?? pagination?.hasPrevious ?? pagination?.page > 1
+
+  const hasNext =
+    pagination?.hasNextPage ??
+    pagination?.hasNext ??
+    pagination?.page < pagination?.totalPages
+
+  const tableHeadClass =
+    "px-4 py-3 text-sm font-bold text-[var(--color-text)] border-b border-[var(--color-border)] whitespace-nowrap"
+
+  const tableCellClass =
+    "px-4 py-4 text-sm text-[var(--color-text)] border-b border-[var(--color-border)] align-middle"
+
+  const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
+    const toneMap = {
+      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+      green:
+        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+      yellow:
+        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+      purple:
+        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+      orange:
+        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+    }
+
+    return (
+      <div className={`${theme.cardSoft} p-4`}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
+            <p className="text-2xl font-extrabold text-[var(--color-text)]">
+              {value ?? 0}
+            </p>
+          </div>
+
+          <div
+            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+              toneMap[tone] || toneMap.blue
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const StatusBadge = ({ active }) => (
+    <span
+      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+        active ? theme.successBadge : theme.dangerBadge
       }`}
     >
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3
-            className={`font-semibold text-lg ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {category.nameArabic}
-          </h3>
-          <p
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-          >
-            {category.nameEnglish}
+      {active ? <CheckCircle size={13} /> : <XCircle size={13} />}
+      {active
+        ? t("categories.status.active") || "Active"
+        : t("categories.status.inactive") || "Inactive"}
+    </span>
+  )
+
+  const CategoryMobileCard = ({ category }) => (
+    <div className={`${theme.card} p-4`}>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+            <Stethoscope size={22} />
+          </div>
+
+          <div>
+            <h3 className="font-extrabold text-[var(--color-text)]">
+              {getCategoryName(category)}
+            </h3>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              {getCategorySubName(category)}
+            </p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-1 font-mono">
+              {category.code || "-"}
+            </p>
+          </div>
+        </div>
+
+        <StatusBadge active={category.isActive} />
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className={`${theme.cardSoft} p-3 text-center`}>
+          <Building className="w-4 h-4 mx-auto mb-1 text-blue-700 dark:text-blue-300" />
+          <p className="font-bold text-[var(--color-text)]">
+            {category.departmentsCount ?? 0}
+          </p>
+          <p className="text-[10px] text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "أقسام" : "Departments"}
           </p>
         </div>
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            category.isActive
-              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-          }`}
-        >
-          {category.isActive
-            ? t("categories.status.active")
-            : t("categories.status.inactive")}
-        </span>
-      </div>
 
-      <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-        <div>
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("categories.table.code")}:
-          </span>
-          <span
-            className={`mr-2 font-mono ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {category.code}
-          </span>
+        <div className={`${theme.cardSoft} p-3 text-center`}>
+          <Users className="w-4 h-4 mx-auto mb-1 text-green-700 dark:text-green-300" />
+          <p className="font-bold text-[var(--color-text)]">
+            {getUsersCount(category)}
+          </p>
+          <p className="text-[10px] text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "دكاترة" : "Doctors"}
+          </p>
         </div>
-        <div>
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("categories.table.departments")}:
-          </span>
-          <span
-            className={`mr-2 ${isDark ? "text-gray-200" : "text-gray-800"}`}
-          >
-            {category.departmentsCount}
-          </span>
-        </div>
-        <div>
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("categories.table.users")}:
-          </span>
-          <span
-            className={`mr-2 ${isDark ? "text-gray-200" : "text-gray-800"}`}
-          >
-            {category.usersCount}
-          </span>
-        </div>
-        <div>
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("categories.table.createdAt")}:
-          </span>
-          <span
-            className={`mr-2 text-xs ${
-              isDark ? "text-gray-200" : "text-gray-800"
-            }`}
-          >
-            {formatDate(category.createdAt)}
-          </span>
+
+        <div className={`${theme.cardSoft} p-3 text-center`}>
+          <Clock className="w-4 h-4 mx-auto mb-1 text-yellow-700 dark:text-yellow-300" />
+          <p className="font-bold text-[var(--color-text)]">
+            {getPendingCount(category)}
+          </p>
+          <p className="text-[10px] text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "طلبات" : "Requests"}
+          </p>
         </div>
       </div>
 
-      <div className="flex gap-2 justify-end">
-        <Link to={`/admin-panel/category/${category.id}`}>
+      <div className="flex items-center justify-between gap-3 pt-3 border-t border-[var(--color-border)]">
+        <p className="text-xs text-[var(--color-text-muted)]">
+          {formatDate(category.createdAt)}
+        </p>
+
+        <div className="flex gap-2">
+          <Link to={`/admin-panel/category/${category.id}`}>
+            <button
+              type="button"
+              className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+              title={t("categories.actions.view")}
+            >
+              <Eye size={16} />
+            </button>
+          </Link>
+
+          <Link to={`/admin-panel/category/edit/${category.id}`}>
+            <button
+              type="button"
+              className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg"
+              title={t("categories.actions.edit")}
+            >
+              <Edit size={16} />
+            </button>
+          </Link>
+
           <button
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
-            title={t("categories.actions.view")}
+            type="button"
+            className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg"
+            title={t("categories.actions.delete")}
+            onClick={() => {
+              setToDelete({
+                id: category.id,
+                name: getCategoryName(category),
+              })
+              setModalOpen(true)
+            }}
           >
-            <Eye size={16} />
+            <Trash2 size={16} />
           </button>
-        </Link>
-        <Link to={`/admin-panel/category/edit/${category.id}`}>
-          <button
-            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
-            title={t("categories.actions.edit")}
-          >
-            <Edit size={16} />
-          </button>
-        </Link>
-        <button
-          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
-          title={t("categories.actions.delete")}
-          onClick={() => {
-            setToDelete({
-              id: category.id,
-              name:
-                language == "en" ? category.nameEnglish : category.nameArabic,
-            })
-            setModalOpen(true)
-          }}
-        >
-          <Trash2 size={16} />
-        </button>
+        </div>
       </div>
     </div>
   )
 
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <DeleteCategoryModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -256,750 +373,492 @@ function Category() {
         info={toDelete}
         categoryName={toDelete.name}
       />
-      <div className="p-4 sm:p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {t("categories.title")}
-              </h1>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Link to="/admin-panel/category/create">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors flex-1 sm:flex-none justify-center cursor-pointer">
-                    <Plus size={20} />
-                    <span className="hidden sm:inline">
-                      {t("categories.actions.addNew")}
-                    </span>
-                    <span className="sm:hidden">
-                      {t("categories.actions.add")}
-                    </span>
-                  </button>
-                </Link>
-                {/* Mobile table toggle */}
-                <button
-                  onClick={() => setShowMobileTable(!showMobileTable)}
-                  className={`md:hidden px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
-                    showMobileTable
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        }`
-                  }`}
-                >
-                  {showMobileTable ? <X size={20} /> : <Menu size={20} />}
-                </button>
-              </div>
-            </div>
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <div className="flex justify-between items-center">
-                  <span>{error.message}</span>
-                  <button
-                    onClick={() => dispatch(clearError())}
-                    className="text-red-500 hover:text-red-700 cursor-pointer"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            )}
+      <div className={theme.container}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-[var(--color-text)] flex items-center gap-3">
+              <span className="w-12 h-12 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                <Stethoscope className="w-7 h-7" />
+              </span>
+              {t("categories.title") || "Categories"}
+            </h1>
+
+            <p className="text-sm text-[var(--color-text-muted)] mt-2">
+              {currentLang === "ar"
+                ? "إدارة التخصصات، الأقسام، الدكاترة، وطلبات الانضمام."
+                : "Manage categories, departments, doctors, and join requests."}
+            </p>
           </div>
 
-          {/* Search and Filters */}
-          <div
-            className={`rounded-lg shadow-sm border mb-6 ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
-            <div className="p-4">
-              {/* Search Bar */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <div className="flex-1 flex items-center gap-2">
-                  {/* Search Icon Container - Completely separate from input */}
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-200 ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700 text-gray-400"
-                        : "border-gray-300 bg-white text-gray-500"
-                    }`}
-                  >
-                    <Search size={20} />
-                  </div>
-
-                  {/* Input Container */}
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder={t("categories.search.placeholder")}
-                      value={searchInput}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                          : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 justify-center sm:justify-start cursor-pointer ${
-                    showFilters
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark
-                            ? "border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-200 hover:border-gray-400"
-                        }`
-                  }`}
-                >
-                  <Filter size={20} />
-                  {t("categories.filters.title")}
-                </button>
-              </div>
-              {/* Advanced Filters */}
-              {showFilters && (
-                <div
-                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t ${
-                    isDark ? "border-gray-600" : "border-gray-200"
-                  }`}
-                >
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("categories.filters.status")}
-                    </label>
-                    <select
-                      value={
-                        filters.isActive === null
-                          ? "all"
-                          : filters.isActive.toString()
-                      }
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === "all"
-                            ? null
-                            : e.target.value === "true"
-                        handleFilterChange("isActive", value)
-                      }}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="true">
-                        {t("categories.status.active")}
-                      </option>
-                      <option value="false">
-                        {t("categories.status.inactive")}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("categories.filters.orderBy")}
-                    </label>
-                    <select
-                      value={filters.orderBy}
-                      onChange={(e) =>
-                        handleFilterChange("orderBy", e.target.value)
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="createdAt">
-                        {t("categories.filters.sortBy.createdAt")}
-                      </option>
-                      <option value="nameArabic">
-                        {t("categories.filters.sortBy.nameArabic")}
-                      </option>
-                      <option value="nameEnglish">
-                        {t("categories.filters.sortBy.nameEnglish")}
-                      </option>
-                      <option value="code">
-                        {t("categories.filters.sortBy.code")}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-2 lg:col-span-1">
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("categories.filters.orderDirection")}
-                    </label>
-                    <select
-                      value={filters.orderDesc.toString()}
-                      onChange={(e) =>
-                        handleFilterChange(
-                          "orderDesc",
-                          e.target.value === "true"
-                        )
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="true">
-                        {t("categories.filters.descending")}
-                      </option>
-                      <option value="false">
-                        {t("categories.filters.ascending")}
-                      </option>
-                    </select>
-                  </div>
-                  <div className="sm:col-span-2 lg:col-span-3">
-                    <button
-                      onClick={() => dispatch(clearFilters())}
-                      className={`px-4 py-2 rounded-lg border transition-colors cursor-pointer cursor-pointer ${
-                        isDark
-                          ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {t("contractingTypes.filters.clear")}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile Cards View */}
-          <div className={`md:hidden ${showMobileTable ? "hidden" : "block"}`}>
-            {loadingGetCategories ? (
-              <div className="text-center p-8">
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span
-                    className={`${isRTL ? "mr-3" : "ml-3"} ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {t("gettingData.categories")}
-                  </span>
-                </div>
-              </div>
-            ) : categories.length === 0 ? (
-              <div
-                className={`text-center p-8 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {t("categories.noData")}
-              </div>
-            ) : (
-              categories.map((category) => (
-                <CategoryCard key={category.id} category={category} />
-              ))
-            )}
-          </div>
-
-          {/* Desktop Table View */}
-          <div
-            className={`hidden md:block ${showMobileTable ? "md:hidden" : ""} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border`}
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.code")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.nameArabic")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.nameEnglish")}
-                    </th>
-
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.status")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.departments")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.users")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.createdAt")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loadingGetCategories ? (
-                    <tr>
-                      <td colSpan="9" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-3" : "ml-3"} ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("gettingData.categories")}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : categories.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="9"
-                        className={`text-center p-8 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {t("categories.noData")}
-                      </td>
-                    </tr>
-                  ) : (
-                    categories.map((category) => (
-                      <tr
-                        key={category.id}
-                        className={`border-b transition-colors ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
-                      >
-                        <td
-                          className={`p-4 text-center font-mono ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {category.code}
-                        </td>
-                        <td
-                          className={`p-4 text-center font-semibold ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {category.nameArabic}
-                        </td>
-                        <td
-                          className={`p-4 text-center ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {category.nameEnglish}
-                        </td>
-
-                        <td className="p-4 text-center">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              category.isActive
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                            }`}
-                          >
-                            {category.isActive
-                              ? t("categories.status.active")
-                              : t("categories.status.inactive")}
-                          </span>
-                        </td>
-                        <td
-                          className={`p-4 text-center ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {category.departmentsCount}
-                        </td>
-                        <td
-                          className={`p-4 text-center ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {category.usersCount}
-                        </td>
-                        <td
-                          className={`p-4 text-center text-sm ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {formatDate(category.createdAt)}
-                        </td>
-                        <td className="p-4 text-center">
-                          <div className="flex gap-2">
-                            <Link to={`/admin-panel/category/${category.id}`}>
-                              <button
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("categories.actions.view")}
-                              >
-                                <Eye size={16} />
-                              </button>
-                            </Link>
-                            <Link
-                              to={`/admin-panel/category/edit/${category.id}`}
-                            >
-                              <button
-                                className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("categories.actions.edit")}
-                              >
-                                <Edit size={16} />
-                              </button>
-                            </Link>
-                            <button
-                              onClick={() => {
-                                setToDelete({
-                                  id: category.id,
-                                  name:
-                                    language == "en"
-                                      ? category.nameEnglish
-                                      : category.nameArabic,
-                                })
-                                setModalOpen(true)
-                              }}
-                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
-                              title={t("categories.actions.delete")}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Mobile Table View (when toggled) */}
-          <div
-            className={`md:hidden ${showMobileTable ? "block" : "hidden"} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border overflow-hidden`}
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`text-center ${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.name")}
-                    </th>
-                    <th
-                      className={`text-center ${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.status")}
-                    </th>
-                    <th
-                      className={`text-center ${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("categories.table.actions")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loadingGetCategories ? (
-                    <tr>
-                      <td colSpan="3" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-2" : "ml-2"} text-sm ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("gettingData.categories")}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : categories.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className={`text-center p-8 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {t("categories.noData")}
-                      </td>
-                    </tr>
-                  ) : (
-                    categories.map((category) => (
-                      <tr
-                        key={category.id}
-                        className={`border-b transition-colors ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
-                      >
-                        <td className="p-2 text-center">
-                          <div>
-                            <div
-                              className={`font-semibold ${
-                                isDark ? "text-white" : "text-gray-900"
-                              }`}
-                            >
-                              {category.nameArabic}
-                            </div>
-                            <div
-                              className={`text-xs ${
-                                isDark ? "text-gray-400" : "text-gray-500"
-                              }`}
-                            >
-                              {category.code}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-2 text-center">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              category.isActive
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                            }`}
-                          >
-                            {category.isActive
-                              ? t("categories.status.active")
-                              : t("categories.status.inactive")}
-                          </span>
-                        </td>
-                        <td className="p-2 text-center">
-                          <div className="flex gap-1">
-                            <Link to={`/admin-panel/category/${category.id}`}>
-                              <button className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded transition-colors cursor-pointer">
-                                <Eye size={14} />
-                              </button>
-                            </Link>
-                            <Link
-                              to={`/admin-panel/category/edit/${category.id}`}
-                            >
-                              <button className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded transition-colors cursor-pointer">
-                                <Edit size={14} />
-                              </button>
-                            </Link>
-                            <button
-                              className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors cursor-pointer"
-                              onClick={() => {
-                                setToDelete({
-                                  id: category.id,
-                                  name:
-                                    language == "en"
-                                      ? category.nameEnglish
-                                      : category.nameArabic,
-                                })
-                                setModalOpen(true)
-                              }}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div
-              className={`border-t p-4 mt-6 ${
-                isDark
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-white border-gray-200"
-              } rounded-lg`}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={refreshData}
+              className={theme.secondaryButton}
             >
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex flex-col sm:flex-row items-center gap-4 text-sm">
-                  <span
-                    className={`${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
-                    {t("displayRange", {
-                      start: (pagination.page - 1) * pagination.pageSize + 1,
-                      end: Math.min(
-                        pagination.page * pagination.pageSize,
-                        pagination.totalCount
-                      ),
-                      total: pagination.totalCount,
-                    })}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={pagination.pageSize}
-                      onChange={(e) => handlePageSizeChange(e.target.value)}
-                      className={`p-1 border rounded text-sm ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
-                    >
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="50">50</option>
-                    </select>
-                    <span
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {t("categories.pagination.itemsPerPage")}{" "}
-                    </span>
-                  </div>
-                </div>
+              <RefreshCw size={16} />
+              {currentLang === "ar" ? "تحديث" : "Refresh"}
+            </button>
 
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={!pagination.hasPreviousPage}
-                    className={`p-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                      isDark
-                        ? "border-gray-600 hover:bg-gray-700"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    <ChevronRight size={16} />
-                  </button>
+            <Link to="/admin-panel/category/create">
+              <button type="button" className={`${theme.primaryButton} gap-2`}>
+                <Plus size={18} />
+                {t("categories.actions.addNew") || "Add New Category"}
+              </button>
+            </Link>
+          </div>
+        </div>
 
-                  {getPageNumbers().map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm cursor-pointer ${
-                        pageNum === pagination.page
-                          ? "bg-blue-600 text-white"
-                          : isDark
-                          ? "border border-gray-600 hover:bg-gray-700 text-gray-300"
-                          : "border border-gray-300 hover:bg-gray-50 text-gray-700"
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  ))}
+        {error && (
+          <div className={`${theme.card} p-4 mb-5 border-red-500/30`}>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-red-700 dark:text-red-300 text-sm font-semibold">
+                {error.message || String(error)}
+              </p>
 
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={!pagination.hasNextPage}
-                    className={`p-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                      isDark
-                        ? "border-gray-600 hover:bg-gray-700"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                </div>
+              <button
+                type="button"
+                onClick={() => dispatch(clearError())}
+                className="text-red-700 dark:text-red-300"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+          <SummaryCard
+            icon={BarChart3}
+            title={currentLang === "ar" ? "إجمالي التخصصات" : "Total Categories"}
+            value={summary.totalCategories}
+            tone="blue"
+          />
+
+          <SummaryCard
+            icon={CheckCircle}
+            title={currentLang === "ar" ? "نشطة" : "Active"}
+            value={summary.activeCategories}
+            tone="green"
+          />
+
+          <SummaryCard
+            icon={XCircle}
+            title={currentLang === "ar" ? "غير نشطة" : "Inactive"}
+            value={summary.inactiveCategories}
+            tone="red"
+          />
+
+          <SummaryCard
+            icon={Building}
+            title={currentLang === "ar" ? "الأقسام" : "Departments"}
+            value={summary.totalDepartments}
+            tone="purple"
+          />
+
+          <SummaryCard
+            icon={Users}
+            title={currentLang === "ar" ? "الدكاترة" : "Doctors"}
+            value={summary.totalUsers}
+            tone="green"
+          />
+
+          <SummaryCard
+            icon={Clock}
+            title={currentLang === "ar" ? "طلبات معلقة" : "Pending"}
+            value={summary.pendingRequests}
+            tone="yellow"
+          />
+        </div>
+
+        <div className={`${theme.card} p-4 mb-6`}>
+          <div className="flex flex-col xl:flex-row gap-4">
+            <div className="flex-1 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-[var(--color-bg-soft)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)]">
+                <Search size={20} />
+              </div>
+
+              <input
+                type="text"
+                placeholder={t("categories.search.placeholder") || "Search categories..."}
+                value={searchInput}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowFilters((prev) => !prev)}
+                className={`${theme.secondaryButton} gap-2`}
+              >
+                <SlidersHorizontal size={17} />
+                {t("categories.filters.title") || "Filters"}
+              </button>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 mt-4 border-t border-[var(--color-border)]">
+              <div>
+                <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                  {t("categories.filters.status") || "Status"}
+                </label>
+
+                <select
+                  value={filters?.isActive === "" ? "" : String(filters?.isActive)}
+                  onChange={(e) => {
+                    const value =
+                      e.target.value === "" ? "" : e.target.value === "true"
+                    handleFilterChange("isActive", value)
+                  }}
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                >
+                  <option value="">
+                    {currentLang === "ar" ? "كل الحالات" : "All Status"}
+                  </option>
+                  <option value="true">
+                    {t("categories.status.active") || "Active"}
+                  </option>
+                  <option value="false">
+                    {t("categories.status.inactive") || "Inactive"}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                  {t("categories.filters.orderBy") || "Order By"}
+                </label>
+
+                <select
+                  value={filters?.orderBy || "createdAt"}
+                  onChange={(e) => handleFilterChange("orderBy", e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                >
+                  <option value="createdAt">
+                    {t("categories.filters.sortBy.createdAt") || "Created At"}
+                  </option>
+                  <option value="nameArabic">
+                    {t("categories.filters.sortBy.nameArabic") || "Arabic Name"}
+                  </option>
+                  <option value="nameEnglish">
+                    {t("categories.filters.sortBy.nameEnglish") || "English Name"}
+                  </option>
+                  <option value="code">
+                    {t("categories.filters.sortBy.code") || "Code"}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-[var(--color-text)] mb-2">
+                  {t("categories.filters.orderDirection") || "Direction"}
+                </label>
+
+                <select
+                  value={String(filters?.orderDesc ?? true)}
+                  onChange={(e) =>
+                    handleFilterChange("orderDesc", e.target.value === "true")
+                  }
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                >
+                  <option value="true">
+                    {t("categories.filters.descending") || "Descending"}
+                  </option>
+                  <option value="false">
+                    {t("categories.filters.ascending") || "Ascending"}
+                  </option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    dispatch(clearFilters())
+                    setSearchInput("")
+                  }}
+                  className={`${theme.secondaryButton} w-full gap-2`}
+                >
+                  <Filter size={16} />
+                  {t("contractingTypes.filters.clear") || "Clear"}
+                </button>
               </div>
             </div>
           )}
         </div>
+
+        <div className="md:hidden space-y-4">
+          {loadingGetCategories ? (
+            <LoadingBlock text={t("gettingData.categories") || "Loading categories..."} />
+          ) : safeCategories.length === 0 ? (
+            <EmptyBlock text={t("categories.noData") || "No categories found"} />
+          ) : (
+            safeCategories.map((category) => (
+              <CategoryMobileCard key={category.id} category={category} />
+            ))
+          )}
+        </div>
+
+        <div className={`${theme.card} hidden md:block overflow-hidden`}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1100px]">
+              <thead className="bg-[var(--color-surface-muted)]">
+                <tr>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {t("categories.table.code") || "Code"}
+                  </th>
+                  <th className={`${tableHeadClass} ${isRTL ? "text-right" : "text-left"}`}>
+                    {currentLang === "ar" ? "التخصص" : "Category"}
+                  </th>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {t("categories.table.status") || "Status"}
+                  </th>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {t("categories.table.departments") || "Departments"}
+                  </th>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {currentLang === "ar" ? "الدكاترة" : "Doctors"}
+                  </th>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {currentLang === "ar" ? "طلبات" : "Requests"}
+                  </th>
+                  <th className={`${tableHeadClass} ${isRTL ? "text-right" : "text-left"}`}>
+                    {currentLang === "ar" ? "رئيس التخصص" : "Category Head"}
+                  </th>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {t("categories.table.createdAt") || "Created At"}
+                  </th>
+                  <th className={`${tableHeadClass} text-center`}>
+                    {t("categories.table.actions") || "Actions"}
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loadingGetCategories ? (
+                  <tr>
+                    <td colSpan="9" className="p-8">
+                      <LoadingBlock text={t("gettingData.categories") || "Loading categories..."} />
+                    </td>
+                  </tr>
+                ) : safeCategories.length === 0 ? (
+                  <tr>
+                    <td colSpan="9" className="p-8">
+                      <EmptyBlock text={t("categories.noData") || "No categories found"} />
+                    </td>
+                  </tr>
+                ) : (
+                  safeCategories.map((category) => (
+                    <tr key={category.id} className={theme.hoverRow}>
+                      <td className={`${tableCellClass} text-center`}>
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg bg-[var(--color-bg-soft)] border border-[var(--color-border)] font-mono font-bold">
+                          {category.code || "-"}
+                        </span>
+                      </td>
+
+                      <td className={`${tableCellClass}`}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                            <Stethoscope size={20} />
+                          </div>
+
+                          <div>
+                            <p className="font-extrabold text-[var(--color-text)]">
+                              {getCategoryName(category)}
+                            </p>
+                            <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                              {getCategorySubName(category)}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className={`${tableCellClass} text-center`}>
+                        <StatusBadge active={category.isActive} />
+                      </td>
+
+                      <td className={`${tableCellClass} text-center`}>
+                        <Link to={`/admin-panel/category/${category.id}`}>
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-200 dark:border-blue-700">
+                            <Building size={13} />
+                            {category.departmentsCount ?? 0}
+                          </span>
+                        </Link>
+                      </td>
+
+                      <td className={`${tableCellClass} text-center`}>
+                        <Link to={`/admin-panel/category/${category.id}`}>
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700">
+                            <Users size={13} />
+                            {getUsersCount(category)}
+                          </span>
+                        </Link>
+                      </td>
+
+                      <td className={`${tableCellClass} text-center`}>
+                        <Link to={`/admin-panel/category/${category.id}`}>
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700">
+                            <Clock size={13} />
+                            {getPendingCount(category)}
+                          </span>
+                        </Link>
+                      </td>
+
+                      <td className={`${tableCellClass}`}>
+                        <div className="flex items-center gap-2">
+                          <UserCheck
+                            size={16}
+                            className="text-purple-700 dark:text-purple-300"
+                          />
+                          <span className="text-[var(--color-text-muted)]">
+                            {getChiefName(category)}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className={`${tableCellClass} text-center text-[var(--color-text-muted)]`}>
+                        {formatDate(category.createdAt)}
+                      </td>
+
+                      <td className={`${tableCellClass} text-center`}>
+                        <div className="flex justify-center gap-2">
+                          <Link to={`/admin-panel/category/${category.id}`}>
+                            <button
+                              type="button"
+                              className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                              title={t("categories.actions.view") || "View"}
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </Link>
+
+                          <Link to={`/admin-panel/category/edit/${category.id}`}>
+                            <button
+                              type="button"
+                              className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
+                              title={t("categories.actions.edit") || "Edit"}
+                            >
+                              <Edit size={16} />
+                            </button>
+                          </Link>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setToDelete({
+                                id: category.id,
+                                name: getCategoryName(category),
+                              })
+                              setModalOpen(true)
+                            }}
+                            className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
+                            title={t("categories.actions.delete") || "Delete"}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {pagination && pagination.totalPages > 1 && (
+          <div className={`${theme.card} p-4 mt-6`}>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-[var(--color-text-muted)]">
+                {currentLang === "ar" ? "عرض" : "Showing"}{" "}
+                <span className="font-bold text-[var(--color-text)]">
+                  {(pagination.page - 1) * pagination.pageSize + 1}
+                </span>{" "}
+                -{" "}
+                <span className="font-bold text-[var(--color-text)]">
+                  {Math.min(
+                    pagination.page * pagination.pageSize,
+                    pagination.totalCount
+                  )}
+                </span>{" "}
+                {currentLang === "ar" ? "من" : "of"}{" "}
+                <span className="font-bold text-[var(--color-text)]">
+                  {pagination.totalCount}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={pagination.pageSize}
+                  onChange={(e) => handlePageSizeChange(e.target.value)}
+                  className="px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+                >
+                  {[5, 10, 20, 50].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={!hasPrevious}
+                  className={theme.secondaryButton}
+                >
+                  {isRTL ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+                </button>
+
+                {getPageNumbers().map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`px-3 py-2 rounded-lg border transition-colors ${
+                      pageNum === pagination.page
+                        ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                        : "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-bg-soft)]"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={!hasNext}
+                  className={theme.secondaryButton}
+                >
+                  {isRTL ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+function LoadingBlock({ text }) {
+  return (
+    <div className="flex items-center justify-center gap-3 py-8 text-[var(--color-text-muted)]">
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[var(--color-primary)]" />
+      <span className="text-sm font-semibold">{text}</span>
+    </div>
+  )
+}
+
+function EmptyBlock({ text }) {
+  return (
+    <div className="text-center py-10 text-[var(--color-text-muted)]">
+      <Stethoscope className="w-12 h-12 mx-auto mb-3 opacity-60" />
+      <p className="text-sm font-semibold">{text}</p>
     </div>
   )
 }

@@ -1,137 +1,119 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useParams, useNavigate, Link } from "react-router-dom"
+import { useTranslation } from "react-i18next"
+import Swal from "sweetalert2"
+import { toast } from "react-toastify"
+import {
+  ArrowLeft,
+  ArrowRight,
+  Award,
+  BarChart3,
+  Building,
+  Calendar,
+  Check,
+  CheckCircle,
+  Clock,
+  Edit,
+  ExternalLink,
+  Eye,
+  FileText,
+  Filter,
+  LinkIcon,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Stethoscope,
+  Trash2,
+  UserCheck,
+  Users,
+  X,
+  XCircle,
+} from "lucide-react"
+
 import {
   getCategoryById,
+  getCategoryDetails,
+  getCategoryStatisticsForDeptHead,
+  getCategoryDoctors,
+  getCategoryPendingRequests,
+  approveDoctorRequest,
+  rejectDoctorRequest,
   getCategoryHeads,
 } from "../../../state/act/actCategory"
+
 import {
   clearSingleCategory,
   clearSingleCategoryError,
-  getCategoryPendingRequests,
+  clearCategoryPendingRequests,
+  clearCategoryPendingRequestsError,
+  clearApprovalSuccess,
+  clearApprovalError,
+  setCategoryPendingRequestsStatusFilter,
   setCategoryPendingRequestsCurrentPage,
   setCategoryPendingRequestsPageSize,
-  setCategoryPendingRequestsStatusFilter,
-  clearCategoryPendingRequestsError,
-  clearCategoryPendingRequests,
-  approveDoctorRequest,
-  clearApprovalSuccess,
-  rejectDoctorRequest,
-  clearApprovalError,
+  setCategoryDoctorsActiveFilter,
+  setCategoryDoctorsCurrentPage,
+  setCategoryDoctorsPageSize,
+  clearCategoryDoctors,
 } from "../../../state/slices/category"
+
 import {
   availabelDepartmentsForCategory,
   getDepartmentByCategory,
   linkDepartmentToCategory,
   unlinkDepartmentFromCategory,
 } from "../../../state/act/actDepartment"
-import LoadingGetData from "../../../components/LoadingGetData"
-import { useTranslation } from "react-i18next"
-import i18next from "i18next"
-import {
-  Building,
-  Users,
-  MapPin,
-  Calendar,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  FileText,
-  BarChart3,
-  Clock,
-  Mail,
-  Phone,
-  Award,
-  Check,
-  X,
-  RefreshCw,
-  AlertCircle,
-  Filter,
-  UserCheck,
-  ChevronDown,
-  ChevronUp,
-  LinkIcon,
-  ArrowUpRight,
-  ExternalLink,
-  ArrowLeft,
-  ArrowRight,
-} from "lucide-react"
+
 import { getRosterByCategory } from "../../../state/act/actRosterManagement"
-import ModalUpdateRosterStatus from "../../../components/modals/ModalUpdateRosterStatus"
-import "../../../styles/general.css"
-import { toast } from "react-toastify"
-import Swal from "sweetalert2"
+import LoadingGetData from "../../../components/LoadingGetData"
 import CategoryHeadsManagement from "../../../components/categoryHeads"
 import { formatDate } from "../../../utils/formtDate"
+import { getPageTheme } from "../../../utils/themeClasses"
 
 const SpecificCategory = () => {
   const { catId: id } = useParams()
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
+  const theme = getPageTheme()
 
-  const [statusModalOpen, setStatusModalOpen] = useState(false)
-  const [statusToUpdate, setStatusToUpdate] = useState({
-    id: null,
-    title: "",
-    currentStatus: "",
-  })
-  const [showMobileRosterTable, setShowMobileRosterTable] = useState(false)
-  const [showPendingDoctors, setShowPendingDoctors] = useState(true)
+  const [activeTab, setActiveTab] = useState("overview")
+  const [depClickId, setDepClickId] = useState(null)
+  const [unlinkDepId, setUnlinkDepId] = useState(null)
 
-  // Local filters for pending doctors
-  const [localFilters, setLocalFilters] = useState({
-    status: "",
-  })
+  const currentLang = i18n.language || "ar"
+  const isRTL = currentLang === "ar"
 
-  const formatMonthYear = (month, year) => {
-    const monthNames = {
-      ar: [
-        "يناير",
-        "فبراير",
-        "مارس",
-        "أبريل",
-        "مايو",
-        "يونيو",
-        "يوليو",
-        "أغسطس",
-        "سبتمبر",
-        "أكتوبر",
-        "نوفمبر",
-        "ديسمبر",
-      ],
-      en: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-    }
-
-    const months = monthNames[currentLang] || monthNames.en
-    return `${months[month - 1]} ${year}`
-  }
-
-  const { selectedCategory, loadingGetSingleCategory, singleCategoryError } =
-    useSelector((state) => state.category)
+  const { mymode } = useSelector((state) => state.mode)
+  const isDark = mymode === "dark"
 
   const { loginRoleResponseDto } = useSelector((state) => state.auth)
 
-  // Pending doctors selectors
   const {
+    selectedCategory,
+    categoryDetails,
+    categoryStatistics,
+    loadingGetSingleCategory,
+    loadingGetCategoryDetails,
+    loadingGetCategoryStatistics,
+    singleCategoryError,
+    categoryDetailsError,
+    categoryStatisticsError,
+
+    categoryDoctors,
+    categoryDoctorsPagination,
+    categoryDoctorsFilters,
+    loadingGetCategoryDoctors,
+    categoryDoctorsError,
+
     categoryPendingRequests,
-    categoryPendingRequestsPagination: pagination,
-    categoryPendingRequestsError: pendingError,
-    loadingGetCategoryPendingRequests: loadingPending,
-    categoryPendingRequestsFilters: filters,
+    categoryPendingRequestsPagination,
+    categoryPendingRequestsError,
+    categoryPendingRequestsFilters,
+    loadingGetCategoryPendingRequests,
+
     loadingApproveRequest,
     loadingRejectRequest,
     approvalError,
@@ -139,2399 +121,1642 @@ const SpecificCategory = () => {
     approvalMessage,
   } = useSelector((state) => state.category)
 
-  const { rosterList, loading } = useSelector((state) => state.rosterManagement)
-
-  // Get departments from the department slice
   const {
     departments,
-    loadingGetDepartments,
-    categoryHead,
-    loadingGetDepartmentsByCategory,
     departmentsByCategory,
+    loadingGetDepartmentsByCategory,
     loadingLinkDepartmentToCategory,
     loadingUnlinkDepartment,
   } = useSelector((state) => state.department)
 
-  // Get mode and translation function
-  const { mymode } = useSelector((state) => state.mode)
-  const { t } = useTranslation()
+  const { rosterList, loading } = useSelector((state) => state.rosterManagement)
 
-  console.log("departmentsByCategory", departmentsByCategory)
+  const canManageCategory =
+    loginRoleResponseDto?.roleNameEn === "System Administrator" ||
+    loginRoleResponseDto?.roleNameEn === "Category Head"
 
-  // Get current language direction and theme
-  const isRTL = mymode === "ar"
-  const currentLang = i18next.language
-  const isDark = mymode === "dark"
+  const category = categoryDetails || selectedCategory
 
-  const getStatusInfo = (status) => {
-    const statusMap = {
-      DRAFT_BASIC: {
-        color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
-        name: t("roster.status.draftBasic"),
-      },
-      DRAFT_PARTIAL: {
-        color:
-          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-        name: t("roster.status.draftPartial"),
-      },
-      DRAFT: {
-        color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-        name: t("roster.status.draft"),
-      },
-      DRAFT_READY: {
-        color:
-          "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-        name: t("roster.status.draftReady"),
-      },
-      PUBLISHED: {
-        color:
-          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-        name: t("roster.status.published"),
-      },
-      CLOSED: {
-        color:
-          "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-        name: t("roster.status.closed"),
-      },
-      ARCHIVED: {
-        color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-        name: t("roster.status.archived"),
-      },
-    }
+  const approvedDoctors = Array.isArray(categoryDoctors) ? categoryDoctors : []
 
-    return (
-      statusMap[status] || {
-        color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
-        name: status,
-      }
-    )
-  }
+  const pendingRequests = Array.isArray(categoryPendingRequests)
+    ? categoryPendingRequests
+    : []
 
-  // Get status configuration for pending doctors
-  const getPendingStatusConfig = (status) => {
-    const configs = {
-      Pending: {
-        className: "bg-yellow-100 text-yellow-800 border-yellow-200",
-        text: t("pendingDoctorRequests.status.pending"),
-        icon: Clock,
-      },
-      Approved: {
-        className: "bg-green-100 text-green-800 border-green-200",
-        text: t("pendingDoctorRequests.status.approved"),
-        icon: Check,
-      },
-    }
+  const linkedDepartments = Array.isArray(departmentsByCategory)
+    ? departmentsByCategory
+    : departmentsByCategory?.items || []
 
-    return (
-      configs[status] || {
-        className: "bg-gray-100 text-gray-800 border-gray-200",
-        text: status,
-        icon: AlertCircle,
-      }
-    )
-  }
+  const availableDepartments = Array.isArray(departments)
+    ? departments
+    : departments?.items || []
 
-  // Render status badge for pending doctors
-  const renderPendingStatusBadge = (status) => {
-    const config = getPendingStatusConfig(status)
-    const IconComponent = config.icon
-
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border ${config.className}`}
-      >
-        <IconComponent className="w-3 h-3" />
-        {config.text}
-      </span>
-    )
-  }
-
-  // Format date for pending doctors
-
-  // Handle pending doctor actions
-  const handleApproveRequest = (userId) => {
-    dispatch(approveDoctorRequest({ userId }))
-      .unwrap()
-      .then(() => {
-        toast.success(t("pendingDoctorRequests.messages.approvalSuccess"))
-        setLocalFilters((prev) => ({ ...prev, status: "" }))
-        dispatch(setCategoryPendingRequestsStatusFilter({ status: "" }))
-      })
-      .catch((error) => {
-        toast.error(
-          error.message || t("pendingDoctorRequests.errors.approvalError")
-        )
-      })
-  }
-
-  const handleRejectRequest = (userId) => {
-    dispatch(rejectDoctorRequest({ userId }))
-      .unwrap()
-      .then(() => {
-        toast.success(t("pendingDoctorRequests.messages.rejectionSuccess"))
-        setLocalFilters((prev) => ({ ...prev, status: "" }))
-        dispatch(setCategoryPendingRequestsStatusFilter({ status: "" }))
-      })
-      .catch((error) => {
-        toast.error(
-          error.message || t("pendingDoctorRequests.errors.rejectionError")
-        )
-      })
-  }
-
-  // Handle status filter change for pending doctors
-  const handlePendingStatusChange = (status) => {
-    setLocalFilters((prev) => ({ ...prev, status }))
-    dispatch(setCategoryPendingRequestsStatusFilter(status))
-  }
-
-  // Handle pagination for pending doctors
-  const handlePendingPageChange = (page) => {
-    dispatch(setCategoryPendingRequestsCurrentPage(page))
-  }
-
-  const handlePendingPageSizeChange = (pageSize) => {
-    dispatch(setCategoryPendingRequestsPageSize(pageSize))
-  }
-
-  // Handle refresh pending doctors
-  const handleRefreshPendingDoctors = () => {
-    if (id && !isNaN(id)) {
-      dispatch(
-        getCategoryPendingRequests({
-          categoryId: id,
-          filters,
-        })
-      )
-    }
-  }
+  const rosters = Array.isArray(rosterList)
+    ? rosterList
+    : rosterList?.items || rosterList?.data?.items || []
 
   useEffect(() => {
-    if (id) {
-      // Clear previous data before fetching
-      dispatch(clearSingleCategory())
-      dispatch(getCategoryById({ categoryId: id }))
-        .unwrap()
-        .then((response) => {
-          localStorage.setItem("categoryId", response.data.id)
-          localStorage.setItem("categoryEnglishName", response.data.nameEnglish)
-          localStorage.setItem("categoryArabicName", response.data.nameArabic)
-        })
-      // Fetch departments for this specific category
-      dispatch(availabelDepartmentsForCategory({ categoryId: id }))
-      dispatch(getRosterByCategory({ categoryId: id }))
-      dispatch(getCategoryHeads({ categoryId: id }))
+    if (!id) return
 
-      // Fetch pending doctors for this category
-      dispatch(
-        getCategoryPendingRequests({ categoryId: id, filters: { status: "" } })
-      )
-    }
+    dispatch(clearSingleCategory())
+    dispatch(clearCategoryDoctors())
+    dispatch(clearCategoryPendingRequests())
 
-    // Cleanup on unmount
+    dispatch(getCategoryById({ categoryId: id }))
+      .unwrap()
+      .then((response) => {
+        const data = response?.data || response
+
+        if (data?.id) {
+          localStorage.setItem("categoryId", data.id)
+          localStorage.setItem("categoryEnglishName", data.nameEnglish || "")
+          localStorage.setItem("categoryArabicName", data.nameArabic || "")
+        }
+      })
+      .catch(() => {})
+
+    dispatch(getCategoryDetails({ categoryId: id }))
+    dispatch(getCategoryStatisticsForDeptHead({ categoryId: id }))
+    dispatch(getCategoryHeads({ categoryId: id }))
+    dispatch(availabelDepartmentsForCategory({ categoryId: id }))
+    dispatch(getDepartmentByCategory({ categoryId: id }))
+    dispatch(getRosterByCategory({ categoryId: id }))
+
     return () => {
       dispatch(clearSingleCategory())
       dispatch(clearSingleCategoryError())
       dispatch(clearCategoryPendingRequests())
+      dispatch(clearCategoryPendingRequestsError())
+      dispatch(clearCategoryDoctors())
       dispatch(clearApprovalSuccess())
       dispatch(clearApprovalError())
     }
   }, [dispatch, id])
 
-  // Fetch pending doctors when filters change
   useEffect(() => {
-    if (id && !isNaN(id)) {
-      dispatch(
-        getCategoryPendingRequests({
-          categoryId: id,
-          filters,
-        })
-      )
-    }
-  }, [dispatch, id, filters])
+    if (!id) return
+
+    dispatch(
+      getCategoryDoctors({
+        categoryId: id,
+        isActive: categoryDoctorsFilters?.isActive,
+        page: categoryDoctorsFilters?.page,
+        pageSize: categoryDoctorsFilters?.pageSize,
+      })
+    )
+  }, [
+    dispatch,
+    id,
+    categoryDoctorsFilters?.isActive,
+    categoryDoctorsFilters?.page,
+    categoryDoctorsFilters?.pageSize,
+  ])
 
   useEffect(() => {
-    if (id && !isNaN(id)) {
-      dispatch(
-        getDepartmentByCategory({
-          categoryId: id,
-        })
-      )
-    }
-  }, [dispatch, id, filters])
+    if (!id) return
 
-  // Handle approval success
+    dispatch(
+      getCategoryPendingRequests({
+        categoryId: id,
+        filters: categoryPendingRequestsFilters,
+      })
+    )
+  }, [
+    dispatch,
+    id,
+    categoryPendingRequestsFilters?.status,
+    categoryPendingRequestsFilters?.page,
+    categoryPendingRequestsFilters?.pageSize,
+  ])
+
   useEffect(() => {
     if (approvalSuccess) {
-      console.log(approvalMessage || "Request processed successfully")
+      toast.success(approvalMessage || "Request processed successfully")
+
       const timer = setTimeout(() => {
         dispatch(clearApprovalSuccess())
-      }, 3000)
+      }, 2500)
+
       return () => clearTimeout(timer)
     }
   }, [approvalSuccess, approvalMessage, dispatch])
 
-  // Handle error cases
   useEffect(() => {
-    if (singleCategoryError) {
-      if (singleCategoryError.status === 404) {
-        console.error("Category not found")
-      } else if (singleCategoryError.status === 403) {
-        console.error("Access denied")
-      }
+    if (approvalError) {
+      toast.error(approvalError?.message || "Failed to process request")
     }
-  }, [singleCategoryError, navigate])
+  }, [approvalError])
 
-  // Get category name based on current language
+  const refreshCategoryData = () => {
+    if (!id) return
+
+    dispatch(getCategoryById({ categoryId: id }))
+    dispatch(getCategoryDetails({ categoryId: id }))
+    dispatch(getCategoryStatisticsForDeptHead({ categoryId: id }))
+    dispatch(
+      getCategoryDoctors({
+        categoryId: id,
+        isActive: categoryDoctorsFilters?.isActive,
+        page: categoryDoctorsFilters?.page,
+        pageSize: categoryDoctorsFilters?.pageSize,
+      })
+    )
+    dispatch(
+      getCategoryPendingRequests({
+        categoryId: id,
+        filters: categoryPendingRequestsFilters,
+      })
+    )
+    dispatch(getDepartmentByCategory({ categoryId: id }))
+    dispatch(availabelDepartmentsForCategory({ categoryId: id }))
+    dispatch(getRosterByCategory({ categoryId: id }))
+    dispatch(getCategoryHeads({ categoryId: id }))
+  }
+
   const getCategoryName = () => {
-    if (!selectedCategory) return ""
-    return currentLang === "en"
-      ? selectedCategory.nameEnglish
-      : selectedCategory.nameArabic
+    if (!category) return "-"
+    return currentLang === "ar"
+      ? category.nameArabic || category.nameEnglish || "-"
+      : category.nameEnglish || category.nameArabic || "-"
   }
 
-  // Format date based on language
+  const getDoctorName = (doctor) => {
+    return currentLang === "ar"
+      ? doctor.nameArabic ||
+          doctor.doctorNameAr ||
+          doctor.fullNameAr ||
+          doctor.nameEnglish ||
+          doctor.doctorNameEn ||
+          "-"
+      : doctor.nameEnglish ||
+          doctor.doctorNameEn ||
+          doctor.fullNameEn ||
+          doctor.nameArabic ||
+          doctor.doctorNameAr ||
+          "-"
+  }
 
-  const [depClickId, setDepClickId] = useState(null)
-  const handleLinkDepartment = async (departmentId) => {
-    try {
-      // Show confirmation dialog
-      const result = await Swal.fire({
-        title: t("confirmations.linkDepartment.title"),
-        text: t("confirmations.linkDepartment.message"),
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: t("confirmations.linkDepartment.confirm"),
-        cancelButtonText: t("confirmations.linkDepartment.cancel"),
-      })
+  const getRequestDoctorName = (request) => {
+    return currentLang === "ar"
+      ? request.doctorNameAr ||
+          request.nameArabic ||
+          request.fullNameAr ||
+          request.doctorNameEn ||
+          request.nameEnglish ||
+          "-"
+      : request.doctorNameEn ||
+          request.nameEnglish ||
+          request.fullNameEn ||
+          request.doctorNameAr ||
+          request.nameArabic ||
+          "-"
+  }
 
-      if (result.isConfirmed) {
-        // Dispatch the action with unwrap
-        setDepClickId(departmentId)
-        await dispatch(
-          linkDepartmentToCategory({
-            id: departmentId,
-            categoryId: id,
-          })
-        ).unwrap()
-        setDepClickId(null)
+  const getDepartmentName = (department) => {
+    return currentLang === "ar"
+      ? department.nameArabic ||
+          department.departmentNameAr ||
+          department.nameEnglish ||
+          department.departmentNameEn ||
+          "-"
+      : department.nameEnglish ||
+          department.departmentNameEn ||
+          department.nameArabic ||
+          department.departmentNameAr ||
+          "-"
+  }
 
-        // Show success toast
-        toast.success(t("messages.success.departmentLinked"), {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        })
-      }
-    } catch (error) {
-      console.error("Error linking department:", error)
-      setDepClickId(null)
+  const getRosterTitle = (roster) => {
+    return roster.title || roster.rosterTitle || roster.name || "-"
+  }
 
-      // Show error toast
-      // toast.error(error.message || t("messages.error.linkDepartmentFailed"), {
-      //   position: "top-right",
-      //   autoClose: 5000,
-      //   hideProgressBar: false,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      // });
-
-      // Show error SweetAlert
-      await Swal.fire({
-        title: t("messages.error.title"),
-        text: error.errors[0] || t("messages.error.linkDepartmentFailed"),
-        icon: "error",
-        confirmButtonText: t("common.ok"),
-      })
+  const getRosterStatusInfo = (status) => {
+    const map = {
+      DRAFT_BASIC: {
+        text: t("roster.status.draftBasic") || "Draft Basic",
+        className: theme.neutralBadge,
+      },
+      DRAFT_PARTIAL: {
+        text: t("roster.status.draftPartial") || "Draft Partial",
+        className: theme.warningBadge,
+      },
+      DRAFT: {
+        text: t("roster.status.draft") || "Draft",
+        className: theme.infoBadge,
+      },
+      DRAFT_READY: {
+        text: t("roster.status.draftReady") || "Draft Ready",
+        className: theme.infoBadge,
+      },
+      PUBLISHED: {
+        text: t("roster.status.published") || "Published",
+        className: theme.successBadge,
+      },
+      CLOSED: {
+        text: t("roster.status.closed") || "Closed",
+        className: theme.dangerBadge,
+      },
+      ARCHIVED: {
+        text: t("roster.status.archived") || "Archived",
+        className: theme.dangerBadge,
+      },
     }
-  }
-
-  const [unlinkDepId, setUnlinkDepId] = useState(null)
-  // Add this handler function
-
-  const handleUnlinkDepartment = async (departmentId) => {
-    try {
-      // Show confirmation dialog
-      const result = await Swal.fire({
-        title: t("confirmations.unlinkDepartment.title"),
-        text: t("confirmations.unlinkDepartment.message"),
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: t("confirmations.unlinkDepartment.confirm"),
-        cancelButtonText: t("confirmations.unlinkDepartment.cancel"),
-      })
-      console.log(departmentId)
-      if (result.isConfirmed) {
-        setUnlinkDepId(departmentId)
-
-        // Dispatch the unlink action - adjust this based on your Redux action
-        await dispatch(
-          unlinkDepartmentFromCategory({
-            id: departmentId,
-            categoryId: id,
-            revocationReason: "er",
-          })
-        ).unwrap()
-
-        setUnlinkDepId(null)
-
-        // Show success toast
-        toast.success(t("messages.success.departmentUnlinked"), {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        })
-
-        // Refresh the departments list
-        // dispatch(getDepartmentByCategory({ categoryId: id }));
-      }
-    } catch (error) {
-      console.error("Error unlinking department:", error)
-      setUnlinkDepId(null)
-
-      // Show error toast
-      // toast.error(error.message || t("messages.error.unlinkDepartmentFailed"), {
-      //   position: "top-right",
-      //   autoClose: 5000,
-      //   hideProgressBar: false,
-      //   closeOnClick: true,
-      //   pauseOnHover: true,
-      //   draggable: true,
-      // });
-
-      // Show error SweetAlert
-      await Swal.fire({
-        title: t("messages.error.title"),
-        text: error.errors[0] || t("messages.error.unlinkDepartmentFailed"),
-        icon: "error",
-        confirmButtonText: t("common.ok"),
-      })
-    }
-  }
-  // Handle create department for this category
-  // const handleCreateDepartment = () => {
-  //   if (selectedCategory) {
-  //     // Save category information to localStorage
-  //     localStorage.setItem("categoryId", selectedCategory.id);
-  //     localStorage.setItem("categoryEnglishName", selectedCategory.nameEnglish);
-  //     localStorage.setItem("categoryArabicName", selectedCategory.nameArabic);
-
-  //     // Navigate to create department page
-  //     navigate("/admin-panel/department/create-specific");
-  //   }
-  // };
-
-  // Render action buttons for pending doctors
-  const renderPendingActionButtons = (request) => {
-    const isProcessing = loadingApproveRequest || loadingRejectRequest
 
     return (
-      <div className="flex gap-2">
-        {/* Show Approve button for Pending and Rejected status */}
-        {request.status === "Pending" && (
-          <button
-            onClick={() => handleApproveRequest(request.userId)}
-            disabled={isProcessing}
-            className="flex-1 inline-flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isProcessing ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <Check className="w-4 h-4" />
-            )}
-            {t("pendingDoctorRequests.requestCard.actions.approve")}
-          </button>
-        )}
+      map[status] || {
+        text: status || "-",
+        className: theme.neutralBadge,
+      }
+    )
+  }
 
-        {/* Show Reject button for Pending and Approved status */}
-        {request.status === "Pending" && (
-          <button
-            onClick={() => handleRejectRequest(request.userId)}
-            disabled={isProcessing}
-            className="flex-1 inline-flex items-center justify-center gap-1 bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+  const getRequestStatusInfo = (status) => {
+    const normalized = String(status || "").toLowerCase()
+
+    if (normalized === "pending" || normalized === "0") {
+      return {
+        label: currentLang === "ar" ? "قيد المراجعة" : "Pending",
+        icon: Clock,
+        className:
+          "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+      }
+    }
+
+    if (normalized === "approved" || normalized === "1") {
+      return {
+        label: currentLang === "ar" ? "مقبول" : "Approved",
+        icon: CheckCircle,
+        className:
+          "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+      }
+    }
+
+    if (normalized === "rejected" || normalized === "2") {
+      return {
+        label: currentLang === "ar" ? "مرفوض" : "Rejected",
+        icon: XCircle,
+        className:
+          "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+      }
+    }
+
+    return {
+      label: status || "-",
+      icon: Clock,
+      className: theme.neutralBadge,
+    }
+  }
+
+  const renderRequestStatusBadge = (status) => {
+    const statusInfo = getRequestStatusInfo(status)
+    const Icon = statusInfo.icon
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${statusInfo.className}`}
+      >
+        <Icon className="w-3 h-3" />
+        {statusInfo.label}
+      </span>
+    )
+  }
+
+  const handleApproveRequest = async (request) => {
+    const userId = request.userId || request.doctorId || request.id
+
+    if (!userId) {
+      toast.error(currentLang === "ar" ? "معرف الدكتور غير موجود" : "Missing doctor id")
+      return
+    }
+
+    const result = await Swal.fire({
+      title: currentLang === "ar" ? "قبول طلب الدكتور؟" : "Approve doctor request?",
+      text:
+        currentLang === "ar"
+          ? `سيتم اعتماد ${getRequestDoctorName(request)} داخل هذا التخصص.`
+          : `${getRequestDoctorName(request)} will be approved in this category.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: currentLang === "ar" ? "قبول" : "Approve",
+      cancelButtonText: currentLang === "ar" ? "إلغاء" : "Cancel",
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#64748b",
+      background: "var(--color-surface)",
+      color: "var(--color-text)",
+    })
+
+    if (!result.isConfirmed) return
+
+    dispatch(approveDoctorRequest({ userId }))
+      .unwrap()
+      .then(() => {
+        refreshCategoryData()
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Failed to approve request")
+      })
+  }
+
+  const handleRejectRequest = async (request) => {
+    const userId = request.userId || request.doctorId || request.id
+
+    if (!userId) {
+      toast.error(currentLang === "ar" ? "معرف الدكتور غير موجود" : "Missing doctor id")
+      return
+    }
+
+    const result = await Swal.fire({
+      title: currentLang === "ar" ? "رفض طلب الدكتور؟" : "Reject doctor request?",
+      text:
+        currentLang === "ar"
+          ? `سيتم رفض طلب ${getRequestDoctorName(request)}.`
+          : `${getRequestDoctorName(request)} request will be rejected.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: currentLang === "ar" ? "رفض" : "Reject",
+      cancelButtonText: currentLang === "ar" ? "إلغاء" : "Cancel",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#64748b",
+      background: "var(--color-surface)",
+      color: "var(--color-text)",
+    })
+
+    if (!result.isConfirmed) return
+
+    dispatch(rejectDoctorRequest({ userId }))
+      .unwrap()
+      .then(() => {
+        refreshCategoryData()
+      })
+      .catch((error) => {
+        toast.error(error?.message || "Failed to reject request")
+      })
+  }
+
+  const handlePendingStatusChange = (status) => {
+    dispatch(setCategoryPendingRequestsStatusFilter(status))
+  }
+
+  const handlePendingPageChange = (page) => {
+    dispatch(setCategoryPendingRequestsCurrentPage(page))
+  }
+
+  const handlePendingPageSizeChange = (pageSize) => {
+    dispatch(setCategoryPendingRequestsPageSize(Number(pageSize)))
+  }
+
+  const handleDoctorsActiveFilterChange = (value) => {
+    dispatch(setCategoryDoctorsActiveFilter(value))
+  }
+
+  const handleDoctorsPageChange = (page) => {
+    dispatch(setCategoryDoctorsCurrentPage(page))
+  }
+
+  const handleDoctorsPageSizeChange = (pageSize) => {
+    dispatch(setCategoryDoctorsPageSize(Number(pageSize)))
+  }
+
+  const handleLinkDepartment = async (departmentId) => {
+    const result = await Swal.fire({
+      title:
+        currentLang === "ar"
+          ? "ربط القسم بالتخصص؟"
+          : "Link department to category?",
+      text:
+        currentLang === "ar"
+          ? "سيتم إتاحة هذا القسم داخل التخصص."
+          : "This department will be available in this category.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: currentLang === "ar" ? "ربط" : "Link",
+      cancelButtonText: currentLang === "ar" ? "إلغاء" : "Cancel",
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#64748b",
+      background: "var(--color-surface)",
+      color: "var(--color-text)",
+    })
+
+    if (!result.isConfirmed) return
+
+    try {
+      setDepClickId(departmentId)
+
+      await dispatch(
+        linkDepartmentToCategory({
+          id: departmentId,
+          categoryId: id,
+        })
+      ).unwrap()
+
+      toast.success(
+        currentLang === "ar" ? "تم ربط القسم بنجاح" : "Department linked successfully"
+      )
+
+      dispatch(getDepartmentByCategory({ categoryId: id }))
+      dispatch(availabelDepartmentsForCategory({ categoryId: id }))
+      dispatch(getCategoryById({ categoryId: id }))
+    } catch (error) {
+      toast.error(error?.message || error?.errors?.[0] || "Failed to link department")
+    } finally {
+      setDepClickId(null)
+    }
+  }
+
+  const handleUnlinkDepartment = async (departmentId) => {
+    const result = await Swal.fire({
+      title:
+        currentLang === "ar"
+          ? "إلغاء ربط القسم؟"
+          : "Unlink department?",
+      text:
+        currentLang === "ar"
+          ? "سيتم إزالة القسم من هذا التخصص."
+          : "This department will be removed from this category.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: currentLang === "ar" ? "إلغاء الربط" : "Unlink",
+      cancelButtonText: currentLang === "ar" ? "تراجع" : "Cancel",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#64748b",
+      background: "var(--color-surface)",
+      color: "var(--color-text)",
+    })
+
+    if (!result.isConfirmed) return
+
+    try {
+      setUnlinkDepId(departmentId)
+
+      await dispatch(
+        unlinkDepartmentFromCategory({
+          id: departmentId,
+          categoryId: id,
+          revocationReason: "Updated from category management page",
+        })
+      ).unwrap()
+
+      toast.success(
+        currentLang === "ar"
+          ? "تم إلغاء ربط القسم بنجاح"
+          : "Department unlinked successfully"
+      )
+
+      dispatch(getDepartmentByCategory({ categoryId: id }))
+      dispatch(availabelDepartmentsForCategory({ categoryId: id }))
+      dispatch(getCategoryById({ categoryId: id }))
+    } catch (error) {
+      toast.error(error?.message || error?.errors?.[0] || "Failed to unlink department")
+    } finally {
+      setUnlinkDepId(null)
+    }
+  }
+
+  const overviewStats = useMemo(() => {
+    const stats = categoryStatistics || {}
+
+    return {
+      departments:
+        stats.departmentsCount ??
+        category?.departmentsCount ??
+        linkedDepartments.length ??
+        0,
+      users:
+        stats.usersCount ??
+        stats.doctorsCount ??
+        category?.usersCount ??
+        approvedDoctors.length ??
+        0,
+      pending:
+        stats.pendingRequestsCount ??
+        pendingRequests.filter((request) =>
+          String(request.status || "").toLowerCase().includes("pending")
+        ).length,
+      rosters:
+        stats.rostersCount ?? rosters.length ?? 0,
+      heads: stats.categoryHeadsCount ?? 0,
+      activeDoctors:
+        stats.activeDoctorsCount ??
+        approvedDoctors.filter((doctor) => doctor.isActive !== false).length,
+    }
+  }, [
+    categoryStatistics,
+    category,
+    linkedDepartments.length,
+    approvedDoctors,
+    pendingRequests,
+    rosters.length,
+  ])
+
+  const TabButton = ({ id: tabId, icon: Icon, label, count }) => (
+    <button
+      type="button"
+      onClick={() => setActiveTab(tabId)}
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
+        activeTab === tabId
+          ? "bg-[var(--color-primary)] text-white"
+          : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text)]"
+      }`}
+    >
+      <Icon size={16} />
+      {label}
+      {count !== undefined && (
+        <span
+          className={`px-2 py-0.5 rounded-full text-[11px] ${
+            activeTab === tabId
+              ? "bg-white/20 text-white"
+              : "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+          }`}
+        >
+          {count}
+        </span>
+      )}
+    </button>
+  )
+
+  const StatCard = ({ icon: Icon, title, value, tone = "blue" }) => {
+    const toneClass = {
+      blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+      green:
+        "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+      yellow:
+        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+      purple:
+        "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+      orange:
+        "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+      red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+    }
+
+    return (
+      <div className={`${theme.cardSoft} p-4`}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
+            <p className="text-2xl font-extrabold text-[var(--color-text)]">
+              {value ?? 0}
+            </p>
+          </div>
+
+          <div
+            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+              toneClass[tone] || toneClass.blue
+            }`}
           >
-            {isProcessing ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <X className="w-4 h-4" />
-            )}
-            {t("pendingDoctorRequests.requestCard.actions.reject")}
-          </button>
-        )}
+            <Icon className="w-5 h-5" />
+          </div>
+        </div>
       </div>
     )
   }
 
-  // Status filter options for pending doctors
-  const statusFilterOptions = [
-    {
-      value: "",
-      label: t("pendingDoctorRequests.filters.statusOptions.all"),
-    },
-    {
-      value: "Pending",
-      label: t("pendingDoctorRequests.filters.statusOptions.pending"),
-    },
-    {
-      value: "Approved",
-      label: t("pendingDoctorRequests.filters.statusOptions.approved"),
-    },
-  ]
+  const EmptyState = ({ icon: Icon, title, description }) => (
+    <div className={`${theme.card} p-8 text-center`}>
+      <Icon className="w-14 h-14 mx-auto mb-4 text-[var(--color-text-muted)]" />
+      <h3 className="text-xl font-bold text-[var(--color-text)]">{title}</h3>
+      <p className="mt-2 text-[var(--color-text-muted)]">{description}</p>
+    </div>
+  )
 
-  // Department Card Component
-  const DepartmentCard = ({ department }) => (
-    <div
-      key={department.id}
-      className={`p-6 rounded-xl border transition-all duration-200 hover:shadow-lg ${
-        isDark
-          ? "bg-gray-700 border-gray-600 hover:border-gray-500"
-          : "bg-white border-gray-200 hover:border-gray-300"
-      }`}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3
-            className={`font-bold text-lg mb-1 ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
+  const Pagination = ({ pagination, onPageChange, onPageSizeChange }) => {
+    if (!pagination) return null
+
+    const page = pagination.page || pagination.pageNumber || 1
+    const totalPages = pagination.totalPages || 1
+    const pageSize = pagination.pageSize || 10
+
+    if (totalPages <= 1 && !onPageSizeChange) return null
+
+    return (
+      <div className={`${theme.card} p-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3`}>
+        <div className="text-sm text-[var(--color-text-muted)]">
+          {currentLang === "ar" ? "صفحة" : "Page"} {page} / {totalPages}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {onPageSizeChange && (
+            <select
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(e.target.value)}
+              className="px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+            >
+              {[10, 20, 50].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+            className={theme.secondaryButton}
           >
-            {currentLang === "en"
-              ? department.nameEnglish
-              : department.nameArabic}
-          </h3>
-          <p
-            className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+            {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+          </button>
+
+          <button
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+            className={theme.secondaryButton}
           >
-            {department.code}
+            {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const renderOverviewTab = () => (
+    <div className="space-y-6">
+      {(loadingGetCategoryStatistics || loadingGetCategoryDetails) && (
+        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الإحصائيات..." : "Loading statistics..."} />
+      )}
+
+      {(categoryDetailsError || categoryStatisticsError) && (
+        <div className={`${theme.card} p-4 border-red-500/30`}>
+          <p className="text-red-700 dark:text-red-300">
+            {categoryDetailsError?.message || categoryStatisticsError?.message}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Active Status */}
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              department.isActive
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-            }`}
-          >
-            {department.isActive
-              ? t("department.status.active")
-              : t("department.status.inactive")}
-          </span>
-        </div>
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <StatCard
+          icon={Building}
+          title={currentLang === "ar" ? "الأقسام" : "Departments"}
+          value={overviewStats.departments}
+          tone="blue"
+        />
+
+        <StatCard
+          icon={Users}
+          title={currentLang === "ar" ? "الدكاترة" : "Doctors"}
+          value={overviewStats.users}
+          tone="green"
+        />
+
+        <StatCard
+          icon={UserCheck}
+          title={currentLang === "ar" ? "نشطين" : "Active"}
+          value={overviewStats.activeDoctors}
+          tone="purple"
+        />
+
+        <StatCard
+          icon={Clock}
+          title={currentLang === "ar" ? "طلبات معلقة" : "Pending"}
+          value={overviewStats.pending}
+          tone="yellow"
+        />
+
+        <StatCard
+          icon={Calendar}
+          title={currentLang === "ar" ? "روسترات" : "Rosters"}
+          value={overviewStats.rosters}
+          tone="orange"
+        />
+
+        <StatCard
+          icon={Award}
+          title={currentLang === "ar" ? "رؤساء" : "Heads"}
+          value={overviewStats.heads}
+          tone="blue"
+        />
       </div>
 
-      <div className="space-y-3 mb-4">
-        <div className="flex items-center gap-2">
-          <Building size={16} className="text-gray-500" />
-          <span
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-          >
-            {t("department.code")}: {department.code}
-          </span>
-        </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className={`${theme.card} p-6 xl:col-span-2`}>
+          <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+            {currentLang === "ar" ? "بيانات التخصص" : "Category Information"}
+          </h2>
 
-        {/* <div className="flex items-center gap-2">
-          <Users size={16} className="text-gray-500" />
-          <span
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-          >
-            {t("department.linkedCategories")}:{" "}
-            {department.linkedCategoriesCount || 0}
-          </span>
-        </div> */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoItem label={currentLang === "ar" ? "الاسم العربي" : "Arabic Name"} value={category?.nameArabic} />
+            <InfoItem label={currentLang === "ar" ? "الاسم الإنجليزي" : "English Name"} value={category?.nameEnglish} />
+            <InfoItem label={currentLang === "ar" ? "الكود" : "Code"} value={category?.code} />
+            <InfoItem
+              label={currentLang === "ar" ? "الحالة" : "Status"}
+              value={
+                category?.isActive
+                  ? currentLang === "ar"
+                    ? "نشط"
+                    : "Active"
+                  : currentLang === "ar"
+                  ? "غير نشط"
+                  : "Inactive"
+              }
+            />
+            <InfoItem label={currentLang === "ar" ? "تاريخ الإنشاء" : "Created At"} value={formatDate(category?.createdAt)} />
+            <InfoItem label={currentLang === "ar" ? "أنشئ بواسطة" : "Created By"} value={category?.createdByName || "-"} />
+          </div>
 
-        {/* <div className="flex items-center gap-2">
-          <Award size={16} className="text-gray-500" />
-          <span
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-          >
-            {department.hasManager
-              ? t("department.hasManager")
-              : t("department.noManager")}
-          </span>
-        </div> */}
-      </div>
-
-      <div
-        className={`flex items-center justify-between pt-4 border-t ${
-          isDark ? "border-gray-600" : "border-gray-200"
-        }`}
-      >
-        {/* Unlink Button */}
-        <button
-          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors flex items-center gap-2"
-          onClick={() => handleLinkDepartment(department.id)}
-          disabled={
-            loadingLinkDepartmentToCategory && depClickId == department.id
-          }
-          title={t("specificCategory.sections.departments.linkButton")}
-        >
-          {loadingLinkDepartmentToCategory && depClickId === department.id ? (
-            <RefreshCw size={14} className="animate-spin" />
-          ) : (
-            <Plus size={14} />
+          {category?.description && (
+            <div className={`${theme.cardSoft} p-4 mt-5`}>
+              <p className="text-sm text-[var(--color-text-muted)] mb-1">
+                {currentLang === "ar" ? "الوصف" : "Description"}
+              </p>
+              <p className="text-[var(--color-text)]">{category.description}</p>
+            </div>
           )}
-          {t("department.actions.link")}
-        </button>
+        </div>
+
+        <div className={`${theme.card} p-6`}>
+          <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+            {currentLang === "ar" ? "إجراءات سريعة" : "Quick Actions"}
+          </h2>
+
+          <div className="space-y-3">
+            <Link to={`/admin-panel/category/edit/${id}`} className="block">
+              <button type="button" className={`${theme.primaryButton} w-full gap-2`}>
+                <Edit size={16} />
+                {currentLang === "ar" ? "تعديل التخصص" : "Edit Category"}
+              </button>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("doctors")}
+              className={`${theme.secondaryButton} w-full gap-2`}
+            >
+              <Users size={16} />
+              {currentLang === "ar" ? "عرض الدكاترة" : "View Doctors"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("requests")}
+              className={`${theme.secondaryButton} w-full gap-2`}
+            >
+              <Clock size={16} />
+              {currentLang === "ar" ? "طلبات الانضمام" : "Join Requests"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(`/admin-panel/leaves/${id}`)}
+              className={`${theme.secondaryButton} w-full gap-2`}
+            >
+              <ExternalLink size={16} />
+              {currentLang === "ar" ? "إجازات التخصص" : "Category Leaves"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )
 
-  // Roster Card Component for Mobile
-  const RosterCard = ({ roster }) => {
-    const statusInfo = getStatusInfo(roster.status)
+  const InfoItem = ({ label, value }) => (
+    <div className={`${theme.cardSoft} p-4`}>
+      <p className="text-xs font-bold text-[var(--color-text-muted)] mb-1">
+        {label}
+      </p>
+      <p className="text-sm font-bold text-[var(--color-text)]">{value || "-"}</p>
+    </div>
+  )
 
-    return (
-      <div
-        className={`p-4 rounded-lg border mb-3 ${
-          isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-        }`}
-      >
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h3
-              className={`font-semibold text-lg mb-1 ${
-                isDark ? "text-white" : "text-gray-900"
-              }`}
-            >
-              {roster.title}
-            </h3>
-            <p
-              className={`text-sm mb-2 ${
-                isDark ? "text-gray-300" : "text-gray-600"
-              }`}
-            >
-              {formatMonthYear(roster.month, roster.year)}
-            </p>
-            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-              <Users size={12} />
-              <span>
-                {roster.departmentsCount} {t("roster.departments")}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Calendar size={12} />
-              <span>
-                {roster.totalDays} {t("roster.dayss")}
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              setStatusToUpdate({
-                id: roster.id,
-                title: roster.title,
-                currentStatus: roster.status,
-              })
-              setStatusModalOpen(true)
-            }}
-            className={`px-2 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80 cursor-pointer ${statusInfo.color}`}
-            title={t("roster.actions.updateStatus")}
-          >
-            {statusInfo.name}
-          </button>
-        </div>
-
-        <div className="flex gap-2 justify-end">
-          <Link to={`/admin-panel/rosters/${roster.id}`}>
-            <button
-              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
-              title={t("roster.actions.view")}
-            >
-              <Eye size={16} />
-            </button>
-          </Link>
-
-          <button
-            className="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900 rounded-lg transition-colors"
-            title={t("roster.actions.updateStatus")}
-            onClick={() => {
-              setStatusToUpdate({
-                id: roster.id,
-                title: roster.title,
-                currentStatus: roster.status,
-              })
-              setStatusModalOpen(true)
-            }}
-          >
-            <BarChart3 size={16} />
-          </button>
-          <Link to={`/admin-panel/rosters/${roster.id}/edit`}>
-            <button
-              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
-              title={t("roster.actions.edit")}
-            >
-              <Edit size={16} />
-            </button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  // Loading Component
-  if (loadingGetSingleCategory) {
-    return <LoadingGetData text={t("gettingData.categoryData")} />
-  }
-
-  // Error Component
-  if (singleCategoryError) {
-    return (
-      <div
-        className={`min-h-screen bg-gradient-to-br ${
-          isDark ? "from-gray-900 to-gray-800" : "from-red-50 to-pink-100"
-        } p-6`}
-      >
-        <div className="max-w-2xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-8 text-center`}
-          >
-            <div
-              className={`w-20 h-20 ${
-                isDark ? "bg-red-900/30" : "bg-red-100"
-              } rounded-full flex items-center justify-center mx-auto mb-6`}
-            >
-              <svg
-                className="w-10 h-10 text-red-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-            <h3
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } mb-4`}
-            >
-              {t("specificCategory.error.title")}
-            </h3>
-            <p
-              className={`${
-                isDark ? "text-gray-300" : "text-gray-600"
-              } mb-8 text-lg`}
-            >
-              {singleCategoryError.message}
-            </p>
-            {loginRoleResponseDto?.roleNameEn == "System Administrator" && (
-              <button
-                onClick={() => navigate("/admin-panel/categories")}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                {t("specificCategory.error.backToCategories")}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Not Found Component
-  if (!selectedCategory) {
-    return (
-      <div
-        className={`min-h-screen bg-gradient-to-br ${
-          isDark ? "from-gray-900 to-gray-800" : "from-gray-50 to-gray-100"
-        } p-6`}
-      >
-        <div className="max-w-2xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-8 text-center`}
-          >
-            <div
-              className={`w-20 h-20 ${
-                isDark ? "bg-gray-700" : "bg-gray-100"
-              } rounded-full flex items-center justify-center mx-auto mb-6`}
-            >
-              <svg
-                className="w-10 h-10 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.664-2.226M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <h3
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } mb-4`}
-            >
-              {t("specificCategory.notFound.title")}
-            </h3>
-            {loginRoleResponseDto?.roleNameEn == "System Administrator" && (
-              <button
-                onClick={() => navigate("/admin-panel/categories")}
-                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                {t("specificCategory.notFound.backToCategories")}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Main Component
-  return (
-    <div
-      className={`min-h-screen bg-gradient-to-br ${
-        isDark
-          ? "from-gray-900 via-gray-800 to-gray-900"
-          : "from-blue-50 via-indigo-50 to-purple-50"
-      } p-6 ${isRTL ? "rtl" : "ltr"}`}
-    >
-      {statusModalOpen && (
-        <ModalUpdateRosterStatus
-          setStatusModalOpen={setStatusModalOpen}
-          statusToUpdate={statusToUpdate}
-          setStatusToUpdate={setStatusToUpdate}
-        />
-      )}
-      <div className="max-w-6xl mx-auto">
-        {/* Approval Error Alert */}
-        {approvalError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-600 ml-2 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="text-red-800 font-medium">
-                  {t("pendingDoctorRequests.errors.approvalError")}
-                </h4>
-                <p className="text-red-700 text-sm mt-1">
-                  {approvalError.message}
-                </p>
-              </div>
-              <button
-                onClick={() => dispatch(clearApprovalError())}
-                className="text-red-600 hover:text-red-800 ml-2"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-        {/* Success Alert */}
-        {approvalSuccess && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-            <div className="flex items-start">
-              <Check className="w-5 h-5 text-green-600 ml-2 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <h4 className="text-green-800 font-medium">
-                  {t("pendingDoctorRequests.success.processed")}
-                </h4>
-                <p className="text-green-700 text-sm mt-1">
-                  {approvalMessage ||
-                    t("pendingDoctorRequests.success.default")}
-                </p>
-              </div>
-              <button
-                onClick={() => dispatch(clearApprovalSuccess())}
-                className="text-green-600 hover:text-green-800 ml-2"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-        {/* Header */}
-        <div className="mb-8">
-          {loginRoleResponseDto?.roleNameEn == "System Administrator" && (
-            <button
-              onClick={() => navigate("/admin-panel/categories")}
-              className={`inline-flex items-center ${
-                isDark
-                  ? "text-blue-400 hover:text-blue-300"
-                  : "text-blue-600 hover:text-blue-800"
-              } transition-colors duration-200 mb-4 group`}
-            >
-              {currentLang == "en" ? <ArrowLeft /> : <ArrowRight />}
-              {t("specificCategory.navigation.backToCategories")}
-            </button>
-          )}
-
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-8 mb-8`}
-          >
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="mb-4">
-                <p className="text-sm font-medium text-gray-500 mb-1">
-                  {(loginRoleResponseDto?.roleNameEn === "Category Head" ||
-                    loginRoleResponseDto?.roleNameEn === "Category Manager") &&
-                    t("common.now_manage")}
-                </p>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent pb-1">
-                  {getCategoryName()}
-                </h1>
-              </div>
-
-              <div
-                className={`flex items-center space-x-4 ${
-                  isRTL ? "space-x-reverse" : ""
-                }`}
-              >
-                <div
-                  className={`px-4 py-2 rounded-full text-sm font-medium ${
-                    selectedCategory.isActive
-                      ? `bg-green-100 text-green-800 ${
-                          isDark
-                            ? "dark:bg-green-900/30 dark:text-green-400"
-                            : ""
-                        }`
-                      : `bg-red-100 text-red-800 ${
-                          isDark ? "dark:bg-red-900/30 dark:text-red-400" : ""
-                        }`
-                  }`}
-                >
-                  {selectedCategory.isActive
-                    ? t("specificCategory.status.active")
-                    : t("specificCategory.status.inactive")}
-                </div>
-
-                <div
-                  className={`${
-                    isDark
-                      ? "bg-blue-900/30 text-blue-400"
-                      : "bg-blue-100 text-blue-800"
-                  } px-4 py-2 rounded-full text-sm font-medium font-mono`}
-                >
-                  {selectedCategory.code}
-                </div>
-              </div>
-            </div>
-
-            {/* Create Department Button */}
-            <div
-              className={`
-    mt-6 flex flex-col gap-3
-    ${isRTL ? "items-start" : "items-end"}
-    md:flex-row md:items-center
-    ${isRTL ? "md:justify-start" : "md:justify-end"}
-  `}
-            >
-              {/* Create Specific Department */}
-              {/* <button
-                onClick={handleCreateDepartment}
-                className="w-full md:w-auto inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <svg
-                  className={`w-5 h-5 ${isRTL ? "mr-2" : "ml-2"}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                {t("create-specific-department")}
-              </button> */}
-
-              {/* Add New Roster (Link button) */}
-              <Link
-                to="/admin-panel/rosters/create"
-                className="w-full md:w-auto"
-              >
-                <button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-colors justify-center">
-                  <Plus size={20} />
-                  <span className="hidden sm:inline">
-                    {t("roster.actions.addNew")}
-                  </span>
-                  <span className="sm:hidden">{t("roster.actions.add")}</span>
-                </button>
-              </Link>
-
-              <Link
-                to={`/admin-panel/category/edit/${selectedCategory.id}`}
-                className="w-full md:w-auto"
-              >
-                <button className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-colors justify-center">
-                  <Edit size={20} />
-                  <span className="hidden sm:inline">
-                    {t("categories.actions.edit")}
-                  </span>
-                  <span className="sm:hidden">
-                    {t("categories.actions.edit")}
-                  </span>
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-        <div className="lg:col-span-2 space-y-6">
-          {/* Description Card */}
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h2
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } mb-4 flex items-center`}
-            >
-              <div
-                className={`w-8 h-8 ${
-                  isDark ? "bg-blue-900/30" : "bg-blue-100"
-                }                     rounded-lg flex items-center justify-center ${
-                  isRTL ? "mr-3" : "ml-3"
-                }`}
-              >
-                <FileText
-                  className={`w-4 h-4 ${
-                    isDark ? "text-purple-400" : "text-purple-600"
-                  }`}
-                />
-              </div>
-              {t("roster.title")}
+  const renderDoctorsTab = () => (
+    <div className="space-y-5">
+      <div className={`${theme.card} p-4`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+              <Users className="w-5 h-5 text-green-700 dark:text-green-300" />
+              {currentLang === "ar" ? "الدكاترة المعتمدين" : "Approved Doctors"}
             </h2>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isDark
-                  ? "bg-blue-900/30 text-blue-400"
-                  : "bg-blue-100 text-blue-800"
-              }`}
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              {currentLang === "ar"
+                ? "الدكاترة الموجودين فعليًا داخل هذا التخصص."
+                : "Doctors currently approved in this category."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={categoryDoctorsFilters?.isActive || ""}
+              onChange={(e) => handleDoctorsActiveFilterChange(e.target.value)}
+              className="px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
             >
-              {rosterList?.length || 0} {t("roster.count")}
-            </span>
+              <option value="">{currentLang === "ar" ? "كل الحالات" : "All Status"}</option>
+              <option value="true">{currentLang === "ar" ? "نشط" : "Active"}</option>
+              <option value="false">{currentLang === "ar" ? "غير نشط" : "Inactive"}</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={() =>
+                dispatch(
+                  getCategoryDoctors({
+                    categoryId: id,
+                    isActive: categoryDoctorsFilters?.isActive,
+                    page: categoryDoctorsFilters?.page,
+                    pageSize: categoryDoctorsFilters?.pageSize,
+                  })
+                )
+              }
+              className={theme.secondaryButton}
+            >
+              <RefreshCw size={16} />
+            </button>
           </div>
+        </div>
+      </div>
 
-          {/* Mobile Cards View for Rosters */}
-          <div className="md:hidden">
-            {loading.fetch ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
-                  {t("gettingData.rosters")}
-                </p>
-              </div>
-            ) : rosterList && rosterList.length > 0 ? (
-              rosterList.map((roster) => (
-                <RosterCard key={roster.id} roster={roster} />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <div
-                  className={`w-16 h-16 ${
-                    isDark ? "bg-gray-700" : "bg-gray-100"
-                  } rounded-full flex items-center justify-center mx-auto mb-4`}
-                >
-                  <FileText
-                    className={`w-8 h-8 ${
-                      isDark ? "text-gray-500" : "text-gray-400"
-                    }`}
-                  />
-                </div>
-                <p
-                  className={`text-lg font-medium ${
-                    isDark ? "text-gray-300" : "text-gray-600"
-                  } mb-2`}
-                >
-                  {t("roster.noRosters")}
-                </p>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  {t("roster.createFirstRoster")}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Desktop Table View for Rosters */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr
-                  className={`border-b ${
-                    isDark
-                      ? "border-gray-700 bg-gray-750"
-                      : "border-gray-200 bg-gray-50"
-                  }`}
-                >
-                  <th
-                    className={`${
-                      isRTL ? "text-right" : "text-left"
-                    } p-4 font-semibold ${
-                      isDark ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {t("roster.table.title")}
-                  </th>
-                  <th
-                    className={`${
-                      isRTL ? "text-right" : "text-left"
-                    } p-4 font-semibold ${
-                      isDark ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {t("roster.table.period")}
-                  </th>
-                  <th
-                    className={`${
-                      isRTL ? "text-right" : "text-left"
-                    } p-4 font-semibold ${
-                      isDark ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {t("roster.table.status")}
-                  </th>
-
-                  <th
-                    className={`${
-                      isRTL ? "text-right" : "text-left"
-                    } p-4 font-semibold ${
-                      isDark ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {t("roster.table.actions")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading.fetch ? (
-                  <tr>
-                    <td colSpan="5" className="text-center p-8">
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        <span
-                          className={`${isRTL ? "mr-3" : "ml-3"} ${
-                            isDark ? "text-gray-400" : "text-gray-600"
-                          }`}
-                        >
-                          {t("gettingData.rosters")}
-                        </span>
-                      </div>
-                    </td>
+      {loadingGetCategoryDoctors ? (
+        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الدكاترة..." : "Loading doctors..."} />
+      ) : categoryDoctorsError ? (
+        <div className={`${theme.card} p-6 text-red-700 dark:text-red-300`}>
+          {categoryDoctorsError?.message}
+        </div>
+      ) : approvedDoctors.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title={currentLang === "ar" ? "لا يوجد دكاترة معتمدين" : "No approved doctors"}
+          description={
+            currentLang === "ar"
+              ? "سيظهر هنا الدكاترة بعد قبول طلباتهم أو ربطهم بالتخصص."
+              : "Doctors will appear here after they are approved or assigned to this category."
+          }
+        />
+      ) : (
+        <>
+          <div className={`${theme.card} overflow-hidden`}>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[950px]">
+                <thead className="bg-[var(--color-surface-muted)]">
+                  <tr className="border-b border-[var(--color-border)]">
+                    <TableHead align={isRTL ? "right" : "left"}>
+                      {currentLang === "ar" ? "الدكتور" : "Doctor"}
+                    </TableHead>
+                    <TableHead>{currentLang === "ar" ? "رقم الطباعة" : "Print No"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "الدرجة" : "Degree"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "التعاقد" : "Contracting"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "الموبايل" : "Mobile"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "الحالة" : "Status"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "إجراءات" : "Actions"}</TableHead>
                   </tr>
-                ) : rosterList && rosterList.length > 0 ? (
-                  rosterList.map((roster) => {
-                    const statusInfo = getStatusInfo(roster.status)
+                </thead>
+
+                <tbody>
+                  {approvedDoctors.map((doctor, index) => {
+                    const doctorId = doctor.id || doctor.userId || doctor.doctorId
+
                     return (
                       <tr
-                        key={roster.id}
-                        className={`border-b transition-colors ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
+                        key={`${doctorId}-${index}`}
+                        className={`border-b border-[var(--color-border)] ${theme.hoverRow}`}
                       >
-                        <td className="p-4">
-                          <div
-                            className={`font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {roster.title}
+                        <TableCell>
+                          <div className="font-bold text-[var(--color-text)]">
+                            {getDoctorName(doctor)}
                           </div>
-                        </td>
-                        <td className="p-4">
-                          <div
-                            className={`${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`}
-                          >
-                            {formatMonthYear(roster.month, roster.year)}
+                          <div className="text-xs text-[var(--color-text-muted)]">
+                            {doctor.email || "-"}
                           </div>
-                          <div
-                            className={`text-sm ${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            {roster.totalDays} {t("roster.dayss")}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <button
-                            onClick={() => {
-                              setStatusToUpdate({
-                                id: roster.id,
-                                title: roster.title,
-                                currentStatus: roster.status,
-                              })
-                              setStatusModalOpen(true)
-                            }}
-                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors hover:opacity-80 cursor-pointer ${statusInfo.color}`}
-                            title={t("roster.actions.updateStatus")}
-                          >
-                            {statusInfo.name}
-                          </button>
-                        </td>
+                        </TableCell>
 
-                        <td className="p-4">
-                          <div className="flex gap-1">
-                            <Link to={`/admin-panel/rosters/${roster.id}`}>
-                              <button className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors">
+                        <TableCell center>{doctor.printNumber || "-"}</TableCell>
+
+                        <TableCell center>
+                          {currentLang === "ar"
+                            ? doctor.scientificDegreeName ||
+                              doctor.scientificDegreeNameAr ||
+                              doctor.scientificDegree?.nameArabic ||
+                              "-"
+                            : doctor.scientificDegreeNameEn ||
+                              doctor.scientificDegree?.nameEnglish ||
+                              doctor.scientificDegreeName ||
+                              "-"}
+                        </TableCell>
+
+                        <TableCell center>
+                          {currentLang === "ar"
+                            ? doctor.contractingTypeName ||
+                              doctor.contractingTypeNameAr ||
+                              doctor.contractingType?.nameArabic ||
+                              "-"
+                            : doctor.contractingTypeNameEn ||
+                              doctor.contractingType?.nameEnglish ||
+                              doctor.contractingTypeName ||
+                              "-"}
+                        </TableCell>
+
+                        <TableCell center>{doctor.mobile || "-"}</TableCell>
+
+                        <TableCell center>
+                          <span
+                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
+                              doctor.isActive === false
+                                ? theme.dangerBadge
+                                : theme.successBadge
+                            }`}
+                          >
+                            {doctor.isActive === false ? (
+                              <XCircle className="w-3 h-3" />
+                            ) : (
+                              <CheckCircle className="w-3 h-3" />
+                            )}
+                            {doctor.isActive === false
+                              ? currentLang === "ar"
+                                ? "غير نشط"
+                                : "Inactive"
+                              : currentLang === "ar"
+                              ? "نشط"
+                              : "Active"}
+                          </span>
+                        </TableCell>
+
+                        <TableCell center>
+                          <div className="flex justify-center gap-2">
+                            <Link to={`/admin-panel/category/doctor/${doctorId}`}>
+                              <button
+                                type="button"
+                                className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                              >
                                 <Eye size={16} />
                               </button>
                             </Link>
-                            <button
-                              className="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900 rounded-lg transition-colors"
-                              title={t("roster.actions.updateStatus")}
-                              onClick={() => {
-                                setStatusToUpdate({
-                                  id: roster.id,
-                                  title: roster.title,
-                                  currentStatus: roster.status,
-                                })
-                                setStatusModalOpen(true)
-                              }}
-                            >
-                              <BarChart3 size={16} />
-                            </button>
-                            <Link to={`/admin-panel/rosters/${roster.id}/edit`}>
-                              <button className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors">
-                                <Edit size={16} />
-                              </button>
-                            </Link>
+
+                            {canManageCategory && (
+                              <Link to={`/admin-panel/category/doctor/${doctorId}/edit`}>
+                                <button
+                                  type="button"
+                                  className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg"
+                                >
+                                  <Edit size={16} />
+                                </button>
+                              </Link>
+                            )}
                           </div>
-                        </td>
+                        </TableCell>
                       </tr>
                     )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <Pagination
+            pagination={categoryDoctorsPagination}
+            onPageChange={handleDoctorsPageChange}
+            onPageSizeChange={handleDoctorsPageSizeChange}
+          />
+        </>
+      )}
+    </div>
+  )
+
+  const renderRequestsTab = () => (
+    <div className="space-y-5">
+      <div className={`${theme.card} p-4`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+              <Clock className="w-5 h-5 text-yellow-700 dark:text-yellow-300" />
+              {currentLang === "ar" ? "طلبات انضمام الدكاترة" : "Doctor Join Requests"}
+            </h2>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              {currentLang === "ar"
+                ? "هنا يتم قبول أو رفض الدكاترة المتقدمين لهذا التخصص."
+                : "Approve or reject doctors requesting to join this category."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={categoryPendingRequestsFilters?.status || ""}
+              onChange={(e) => handlePendingStatusChange(e.target.value)}
+              className="px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]"
+            >
+              <option value="">{currentLang === "ar" ? "كل الطلبات" : "All Requests"}</option>
+              <option value="Pending">{currentLang === "ar" ? "قيد المراجعة" : "Pending"}</option>
+              <option value="Approved">{currentLang === "ar" ? "مقبول" : "Approved"}</option>
+              <option value="Rejected">{currentLang === "ar" ? "مرفوض" : "Rejected"}</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={() =>
+                dispatch(
+                  getCategoryPendingRequests({
+                    categoryId: id,
+                    filters: categoryPendingRequestsFilters,
                   })
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center p-12">
-                      <div
-                        className={`w-16 h-16 ${
-                          isDark ? "bg-gray-700" : "bg-gray-100"
-                        } rounded-full flex items-center justify-center mx-auto mb-4`}
-                      >
-                        <FileText
-                          size={32}
-                          className={`${
-                            isDark ? "text-gray-600" : "text-gray-400"
-                          }`}
-                        />
-                      </div>
-                      <h3
-                        className={`text-lg font-medium ${
-                          isDark ? "text-white" : "text-gray-900"
-                        } mb-2`}
-                      >
-                        {t("roster.noRosters")}
-                      </h3>
-                      <p
-                        className={`${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        } mb-6`}
-                      >
-                        {t("roster.createFirstRoster")}
-                      </p>
-                      <Link to="/admin-panel/rosters/create">
-                        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                          <Plus size={16} className={isRTL ? "ml-2" : "mr-2"} />
-                          {t("roster.actions.createBasic")}
-                        </button>
-                      </Link>
-                    </td>
+                )
+              }
+              className={theme.secondaryButton}
+            >
+              <RefreshCw size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {loadingGetCategoryPendingRequests ? (
+        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الطلبات..." : "Loading requests..."} />
+      ) : categoryPendingRequestsError ? (
+        <div className={`${theme.card} p-6 text-red-700 dark:text-red-300`}>
+          {categoryPendingRequestsError?.message}
+        </div>
+      ) : pendingRequests.length === 0 ? (
+        <EmptyState
+          icon={Clock}
+          title={currentLang === "ar" ? "لا توجد طلبات" : "No requests"}
+          description={
+            currentLang === "ar"
+              ? "لا توجد طلبات انضمام مطابقة للفلاتر الحالية."
+              : "No join requests match the current filters."
+          }
+        />
+      ) : (
+        <>
+          <div className={`${theme.card} overflow-hidden`}>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px]">
+                <thead className="bg-[var(--color-surface-muted)]">
+                  <tr className="border-b border-[var(--color-border)]">
+                    <TableHead align={isRTL ? "right" : "left"}>
+                      {currentLang === "ar" ? "الدكتور" : "Doctor"}
+                    </TableHead>
+                    <TableHead>{currentLang === "ar" ? "الدرجة" : "Degree"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "التعاقد" : "Contracting"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "الموبايل" : "Mobile"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "تاريخ الطلب" : "Requested At"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "الحالة" : "Status"}</TableHead>
+                    <TableHead>{currentLang === "ar" ? "إجراءات" : "Actions"}</TableHead>
                   </tr>
-                )}
+                </thead>
+
+                <tbody>
+                  {pendingRequests.map((request, index) => {
+                    const userId = request.userId || request.doctorId || request.id
+                    const status = String(request.status || "").toLowerCase()
+                    const canProcess =
+                      status === "pending" || status === "0" || !status
+
+                    return (
+                      <tr
+                        key={`${userId}-${index}`}
+                        className={`border-b border-[var(--color-border)] ${theme.hoverRow}`}
+                      >
+                        <TableCell>
+                          <div className="font-bold text-[var(--color-text)]">
+                            {getRequestDoctorName(request)}
+                          </div>
+                          <div className="text-xs text-[var(--color-text-muted)]">
+                            {request.email || "-"}
+                          </div>
+                        </TableCell>
+
+                        <TableCell center>
+                          {currentLang === "ar"
+                            ? request.scientificDegreeName ||
+                              request.scientificDegreeNameAr ||
+                              "-"
+                            : request.scientificDegreeNameEn ||
+                              request.scientificDegreeName ||
+                              "-"}
+                        </TableCell>
+
+                        <TableCell center>
+                          {currentLang === "ar"
+                            ? request.contractingTypeName ||
+                              request.contractingTypeNameAr ||
+                              "-"
+                            : request.contractingTypeNameEn ||
+                              request.contractingTypeName ||
+                              "-"}
+                        </TableCell>
+
+                        <TableCell center>{request.mobile || "-"}</TableCell>
+
+                        <TableCell center>
+                          {formatDate(
+                            request.requestedAt ||
+                              request.createdAt ||
+                              request.createdOn
+                          )}
+                        </TableCell>
+
+                        <TableCell center>
+                          {renderRequestStatusBadge(request.status)}
+                        </TableCell>
+
+                        <TableCell center>
+                          <div className="flex justify-center gap-2">
+                            <Link to={`/admin-panel/category/doctor/${userId}`}>
+                              <button
+                                type="button"
+                                className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                              >
+                                <Eye size={16} />
+                              </button>
+                            </Link>
+
+                            {canManageCategory && canProcess && (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={loadingApproveRequest || loadingRejectRequest}
+                                  onClick={() => handleApproveRequest(request)}
+                                  className="p-2 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg disabled:opacity-50"
+                                >
+                                  <Check size={16} />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  disabled={loadingApproveRequest || loadingRejectRequest}
+                                  onClick={() => handleRejectRequest(request)}
+                                  className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg disabled:opacity-50"
+                                >
+                                  <X size={16} />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <Pagination
+            pagination={categoryPendingRequestsPagination}
+            onPageChange={handlePendingPageChange}
+            onPageSizeChange={handlePendingPageSizeChange}
+          />
+        </>
+      )}
+    </div>
+  )
+
+  const TableHead = ({ children, align = "center" }) => (
+    <th
+      className={`p-4 text-sm font-bold text-[var(--color-text)] text-${align}`}
+    >
+      {children}
+    </th>
+  )
+
+  const TableCell = ({ children, center = false }) => (
+    <td
+      className={`p-4 text-sm text-[var(--color-text)] ${
+        center ? "text-center" : ""
+      }`}
+    >
+      {children}
+    </td>
+  )
+
+  const renderDepartmentsTab = () => (
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className={`${theme.card} p-6`}>
+        <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
+          <Building className="w-5 h-5 text-green-700 dark:text-green-300" />
+          {currentLang === "ar" ? "الأقسام المرتبطة" : "Linked Departments"}
+        </h2>
+
+        {loadingGetDepartmentsByCategory ? (
+          <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الأقسام..." : "Loading departments..."} />
+        ) : linkedDepartments.length === 0 ? (
+          <p className="text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "لا توجد أقسام مرتبطة" : "No linked departments"}
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {linkedDepartments.map((department) => {
+              const departmentId =
+                department.id || department.departmentId || department.categoryDepartmentId
+
+              return (
+                <div
+                  key={departmentId}
+                  className={`${theme.cardSoft} p-4 flex items-center justify-between gap-4`}
+                >
+                  <div>
+                    <p className="font-bold text-[var(--color-text)]">
+                      {getDepartmentName(department)}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      {department.code || department.departmentCode || "-"}
+                    </p>
+                  </div>
+
+                  {canManageCategory && (
+                    <button
+                      type="button"
+                      disabled={
+                        unlinkDepId === departmentId || loadingUnlinkDepartment
+                      }
+                      onClick={() => handleUnlinkDepartment(departmentId)}
+                      className="p-2 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg disabled:opacity-50"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className={`${theme.card} p-6`}>
+        <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
+          <LinkIcon className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+          {currentLang === "ar" ? "أقسام متاحة للربط" : "Available Departments"}
+        </h2>
+
+        {availableDepartments.length === 0 ? (
+          <p className="text-[var(--color-text-muted)]">
+            {currentLang === "ar" ? "لا توجد أقسام متاحة" : "No available departments"}
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {availableDepartments.map((department) => {
+              const departmentId = department.id || department.departmentId
+
+              return (
+                <div
+                  key={departmentId}
+                  className={`${theme.cardSoft} p-4 flex items-center justify-between gap-4`}
+                >
+                  <div>
+                    <p className="font-bold text-[var(--color-text)]">
+                      {getDepartmentName(department)}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                      {department.code || department.departmentCode || "-"}
+                    </p>
+                  </div>
+
+                  {canManageCategory && (
+                    <button
+                      type="button"
+                      disabled={
+                        depClickId === departmentId ||
+                        loadingLinkDepartmentToCategory
+                      }
+                      onClick={() => handleLinkDepartment(departmentId)}
+                      className={theme.primaryButton}
+                    >
+                      <LinkIcon size={16} />
+                      {currentLang === "ar" ? "ربط" : "Link"}
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderRostersTab = () => (
+    <div className="space-y-5">
+      <div className={`${theme.card} p-4 flex items-center justify-between gap-3 flex-wrap`}>
+        <div>
+          <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-orange-700 dark:text-orange-300" />
+            {currentLang === "ar" ? "روسترات التخصص" : "Category Rosters"}
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            {currentLang === "ar"
+              ? "كل الروسترات التابعة لهذا التخصص."
+              : "All rosters created for this category."}
+          </p>
+        </div>
+
+        <Link to="/admin-panel/rosters/create">
+          <button type="button" className={theme.primaryButton}>
+            {currentLang === "ar" ? "إنشاء روستر" : "Create Roster"}
+          </button>
+        </Link>
+      </div>
+
+      {loading?.getRosterByCategory ? (
+        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الروسترات..." : "Loading rosters..."} />
+      ) : rosters.length === 0 ? (
+        <EmptyState
+          icon={Calendar}
+          title={currentLang === "ar" ? "لا توجد روسترات" : "No rosters"}
+          description={
+            currentLang === "ar"
+              ? "لا توجد روسترات مسجلة لهذا التخصص حتى الآن."
+              : "There are no rosters for this category yet."
+          }
+        />
+      ) : (
+        <div className={`${theme.card} overflow-hidden`}>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px]">
+              <thead className="bg-[var(--color-surface-muted)]">
+                <tr className="border-b border-[var(--color-border)]">
+                  <TableHead align={isRTL ? "right" : "left"}>
+                    {currentLang === "ar" ? "الروستر" : "Roster"}
+                  </TableHead>
+                  <TableHead>{currentLang === "ar" ? "الشهر" : "Month"}</TableHead>
+                  <TableHead>{currentLang === "ar" ? "الفترة" : "Period"}</TableHead>
+                  <TableHead>{currentLang === "ar" ? "الحالة" : "Status"}</TableHead>
+                  <TableHead>{currentLang === "ar" ? "الإكمال" : "Completion"}</TableHead>
+                  <TableHead>{currentLang === "ar" ? "إجراءات" : "Actions"}</TableHead>
+                </tr>
+              </thead>
+
+              <tbody>
+                {rosters.map((roster) => {
+                  const statusInfo = getRosterStatusInfo(roster.status)
+
+                  return (
+                    <tr
+                      key={roster.id}
+                      className={`border-b border-[var(--color-border)] ${theme.hoverRow}`}
+                    >
+                      <TableCell>
+                        <div className="font-bold text-[var(--color-text)]">
+                          {getRosterTitle(roster)}
+                        </div>
+                        <div className="text-xs text-[var(--color-text-muted)]">
+                          #{roster.id}
+                        </div>
+                      </TableCell>
+
+                      <TableCell center>
+                        {roster.month}/{roster.year}
+                      </TableCell>
+
+                      <TableCell center>
+                        {formatDate(roster.startDate)} - {formatDate(roster.endDate)}
+                      </TableCell>
+
+                      <TableCell center>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${statusInfo.className}`}
+                        >
+                          {statusInfo.text}
+                        </span>
+                      </TableCell>
+
+                      <TableCell center>
+                        {Math.round(roster.completionPercentage || roster.completionPercent || 0)}%
+                      </TableCell>
+
+                      <TableCell center>
+                        <Link to={`/admin-panel/rosters/${roster.id}`}>
+                          <button
+                            type="button"
+                            className="p-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        </Link>
+                      </TableCell>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
         </div>
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6 mb-8 mt-8`}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } flex items-center`}
-            >
-              <div
-                className={`w-8 h-8 ${
-                  isDark ? "bg-blue-900/30" : "bg-blue-100"
-                } rounded-lg flex items-center justify-center ${
-                  isRTL ? "mr-3" : "ml-3"
-                }`}
-              >
-                <LinkIcon
-                  className={`w-4 h-4 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
-              </div>
-              {t("specificCategory.sections.linkedDepartments.title")}
+      )}
+    </div>
+  )
+
+  const renderHeadsTab = () => (
+    <div className="space-y-5">
+      <div className={`${theme.card} p-4`}>
+        <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+          <Award className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+          {currentLang === "ar" ? "رؤساء التخصص" : "Category Heads"}
+        </h2>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          {currentLang === "ar"
+            ? "إدارة مسؤولي ورؤساء هذا التخصص."
+            : "Manage the heads and managers of this category."}
+        </p>
+      </div>
+
+      <CategoryHeadsManagement
+        selectedCategory={category}
+        isDark={isDark}
+        isRTL={isRTL}
+      />
+    </div>
+  )
+
+  if (loadingGetSingleCategory && !category) {
+    return <LoadingGetData text={t("gettingData.categoryData") || "Loading category data..."} />
+  }
+
+  if (singleCategoryError) {
+    return (
+      <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-5xl mx-auto">
+          <div className={`${theme.card} p-8 text-center`}>
+            <XCircle className="w-14 h-14 text-red-700 dark:text-red-300 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
+              {currentLang === "ar" ? "تعذر تحميل التخصص" : "Failed to load category"}
             </h2>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isDark
-                  ? "bg-green-900/30 text-green-400"
-                  : "bg-green-100 text-green-800"
-              }`}
+            <p className="text-[var(--color-text-muted)] mb-6">
+              {singleCategoryError?.message || "-"}
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/admin-panel/categories")}
+              className={theme.primaryButton}
             >
-              {departmentsByCategory?.length || 0}{" "}
-              {t("specificCategory.sections.linkedDepartments.count")}
-            </span>
+              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {currentLang === "ar" ? "رجوع للتخصصات" : "Back to Categories"}
+            </button>
           </div>
+        </div>
+      </div>
+    )
+  }
 
-          {/* Loading State */}
-          {loadingGetDepartmentsByCategory ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
-                {t("department.loading")}
-              </p>
-            </div>
-          ) : departmentsByCategory && departmentsByCategory.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {departmentsByCategory.map((department) => (
-                <div
-                  key={department.id}
-                  className={`p-6 rounded-xl border transition-all duration-200 hover:shadow-lg ${
-                    isDark
-                      ? "bg-gray-700 border-gray-600 hover:border-gray-500"
-                      : "bg-white border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3
-                        className={`font-bold text-lg mb-1 ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {currentLang === "en"
-                          ? department.nameEnglish
-                          : department.nameArabic}
-                      </h3>
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {department.code}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {/* Active Status */}
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          department.isActive
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                            : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                        }`}
-                      >
-                        {department.isActive
-                          ? t("department.status.active")
-                          : t("department.status.inactive")}
-                      </span>
-                    </div>
-                  </div>
+  if (!category) {
+    return (
+      <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-5xl mx-auto">
+          <EmptyState
+            icon={FileText}
+            title={currentLang === "ar" ? "التخصص غير موجود" : "Category not found"}
+            description={
+              currentLang === "ar"
+                ? "لم يتم العثور على بيانات لهذا التخصص."
+                : "No data was found for this category."
+            }
+          />
+        </div>
+      </div>
+    )
+  }
 
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Building size={16} className="text-gray-500" />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        {t("department.code")}: {department.code}
-                      </span>
-                    </div>
+  return (
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <button
+            type="button"
+            onClick={() => navigate("/admin-panel/categories")}
+            className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          >
+            {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+            {currentLang === "ar" ? "رجوع للتخصصات" : "Back to Categories"}
+          </button>
 
-                    {/* <div className="flex items-center gap-2">
-                      <Users size={16} className="text-gray-500" />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        {t("department.linkedCategories")}:{" "}
-                        {department.linkedCategoriesCount || 0}
-                      </span>
-                    </div> */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={refreshCategoryData}
+              className={theme.secondaryButton}
+            >
+              <RefreshCw size={16} />
+              {currentLang === "ar" ? "تحديث" : "Refresh"}
+            </button>
 
-                    <div className="flex items-center gap-2">
-                      <Award size={16} className="text-gray-500" />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        {department.hasManager
-                          ? t("department.hasManager")
-                          : t("department.noManager")}
-                      </span>
-                    </div>
-                  </div>
+            {canManageCategory && (
+              <Link to={`/admin-panel/category/edit/${id}`}>
+                <button type="button" className={theme.primaryButton}>
+                  <Edit size={16} />
+                  {currentLang === "ar" ? "تعديل" : "Edit"}
+                </button>
+              </Link>
+            )}
+          </div>
+        </div>
 
-                  <div
-                    className={`flex items-center justify-between pt-4 border-t ${
-                      isDark ? "border-gray-600" : "border-gray-200"
+        <div className={`${theme.card} p-6`}>
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                <Stethoscope className="w-7 h-7" />
+              </div>
+
+              <div>
+                <h1 className="text-3xl font-extrabold text-[var(--color-text)]">
+                  {getCategoryName()}
+                </h1>
+
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
+                    {category.code || "-"}
+                  </span>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                      category.isActive ? theme.successBadge : theme.dangerBadge
                     }`}
                   >
-                    <div className="flex gap-2">
-                      <Link to={`/admin-panel/department/${department.id}`}>
-                        <button
-                          className="inline-flex items-center gap-2 px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                          title={t("department.actions.view")}
-                        >
-                          <Eye size={14} />
-                          {t("department.actions.view")}
-                        </button>
-                      </Link>
-                    </div>
+                    {category.isActive
+                      ? currentLang === "ar"
+                        ? "نشط"
+                        : "Active"
+                      : currentLang === "ar"
+                      ? "غير نشط"
+                      : "Inactive"}
+                  </span>
 
-                    {/* Unlink Button */}
-
-                    {loginRoleResponseDto.roleNameEn ==
-                      "System Administrator" && (
-                      <button
-                        onClick={() => handleUnlinkDepartment(department.id)}
-                        disabled={
-                          loadingUnlinkDepartment &&
-                          unlinkDepId === department.id
-                        }
-                        className="inline-flex items-center gap-2 px-3 py-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={t("department.actions.unlink")}
-                      >
-                        {loadingUnlinkDepartment &&
-                        unlinkDepId === department.id ? (
-                          <RefreshCw size={14} className="animate-spin" />
-                        ) : (
-                          <X size={14} />
-                        )}
-                        {t("department.actions.unlink")}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div
-                className={`w-16 h-16 ${
-                  isDark ? "bg-gray-700" : "bg-gray-100"
-                } rounded-full flex items-center justify-center mx-auto mb-4`}
-              >
-                <LinkIcon
-                  className={`w-8 h-8 ${
-                    isDark ? "text-gray-500" : "text-gray-400"
-                  }`}
-                />
-              </div>
-              <p
-                className={`text-lg font-medium ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                } mb-2`}
-              >
-                {t(
-                  "specificCategory.sections.linkedDepartments.noLinkedDepartments"
-                )}
-              </p>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {t(
-                  "specificCategory.sections.linkedDepartments.linkDepartmentsToGetStarted"
-                )}
-              </p>
-            </div>
-          )}
-        </div>
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6`}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } flex items-center`}
-            >
-              <div
-                className={`w-8 h-8 ${
-                  isDark ? "bg-green-900/30" : "bg-green-100"
-                } rounded-lg flex items-center justify-center ${
-                  isRTL ? "mr-3" : "ml-3"
-                }`}
-              >
-                <Building
-                  className={`w-4 h-4 ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                />
-              </div>
-              {t("specificCategory.sections.departments.title")}
-            </h2>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isDark
-                  ? "bg-blue-900/30 text-blue-400"
-                  : "bg-blue-100 text-blue-800"
-              }`}
-            >
-              {departments?.length || 0}{" "}
-              {t("specificCategory.sections.departments.count")}
-            </span>
-          </div>
-
-          {loadingGetDepartments ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>
-                {t("department.loading")}
-              </p>
-            </div>
-          ) : departments && departments.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {departments.map((department) => (
-                <DepartmentCard key={department.id} department={department} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div
-                className={`w-16 h-16 ${
-                  isDark ? "bg-gray-700" : "bg-gray-100"
-                } rounded-full flex items-center justify-center mx-auto mb-4`}
-              >
-                <Building
-                  className={`w-8 h-8 ${
-                    isDark ? "text-gray-500" : "text-gray-400"
-                  }`}
-                />
-              </div>
-              <p
-                className={`text-lg font-medium ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                } mb-2`}
-              >
-                {t("specificCategory.sections.departments.noDepartments")}
-              </p>
-              <p
-                className={`text-sm ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {t("specificCategory.sections.departments.createFirst")}
-              </p>
-            </div>
-          )}
-        </div>
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6 mb-8`}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } flex items-center`}
-            >
-              <div
-                className={`w-8 h-8 ${
-                  isDark ? "bg-orange-900/30" : "bg-orange-100"
-                } rounded-lg flex items-center justify-center ${
-                  isRTL ? "mr-3" : "ml-3"
-                }`}
-              >
-                <UserCheck
-                  className={`w-4 h-4 ${
-                    isDark ? "text-orange-400" : "text-orange-600"
-                  }`}
-                />
-              </div>
-              {t("pendingDoctorRequests.title")}
-            </h2>
-
-            <div className="flex items-center gap-4">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  isDark
-                    ? "bg-blue-900/30 text-blue-400"
-                    : "bg-blue-100 text-blue-800"
-                }`}
-              >
-                {categoryPendingRequests?.length || 0}{" "}
-                {t("pendingDoctorRequests.count")}
-              </span>
-
-              <button
-                onClick={() => setShowPendingDoctors(!showPendingDoctors)}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDark
-                    ? "hover:bg-gray-700 text-gray-400 hover:text-gray-300"
-                    : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {showPendingDoctors ? (
-                  <ChevronUp size={20} />
-                ) : (
-                  <ChevronDown size={20} />
-                )}
-              </button>
-
-              <button
-                onClick={handleRefreshPendingDoctors}
-                disabled={loadingPending}
-                className={`p-2 rounded-lg transition-colors ${
-                  isDark
-                    ? "hover:bg-gray-700 text-gray-400 hover:text-gray-300"
-                    : "hover:bg-gray-100 text-gray-500 hover:text-gray-700"
-                } disabled:opacity-50`}
-              >
-                <RefreshCw
-                  className={`w-4 h-4 ${loadingPending ? "animate-spin" : ""}`}
-                />
-              </button>
-            </div>
-          </div>
-
-          {showPendingDoctors && (
-            <>
-              {/* Filters */}
-              <div
-                className={`p-4 rounded-lg mb-6 ${
-                  isDark ? "bg-gray-700" : "bg-gray-50"
-                }`}
-              >
-                <div className="flex flex-wrap gap-4 items-center">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {t("pendingDoctorRequests.filters.filterByStatus")}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-2 flex-wrap">
-                    {statusFilterOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => handlePendingStatusChange(option.value)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          localFilters.status === option.value
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Pending Error Display */}
-              {pendingError && (
-                <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-start">
-                    <AlertCircle className="w-5 h-5 text-red-600 ml-2 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <h4 className="text-red-800 font-medium">
-                        {t("pendingDoctorRequests.errors.dataLoadError")}
-                      </h4>
-                      <p className="text-red-700 text-sm mt-1">
-                        {pendingError.message}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() =>
-                        dispatch(clearCategoryPendingRequestsError())
-                      }
-                      className="text-red-600 hover:text-red-800 ml-2"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Content */}
-              {loadingPending ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <span
-                    className={`${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
-                    {t("pendingDoctorRequests.loading.requests")}
+                  <span className="text-sm text-[var(--color-text-muted)]">
+                    {currentLang === "ar" ? "تم الإنشاء" : "Created"}:{" "}
+                    {formatDate(category.createdAt)}
                   </span>
                 </div>
-              ) : !categoryPendingRequests ||
-                categoryPendingRequests.length === 0 ? (
-                <div className="text-center py-8">
-                  <div
-                    className={`w-16 h-16 ${
-                      isDark ? "bg-gray-700" : "bg-gray-100"
-                    } rounded-full flex items-center justify-center mx-auto mb-4`}
-                  >
-                    <UserCheck
-                      className={`w-8 h-8 ${
-                        isDark ? "text-gray-500" : "text-gray-400"
-                      }`}
-                    />
-                  </div>
-                  <p
-                    className={`text-lg font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-600"
-                    } mb-2`}
-                  >
-                    {t("pendingDoctorRequests.emptyStates.noRequests")}
-                  </p>
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    }`}
-                  >
-                    {filters.status
-                      ? t(
-                          "pendingDoctorRequests.emptyStates.noRequestsWithFilter"
-                        )
-                      : t(
-                          "pendingDoctorRequests.emptyStates.noRequestsDefault"
-                        )}
-                  </p>
-                  {filters.status && (
-                    <button
-                      onClick={() => handlePendingStatusChange("")}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 transition-colors mt-4"
-                    >
-                      <X className="w-4 h-4" />
-                      {t("pendingDoctorRequests.emptyStates.showAllRequests")}
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <>
-                  {/* Results Summary */}
-                  {pagination && (
-                    <div className="mb-6 flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
-                        {t("categories.pagination.showing", {
-                          start: pagination.startIndex || 1,
-                          end:
-                            pagination.endIndex ||
-                            categoryPendingRequests.length,
-                          total: pagination.totalCount,
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr
-                          className={`border-b ${
-                            isDark
-                              ? "border-gray-700 bg-gray-750"
-                              : "border-gray-200 bg-gray-50"
-                          }`}
-                        >
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.doctorName")}
-                          </th>
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.contact")}
-                          </th>
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.degree")}
-                          </th>
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.status")}
-                          </th>
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.requestedAt")}
-                          </th>
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.scheules")}
-                          </th>
-                          <th
-                            className={`${
-                              isRTL ? "text-right" : "text-left"
-                            } p-4 font-semibold ${
-                              isDark ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {t("pendingDoctorRequests.table.actions")}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {categoryPendingRequests.map((request) => (
-                          <tr
-                            key={`${request.userId}-${request.categoryId}`}
-                            className={`border-b transition-colors ${
-                              isDark
-                                ? "border-gray-700 hover:bg-gray-750"
-                                : "border-gray-200 hover:bg-gray-50"
-                            }`}
-                          >
-                            <td className="p-4">
-                              <div
-                                className={`font-semibold ${
-                                  isDark ? "text-white" : "text-gray-900"
-                                }`}
-                              >
-                                {request.doctorNameArabic ||
-                                  t(
-                                    "pendingDoctorRequests.requestCard.nameNotSpecified"
-                                  )}
-                              </div>
-                              {request.doctorNameEnglish && (
-                                <div
-                                  className={`text-sm ${
-                                    isDark ? "text-gray-400" : "text-gray-500"
-                                  }`}
-                                >
-                                  {request.doctorNameEnglish}
-                                </div>
-                              )}
-                            </td>
-                            <td className="p-4">
-                              <div className="space-y-1">
-                                {request.email && (
-                                  <div className="flex items-center text-sm text-gray-600">
-                                    <Mail className="w-4 h-4 ml-2 flex-shrink-0 text-gray-400" />
-                                    <span
-                                      className="truncate"
-                                      title={request.email}
-                                    >
-                                      {request.email}
-                                    </span>
-                                  </div>
-                                )}
-                                {request.mobile && (
-                                  <div className="flex items-center text-sm text-gray-600">
-                                    <Phone className="w-4 h-4 ml-2 flex-shrink-0 text-gray-400" />
-                                    <span>{request.mobile}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <div
-                                className={`text-sm ${
-                                  isDark ? "text-gray-300" : "text-gray-700"
-                                }`}
-                              >
-                                {request.scientificDegree ||
-                                  t(
-                                    "pendingDoctorRequests.fields.notSpecified"
-                                  )}
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              {renderPendingStatusBadge(request.status)}
-                            </td>
-                            <td className="p-4">
-                              <div
-                                className={`text-sm ${
-                                  isDark ? "text-gray-300" : "text-gray-700"
-                                }`}
-                              >
-                                {formatDate(request.requestedAt)}
-                              </div>
-                            </td>{" "}
-                            <td className="p-4">
-                              <Link
-                                to={`/admin-panel/doctors/${request.userId}`}
-                              >
-                                <button className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors">
-                                  <Eye size={16} />
-                                </button>{" "}
-                              </Link>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex gap-1">
-                                {renderPendingActionButtons(request)}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Mobile Cards View */}
-                  <div className="md:hidden">
-                    <div className="grid gap-4">
-                      {categoryPendingRequests.map((request) => (
-                        <div
-                          key={`${request.userId}-${request.categoryId}`}
-                          className={`p-4 rounded-lg border ${
-                            isDark
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-200"
-                          }`}
-                        >
-                          {/* Header */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1 min-w-0">
-                              <h3
-                                className={`text-lg font-semibold mb-1 truncate ${
-                                  isDark ? "text-white" : "text-gray-900"
-                                }`}
-                              >
-                                {request.doctorNameArabic ||
-                                  t(
-                                    "pendingDoctorRequests.requestCard.nameNotSpecified"
-                                  )}
-                              </h3>
-                              {request.doctorNameEnglish && (
-                                <p
-                                  className={`text-sm truncate ${
-                                    isDark ? "text-gray-400" : "text-gray-600"
-                                  }`}
-                                >
-                                  {request.doctorNameEnglish}
-                                </p>
-                              )}
-                            </div>
-                            <div className="mr-3 flex-shrink-0">
-                              {renderPendingStatusBadge(request.status)}
-                            </div>
-                          </div>
-
-                          {/* Details */}
-                          <div className="space-y-3">
-                            {request.email && (
-                              <div className="flex items-center text-sm text-gray-600">
-                                <Mail className="w-4 h-4 ml-2 flex-shrink-0 text-gray-400" />
-                                <span
-                                  className="truncate"
-                                  title={request.email}
-                                >
-                                  {request.email}
-                                </span>
-                              </div>
-                            )}
-
-                            {request.mobile && (
-                              <div className="flex items-center text-sm text-gray-600">
-                                <Phone className="w-4 h-4 ml-2 flex-shrink-0 text-gray-400" />
-                                <span>{request.mobile}</span>
-                              </div>
-                            )}
-
-                            {request.scientificDegree && (
-                              <div className="flex items-center text-sm text-gray-600">
-                                <Award className="w-4 h-4 ml-2 flex-shrink-0 text-gray-400" />
-                                <span
-                                  className="truncate"
-                                  title={request.scientificDegree}
-                                >
-                                  {request.scientificDegree}
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="flex items-center text-sm text-gray-600">
-                              <Clock className="w-4 h-4 ml-2 flex-shrink-0 text-gray-400" />
-                              <span>{formatDate(request.requestedAt)}</span>
-                            </div>
-
-                            {request.notes && (
-                              <div className="flex items-start text-sm text-gray-600">
-                                <FileText className="w-4 h-4 ml-2 mt-0.5 flex-shrink-0 text-gray-400" />
-                                <span
-                                  className="line-clamp-2 leading-relaxed"
-                                  title={request.notes}
-                                >
-                                  {request.notes}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Actions */}
-                          <div className="mt-6 pt-4 border-t border-gray-200">
-                            <div className="flex gap-2">
-                              {/* Action buttons (Approve/Reject) */}
-                              {renderPendingActionButtons(request)}
-
-                              {/* View details button */}
-                              <Link
-                                to={`/admin-panel/doctors/${request.userId}`}
-                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-blue-900 text-white hover:bg-blue-700"
-                              >
-                                <Eye size={16} />
-                                <span className="hidden sm:inline">
-                                  {t(
-                                    "pendingDoctorRequests.requestCard.actions.viewDetails",
-                                    "View"
-                                  )}
-                                </span>
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Pagination */}
-                  {pagination && pagination.totalPages > 1 && (
-                    <div className="mt-8 bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                      <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-white">
-                            {t("categories.pagination.showing", {
-                              start: pagination.startIndex || 1,
-                              end:
-                                pagination.endIndex ||
-                                categoryPendingRequests.length,
-                              total: pagination.totalCount,
-                            })}
-                          </span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() =>
-                              handlePendingPageChange(pagination.page - 1)
-                            }
-                            disabled={!pagination.hasPrevious}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                            {t("pendingDoctorRequests.pagination.previous")}
-                          </button>
-
-                          <div className="flex gap-1">
-                            {Array.from(
-                              { length: Math.min(pagination.totalPages, 5) },
-                              (_, i) => {
-                                const startPage = Math.max(
-                                  1,
-                                  pagination.page - 2
-                                )
-                                const pageNumber = Math.min(
-                                  startPage + i,
-                                  pagination.totalPages
-                                )
-
-                                if (pageNumber > pagination.totalPages)
-                                  return null
-
-                                return (
-                                  <button
-                                    key={pageNumber}
-                                    onClick={() =>
-                                      handlePendingPageChange(pageNumber)
-                                    }
-                                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                      pageNumber === pagination.page
-                                        ? "bg-blue-600 text-white"
-                                        : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
-                                    }`}
-                                  >
-                                    {pageNumber}
-                                  </button>
-                                )
-                              }
-                            )}
-                          </div>
-
-                          <button
-                            onClick={() =>
-                              handlePendingPageChange(pagination.page + 1)
-                            }
-                            disabled={!pagination.hasNext}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                            {t("pendingDoctorRequests.pagination.next")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
-          )}
-          <select
-            value={filters.pageSize}
-            onChange={(e) =>
-              handlePendingPageSizeChange(Number(e.target.value))
-            }
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value={10}>
-              10 {t("pendingDoctorRequests.pagination.perPage")}
-            </option>
-            <option value={20}>
-              20 {t("pendingDoctorRequests.pagination.perPage")}
-            </option>
-            <option value={50}>
-              50 {t("pendingDoctorRequests.pagination.perPage")}
-            </option>
-          </select>
-        </div>
-        <div
-          className={`${
-            isDark ? "bg-gray-800" : "bg-white"
-          } rounded-2xl shadow-xl p-6 mb-8`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div
-                className={`w-10 h-10 ${
-                  isDark ? "bg-yellow-900/30" : "bg-yellow-100"
-                } rounded-lg flex items-center justify-center ${
-                  isRTL ? "mr-3" : "ml-3"
-                }`}
-              >
-                <Calendar
-                  className={`w-5 h-5 ${
-                    isDark ? "text-yellow-400" : "text-yellow-600"
-                  }`}
-                />
               </div>
-              <div>
-                <h2
-                  className={`text-xl font-bold ${
-                    isDark ? "text-white" : "text-gray-900"
-                  }`}
-                >
-                  {t(
-                    "specificCategory.sections.leaves.title",
-                    "Leaves Management"
-                  )}
-                </h2>
-                <p
-                  className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  } mt-1`}
-                >
-                  {t(
-                    "specificCategory.sections.leaves.description",
-                    "Manage leave requests and schedules"
-                  )}
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 min-w-[280px]">
+              <div className={`${theme.cardSoft} p-3 text-center`}>
+                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                  {overviewStats.departments}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  {currentLang === "ar" ? "أقسام" : "Departments"}
+                </p>
+              </div>
+
+              <div className={`${theme.cardSoft} p-3 text-center`}>
+                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                  {overviewStats.users}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  {currentLang === "ar" ? "دكاترة" : "Doctors"}
+                </p>
+              </div>
+
+              <div className={`${theme.cardSoft} p-3 text-center`}>
+                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                  {overviewStats.pending}
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  {currentLang === "ar" ? "طلبات" : "Requests"}
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={() => {
-                window.scrollTo({
-                  top: 0,
-                })
-                navigate(`/admin-panel/leaves/${id}`)
-              }}
-              className="inline-flex items-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              <ExternalLink size={18} />
-              {t("specificCategory.sections.leaves.viewButton", "View Leaves")}
-            </button>
-          </div>
-        </div>{" "}
-        <CategoryHeadsManagement
-          selectedCategory={selectedCategory}
-          isDark={isDark}
-          isRTL={isRTL}
-        />{" "}
-        <div className="space-y-6">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h2
-              className={`text-xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } mb-6`}
-            >
-              {t("specificCategory.sections.statistics.title")}
-            </h2>
-
-            <div className="space-y-4">
-              <div
-                className={`flex items-center justify-between p-4 ${
-                  isDark ? "bg-blue-900/20" : "bg-blue-50"
-                } rounded-xl`}
-              >
-                <div className="flex items-center">
-                  <div
-                    className={`w-10 h-10 ${
-                      isDark ? "bg-blue-900/30" : "bg-blue-100"
-                    } rounded-lg flex items-center justify-center ${
-                      isRTL ? "mr-3" : "ml-3"
-                    }`}
-                  >
-                    <svg
-                      className={`w-5 h-5 ${
-                        isDark ? "text-blue-400" : "text-blue-600"
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    className={`${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } font-medium`}
-                  >
-                    {t("specificCategory.sections.statistics.departmentsCount")}
-                  </span>
-                </div>
-                <span
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                >
-                  {selectedCategory.departmentsCount}
-                </span>
-              </div>
-
-              <div
-                className={`flex items-center justify-between p-4 ${
-                  isDark ? "bg-green-900/20" : "bg-green-50"
-                } rounded-xl`}
-              >
-                <div className="flex items-center">
-                  <div
-                    className={`w-10 h-10 ${
-                      isDark ? "bg-green-900/30" : "bg-green-100"
-                    } rounded-lg flex items-center justify-center ${
-                      isRTL ? "mr-3" : "ml-3"
-                    }`}
-                  >
-                    <svg
-                      className={`w-5 h-5 ${
-                        isDark ? "text-green-400" : "text-green-600"
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    className={`${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } font-medium`}
-                  >
-                    {t("specificCategory.sections.statistics.usersCount")}
-                  </span>
-                </div>
-                <span
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-green-400" : "text-green-600"
-                  }`}
-                >
-                  {selectedCategory.usersCount}
-                </span>
-              </div>
-
-              {/* Rosters Count */}
-              <div
-                className={`flex items-center justify-between p-4 ${
-                  isDark ? "bg-purple-900/20" : "bg-purple-50"
-                } rounded-xl`}
-              >
-                <div className="flex items-center">
-                  <div
-                    className={`w-10 h-10 ${
-                      isDark ? "bg-purple-900/30" : "bg-purple-100"
-                    } rounded-lg flex items-center justify-center ${
-                      isRTL ? "mr-3" : "ml-3"
-                    }`}
-                  >
-                    <FileText
-                      className={`w-5 h-5 ${
-                        isDark ? "text-purple-400" : "text-purple-600"
-                      }`}
-                    />
-                  </div>
-                  <span
-                    className={`${
-                      isDark ? "text-gray-300" : "text-gray-700"
-                    } font-medium`}
-                  >
-                    {t("specificCategory.sections.statistics.rostersCount")}
-                  </span>
-                </div>
-                <span
-                  className={`text-2xl font-bold ${
-                    isDark ? "text-purple-400" : "text-purple-600"
-                  }`}
-                >
-                  {rosterList?.length || 0}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Metadata Card */}
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-2xl shadow-xl p-6`}
-          >
-            <h2
-              className={`text-xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
-              } mb-6`}
-            >
-              {t("specificCategory.sections.metadata.title")}
-            </h2>
-
-            <div className="space-y-4 text-sm">
-              <div
-                className={`border-b ${
-                  isDark ? "border-gray-700" : "border-gray-200"
-                } pb-3`}
-              >
-                <div
-                  className={`${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  } mb-1`}
-                >
-                  {t("specificCategory.sections.metadata.createdBy")}
-                </div>
-                <div
-                  className={`${
-                    isDark ? "text-white" : "text-gray-900"
-                  } font-medium`}
-                >
-                  {selectedCategory.createdByName}
-                </div>
-              </div>
-
-              {selectedCategory.updatedAt && (
-                <>
-                  <div
-                    className={`border-b ${
-                      isDark ? "border-gray-700" : "border-gray-200"
-                    } pb-3`}
-                  >
-                    <div
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("specificCategory.sections.metadata.updatedAt")}
-                    </div>
-                    <div
-                      className={`${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-medium`}
-                    >
-                      {formatDate(selectedCategory.updatedAt)}
-                    </div>
-                  </div>
-
-                  {selectedCategory.updatedByName && (
-                    <div>
-                      <div
-                        className={`${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        } mb-1`}
-                      >
-                        {t("specificCategory.sections.metadata.updatedBy")}
-                      </div>
-                      <div
-                        className={`${
-                          isDark ? "text-white" : "text-gray-900"
-                        } font-medium`}
-                      >
-                        {selectedCategory.updatedByName}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
           </div>
         </div>
+
+        <div className={`${theme.card} p-4`}>
+          <div className="flex flex-wrap gap-2">
+            <TabButton
+              id="overview"
+              icon={BarChart3}
+              label={currentLang === "ar" ? "نظرة عامة" : "Overview"}
+            />
+
+            <TabButton
+              id="doctors"
+              icon={Users}
+              label={currentLang === "ar" ? "الدكاترة" : "Doctors"}
+              count={approvedDoctors.length}
+            />
+
+            <TabButton
+              id="requests"
+              icon={Clock}
+              label={currentLang === "ar" ? "طلبات الانضمام" : "Requests"}
+              count={pendingRequests.length}
+            />
+
+            <TabButton
+              id="departments"
+              icon={Building}
+              label={currentLang === "ar" ? "الأقسام" : "Departments"}
+              count={linkedDepartments.length}
+            />
+
+            <TabButton
+              id="rosters"
+              icon={Calendar}
+              label={currentLang === "ar" ? "الروسترات" : "Rosters"}
+              count={rosters.length}
+            />
+
+            <TabButton
+              id="heads"
+              icon={Award}
+              label={currentLang === "ar" ? "الرؤساء" : "Heads"}
+            />
+          </div>
+        </div>
+
+        {activeTab === "overview" && renderOverviewTab()}
+        {activeTab === "doctors" && renderDoctorsTab()}
+        {activeTab === "requests" && renderRequestsTab()}
+        {activeTab === "departments" && renderDepartmentsTab()}
+        {activeTab === "rosters" && renderRostersTab()}
+        {activeTab === "heads" && renderHeadsTab()}
       </div>
     </div>
   )

@@ -652,10 +652,10 @@ const SpecificCategory = () => {
     "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const dangerButton =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-[var(--color-danger)] border-[var(--color-danger-border)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-red-500 border-[var(--color-danger-border)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const dangerIconButton =
-    "p-2 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "p-2 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const TabButton = ({ id: tabId, icon: Icon, label, count }) => {
     const isActive = activeTab === tabId
@@ -690,17 +690,17 @@ const SpecificCategory = () => {
   const StatCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneClass = {
       blue:
-        "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20",
+        "bg-transparent text-blue-500 border border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
       green:
-        "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]",
+        "bg-transparent text-emerald-500 border border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
       yellow:
-        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
+        "bg-transparent text-amber-500 border border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
       purple:
-        "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border border-[var(--color-purple-border)]",
+        "bg-transparent text-violet-500 border border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
       orange:
-        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
+        "bg-transparent text-orange-500 border border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
       red:
-        "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]",
+        "bg-transparent text-red-500 border border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
     }
 
     return (
@@ -793,7 +793,7 @@ const SpecificCategory = () => {
 
       {(categoryDetailsError || categoryStatisticsError) && (
         <div className={`${theme.card} p-4 border-[var(--color-danger-border)]`}>
-          <p className="text-[var(--color-danger)]">
+          <p className="text-red-500">
             {categoryDetailsError?.message || categoryStatisticsError?.message}
           </p>
         </div>
@@ -846,7 +846,7 @@ const SpecificCategory = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className={`${theme.card} p-6 xl:col-span-2`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[var(--color-primary)]" />
+            <FileText className="w-5 h-5 text-blue-500" />
             {currentLang === "ar" ? "بيانات التخصص" : "Category Information"}
           </h2>
 
@@ -882,7 +882,7 @@ const SpecificCategory = () => {
 
         <div className={`${theme.card} p-6`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-[var(--color-purple)]" />
+            <BarChart3 className="w-5 h-5 text-violet-500" />
             {currentLang === "ar" ? "إجراءات سريعة" : "Quick Actions"}
           </h2>
 
@@ -941,7 +941,7 @@ const SpecificCategory = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-              <Users className="w-5 h-5 text-[var(--color-success)]" />
+              <Users className="w-5 h-5 text-emerald-500" />
               {currentLang === "ar" ? "الدكاترة المعتمدين" : "Approved Doctors"}
             </h2>
             <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -985,7 +985,7 @@ const SpecificCategory = () => {
       {loadingGetCategoryDoctors ? (
         <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الدكاترة..." : "Loading doctors..."} />
       ) : categoryDoctorsError ? (
-        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
+        <div className={`${theme.card} p-6 text-red-500`}>
           {categoryDoctorsError?.message}
         </div>
       ) : approvedDoctors.length === 0 ? (
@@ -1133,7 +1133,7 @@ const SpecificCategory = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[var(--color-warning)]" />
+              <Clock className="w-5 h-5 text-amber-500" />
               {currentLang === "ar" ? "طلبات انضمام الدكاترة" : "Doctor Join Requests"}
             </h2>
             <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -1176,7 +1176,7 @@ const SpecificCategory = () => {
       {loadingGetCategoryPendingRequests ? (
         <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الطلبات..." : "Loading requests..."} />
       ) : categoryPendingRequestsError ? (
-        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
+        <div className={`${theme.card} p-6 text-red-500`}>
           {categoryPendingRequestsError?.message}
         </div>
       ) : pendingRequests.length === 0 ? (
@@ -1337,7 +1337,7 @@ const SpecificCategory = () => {
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <div className={`${theme.card} p-6`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-          <Building className="w-5 h-5 text-[var(--color-success)]" />
+          <Building className="w-5 h-5 text-emerald-500" />
           {currentLang === "ar" ? "الأقسام المرتبطة" : "Linked Departments"}
         </h2>
 
@@ -1388,7 +1388,7 @@ const SpecificCategory = () => {
 
       <div className={`${theme.card} p-6`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-          <LinkIcon className="w-5 h-5 text-[var(--color-primary)]" />
+          <LinkIcon className="w-5 h-5 text-blue-500" />
           {currentLang === "ar" ? "أقسام متاحة للربط" : "Available Departments"}
         </h2>
 
@@ -1443,7 +1443,7 @@ const SpecificCategory = () => {
       <div className={`${theme.card} p-4 flex items-center justify-between gap-3 flex-wrap`}>
         <div>
           <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[var(--color-warning)]" />
+            <Calendar className="w-5 h-5 text-amber-500" />
             {currentLang === "ar" ? "روسترات التخصص" : "Category Rosters"}
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -1552,7 +1552,7 @@ const SpecificCategory = () => {
     <div className="space-y-5">
       <div className={`${theme.card} p-4`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-          <Award className="w-5 h-5 text-[var(--color-purple)]" />
+          <Award className="w-5 h-5 text-violet-500" />
           {currentLang === "ar" ? "رؤساء التخصص" : "Category Heads"}
         </h2>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">
@@ -1579,7 +1579,7 @@ const SpecificCategory = () => {
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-5xl mx-auto">
           <div className={`${theme.card} p-8 text-center`}>
-            <XCircle className="w-14 h-14 text-[var(--color-danger)] mx-auto mb-4" />
+            <XCircle className="w-14 h-14 text-red-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
               {currentLang === "ar" ? "تعذر تحميل التخصص" : "Failed to load category"}
             </h2>
@@ -1655,7 +1655,7 @@ const SpecificCategory = () => {
         <div className={`${theme.card} p-6`}>
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-blue-500 flex items-center justify-center">
                 <Stethoscope className="w-7 h-7" />
               </div>
 

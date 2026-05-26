@@ -96,12 +96,12 @@ function EditWorkingHour() {
   const fieldClass = (hasError = false) =>
     `w-full px-3 py-2 text-sm ${theme.input} ${
       hasError
-        ? "border-[var(--color-danger)] bg-[var(--color-danger-soft)]"
+        ? "border-[var(--color-danger)] bg-transparent border border-red-500"
         : ""
     }`
 
   const labelClass = "block text-sm font-semibold text-[var(--color-text)] mb-2"
-  const errorClass = "mt-1 text-sm text-[var(--color-danger)]"
+  const errorClass = "mt-1 text-sm text-red-500"
 
   const CharacterCounter = ({ value }) => (
     <p className="mt-1 text-xs text-[var(--color-text-muted)]">
@@ -167,7 +167,7 @@ function EditWorkingHour() {
                 <div>
                   <label htmlFor="requiredDoctors" className={labelClass}>
                     {t("roster.workingHours.fields.requiredDoctors")}{" "}
-                    <span className="text-[var(--color-danger)]">*</span>
+                    <span className="text-red-500">*</span>
                   </label>
 
                   <Field
@@ -190,7 +190,7 @@ function EditWorkingHour() {
                 <div>
                   <label htmlFor="maxDoctors" className={labelClass}>
                     {t("roster.workingHours.fields.maxDoctors")}{" "}
-                    <span className="text-[var(--color-danger)]">*</span>
+                    <span className="text-red-500">*</span>
                   </label>
 
                   <Field
@@ -239,7 +239,7 @@ function EditWorkingHour() {
                 <div>
                   <label htmlFor="modificationReason" className={labelClass}>
                     {t("roster.workingHours.fields.modificationReason")}{" "}
-                    <span className="text-[var(--color-danger)]">*</span>
+                    <span className="text-red-500">*</span>
                   </label>
 
                   <Field

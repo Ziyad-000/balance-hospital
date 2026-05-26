@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom"
 import Header from "../../components/Header"
 import { useDispatch, useSelector } from "react-redux"
 import { toast, ToastContainer } from "react-toastify"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { logOut } from "../../state/slices/auth"
 import { useTranslation } from "react-i18next"
 import { useSignalR } from "../../hooks/use-singalr"
@@ -11,85 +11,113 @@ import ConnectionStatusBadge from "../../components/notifications/ConnectionStat
 function RootLayout() {
   const { mymode } = useSelector((state) => state.mode)
   const { expiresAt } = useSelector((state) => state.auth)
+
   const dispatch = useDispatch()
-  console.log("Current mode:", mymode)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
-  // Define color schemes for light and dark modes
-  const colorSchemes = {
-    light: {
-      primary: "#ffffff",
-      secondary: "#f8fafc",
-      accent: "#3b82f6",
-      accentHover: "#2563eb",
-      text: "#1e293b",
-      textSecondary: "#64748b",
-      border: "#e2e8f0",
-      shadow: "rgba(0, 0, 0, 0.1)",
-      cardBg: "#ffffff",
-      headerBg: "#ffffff",
-      footerBg: "#f1f5f9",
-    },
-    dark: {
-      primary: "#0f172a",
-      secondary: "#1e293b",
-      accent: "#60a5fa",
-      accentHover: "#3b82f6",
-      text: "#f1f5f9",
-      textSecondary: "#94a3b8",
-      border: "#334155",
-      shadow: "rgba(0, 0, 0, 0.3)",
-      cardBg: "#1e293b",
-      headerBg: "#0f172a",
-      footerBg: "#020617",
-    },
-  }
+  const isDark = mymode === "dark"
+  const isRTL = i18n.language === "ar"
 
-  const currentTheme = colorSchemes[mymode] || colorSchemes.light
+  const { isConnected, connectionState, reconnect } = useSignalR()
 
-  // CSS variables for dynamic theming
-  const themeStyles = {
-    "--color-primary": currentTheme.primary,
-    "--color-secondary": currentTheme.secondary,
-    "--color-accent": currentTheme.accent,
-    "--color-accent-hover": currentTheme.accentHover,
-    "--color-text": currentTheme.text,
-    "--color-text-secondary": currentTheme.textSecondary,
-    "--color-border": currentTheme.border,
-    "--color-shadow": currentTheme.shadow,
-    "--color-card-bg": currentTheme.cardBg,
-    "--color-header-bg": currentTheme.headerBg,
-    "--color-footer-bg": currentTheme.footerBg,
-  }
+  const themeStyles = useMemo(() => {
+    if (isDark) {
+      return {
+        "--color-bg": "#020617",
+        "--color-bg-soft": "#0f172a",
+        "--color-surface": "#111827",
+        "--color-surface-muted": "#1f2937",
+        "--color-text": "#f8fafc",
+        "--color-text-muted": "#cbd5e1",
+        "--color-border": "#334155",
+        "--color-border-strong": "#475569",
+
+        "--color-success": "#10b981",
+        "--color-success-hover": "#059669",
+        "--color-success-soft": "transparent",
+        "--color-success-border": "#10b981",
+
+        "--color-primary": "#3b82f6",
+        "--color-primary-hover": "#2563eb",
+        "--color-primary-soft": "transparent",
+        "--color-primary-border": "#3b82f6",
+
+        "--color-warning": "#f59e0b",
+        "--color-warning-hover": "#d97706",
+        "--color-warning-soft": "transparent",
+        "--color-warning-border": "#f59e0b",
+
+        "--color-danger": "#ef4444",
+        "--color-danger-hover": "#dc2626",
+        "--color-danger-soft": "transparent",
+        "--color-danger-border": "#ef4444",
+
+        "--color-purple": "#8b5cf6",
+        "--color-purple-hover": "#7c3aed",
+        "--color-purple-soft": "transparent",
+        "--color-purple-border": "#8b5cf6",
+
+        "--color-neutral": "#64748b",
+        "--color-neutral-soft": "transparent",
+        "--color-neutral-border": "#64748b",
+
+        "--shadow-sm": "0 1px 3px rgba(0, 0, 0, 0.35)",
+        "--shadow-md": "0 10px 25px rgba(0, 0, 0, 0.35)",
+      }
+    }
+
+    return {
+      "--color-bg": "#f8fafc",
+      "--color-bg-soft": "#f1f5f9",
+      "--color-surface": "#ffffff",
+      "--color-surface-muted": "#f8fafc",
+      "--color-text": "#0f172a",
+      "--color-text-muted": "#475569",
+      "--color-border": "#e2e8f0",
+      "--color-border-strong": "#cbd5e1",
+
+      "--color-success": "#10b981",
+      "--color-success-hover": "#059669",
+      "--color-success-soft": "transparent",
+      "--color-success-border": "#10b981",
+
+      "--color-primary": "#3b82f6",
+      "--color-primary-hover": "#2563eb",
+      "--color-primary-soft": "transparent",
+      "--color-primary-border": "#3b82f6",
+
+      "--color-warning": "#f59e0b",
+      "--color-warning-hover": "#d97706",
+      "--color-warning-soft": "transparent",
+      "--color-warning-border": "#f59e0b",
+
+      "--color-danger": "#ef4444",
+      "--color-danger-hover": "#dc2626",
+      "--color-danger-soft": "transparent",
+      "--color-danger-border": "#ef4444",
+
+      "--color-purple": "#8b5cf6",
+      "--color-purple-hover": "#7c3aed",
+      "--color-purple-soft": "transparent",
+      "--color-purple-border": "#8b5cf6",
+
+      "--color-neutral": "#64748b",
+      "--color-neutral-soft": "transparent",
+      "--color-neutral-border": "#64748b",
+
+      "--shadow-sm": "0 1px 3px rgba(15, 23, 42, 0.08)",
+      "--shadow-md": "0 10px 25px rgba(15, 23, 42, 0.12)",
+    }
+  }, [isDark])
 
   useEffect(() => {
-    if (!expiresAt) {
-      console.log("No expiration time found")
-      return
-    }
+    if (!expiresAt) return
 
     const checkTokenExpiration = () => {
       const currentTime = new Date()
       const expirationTime = new Date(expiresAt)
 
-      // Format times for logging
-      const currentTimeFormatted = currentTime.toISOString()
-      const expirationTimeFormatted = expirationTime.toISOString()
-
-      console.log("🕒 Token Expiration Check:")
-      console.log("  Current Time:    ", currentTimeFormatted)
-      console.log("  Expiration Time: ", expirationTimeFormatted)
-      console.log(
-        "  Time Difference: ",
-        Math.round((expirationTime - currentTime) / 1000),
-        "seconds"
-      )
-
-      // Check if token has expired
       if (currentTime >= expirationTime) {
-        console.log("❌ Token has expired, logging out user")
-
-        // Show notification to user
         toast.error(t("session-expired"), {
           position: "top-right",
           autoClose: 3000,
@@ -99,346 +127,176 @@ function RootLayout() {
           draggable: true,
         })
 
-        // Dispatch logout action
         dispatch(logOut())
-      } else {
-        const timeUntilExpiry = Math.round(
-          (expirationTime - currentTime) / 1000
-        )
-
-        console.log("✅ Token is still valid for", timeUntilExpiry, "seconds")
       }
     }
 
-    // Check immediately
     checkTokenExpiration()
 
-    // Set up interval to check every minute
-    const intervalId = setInterval(checkTokenExpiration, 6000) // Check every 60 seconds
+    const intervalId = setInterval(checkTokenExpiration, 60000)
 
-    // Cleanup interval on component unmount or expiresAt change
     return () => {
-      console.log("🧹 Cleaning up token expiration check interval")
       clearInterval(intervalId)
     }
-  }, [expiresAt, dispatch])
-  const { isConnected, connectionState, reconnect } = useSignalR()
+  }, [expiresAt, dispatch, t])
 
   return (
     <div
-      className={`root-layout ${mymode}`}
-      style={{
-        ...themeStyles,
-        minHeight: "100vh",
-        backgroundColor: currentTheme.primary,
-        color: currentTheme.text,
-        transition: "all 0.3s ease-in-out",
-      }}
+      className={`min-h-screen transition-colors duration-300 ${
+        isDark
+          ? "bg-gray-950 text-white"
+          : "bg-slate-50 text-slate-950"
+      }`}
+      style={themeStyles}
+      dir={isRTL ? "rtl" : "ltr"}
     >
-      {/* Global CSS injection for consistent theming */}
-      <style jsx global>{`
-        * {
-          transition: background-color 0.3s ease, color 0.3s ease,
-            border-color 0.3s ease;
-        }
-
+      <style>{`
+        html,
         body {
-          background-color: ${currentTheme.primary};
-          color: ${currentTheme.text};
-          margin: 0;
-          padding: 0;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-            sans-serif;
+          background: var(--color-bg);
+          color: var(--color-text);
         }
 
-        /* Scrollbar styling */
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: var(--color-success) var(--color-bg-soft);
+        }
+
         ::-webkit-scrollbar {
           width: 8px;
+          height: 8px;
         }
 
         ::-webkit-scrollbar-track {
-          background: ${currentTheme.secondary};
+          background: var(--color-bg-soft);
         }
 
         ::-webkit-scrollbar-thumb {
-          background: ${currentTheme.accent};
-          border-radius: 4px;
+          background: var(--color-success);
+          border-radius: 999px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-          background: ${currentTheme.accentHover};
+          background: var(--color-success-hover);
         }
 
-        /* Selection styling */
         ::selection {
-          background-color: ${currentTheme.accent};
-          color: ${mymode === "dark"
-            ? currentTheme.primary
-            : currentTheme.text};
+          background: var(--color-success);
+          color: white;
         }
 
-        /* Focus styles */
-        button:focus,
-        input:focus,
-        textarea:focus,
-        select:focus {
-          outline: 2px solid ${currentTheme.accent};
+        button,
+        input,
+        textarea,
+        select,
+        a {
+          transition:
+            background-color 0.2s ease,
+            color 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible,
+        a:focus-visible {
+          outline: 2px solid var(--color-success);
           outline-offset: 2px;
         }
 
-        /* Link styles */
-        a {
-          color: ${currentTheme.accent};
-          text-decoration: none;
-          transition: color 0.3s ease;
-        }
-
-        a:hover {
-          color: ${currentTheme.accentHover};
-        }
-
-        /* Button styles */
-        .btn-primary {
-          background-color: ${currentTheme.accent};
-          color: ${mymode === "dark" ? currentTheme.primary : "#ffffff"};
-          border: 1px solid ${currentTheme.accent};
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-          background-color: ${currentTheme.accentHover};
-          border-color: ${currentTheme.accentHover};
-        }
-
-        .btn-secondary {
-          background-color: transparent;
-          color: ${currentTheme.text};
-          border: 1px solid ${currentTheme.border};
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-          background-color: ${currentTheme.secondary};
-          border-color: ${currentTheme.accent};
-        }
-
-        /* Card styles */
-        .card {
-          background-color: ${currentTheme.cardBg};
-          border: 1px solid ${currentTheme.border};
-          border-radius: 8px;
-          padding: 20px;
-          box-shadow: 0 2px 4px ${currentTheme.shadow};
-          transition: all 0.3s ease;
-        }
-
-        .card:hover {
-          box-shadow: 0 4px 8px ${currentTheme.shadow};
-          transform: translateY(-2px);
-        }
-
-        /* Input styles */
         input,
         textarea,
         select {
-          background-color: ${currentTheme.secondary};
-          color: ${currentTheme.text};
-          border: 1px solid ${currentTheme.border};
-          border-radius: 6px;
-          padding: 8px 12px;
-          transition: all 0.3s ease;
+          background: var(--color-surface);
+          color: var(--color-text);
+          border-color: var(--color-border);
         }
 
-        input:focus,
-        textarea:focus,
-        select:focus {
-          border-color: ${currentTheme.accent};
-          box-shadow: 0 0 0 3px ${currentTheme.accent}20;
+        input::placeholder,
+        textarea::placeholder {
+          color: var(--color-text-muted);
         }
 
-        /* Modal/Dialog styles */
-        .modal-overlay {
-          background-color: ${mymode === "dark"
-            ? "rgba(0, 0, 0, 0.8)"
-            : "rgba(0, 0, 0, 0.5)"};
+        a {
+          color: inherit;
+          text-decoration: none;
         }
 
-        .modal-content {
-          background-color: ${currentTheme.primary};
-          border: 1px solid ${currentTheme.border};
-          border-radius: 12px;
-          box-shadow: 0 10px 25px ${currentTheme.shadow};
-        }
-
-        /* Navigation styles */
-        .nav-item {
-          color: ${currentTheme.textSecondary};
-          padding: 8px 16px;
-          border-radius: 6px;
-          transition: all 0.3s ease;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-          color: ${currentTheme.accent};
-          background-color: ${currentTheme.secondary};
-        }
-
-        /* Dropdown styles */
-        .dropdown-menu {
-          background-color: ${currentTheme.cardBg};
-          border: 1px solid ${currentTheme.border};
-          border-radius: 8px;
-          box-shadow: 0 4px 12px ${currentTheme.shadow};
-        }
-
-        .dropdown-item {
-          color: ${currentTheme.text};
-          padding: 8px 16px;
-          transition: all 0.3s ease;
-        }
-
-        .dropdown-item:hover {
-          background-color: ${currentTheme.secondary};
-          color: ${currentTheme.accent};
-        }
-
-        /* Table styles */
         table {
-          background-color: ${currentTheme.cardBg};
-          border-collapse: collapse;
-          width: 100%;
+          color: var(--color-text);
         }
 
-        th,
-        td {
-          border: 1px solid ${currentTheme.border};
-          padding: 12px;
-          text-align: left;
+        .ui-icon-box {
+          background: transparent;
+          border-width: 2px;
         }
 
-        th {
-          background-color: ${currentTheme.secondary};
-          color: ${currentTheme.text};
-          font-weight: 600;
+        .ui-icon-blue {
+          color: #3b82f6;
+          border-color: #3b82f6;
         }
 
-        tbody tr:hover {
-          background-color: ${currentTheme.secondary};
+        .ui-icon-emerald {
+          color: #10b981;
+          border-color: #10b981;
         }
 
-        /* Code styles */
-        code {
-          background-color: ${currentTheme.secondary};
-          color: ${currentTheme.accent};
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-family: "Monaco", "Menlo", monospace;
+        .ui-icon-amber {
+          color: #f59e0b;
+          border-color: #f59e0b;
         }
 
-        pre {
-          background-color: ${currentTheme.secondary};
-          border: 1px solid ${currentTheme.border};
-          border-radius: 8px;
-          padding: 16px;
-          overflow-x: auto;
+        .ui-icon-orange {
+          color: #f97316;
+          border-color: #f97316;
         }
 
-        /* Toast/Alert styles */
-        .alert {
-          border-radius: 8px;
-          padding: 12px 16px;
-          margin-bottom: 16px;
-          border-left: 4px solid ${currentTheme.accent};
+        .ui-icon-violet {
+          color: #8b5cf6;
+          border-color: #8b5cf6;
         }
 
-        .alert-info {
-          background-color: ${mymode === "dark"
-            ? currentTheme.secondary
-            : "#eff6ff"};
-          color: ${currentTheme.text};
+        .ui-icon-red {
+          color: #ef4444;
+          border-color: #ef4444;
         }
 
-        .alert-success {
-          background-color: ${mymode === "dark" ? "#064e3b" : "#f0fdf4"};
-          border-left-color: #10b981;
+        .ui-icon-slate {
+          color: #64748b;
+          border-color: #64748b;
         }
 
-        .alert-warning {
-          background-color: ${mymode === "dark" ? "#451a03" : "#fffbeb"};
-          border-left-color: #f59e0b;
+        .Toastify__toast {
+          border-radius: 16px;
+          font-weight: 800;
+          border: 1px solid var(--color-border);
+          background: var(--color-surface);
+          color: var(--color-text);
+          box-shadow: var(--shadow-md);
         }
 
-        .alert-error {
-          background-color: ${mymode === "dark" ? "#450a0a" : "#fef2f2"};
-          border-left-color: #ef4444;
+        .Toastify__toast--success {
+          border-color: var(--color-success);
         }
 
-        /* Loading spinner */
-        .spinner {
-          border: 2px solid ${currentTheme.border};
-          border-top: 2px solid ${currentTheme.accent};
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
+        .Toastify__toast--error {
+          border-color: var(--color-danger);
         }
 
-        @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
+        .Toastify__toast--warning {
+          border-color: var(--color-warning);
         }
 
-        /* Divider */
-        .divider {
-          border-top: 1px solid ${currentTheme.border};
-          margin: 20px 0;
-        }
-
-        /* Badge styles */
-        .badge {
-          background-color: ${currentTheme.accent};
-          color: ${mymode === "dark" ? currentTheme.primary : "#ffffff"};
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 0.75rem;
-          font-weight: 500;
-        }
-
-        .badge-secondary {
-          background-color: ${currentTheme.secondary};
-          color: ${currentTheme.textSecondary};
-          border: 1px solid ${currentTheme.border};
+        .Toastify__progress-bar {
+          background: var(--color-success);
         }
       `}</style>
 
-      <div
-        className="layout-container"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
-        }}
-      >
-        {/* Header with theme-aware styling */}
-        <header
-          style={{
-            backgroundColor: currentTheme.headerBg,
-            borderBottom: `1px solid ${currentTheme.border}`,
-            boxShadow: `0 2px 4px ${currentTheme.shadow}`,
-            position: "sticky",
-            top: 0,
-            zIndex: 1000,
-          }}
-        >
+      <div className="flex min-h-screen flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
+        <header className="sticky top-0 z-[1000] border-b border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)]">
           <Header />
         </header>
 
@@ -450,46 +308,10 @@ function RootLayout() {
 
         <ToastContainer />
 
-        {/* Main content area */}
-        <main
-          style={{
-            flex: 1,
-            backgroundColor: currentTheme.primary,
-          }}
-        >
+        <main className="flex-1 bg-[var(--color-bg)]">
           <Outlet />
         </main>
-
-        {/* Footer with theme-aware styling */}
-        {/* <footer
-          style={{
-            backgroundColor: currentTheme.footerBg,
-            borderTop: `1px solid ${currentTheme.border}`,
-            marginTop: "auto",
-          }}
-        >
-          <Footer />
-        </footer> */}
       </div>
-
-      {/* Theme indicator (optional - can be removed) */}
-      {/* <div
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          padding: "8px 12px",
-          backgroundColor: currentTheme.cardBg,
-          border: `1px solid ${currentTheme.border}`,
-          borderRadius: "20px",
-          fontSize: "12px",
-          color: currentTheme.textSecondary,
-          boxShadow: `0 2px 8px ${currentTheme.shadow}`,
-          zIndex: 1000,
-        }}
-      >
-        {mymode === "dark" ? "🌙" : "☀️"} {mymode} mode
-      </div> */}
     </div>
   )
 }

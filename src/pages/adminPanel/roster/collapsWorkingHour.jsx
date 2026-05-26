@@ -39,26 +39,26 @@ const CollapsibleDateCard = ({
   }
 
   const iconColors = {
-    calendar: "text-blue-600 dark:text-blue-400",
-    building: "text-green-600 dark:text-green-400",
-    briefcase: "text-purple-600 dark:text-purple-400",
-    user: "text-orange-600 dark:text-orange-400",
-    users: "text-blue-600 dark:text-blue-400",
-    file: "text-slate-500 dark:text-slate-400",
-    view: "text-blue-600 dark:text-blue-400",
-    edit: "text-green-600 dark:text-green-400",
-    assign: "text-purple-600 dark:text-purple-400",
-    success: "text-green-600 dark:text-green-400",
-    danger: "text-red-600 dark:text-red-400",
+    calendar: "text-blue-500 dark:text-blue-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    briefcase: "text-violet-500 dark:text-violet-500",
+    user: "text-orange-500 dark:text-orange-500",
+    users: "text-blue-500 dark:text-blue-500",
+    file: "text-slate-500 dark:text-slate-500",
+    view: "text-blue-500 dark:text-blue-500",
+    edit: "text-emerald-500 dark:text-emerald-500",
+    assign: "text-violet-500 dark:text-violet-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    danger: "text-red-500 dark:text-red-500",
   }
 
   const iconBg = {
-    calendar: "bg-blue-100 dark:bg-blue-900/30",
-    building: "bg-green-100 dark:bg-green-900/30",
-    briefcase: "bg-purple-100 dark:bg-purple-900/30",
-    user: "bg-orange-100 dark:bg-orange-900/30",
-    users: "bg-blue-100 dark:bg-blue-900/30",
-    file: "bg-slate-100 dark:bg-slate-800",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    building: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    briefcase: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    user: "bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500",
+    users: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    file: "bg-transparent dark:bg-transparent border-2 border-slate-500 dark:border-slate-500",
   }
 
   const actionButtonClass = {
@@ -214,7 +214,7 @@ const CollapsibleDateCard = ({
 
                                 <div className="flex flex-wrap items-center gap-2">
                                   {detail.isFullyBooked && (
-                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
+                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-transparent text-emerald-500 border-2 border-emerald-500 shadow-sm">
                                       <CheckCircle
                                         size={12}
                                         className={isRTL ? "ml-1" : "mr-1"}
@@ -224,7 +224,7 @@ const CollapsibleDateCard = ({
                                   )}
 
                                   {detail.isOverBooked && (
-                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20">
+                                    <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-transparent text-red-500 border-2 border-red-500 shadow-sm">
                                       <AlertCircle
                                         size={12}
                                         className={isRTL ? "ml-1" : "mr-1"}
@@ -334,7 +334,7 @@ const CollapsibleDateCard = ({
                                       .map((doctor, index) => (
                                         <span
                                           key={index}
-                                          className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-[var(--color-bg-soft)] text-[var(--color-text)] border border-[var(--color-border)]"
+                                          className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-transparent text-slate-500 border-2 border-slate-500 shadow-sm"
                                         >
                                           <User
                                             size={10}
@@ -347,7 +347,7 @@ const CollapsibleDateCard = ({
                                       ))}
 
                                     {detail.assignedDoctors.length > 4 && (
-                                      <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20">
+                                      <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-transparent text-blue-500 border-2 border-blue-500 shadow-sm">
                                         +{detail.assignedDoctors.length - 4}{" "}
                                         {t("common.more")}
                                       </span>

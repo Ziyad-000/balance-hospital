@@ -78,16 +78,16 @@ function ManageDoctors() {
   const currentLang = i18n.language || "ar"
 
   const defaultButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const selectedButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-emerald-500 transition-colors"
 
   const iconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const dangerIconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
   const isDark = mymode === "dark"
 
   useEffect(() => {
@@ -116,16 +116,16 @@ function ManageDoctors() {
     switch (status) {
       case "Pending":
         return isDark
-          ? "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning-border)]"
-          : "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning-border)]"
+          ? "bg-transparent text-amber-500 border-amber-500"
+          : "bg-transparent text-amber-500 border-amber-500"
       case "Approved":
         return isDark
-          ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
-          : "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
+          ? "bg-transparent text-emerald-500 border-emerald-500"
+          : "bg-transparent text-emerald-500 border-emerald-500"
       case "Rejected":
         return isDark
-          ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
-          : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
+          ? "bg-transparent text-red-500 border-red-500"
+          : "bg-transparent text-red-500 border-red-500"
       default:
         return isDark
           ? "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]"
@@ -196,12 +196,12 @@ function ManageDoctors() {
           <div className="flex items-center gap-4 mb-4">
             <div
               className={`p-3 ${
-                isDark ? "bg-[var(--color-surface-muted)]" : "bg-[var(--color-primary-soft)]"
+                isDark ? "bg-[var(--color-surface-muted)]" : "bg-transparent"
               } rounded-lg`}
             >
               <UserCheck
                 className={`h-8 w-8 ${
-                  isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
+                  isDark ? "text-blue-500" : "text-blue-500"
                 }`}
               />
             </div>
@@ -242,8 +242,8 @@ function ManageDoctors() {
                   currentStatus === value
                     ? selectedButtonClass
                     : isDark
-                    ? "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
-                    : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
+                    ? "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500"
+                    : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500"
                 }`}
               >
                 {getStatusIcon(key)}
@@ -282,7 +282,7 @@ function ManageDoctors() {
                 </div>
                 <Badge
                   className={`h-8 w-8 ${
-                    isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
+                    isDark ? "text-blue-500" : "text-blue-500"
                   }`}
                 />
               </div>
@@ -299,7 +299,7 @@ function ManageDoctors() {
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-[var(--color-warning)]" : "text-[var(--color-warning)]"
+                      isDark ? "text-amber-500" : "text-amber-500"
                     }`}
                   >
                     {doctorRequests.pendingRequests}
@@ -314,7 +314,7 @@ function ManageDoctors() {
                 </div>
                 <Clock
                   className={`h-8 w-8 ${
-                    isDark ? "text-[var(--color-warning)]" : "text-[var(--color-warning)]"
+                    isDark ? "text-amber-500" : "text-amber-500"
                   }`}
                 />
               </div>
@@ -331,7 +331,7 @@ function ManageDoctors() {
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-[var(--color-success)]" : "text-[var(--color-success)]"
+                      isDark ? "text-emerald-500" : "text-emerald-500"
                     }`}
                   >
                     {doctorRequests.approvedRequests}
@@ -346,7 +346,7 @@ function ManageDoctors() {
                 </div>
                 <CheckCircle
                   className={`h-8 w-8 ${
-                    isDark ? "text-[var(--color-success)]" : "text-[var(--color-success)]"
+                    isDark ? "text-emerald-500" : "text-emerald-500"
                   }`}
                 />
               </div>
@@ -363,7 +363,7 @@ function ManageDoctors() {
                 <div>
                   <p
                     className={`text-2xl font-bold ${
-                      isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
+                      isDark ? "text-red-500" : "text-red-500"
                     }`}
                   >
                     {doctorRequests.rejectedRequests}
@@ -378,7 +378,7 @@ function ManageDoctors() {
                 </div>
                 <Ban
                   className={`h-8 w-8 ${
-                    isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
+                    isDark ? "text-red-500" : "text-red-500"
                   }`}
                 />
               </div>
@@ -411,12 +411,12 @@ function ManageDoctors() {
                     <div className="flex items-center gap-4">
                       <div
                         className={`p-3 ${
-                          isDark ? "bg-[var(--color-primary-soft)]" : "bg-[var(--color-primary-soft)]"
+                          isDark ? "bg-transparent" : "bg-transparent"
                         } rounded-lg`}
                       >
                         <Calendar
                           className={`h-6 w-6 ${
-                            isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
+                            isDark ? "text-blue-500" : "text-blue-500"
                           }`}
                         />
                       </div>
@@ -492,7 +492,7 @@ function ManageDoctors() {
                               <div className="flex items-center gap-2">
                                 <User
                                   className={`h-5 w-5 ${
-                                    isDark ? "text-[var(--color-primary)]" : "text-[var(--color-primary)]"
+                                    isDark ? "text-blue-500" : "text-blue-500"
                                   }`}
                                 />
                                 <h3
@@ -523,7 +523,7 @@ function ManageDoctors() {
                               <div className="flex items-center gap-2">
                                 <Building
                                   className={`h-4 w-4 ${
-                                    isDark ? "text-[var(--color-success)]" : "text-[var(--color-success)]"
+                                    isDark ? "text-emerald-500" : "text-emerald-500"
                                   }`}
                                 />
                                 <div>
@@ -550,8 +550,8 @@ function ManageDoctors() {
                                 <Briefcase
                                   className={`h-4 w-4 ${
                                     isDark
-                                      ? "text-[var(--color-purple)]"
-                                      : "text-[var(--color-purple)]"
+                                      ? "text-violet-500"
+                                      : "text-violet-500"
                                   }`}
                                 />
                                 <div>
@@ -576,8 +576,8 @@ function ManageDoctors() {
                                 <Clock
                                   className={`h-4 w-4 ${
                                     isDark
-                                      ? "text-[var(--color-warning)]"
-                                      : "text-[var(--color-warning)]"
+                                      ? "text-amber-500"
+                                      : "text-amber-500"
                                   }`}
                                 />
                                 <div>
@@ -689,13 +689,13 @@ function ManageDoctors() {
                                 <div className="flex items-start gap-2">
                                   <AlertCircle
                                     className={`h-4 w-4 mt-0.5 ${
-                                      isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
+                                      isDark ? "text-red-500" : "text-red-500"
                                     }`}
                                   />
                                   <div>
                                     <span
                                       className={`text-xs font-medium ${
-                                        isDark ? "text-[var(--color-danger)]" : "text-[var(--color-danger)]"
+                                        isDark ? "text-red-500" : "text-red-500"
                                       }`}
                                     >
                                       {t("doctorRequests.fields.issues")}:
@@ -709,8 +709,8 @@ function ManageDoctors() {
                                           key={index}
                                           className={`text-sm ${
                                             isDark
-                                              ? "text-[var(--color-danger)]"
-                                              : "text-[var(--color-danger)]"
+                                              ? "text-red-500"
+                                              : "text-red-500"
                                           } flex items-center`}
                                         >
                                           <span

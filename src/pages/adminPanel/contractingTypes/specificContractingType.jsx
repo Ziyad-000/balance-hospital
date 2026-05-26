@@ -41,10 +41,52 @@ function SpecificContractingType() {
   const { mymode } = useSelector((state) => state.mode)
   const { t, i18n } = useTranslation()
 
-  // Get current language direction
   const isRTL = i18n.language === "ar"
   const currentLang = i18n.language || "ar"
   const isDark = mymode === "dark"
+
+  const pageClass = isDark
+    ? "min-h-screen p-4 sm:p-6 bg-gray-950 text-white"
+    : "min-h-screen p-4 sm:p-6 bg-slate-50 text-slate-950"
+
+  const cardClass = isDark
+    ? "bg-gray-900 border-gray-700 shadow-sm"
+    : "bg-white border-slate-200 shadow-sm"
+
+  const softCardClass = isDark
+    ? "bg-gray-800/90 border-gray-600"
+    : "bg-slate-100 border-slate-300"
+
+  const textMain = isDark ? "text-white" : "text-slate-950"
+  const textMuted = isDark ? "text-slate-300" : "text-slate-700"
+  const textSoft = isDark ? "text-slate-300" : "text-slate-600"
+
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border bg-white text-slate-950 border-slate-400 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 active:bg-emerald-700 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:hover:bg-emerald-600 dark:hover:border-emerald-600 transition-colors shadow-sm"
+
+  const editButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 active:bg-emerald-800 transition-colors shadow-sm"
+
+  const iconBoxBlue =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
+
+  const iconBoxEmerald =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+
+  const iconBoxAmber =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+
+  const iconBoxOrange =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500"
+
+  const iconBoxViolet =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500"
+
+  const iconBoxRed =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+
+  const smallIconClass = "w-5 h-5 shrink-0"
+  const sectionTitleClass = `text-xl font-black ${textMain} flex items-center gap-3`
 
   useEffect(() => {
     if (id) {
@@ -68,62 +110,210 @@ function SpecificContractingType() {
     }
   }, [singleContractingTypeError, navigate])
 
-  // Get contracting type name based on current language
   const getContractingTypeName = () => {
     if (!selectedContractingType) return ""
+
     return currentLang === "en"
       ? selectedContractingType.nameEnglish
       : selectedContractingType.nameArabic
   }
 
-  // Get contracting type secondary name (opposite language)
   const getContractingTypeSecondaryName = () => {
     if (!selectedContractingType) return ""
+
     return currentLang === "en"
       ? selectedContractingType.nameArabic
       : selectedContractingType.nameEnglish
   }
 
-  // Get user name based on current language
   const getUserName = (user) => {
     if (!user) return ""
     return currentLang === "en" ? user.nameEnglish : user.nameArabic
   }
 
-  // Format date
+  const InfoField = ({ icon: Icon, label, value, dir, tone = "blue" }) => {
+    const toneClass =
+      tone === "emerald"
+        ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+        : tone === "amber"
+        ? "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+        : tone === "orange"
+        ? "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500"
+        : tone === "red"
+        ? "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+        : tone === "violet"
+        ? "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500"
+        : "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
 
-  if (loadingGetSingleContractingType)
+    return (
+      <div className={`rounded-2xl border p-4 ${softCardClass}`}>
+        <div className="flex items-start gap-3">
+          <div
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${toneClass}`}
+          >
+            <Icon className="w-5 h-5 shrink-0" />
+          </div>
+
+          <div className="min-w-0">
+            <p className={`text-xs font-black mb-1 ${textSoft}`}>{label}</p>
+
+            <p
+              className={`text-sm sm:text-base font-extrabold ${textMain} break-words`}
+              dir={dir}
+            >
+              {value || "-"}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const CodeBadge = ({ code }) => (
+    <span className="inline-flex items-center gap-1.5 text-sm font-black px-3 py-1.5 rounded-full border-2 bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500 shadow-sm">
+      <Hash className="w-4 h-4 shrink-0" />
+      {code || "-"}
+    </span>
+  )
+
+  const StatusBadge = ({ isActive }) => (
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black border-2 shadow-sm ${
+        isActive
+          ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+          : "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+      }`}
+    >
+      {isActive ? (
+        <CheckCircle className="w-4 h-4 shrink-0" />
+      ) : (
+        <XCircle className="w-4 h-4 shrink-0" />
+      )}
+
+      {isActive
+        ? t("contractingTypes.status.active")
+        : t("contractingTypes.status.inactive")}
+    </span>
+  )
+
+  const OvertimeBadge = ({ allowOvertime }) => (
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black border-2 shadow-sm ${
+        allowOvertime
+          ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+          : "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+      }`}
+    >
+      {allowOvertime ? (
+        <CheckCircle className="w-4 h-4 shrink-0" />
+      ) : (
+        <XCircle className="w-4 h-4 shrink-0" />
+      )}
+
+      {allowOvertime
+        ? t("contractingTypes.overtime.allowed")
+        : t("contractingTypes.overtime.notAllowed")}
+    </span>
+  )
+
+  const StatBox = ({ icon: Icon, label, value, tone = "blue" }) => {
+    const toneClass =
+      tone === "emerald"
+        ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+        : tone === "amber"
+        ? "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+        : tone === "orange"
+        ? "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500"
+        : tone === "red"
+        ? "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+        : tone === "violet"
+        ? "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500"
+        : "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
+
+    return (
+      <div className={`rounded-2xl border-2 p-5 shadow-sm ${toneClass}`}>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Icon className="w-6 h-6 shrink-0" />
+            <span className="text-sm font-black truncate">{label}</span>
+          </div>
+
+          <span className="text-2xl font-black shrink-0">{value}</span>
+        </div>
+      </div>
+    )
+  }
+
+  const UserCard = ({ user }) => (
+    <div className={`p-4 border rounded-2xl ${softCardClass}`}>
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500 shadow-sm">
+            <User className="w-5 h-5 shrink-0" />
+          </div>
+
+          <div className="min-w-0">
+            <h4 className={`font-black ${textMain} truncate`}>
+              {getUserName(user)}
+            </h4>
+
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 mt-2">
+              {user.email && (
+                <div
+                  className={`inline-flex items-center gap-1.5 text-sm font-bold ${textMuted}`}
+                >
+                  <Mail className="w-4 h-4 shrink-0 text-cyan-500 dark:text-cyan-500" />
+                  <span className="truncate">{user.email}</span>
+                </div>
+              )}
+
+              {user.mobile && (
+                <div
+                  className={`inline-flex items-center gap-1.5 text-sm font-bold ${textMuted}`}
+                >
+                  <Phone className="w-4 h-4 shrink-0 text-emerald-500 dark:text-emerald-500" />
+                  <span>{user.mobile}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {user.role && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black border-2 bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500 shrink-0 shadow-sm">
+            <Shield className="w-4 h-4 shrink-0" />
+            {user.role}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  if (loadingGetSingleContractingType) {
     return <LoadingGetData text={t("gettingData.contractingTypeData")} />
+  }
 
   if (singleContractingTypeError) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
-        <div className="max-w-4xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="text-center py-12">
-              <div className="text-red-500 text-lg mb-4">
-                {singleContractingTypeError?.message ||
-                  t("contractingTypes.fetchError")}
-              </div>
-              <Link
-                to="/admin-panel/contracting-types"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
-                  {t("contractingTypes.backToList")}
-                </span>
-              </Link>
+      <div className={pageClass} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-3xl mx-auto">
+          <div className={`${cardClass} rounded-2xl border p-8 text-center`}>
+            <div className="w-20 h-20 rounded-full bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500 flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <XCircle className="w-10 h-10" />
             </div>
+
+            <div className="text-lg font-black mb-6 text-red-500 dark:text-red-500">
+              {singleContractingTypeError?.message ||
+                t("contractingTypes.fetchError")}
+            </div>
+
+            <Link
+              to="/admin-panel/contracting-types"
+              className={defaultButtonClass}
+            >
+              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {t("contractingTypes.backToList")}
+            </Link>
           </div>
         </div>
       </div>
@@ -132,36 +322,24 @@ function SpecificContractingType() {
 
   if (!selectedContractingType) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
-        <div className="max-w-4xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="text-center py-12">
-              <div
-                className={`text-lg mb-4 ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                {t("contractingTypes.notFound")}
-              </div>
-              <Link
-                to="/admin-panel/contracting-type"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
-                  {t("contractingTypes.backToList")}
-                </span>
-              </Link>
+      <div className={pageClass} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-3xl mx-auto">
+          <div className={`${cardClass} rounded-2xl border p-8 text-center`}>
+            <div className="w-20 h-20 rounded-full bg-transparent text-slate-500 border-2 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500 flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <FileText className="w-10 h-10" />
             </div>
+
+            <div className={`text-lg font-black mb-6 ${textMuted}`}>
+              {t("contractingTypes.notFound")}
+            </div>
+
+            <Link
+              to="/admin-panel/contracting-types"
+              className={defaultButtonClass}
+            >
+              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {t("contractingTypes.backToList")}
+            </Link>
           </div>
         </div>
       </div>
@@ -169,527 +347,323 @@ function SpecificContractingType() {
   }
 
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={pageClass} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
             <Link
               to="/admin-panel/contracting-types"
-              className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
-                isDark
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              } transition-colors`}
+              className={defaultButtonClass}
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-              <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
-                {t("contractingTypes.backToList")}
-              </span>
+              {t("contractingTypes.backToList")}
             </Link>
 
             <Link
               to={`/admin-panel/contracting-types/edit/${selectedContractingType.id}`}
             >
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors flex-1 sm:flex-none justify-center">
-                <Edit size={16} className={`${isRTL ? "ml-2" : "mr-2"}`} />
+              <button type="button" className={editButtonClass}>
+                <Edit size={16} className="shrink-0" />
                 {t("contractingTypes.actions.edit")}
               </button>
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div
-              className={`p-3 ${
-                isDark ? "bg-gray-700" : "bg-blue-100"
-              } rounded-lg`}
-            >
-              <FileText
-                className={`h-8 w-8 ${
-                  isDark ? "text-blue-400" : "text-blue-600"
-                }`}
-              />
-            </div>
-            <div>
-              <h1
-                className={`text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {getContractingTypeName()}
-              </h1>
-              {/* <p
-                className={`text-lg ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                {getContractingTypeSecondaryName()}
-              </p> */}
-              {selectedContractingType.code && (
-                <div className="flex items-center mt-2">
-                  <Hash
-                    className={`h-4 w-4 ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    } ${isRTL ? "ml-1" : "mr-1"}`}
-                  />
-                  <span
-                    className={`text-sm font-mono px-2 py-1 rounded ${
-                      isDark
-                        ? "bg-gray-700 text-gray-300"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {selectedContractingType.code}
-                  </span>
+          <div className={`${cardClass} rounded-3xl border p-6`}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4 min-w-0">
+                <div className="w-20 h-20 rounded-3xl flex items-center justify-center shrink-0 shadow-sm border-2 bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500">
+                  <FileText className="w-10 h-10 shrink-0" />
                 </div>
-              )}
+
+                <div className="min-w-0">
+                  <h1
+                    className={`text-3xl font-black tracking-tight ${textMain}`}
+                  >
+                    {getContractingTypeName()}
+                  </h1>
+
+                  {getContractingTypeSecondaryName() && (
+                    <p className={`mt-1 text-base font-bold ${textMuted}`}>
+                      {getContractingTypeSecondaryName()}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
+                    <CodeBadge code={selectedContractingType.code} />
+                    <StatusBadge isActive={selectedContractingType.isActive} />
+                    <OvertimeBadge
+                      allowOvertime={
+                        selectedContractingType.allowOvertimeHours
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
+                <div className="rounded-2xl border-2 bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500 px-4 py-3 shadow-sm">
+                  <p className="text-xs font-black opacity-90">
+                    {t("contractingTypes.form.maxHoursPerWeek")}
+                  </p>
+                  <p className="text-2xl font-black">
+                    {selectedContractingType.maxHoursPerWeek ?? 0}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border-2 bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500 px-4 py-3 shadow-sm">
+                  <p className="text-xs font-black opacity-90">
+                    {t("contractingTypes.table.users")}
+                  </p>
+                  <p className="text-2xl font-black">
+                    {selectedContractingType.usersCount ?? 0}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Information */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h2
-                className={`text-xl font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-6 flex items-center`}
-              >
-                <Info
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h2 className={`${sectionTitleClass} mb-6`}>
+                <span className={iconBoxBlue}>
+                  <Info className={smallIconClass} />
+                </span>
                 {t("contractingTypes.details.basicInfo")}
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("contractingTypes.form.nameArabic")}
-                  </label>
-                  <p
-                    className={`text-base ${
-                      isDark ? "text-white" : "text-gray-900"
-                    } font-medium`}
-                    dir="rtl"
-                  >
-                    {selectedContractingType.nameArabic}
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField
+                  icon={FileText}
+                  label={t("contractingTypes.form.nameArabic")}
+                  value={selectedContractingType.nameArabic}
+                  dir="rtl"
+                  tone="blue"
+                />
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("contractingTypes.form.nameEnglish")}
-                  </label>
-                  <p
-                    className={`text-base ${
-                      isDark ? "text-white" : "text-gray-900"
-                    } font-medium`}
-                    dir="ltr"
-                  >
-                    {selectedContractingType.nameEnglish}
-                  </p>
-                </div>
+                <InfoField
+                  icon={FileText}
+                  label={t("contractingTypes.form.nameEnglish")}
+                  value={selectedContractingType.nameEnglish}
+                  dir="ltr"
+                  tone="blue"
+                />
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("contractingTypes.form.maxHoursPerWeek")}
-                  </label>
-                  <div className="flex items-center">
-                    <Clock
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      } ${isRTL ? "ml-2" : "mr-2"}`}
-                      size={18}
-                    />
-                    <span
-                      className={`text-base ${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-medium`}
+                <InfoField
+                  icon={Clock}
+                  label={t("contractingTypes.form.maxHoursPerWeek")}
+                  value={`${selectedContractingType.maxHoursPerWeek ?? 0} ${t(
+                    "contractingTypes.hoursPerWeek"
+                  )}`}
+                  tone="amber"
+                />
+
+                <div className={`rounded-2xl border p-4 ${softCardClass}`}>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${
+                        selectedContractingType.allowOvertimeHours
+                          ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+                          : "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+                      }`}
                     >
-                      {selectedContractingType.maxHoursPerWeek}{" "}
-                      {t("contractingTypes.hoursPerWeek")}
-                    </span>
+                      {selectedContractingType.allowOvertimeHours ? (
+                        <CheckCircle className="w-5 h-5 shrink-0" />
+                      ) : (
+                        <XCircle className="w-5 h-5 shrink-0" />
+                      )}
+                    </div>
+
+                    <div>
+                      <p className={`text-xs font-black mb-2 ${textSoft}`}>
+                        {t("contractingTypes.form.allowOvertimeHours")}
+                      </p>
+
+                      <OvertimeBadge
+                        allowOvertime={
+                          selectedContractingType.allowOvertimeHours
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("contractingTypes.form.allowOvertimeHours")}
-                  </label>
-                  <div className="flex items-center">
-                    {selectedContractingType.allowOvertimeHours ? (
-                      <CheckCircle
-                        className={`text-green-500 ${isRTL ? "ml-2" : "mr-2"}`}
-                        size={18}
-                      />
-                    ) : (
-                      <XCircle
-                        className={`text-red-500 ${isRTL ? "ml-2" : "mr-2"}`}
-                        size={18}
-                      />
-                    )}
-                    <span
-                      className={`text-base ${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-medium`}
+                <div className={`rounded-2xl border p-4 ${softCardClass}`}>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${
+                        selectedContractingType.isActive
+                          ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+                          : "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+                      }`}
                     >
-                      {selectedContractingType.allowOvertimeHours
-                        ? t("contractingTypes.overtime.allowed")
-                        : t("contractingTypes.overtime.notAllowed")}
-                    </span>
-                  </div>
-                </div>
+                      {selectedContractingType.isActive ? (
+                        <CheckCircle className="w-5 h-5 shrink-0" />
+                      ) : (
+                        <XCircle className="w-5 h-5 shrink-0" />
+                      )}
+                    </div>
 
-                <div className="md:col-span-2">
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("contractingTypes.table.status")}
-                  </label>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${
-                      selectedContractingType.isActive
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                    }`}
-                  >
-                    {selectedContractingType.isActive ? (
-                      <CheckCircle
-                        size={14}
-                        className={`${isRTL ? "ml-1" : "mr-1"}`}
-                      />
-                    ) : (
-                      <XCircle
-                        size={14}
-                        className={`${isRTL ? "ml-1" : "mr-1"}`}
-                      />
-                    )}
-                    {selectedContractingType.isActive
-                      ? t("contractingTypes.status.active")
-                      : t("contractingTypes.status.inactive")}
-                  </span>
+                    <div>
+                      <p className={`text-xs font-black mb-2 ${textSoft}`}>
+                        {t("contractingTypes.table.status")}
+                      </p>
+
+                      <StatusBadge isActive={selectedContractingType.isActive} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Associated Users */}
             {selectedContractingType.users &&
               selectedContractingType.users.length > 0 && (
-                <div
-                  className={`${
-                    isDark ? "bg-gray-800" : "bg-white"
-                  } rounded-lg shadow-sm border ${
-                    isDark ? "border-gray-700" : "border-gray-200"
-                  } p-6`}
-                >
-                  <h2
-                    className={`text-xl font-semibold ${
-                      isDark ? "text-white" : "text-gray-900"
-                    } mb-6 flex items-center`}
-                  >
-                    <Users
-                      className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                        isDark ? "text-blue-400" : "text-blue-600"
-                      }`}
-                    />
-                    {t("contractingTypes.details.associatedUsers")}
-                    <span
-                      className={`${
-                        isRTL ? "mr-2" : "ml-2"
-                      } text-sm font-normal px-2 py-1 rounded-full ${
-                        isDark
-                          ? "bg-gray-700 text-gray-300"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {selectedContractingType.usersCount}
+                <div className={`${cardClass} rounded-3xl border p-6`}>
+                  <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+                    <h2 className={sectionTitleClass}>
+                      <span className={iconBoxEmerald}>
+                        <Users className={smallIconClass} />
+                      </span>
+                      {t("contractingTypes.details.associatedUsers")}
+                    </h2>
+
+                    <span className="px-3 py-1.5 rounded-full text-xs font-black bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500 shadow-sm">
+                      {selectedContractingType.usersCount ?? 0}
                     </span>
-                  </h2>
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedContractingType.users.map((user) => (
-                      <div
-                        key={user.id}
-                        className={`flex items-center p-4 ${
-                          isDark ? "bg-gray-700" : "bg-gray-50"
-                        } rounded-lg border ${
-                          isDark ? "border-gray-600" : "border-gray-200"
-                        }`}
-                      >
-                        <div
-                          className={`p-2 ${
-                            isDark ? "bg-gray-600" : "bg-blue-100"
-                          } rounded-full ${isRTL ? "ml-3" : "mr-3"}`}
-                        >
-                          <User
-                            className={`h-4 w-4 ${
-                              isDark ? "text-blue-400" : "text-blue-600"
-                            }`}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium ${
-                              isDark ? "text-white" : "text-gray-900"
-                            } truncate`}
-                          >
-                            {getUserName(user)}
-                          </p>
-                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-                            <span className="flex items-center truncate">
-                              <Mail
-                                className={`h-3 w-3 ${isRTL ? "ml-1" : "mr-1"}`}
-                              />
-                              {user.email}
-                            </span>
-                            <span className="flex items-center">
-                              <Phone
-                                className={`h-3 w-3 ${isRTL ? "ml-1" : "mr-1"}`}
-                              />
-                              {user.mobile}
-                            </span>
-                          </div>
-                          <span
-                            className={`inline-block mt-2 text-xs px-2 py-1 rounded-full ${
-                              isDark
-                                ? "bg-gray-600 text-gray-300"
-                                : "bg-gray-200 text-gray-700"
-                            }`}
-                          >
-                            <Shield
-                              className={`h-3 w-3 inline ${
-                                isRTL ? "ml-1" : "mr-1"
-                              }`}
-                            />
-                            {user.role}
-                          </span>
-                        </div>
-                      </div>
+                      <UserCard key={user.id} user={user} />
                     ))}
                   </div>
-
-                  {/* {selectedContractingType.users.length > 6 && (
-                    <div className="mt-4 text-center">
-                      <p
-                        className={`text-sm ${
-                          isDark ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                        {t("contractingTypes.details.andMoreUsers", {
-                          count: selectedContractingType.users.length - 6,
-                        })}
-                      </p>
-                    </div>
-                  )} */}
                 </div>
               )}
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Statistics */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4 flex items-center`}
-              >
-                <Users
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h3 className={`${sectionTitleClass} mb-5`}>
+                <span className={iconBoxBlue}>
+                  <Users className={smallIconClass} />
+                </span>
                 {t("contractingTypes.details.statistics")}
               </h3>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                  <div className="flex items-center">
-                    <Users
-                      className={`h-5 w-5 ${
-                        isDark ? "text-blue-400" : "text-blue-600"
-                      } ${isRTL ? "ml-2" : "mr-2"}`}
-                    />
-                    <span
-                      className={`text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("contractingTypes.table.users")}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-2xl font-bold ${
-                      isDark ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  >
-                    {selectedContractingType.usersCount}
-                  </span>
-                </div>
+                <StatBox
+                  icon={Users}
+                  label={t("contractingTypes.table.users")}
+                  value={selectedContractingType.usersCount ?? 0}
+                  tone="blue"
+                />
+
+                <StatBox
+                  icon={Clock}
+                  label={t("contractingTypes.form.maxHoursPerWeek")}
+                  value={selectedContractingType.maxHoursPerWeek ?? 0}
+                  tone="amber"
+                />
+
+                <StatBox
+                  icon={
+                    selectedContractingType.allowOvertimeHours
+                      ? CheckCircle
+                      : XCircle
+                  }
+                  label={t("contractingTypes.form.allowOvertimeHours")}
+                  value={
+                    selectedContractingType.allowOvertimeHours
+                      ? t("contractingTypes.overtime.allowed")
+                      : t("contractingTypes.overtime.notAllowed")
+                  }
+                  tone={
+                    selectedContractingType.allowOvertimeHours
+                      ? "emerald"
+                      : "red"
+                  }
+                />
               </div>
             </div>
 
-            {/* Audit Information */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4 flex items-center`}
-              >
-                <Calendar
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h3 className={`${sectionTitleClass} mb-5`}>
+                <span className={iconBoxAmber}>
+                  <Calendar className={smallIconClass} />
+                </span>
                 {t("contractingTypes.details.auditInfo")}
               </h3>
 
               <div className="space-y-4">
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-1`}
-                  >
-                    {t("contractingTypes.details.createdAt")}
-                  </label>
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {formatDate(selectedContractingType.createdAt)}
-                  </p>
-                </div>
+                <InfoField
+                  icon={Calendar}
+                  label={t("contractingTypes.details.createdAt")}
+                  value={formatDate(selectedContractingType.createdAt)}
+                  tone="amber"
+                />
 
                 {selectedContractingType.createdByUser && (
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("contractingTypes.details.createdBy")}
-                    </label>
-                    <div className="flex items-center">
-                      <User
-                        className={`h-4 w-4 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        } ${isRTL ? "ml-2" : "mr-2"}`}
-                      />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {getUserName(selectedContractingType.createdByUser)}
-                      </span>
-                    </div>
-                    <p
-                      className={`text-xs mt-1 ${
-                        isDark ? "text-gray-400" : "text-gray-500"
+                  <>
+                    <InfoField
+                      icon={User}
+                      label={t("contractingTypes.details.createdBy")}
+                      value={getUserName(selectedContractingType.createdByUser)}
+                      tone="blue"
+                    />
+
+                    <InfoField
+                      icon={FileText}
+                      label={currentLang === "ar" ? "بيانات المنشئ" : "Creator Info"}
+                      value={`${selectedContractingType.createdByUser.role || "-"} • ${
+                        selectedContractingType.createdByUser.email || "-"
                       }`}
-                    >
-                      {selectedContractingType.createdByUser.role} •{" "}
-                      {selectedContractingType.createdByUser.email}
-                    </p>
-                  </div>
+                      tone="violet"
+                    />
+                  </>
                 )}
+
                 {selectedContractingType.updatedAt && (
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("contractingTypes.details.updatedAt")}
-                    </label>
-                    <p
-                      className={`text-sm ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {formatDate(selectedContractingType.updatedAt)}
-                    </p>
-                  </div>
+                  <InfoField
+                    icon={Clock}
+                    label={t("contractingTypes.details.updatedAt")}
+                    value={formatDate(selectedContractingType.updatedAt)}
+                    tone="amber"
+                  />
                 )}
+
                 {selectedContractingType.updatedByUser && (
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("contractingTypes.details.updatedBy")}
-                    </label>
-                    <div className="flex items-center">
-                      <User
-                        className={`h-4 w-4 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        } ${isRTL ? "ml-2" : "mr-2"}`}
-                      />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {getUserName(selectedContractingType.updatedByUser)}
-                      </span>
-                    </div>
-                    <p
-                      className={`text-xs mt-1 ${
-                        isDark ? "text-gray-400" : "text-gray-500"
+                  <>
+                    <InfoField
+                      icon={User}
+                      label={t("contractingTypes.details.updatedBy")}
+                      value={getUserName(selectedContractingType.updatedByUser)}
+                      tone="blue"
+                    />
+
+                    <InfoField
+                      icon={FileText}
+                      label={currentLang === "ar" ? "بيانات المعدل" : "Updater Info"}
+                      value={`${selectedContractingType.updatedByUser.role || "-"} • ${
+                        selectedContractingType.updatedByUser.email || "-"
                       }`}
-                    >
-                      {selectedContractingType.updatedByUser.role} •{" "}
-                      {selectedContractingType.updatedByUser.email}
-                    </p>
-                  </div>
+                      tone="violet"
+                    />
+                  </>
                 )}
               </div>
+            </div>
+
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h3 className={`${sectionTitleClass} mb-5`}>
+                <span className={iconBoxViolet}>
+                  <Shield className={smallIconClass} />
+                </span>
+                {t("contractingTypes.table.status")}
+              </h3>
+
+              <StatusBadge isActive={selectedContractingType.isActive} />
             </div>
           </div>
         </div>

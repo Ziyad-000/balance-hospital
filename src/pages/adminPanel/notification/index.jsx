@@ -240,14 +240,14 @@ function Notification() {
   const getNotificationColor = (type) => {
     switch (type?.toUpperCase()) {
       case "SUCCESS":
-        return "text-green-500 bg-green-100 dark:bg-green-900/20"
+        return "text-green-500 bg-transparent dark:bg-transparent"
       case "ERROR":
-        return "text-red-500 bg-red-100 dark:bg-red-900/20"
+        return "text-red-500 bg-transparent dark:bg-transparent"
       case "WARNING":
-        return "text-orange-500 bg-orange-100 dark:bg-orange-900/20"
+        return "text-orange-500 bg-transparent dark:bg-transparent"
       case "INFO":
       default:
-        return "text-blue-500 bg-blue-100 dark:bg-blue-900/20"
+        return "text-blue-500 bg-transparent dark:bg-transparent"
     }
   }
 
@@ -318,12 +318,12 @@ function Notification() {
             <div className="flex items-center gap-4">
               <div
                 className={`p-3 ${
-                  isDark ? "bg-gray-700" : "bg-blue-100"
+                  isDark ? "bg-gray-700" : "bg-transparent"
                 } rounded-lg`}
               >
                 <Bell
                   className={`h-8 w-8 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
+                    isDark ? "text-blue-500" : "text-blue-500"
                   }`}
                 />
               </div>
@@ -337,7 +337,7 @@ function Notification() {
                 </h1>
                 <p
                   className={`text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-600"
+                    isDark ? "text-slate-500" : "text-gray-600"
                   }`}
                 >
                   {unreadCount > 0
@@ -349,7 +349,7 @@ function Notification() {
 
             {/* <button
               onClick={() => navigate("preferences")}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-slate-500 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               <Settings size={18} />
               <span className="hidden sm:inline">
@@ -374,8 +374,8 @@ function Notification() {
                   <div
                     className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-200 ${
                       isDark
-                        ? "border-gray-600 bg-gray-700 text-gray-400"
-                        : "border-gray-300 bg-white text-gray-500"
+                        ? "border-gray-600 bg-gray-700 text-slate-500"
+                        : "border-gray-300 bg-white text-slate-500"
                     }`}
                   >
                     <Search size={20} />
@@ -489,8 +489,8 @@ function Notification() {
 
         {/* Notifications List */}
         {error.list && (
-          <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg">
-            <p className="text-red-700 dark:text-red-400">{error.list}</p>
+          <div className="mb-6 p-4 bg-transparent dark:bg-transparent border border-red-300 dark:border-red-700 rounded-lg">
+            <p className="text-red-500 dark:text-red-500">{error.list}</p>
           </div>
         )}
 
@@ -505,7 +505,7 @@ function Notification() {
             <div className="text-center">
               <Bell
                 className={`h-16 w-16 mx-auto mb-4 ${
-                  isDark ? "text-gray-600" : "text-gray-400"
+                  isDark ? "text-gray-600" : "text-slate-500"
                 }`}
               />
               <h3
@@ -515,7 +515,7 @@ function Notification() {
               >
                 {t("notifications.noNotifications")}
               </h3>
-              <p className={`${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              <p className={`${isDark ? "text-slate-500" : "text-slate-500"}`}>
                 {t("notifications.noNotificationsDesc")}
               </p>
             </div>
@@ -539,7 +539,7 @@ function Notification() {
                       filteredNotifications.length
                     }
                     onChange={selectAllNotifications}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    className="w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <span
                     className={`${
@@ -578,7 +578,7 @@ function Notification() {
                         onChange={() =>
                           toggleSelectNotification(notification.id)
                         }
-                        className="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        className="mt-1 w-4 h-4 text-blue-500 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                       />
 
                       {/* Icon */}
@@ -603,7 +603,7 @@ function Notification() {
                             </h3>
                             <p
                               className={`text-sm mt-1 ${
-                                isDark ? "text-gray-400" : "text-gray-600"
+                                isDark ? "text-slate-500" : "text-gray-600"
                               }`}
                             >
                               {notification.messagePreview}
@@ -612,7 +612,7 @@ function Notification() {
                             <div className="flex items-center gap-3 mt-2">
                               <span
                                 className={`text-xs flex items-center gap-1 ${
-                                  isDark ? "text-gray-400" : "text-gray-500"
+                                  isDark ? "text-slate-500" : "text-slate-500"
                                 }`}
                               >
                                 <Clock size={12} />
@@ -623,10 +623,10 @@ function Notification() {
                                 <span
                                   className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                                     notification.priority === "Critical"
-                                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                      ? "bg-transparent text-red-500 dark:bg-red-900/30 dark:text-red-500"
                                       : notification.priority === "High"
-                                      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                                      : "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
+                                      ? "bg-transparent text-orange-500 dark:bg-transparent dark:text-orange-500"
+                                      : "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-slate-500"
                                   }`}
                                 >
                                   {notification.priority}
@@ -634,7 +634,7 @@ function Notification() {
                               )}
 
                               {!notification.isRead && (
-                                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-transparent text-blue-500 dark:bg-transparent dark:text-blue-500">
                                   {t("notifications.new")}
                                 </span>
                               )}
@@ -650,7 +650,7 @@ function Notification() {
                             onClick={() =>
                               handleNotificationClick(notification)
                             }
-                            className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                            className="p-2 text-blue-500 hover:bg-transparent dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title={t("notifications.viewDetails")}
                           >
                             <ExternalLink size={18} />
@@ -661,7 +661,7 @@ function Notification() {
                           <button
                             onClick={() => handleMarkAsRead(notification.id)}
                             disabled={loading.markAsRead}
-                            className="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50"
+                            className="p-2 text-emerald-500 hover:bg-transparent dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50"
                             title={t("notifications.markAsRead")}
                           >
                             <Check size={18} />
@@ -671,7 +671,7 @@ function Notification() {
                         <button
                           onClick={() => handleDelete(notification.id)}
                           disabled={loading.delete}
-                          className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                          className="p-2 text-red-500 hover:bg-transparent dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
                           title={t("notifications.delete.title")}
                         >
                           <Trash2 size={18} />
@@ -690,7 +690,7 @@ function Notification() {
           <div className="mt-6 flex items-center justify-between">
             <p
               className={`text-sm ${
-                isDark ? "text-gray-400" : "text-gray-600"
+                isDark ? "text-slate-500" : "text-gray-600"
               }`}
             >
               {t("notifications.showing")} {notifications.length}{" "}

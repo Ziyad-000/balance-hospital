@@ -59,19 +59,19 @@ const CreateRoster = () => {
   const { subDepartments } = useSelector((state) => state.subDepartment)
 
   const iconColors = {
-    info: "text-blue-600 dark:text-blue-400",
-    building: "text-green-600 dark:text-green-400",
-    clock: "text-purple-600 dark:text-purple-400",
-    settings: "text-orange-600 dark:text-orange-400",
-    save: "text-green-600 dark:text-green-400",
-    trash: "text-red-600 dark:text-red-400",
+    info: "text-blue-500 dark:text-blue-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-violet-500 dark:text-violet-500",
+    settings: "text-orange-500 dark:text-orange-500",
+    save: "text-emerald-500 dark:text-emerald-500",
+    trash: "text-red-500 dark:text-red-500",
   }
 
   const iconBg = {
-    info: "bg-blue-100 dark:bg-blue-900/30",
-    building: "bg-green-100 dark:bg-green-900/30",
-    clock: "bg-purple-100 dark:bg-purple-900/30",
-    settings: "bg-orange-100 dark:bg-orange-900/30",
+    info: "bg-transparent dark:bg-transparent border border-blue-500",
+    building: "bg-transparent dark:bg-transparent border border-emerald-500",
+    clock: "bg-transparent dark:bg-transparent border border-violet-500",
+    settings: "bg-transparent dark:bg-transparent border border-orange-500",
   }
 
   useEffect(() => {
@@ -350,13 +350,13 @@ const CreateRoster = () => {
 
   const labelClass = "block text-sm font-semibold text-[var(--color-text)] mb-2"
 
-  const errorClass = "text-[var(--color-danger)] text-xs mt-1"
+  const errorClass = "text-red-500 text-xs mt-1"
 
   const DropdownLoader = ({ text }) => (
     <div
       className={`w-full px-3 py-2 border rounded-lg bg-[var(--color-surface)] border-[var(--color-border)] flex items-center justify-center`}
     >
-      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--color-primary)]" />
+      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-500" />
 
       <span
         className={`${isRTL ? "mr-2" : "ml-2"} text-sm text-[var(--color-text-muted)]`}
@@ -454,7 +454,7 @@ const CreateRoster = () => {
                       <div
                         className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                           isReached
-                            ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                            ? "border-emerald-500 bg-emerald-600 text-white"
                             : `border-[var(--color-border)] ${getStepIconBg(
                                 step
                               )} ${getStepIconColor(step)}`
@@ -472,7 +472,7 @@ const CreateRoster = () => {
                             : ""
                         } ${
                           isReached
-                            ? "border-[var(--color-primary)]"
+                            ? "border-emerald-500"
                             : "border-[var(--color-border)]"
                         } ${isRTL ? "pr-3" : "pl-3"}`}
                       >
@@ -491,7 +491,7 @@ const CreateRoster = () => {
                         <div
                           className={`flex-1 h-0.5 mx-4 ${
                             isDone
-                              ? "bg-[var(--color-primary)]"
+                              ? "bg-emerald-600"
                               : "bg-[var(--color-border)]"
                           }`}
                         />
@@ -752,7 +752,7 @@ const CreateRoster = () => {
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
 
                             <span
-                              className={`${isRTL ? "mr-3" : "ml-3"} text-sm text-blue-800 dark:text-blue-300`}
+                              className={`${isRTL ? "mr-3" : "ml-3"} text-sm text-blue-500 dark:text-blue-500`}
                             >
                               {t("department.loading")}
                             </span>
@@ -775,7 +775,7 @@ const CreateRoster = () => {
                                     <button
                                       type="button"
                                       onClick={() => remove(index)}
-                                      className="text-red-600 dark:text-red-400 hover:opacity-80 p-1 rounded"
+                                      className="text-red-500 dark:text-red-500 hover:opacity-80 p-1 rounded"
                                       title={t("roster.form.removeDepartment")}
                                     >
                                       <Trash2 size={16} />

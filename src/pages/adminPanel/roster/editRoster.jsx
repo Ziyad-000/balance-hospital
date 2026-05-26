@@ -51,15 +51,15 @@ const UpdateRoster = () => {
   const { VALIDATION_SCHEMA_UPDATE_BASIC_ROASTER } = UseFormValidation()
 
   const iconColors = {
-    info: "text-blue-600 dark:text-blue-400",
-    settings: "text-orange-600 dark:text-orange-400",
-    success: "text-green-600 dark:text-green-400",
-    danger: "text-red-600 dark:text-red-400",
+    info: "text-blue-500 dark:text-blue-500",
+    settings: "text-orange-500 dark:text-orange-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    danger: "text-red-500 dark:text-red-500",
   }
 
   const iconBg = {
-    info: "bg-blue-100 dark:bg-blue-900/30",
-    settings: "bg-orange-100 dark:bg-orange-900/30",
+    info: "bg-transparent dark:bg-transparent border border-blue-500",
+    settings: "bg-transparent dark:bg-transparent border border-orange-500",
   }
 
   useEffect(() => {
@@ -318,7 +318,7 @@ const UpdateRoster = () => {
     }`
 
   const labelClass = "block text-sm font-semibold text-[var(--color-text)] mb-2"
-  const errorClass = "text-[var(--color-danger)] text-xs mt-1"
+  const errorClass = "text-red-500 text-xs mt-1"
 
   const StepHeading = ({ icon: Icon, iconClass, title }) => (
     <div className="flex items-center mb-6">
@@ -399,7 +399,7 @@ const UpdateRoster = () => {
                       <div
                         className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
                           isReached
-                            ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                            ? "border-emerald-500 bg-emerald-600 text-white"
                             : `border-[var(--color-border)] ${getStepIconBg(
                                 step
                               )} ${getStepIconColor(step)}`
@@ -417,7 +417,7 @@ const UpdateRoster = () => {
                             : ""
                         } ${
                           isReached
-                            ? "border-[var(--color-primary)]"
+                            ? "border-emerald-500"
                             : "border-[var(--color-border)]"
                         } ${isRTL ? "pr-3" : "pl-3"}`}
                       >
@@ -436,7 +436,7 @@ const UpdateRoster = () => {
                         <div
                           className={`flex-1 h-0.5 mx-4 ${
                             isDone
-                              ? "bg-[var(--color-primary)]"
+                              ? "bg-emerald-600"
                               : "bg-[var(--color-border)]"
                           }`}
                         />

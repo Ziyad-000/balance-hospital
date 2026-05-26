@@ -674,7 +674,7 @@ function SpecificUser() {
         <div className={`${theme.card} p-6`}>
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-transparent text-blue-500 border-2 border-blue-500 flex items-center justify-center shadow-sm">
                 <User className="w-8 h-8" />
               </div>
 
@@ -723,12 +723,12 @@ function SpecificUser() {
 
                 <div className="flex flex-wrap gap-4 mt-4 text-sm text-[var(--color-text-muted)]">
                   <span className="inline-flex items-center gap-2">
-                    <Mail size={15} />
+                    <Mail size={15} className="text-cyan-500" />
                     {selectedUser.email || "-"}
                   </span>
 
                   <span className="inline-flex items-center gap-2">
-                    <Phone size={15} />
+                    <Phone size={15} className="text-emerald-500" />
                     {selectedUser.mobile || "-"}
                   </span>
                 </div>
@@ -1509,8 +1509,8 @@ function DoctorScheduleTab({
                 onClick={() => setViewMode("calendar")}
                 className={`px-4 py-2 text-sm font-bold transition-colors ${
                   viewMode === "calendar"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-emerald-600 hover:text-white"
                 }`}
               >
                 Calendar View
@@ -1521,8 +1521,8 @@ function DoctorScheduleTab({
                 onClick={() => setViewMode("rows")}
                 className={`px-4 py-2 text-sm font-bold transition-colors ${
                   viewMode === "rows"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-emerald-600 hover:text-white"
                 }`}
               >
                 Rows View
@@ -1935,11 +1935,28 @@ function SelectInput({
   )
 }
 
-function SectionCard({ title, icon: Icon, children }) {
+function SectionCard({ title, icon: Icon, children, tone = "blue" }) {
+  const toneClass =
+    tone === "green"
+      ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+      : tone === "red"
+      ? "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+      : tone === "orange"
+      ? "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500"
+      : tone === "yellow"
+      ? "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+      : tone === "purple"
+      ? "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500"
+      : tone === "neutral"
+      ? "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500"
+      : "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
+
   return (
     <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-sm)] p-5">
       <h2 className="text-xl font-extrabold text-[var(--color-text)] mb-5 flex items-center gap-2">
-        <span className="w-9 h-9 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+        <span
+          className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-sm ${toneClass}`}
+        >
           <Icon className="w-5 h-5" />
         </span>
         {title}
@@ -1973,34 +1990,39 @@ function FormInput({ label, value, onChange, theme, type = "text" }) {
 function StatCard({ title, value, icon: Icon, tone = "blue" }) {
   const toneMap = {
     blue: {
-      bg: "bg-[var(--color-primary-soft)]",
-      text: "text-[var(--color-primary)]",
-      border: "border-[var(--color-primary)]",
+      bg: "bg-transparent",
+      text: "text-blue-500",
+      border: "border-blue-500",
     },
     green: {
-      bg: "bg-[var(--color-success-soft)]",
-      text: "text-[var(--color-success)]",
-      border: "border-[var(--color-success-border)]",
+      bg: "bg-transparent",
+      text: "text-emerald-500",
+      border: "border-emerald-500",
     },
     red: {
-      bg: "bg-[var(--color-danger-soft)]",
-      text: "text-[var(--color-danger)]",
-      border: "border-[var(--color-danger-border)]",
+      bg: "bg-transparent",
+      text: "text-red-500",
+      border: "border-red-500",
     },
     orange: {
-      bg: "bg-[var(--color-warning-soft)]",
-      text: "text-[var(--color-warning)]",
-      border: "border-[var(--color-warning-border)]",
+      bg: "bg-transparent",
+      text: "text-orange-500",
+      border: "border-orange-500",
     },
     purple: {
-      bg: "bg-[var(--color-purple-soft)]",
-      text: "text-[var(--color-purple)]",
-      border: "border-[var(--color-purple-border)]",
+      bg: "bg-transparent",
+      text: "text-violet-500",
+      border: "border-violet-500",
     },
     yellow: {
-      bg: "bg-[var(--color-warning-soft)]",
-      text: "text-[var(--color-warning)]",
-      border: "border-[var(--color-warning-border)]",
+      bg: "bg-transparent",
+      text: "text-amber-500",
+      border: "border-amber-500",
+    },
+    neutral: {
+      bg: "bg-transparent",
+      text: "text-slate-500",
+      border: "border-slate-500",
     },
   }
 
@@ -2020,7 +2042,7 @@ function StatCard({ title, value, icon: Icon, tone = "blue" }) {
         </div>
 
         <div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center border ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
+          className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 shadow-sm ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
         >
           <Icon size={22} />
         </div>
@@ -2045,23 +2067,17 @@ function MiniInfo({ label, value }) {
 
 function Badge({ text, tone = "blue" }) {
   const toneMap = {
-    blue:
-      "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border-[var(--color-primary)]",
-    green:
-      "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]",
-    red:
-      "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]",
-    orange:
-      "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning-border)]",
-    purple:
-      "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border-[var(--color-purple-border)]",
-    neutral:
-      "bg-[var(--color-neutral-soft)] text-[var(--color-neutral)] border-[var(--color-neutral-border)]",
+    blue: "bg-transparent text-blue-500 border-blue-500",
+    green: "bg-transparent text-emerald-500 border-emerald-500",
+    red: "bg-transparent text-red-500 border-red-500",
+    orange: "bg-transparent text-orange-500 border-orange-500",
+    purple: "bg-transparent text-violet-500 border-violet-500",
+    neutral: "bg-transparent text-slate-500 border-slate-500",
   }
 
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border-2 shadow-sm ${
         toneMap[tone] || toneMap.neutral
       }`}
     >
@@ -2077,21 +2093,20 @@ function TabButton({ id, activeTab, setActiveTab, icon: Icon, label, count }) {
     <button
       type="button"
       onClick={() => setActiveTab(id)}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${
         isActive
-          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-[var(--shadow-sm)]"
-          : "bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text)]"
+          ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
+          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)]"
       }`}
     >
       <Icon size={16} />
       {label}
-
       {count !== undefined && (
         <span
-          className={`px-2 py-0.5 rounded-full text-[11px] ${
+          className={`px-2 py-0.5 rounded-full text-[11px] border ${
             isActive
-              ? "bg-white/20 text-white"
-              : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]"
+              ? "bg-white/20 text-white border-white/20"
+              : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]"
           }`}
         >
           {count}
@@ -2113,7 +2128,7 @@ function InlineLoader({ text }) {
 function EmptyState({ title, description }) {
   return (
     <div className="p-8 text-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-      <User className="w-12 h-12 mx-auto mb-3 text-[var(--color-text-muted)]" />
+      <User className="w-12 h-12 mx-auto mb-3 text-slate-500" />
       <h3 className="text-lg font-extrabold text-[var(--color-text)]">
         {title}
       </h3>
@@ -2126,9 +2141,9 @@ function EmptyState({ title, description }) {
 
 function ErrorBox({ title, message }) {
   return (
-    <div className="p-5 rounded-2xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]">
+    <div className="p-5 rounded-2xl bg-transparent text-red-500 border-2 border-red-500 shadow-sm">
       <div className="flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 mt-0.5" />
+        <AlertTriangle className="w-5 h-5 mt-0.5 text-red-500" />
 
         <div>
           {title && <h3 className="font-extrabold mb-1">{title}</h3>}
@@ -2141,9 +2156,9 @@ function ErrorBox({ title, message }) {
 
 function SuccessBox({ message }) {
   return (
-    <div className="p-5 rounded-2xl bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
+    <div className="p-5 rounded-2xl bg-transparent text-emerald-500 border-2 border-emerald-500 shadow-sm">
       <div className="flex items-start gap-3">
-        <CheckCircle className="w-5 h-5 mt-0.5" />
+        <CheckCircle className="w-5 h-5 mt-0.5 text-emerald-500" />
         <p className="text-sm font-bold">{message}</p>
       </div>
     </div>
@@ -2153,26 +2168,22 @@ function SuccessBox({ message }) {
 function AttendanceBadge({ status }) {
   const normalized = String(status || "").toLowerCase()
 
-  let cls =
-    "bg-[var(--color-info-soft)] text-[var(--color-info)] border-[var(--color-info-border)]"
+  let cls = "bg-transparent text-blue-500 border-blue-500"
 
   if (normalized.includes("حاضر") || normalized.includes("present")) {
-    cls =
-      "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
+    cls = "bg-transparent text-emerald-500 border-emerald-500"
   }
 
   if (normalized.includes("غائب") || normalized.includes("absent")) {
-    cls =
-      "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
+    cls = "bg-transparent text-red-500 border-red-500"
   }
 
   if (normalized.includes("متأخر") || normalized.includes("late")) {
-    cls =
-      "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border-[var(--color-warning-border)]"
+    cls = "bg-transparent text-amber-500 border-amber-500"
   }
 
   return (
-    <span className={`px-3 py-1 rounded-full border text-xs font-bold ${cls}`}>
+    <span className={`px-3 py-1 rounded-full border-2 text-xs font-bold shadow-sm ${cls}`}>
       {status || "-"}
     </span>
   )
@@ -2181,18 +2192,18 @@ function AttendanceBadge({ status }) {
 function AttendanceDot({ status }) {
   const normalized = String(status || "").toLowerCase()
 
-  let cls = "bg-[var(--color-info)]"
+  let cls = "bg-blue-500"
 
   if (normalized.includes("حاضر") || normalized.includes("present")) {
-    cls = "bg-[var(--color-success)]"
+    cls = "bg-emerald-500"
   }
 
   if (normalized.includes("غائب") || normalized.includes("absent")) {
-    cls = "bg-[var(--color-danger)]"
+    cls = "bg-red-500"
   }
 
   if (normalized.includes("متأخر") || normalized.includes("late")) {
-    cls = "bg-[var(--color-warning)]"
+    cls = "bg-amber-500"
   }
 
   return <span className={`w-2.5 h-2.5 rounded-full ${cls}`} />

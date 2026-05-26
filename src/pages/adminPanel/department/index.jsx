@@ -331,54 +331,54 @@ function Department() {
     pagination?.page < pagination?.totalPages
 
   const defaultButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)] active:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const selectedButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-emerald-500 transition-colors"
 
   const iconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] active:text-white transition-colors"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)] active:text-white transition-colors"
 
   const dangerIconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-red-500 transition-colors"
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors"
+    "w-full px-3 py-2 rounded-lg bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-success)]/20 focus:border-blue-500 transition-colors"
 
   const searchInputClass =
-    "w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)] transition-colors"
+    "w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-success)]/20 focus:border-blue-500 transition-colors"
 
   const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneMap = {
       blue: {
-        bg: "bg-[var(--color-primary-soft)]",
-        text: "text-[var(--color-primary)]",
-        border: "border-[var(--color-primary)]/25",
+        bg: "bg-transparent",
+        text: "text-blue-500",
+        border: "border-blue-500",
       },
       green: {
-        bg: "bg-[var(--color-success-soft)]",
-        text: "text-[var(--color-success)]",
-        border: "border-[var(--color-success-border)]",
+        bg: "bg-transparent",
+        text: "text-emerald-500",
+        border: "border-emerald-500",
       },
       red: {
-        bg: "bg-[var(--color-danger-soft)]",
-        text: "text-[var(--color-danger)]",
-        border: "border-[var(--color-danger-border)]",
+        bg: "bg-transparent",
+        text: "text-red-500",
+        border: "border-red-500",
       },
       yellow: {
-        bg: "bg-[var(--color-warning-soft)]",
-        text: "text-[var(--color-warning)]",
-        border: "border-[var(--color-warning-border)]",
+        bg: "bg-transparent",
+        text: "text-amber-500",
+        border: "border-amber-500",
       },
       purple: {
-        bg: "bg-[var(--color-purple-soft)]",
-        text: "text-[var(--color-purple)]",
-        border: "border-[var(--color-purple-border)]",
+        bg: "bg-transparent",
+        text: "text-violet-500",
+        border: "border-violet-500",
       },
       orange: {
-        bg: "bg-[var(--color-warning-soft)]",
-        text: "text-[var(--color-warning)]",
-        border: "border-[var(--color-warning-border)]",
+        bg: "bg-transparent",
+        text: "text-amber-500",
+        border: "border-amber-500",
       },
     }
 
@@ -407,7 +407,7 @@ function Department() {
   const StatusBadge = ({ active }) => (
     <span
       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
-        active ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]" : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
+        active ? "bg-transparent text-emerald-500 border-emerald-500" : "bg-transparent text-red-500 border-red-500"
       }`}
     >
       {active ? <CheckCircle size={13} /> : <XCircle size={13} />}
@@ -425,8 +425,8 @@ function Department() {
       <span
         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
           hasManager
-            ? "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border-[var(--color-purple-border)]"
-            : "bg-[var(--color-neutral-soft)] text-[var(--color-neutral)] border-[var(--color-neutral-border)]"
+            ? "bg-transparent text-violet-500 border-violet-500"
+            : "bg-transparent text-slate-500 border-slate-500"
         }`}
       >
         <UserCheck size={13} />
@@ -443,7 +443,7 @@ function Department() {
     <div className={`${theme.card} p-4`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-start gap-3">
-          <div className="w-11 h-11 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-transparent text-blue-500 flex items-center justify-center">
             <Building2 size={22} />
           </div>
 
@@ -466,7 +466,7 @@ function Department() {
 
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Link2 className="w-4 h-4 mx-auto mb-1 text-[var(--color-primary)]" />
+          <Link2 className="w-4 h-4 mx-auto mb-1 text-blue-500" />
           <p className="font-bold text-[var(--color-text)]">
             {getLinkedCategoriesCount(department)}
           </p>
@@ -476,7 +476,7 @@ function Department() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Shield className="w-4 h-4 mx-auto mb-1 text-[var(--color-purple)]" />
+          <Shield className="w-4 h-4 mx-auto mb-1 text-violet-500" />
           <p className="font-bold text-[var(--color-text)]">
             {getManagerName(department) !== "-" ? 1 : 0}
           </p>
@@ -486,7 +486,7 @@ function Department() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <MapPin className="w-4 h-4 mx-auto mb-1 text-[var(--color-success)]" />
+          <MapPin className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
           <p className="font-bold text-[var(--color-text)]">
             {getGeoFenceCount(department)}
           </p>
@@ -568,7 +568,7 @@ function Department() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl font-extrabold text-[var(--color-text)] flex items-center gap-3">
-                <span className="w-12 h-12 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                <span className="w-12 h-12 rounded-2xl bg-transparent text-blue-500 flex items-center justify-center">
                   <Building2 className="w-7 h-7" />
                 </span>
                 {t("department.title") || "Departments"}
@@ -601,16 +601,16 @@ function Department() {
           </div>
 
           {error && (
-            <div className={`${theme.card} p-4 mb-5 border-[var(--color-danger-border)]`}>
+            <div className={`${theme.card} p-4 mb-5 border-red-500`}>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[var(--color-danger)] text-sm font-semibold">
+                <p className="text-red-500 text-sm font-semibold">
                   {error.message || String(error)}
                 </p>
 
                 <button
                   type="button"
                   onClick={() => dispatch(clearError())}
-                  className="text-[var(--color-danger)]"
+                  className="text-red-500"
                 >
                   <X size={18} />
                 </button>
@@ -1016,7 +1016,7 @@ function Department() {
 
                         <td className={tableCellClass}>
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-transparent text-blue-500 flex items-center justify-center">
                               <Building2 size={20} />
                             </div>
 
@@ -1041,7 +1041,7 @@ function Department() {
 
                         <td className={`${tableCellClass} text-center`}>
                           <Link to={`/admin-panel/department/${department.id}`}>
-                            <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/25">
+                            <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-transparent text-blue-500 border border-blue-500">
                               <Link2 size={13} />
                               {getLinkedCategoriesCount(department)}
                             </span>
@@ -1058,8 +1058,8 @@ function Department() {
                           <span
                             className={`inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${
                               getGeoFenceCount(department) > 0
-                                ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
-                                : "bg-[var(--color-neutral-soft)] text-[var(--color-neutral)] border-[var(--color-neutral-border)]"
+                                ? "bg-transparent text-emerald-500 border-emerald-500"
+                                : "bg-transparent text-slate-500 border-slate-500"
                             }`}
                           >
                             <MapPin size={13} />
@@ -1178,8 +1178,8 @@ function Department() {
                       onClick={() => handlePageChange(page)}
                       className={`px-3 py-2 rounded-lg border transition-colors ${
                         page === pagination.page
-                          ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
-                          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)]"
+                          ? "bg-[var(--color-success)] text-white border-emerald-500"
+                          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)]"
                       }`}
                     >
                       {page}
@@ -1211,7 +1211,7 @@ function Department() {
 function LoadingBlock({ text }) {
   return (
     <div className="flex items-center justify-center gap-3 py-8 text-[var(--color-text-muted)]">
-      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[var(--color-primary)]" />
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-500" />
       <span className="text-sm font-semibold">{text}</span>
     </div>
   )

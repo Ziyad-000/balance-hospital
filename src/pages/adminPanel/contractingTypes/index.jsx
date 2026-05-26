@@ -13,7 +13,14 @@ import {
   Menu,
   X,
   Users,
+  Clock,
+  Hash,
+  Calendar,
+  FileText,
+  CheckCircle,
+  XCircle,
 } from "lucide-react"
+
 import { getContractingTypes } from "../../../state/act/actContractingType"
 import {
   clearError,
@@ -27,26 +34,27 @@ import {
   setSortFilter,
   clearFilters,
 } from "../../../state/slices/contractingType"
+
 import { Link } from "react-router-dom"
 import DeleteContractingTypeModal from "../../../components/modals/DeleteContractingType"
+import { getPageTheme } from "../../../utils/themeClasses"
 import "../../../styles/general.css"
 
 function ContractingTypes() {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
+
   const [modalOpen, setModalOpen] = useState(false)
   const [toDelete, setToDelete] = useState({ id: null, name: "" })
   const [showFilters, setShowFilters] = useState(false)
   const [showMobileTable, setShowMobileTable] = useState(false)
 
-  // Filter input states
   const [searchInput, setSearchInput] = useState("")
   const [minHoursInput, setMinHoursInput] = useState("")
   const [maxHoursInput, setMaxHoursInput] = useState("")
   const [fromDateInput, setFromDateInput] = useState("")
   const [toDateInput, setToDateInput] = useState("")
-
-  // Debounced search
   const [searchTimeout, setSearchTimeout] = useState(null)
 
   const {
@@ -57,16 +65,18 @@ function ContractingTypes() {
     error,
   } = useSelector((state) => state.contractingType)
 
-  const { mymode } = useSelector((state) => state.mode)
-
-  // Check if we're in dark mode
-  const isDark = mymode === "dark"
-
-  // Check if current language is RTL
   const language = i18n.language
   const isRTL = language === "ar"
 
-  // Initialize filter inputs from current filters
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const createButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] hover:bg-[var(--color-success-hover)] hover:border-[var(--color-success-hover)] active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
   useEffect(() => {
     setSearchInput(filters.search || "")
     setMinHoursInput(filters.minHoursPerWeek || "")
@@ -75,7 +85,6 @@ function ContractingTypes() {
     setToDateInput(filters.createdToDate || "")
   }, [filters])
 
-  // Fetch contracting types when component mounts or filters change
   useEffect(() => {
     const params = {
       search: filters.search,
@@ -94,12 +103,10 @@ function ContractingTypes() {
     dispatch(getContractingTypes(params))
   }, [dispatch, filters])
 
-  // Clear error on mount
   useEffect(() => {
     dispatch(clearError())
   }, [dispatch])
 
-  // Handle search with debounce
   const handleSearchChange = useCallback(
     (value) => {
       setSearchInput(value)
@@ -117,7 +124,6 @@ function ContractingTypes() {
     [dispatch, searchTimeout]
   )
 
-  // Handle pagination
   const handlePageChange = (newPage) => {
     dispatch(setCurrentPage(newPage))
   }
@@ -126,7 +132,6 @@ function ContractingTypes() {
     dispatch(setPageSize(parseInt(newPageSize)))
   }
 
-  // Handle filter changes
   const handleStatusChange = (value) => {
     dispatch(setStatusFilter(value))
   }
@@ -164,24 +169,22 @@ function ContractingTypes() {
     setToDateInput("")
   }
 
-  // Handle delete action
   const handleDeleteClick = (contractingType) => {
     const name =
       language === "ar"
         ? contractingType.nameArabic
         : contractingType.nameEnglish
+
     setToDelete({ id: contractingType.id, name })
     setModalOpen(true)
   }
 
-  // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages = []
     const totalPages = pagination?.totalPages || 1
     const currentPage = pagination?.page || 1
-
-    // Show up to 3 page numbers on mobile, 5 on desktop
     const maxPages = window.innerWidth < 768 ? 3 : 5
+
     let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2))
     let endPage = Math.min(totalPages, startPage + maxPages - 1)
 
@@ -196,79 +199,198 @@ function ContractingTypes() {
     return pages
   }
 
-  // Mobile card component for each contracting type
+  const formatHours = (hours) => {
+    if (hours === null || hours === undefined || hours === "") return "0"
+    return parseFloat(hours).toString()
+  }
+
+  const getOvertimeBadgeClass = (allowed) => {
+    if (allowed === true) {
+      return "bg-transparent text-emerald-500 border-2 border-emerald-500"
+    }
+
+    if (allowed === false) {
+      return "bg-transparent text-red-500 border-2 border-red-500"
+    }
+
+    return "bg-transparent text-slate-500 border-2 border-slate-500"
+  }
+
+  const getStatusBadgeClass = (active) => {
+    if (active === true) {
+      return "bg-transparent text-emerald-500 border-2 border-emerald-500"
+    }
+
+    if (active === false) {
+      return "bg-transparent text-red-500 border-2 border-red-500"
+    }
+
+    return "bg-transparent text-slate-500 border-2 border-slate-500"
+  }
+
+  const ActionButton = ({ children, title, tone = "primary", onClick }) => {
+    const toneClasses = {
+      primary:
+        "bg-transparent text-blue-500 border border-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+      warning:
+        "bg-transparent text-amber-500 border border-amber-500 hover:bg-amber-600 hover:text-white hover:border-amber-600",
+      success:
+        "bg-transparent text-emerald-500 border border-emerald-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+      danger:
+        "bg-transparent text-red-500 border border-red-500 hover:bg-red-600 hover:text-white hover:border-red-600",
+    }
+
+    return (
+      <button
+        onClick={onClick}
+        className={`p-2 rounded-lg transition-colors ${toneClasses[tone]}`}
+        title={title}
+        type="button"
+      >
+        {children}
+      </button>
+    )
+  }
+
+  const LoadingState = ({ small = false }) => (
+    <div className="text-center p-8">
+      <div className="flex items-center justify-center">
+        <div
+          className={`animate-spin rounded-full border-b-2 border-[var(--color-success)] ${
+            small ? "h-6 w-6" : "h-8 w-8"
+          }`}
+        />
+
+        <span
+          className={`${
+            isRTL ? "mr-3" : "ml-3"
+          } text-[var(--color-text-muted)]`}
+        >
+          {t("gettingData.contractingTypes")}
+        </span>
+      </div>
+    </div>
+  )
+
+  const EmptyState = ({ compact = false }) => (
+    <div className={`text-center ${compact ? "p-8" : "p-12"}`}>
+      <div className="w-14 h-14 bg-transparent rounded-full border-2 border-slate-500 text-slate-500 flex items-center justify-center mx-auto mb-4 shadow-sm">
+        <FileText size={compact ? 24 : 32} />
+      </div>
+
+      <h3
+        className={`font-semibold text-[var(--color-text)] mb-2 ${
+          compact ? "text-base" : "text-lg"
+        }`}
+      >
+        {t("contractingTypes.noData")}
+      </h3>
+    </div>
+  )
+
   const ContractingTypeCard = ({ contractingType }) => (
-    <div
-      className={`p-4 rounded-lg border mb-3 ${
-        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-      }`}
-    >
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h3
-            className={`font-semibold text-lg ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
+    <div className={`${theme.card} p-4 mb-3`}>
+      <div className="flex justify-between items-start mb-3 gap-3">
+        <div className="flex-1">
+          <h3 className="font-semibold text-lg text-[var(--color-text)]">
             {language === "en"
               ? contractingType.nameEnglish
               : contractingType.nameArabic}
           </h3>
+
+          <p className="text-sm text-[var(--color-text-muted)]">
+            {language === "en"
+              ? contractingType.nameArabic
+              : contractingType.nameEnglish}
+          </p>
+
+          {contractingType.code && (
+            <div className="flex items-center mt-1 gap-1">
+              <Hash className="h-3 w-3 text-[var(--color-text-muted)]" />
+
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text)]">
+                {contractingType.code}
+              </span>
+            </div>
+          )}
         </div>
+
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${getOvertimeBadgeClass(
+            contractingType.allowOvertimeHours
+          )}`}
+        >
+          {contractingType.allowOvertimeHours
+            ? t("contractingTypes.overtime.allowed")
+            : t("contractingTypes.overtime.notAllowed")}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-        <div>
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
+        <div className="flex items-center gap-2">
+          <Users size={14} className="text-[var(--color-text-muted)]" />
+          <span className="text-[var(--color-text-muted)]">
             {t("contractingTypes.table.users")}:
           </span>
-          <span
-            className={`${isRTL ? "mr-2" : "ml-2"} ${
-              isDark ? "text-gray-200" : "text-gray-800"
-            }`}
-          >
-            {contractingType.usersCount}
+          <span className="font-semibold text-[var(--color-text)]">
+            {contractingType.usersCount || 0}
           </span>
         </div>
+
+        <div className="flex items-center gap-2">
+          <Clock size={14} className="text-[var(--color-text-muted)]" />
+          <span className="text-[var(--color-text-muted)]">
+            {t("contractingTypes.table.maxHours") ||
+              t("contractingTypes.filters.maxHours")}
+            :
+          </span>
+          <span className="font-semibold text-[var(--color-text)]">
+            {formatHours(contractingType.maxHoursPerWeek)}h
+          </span>
+        </div>
+
+        {contractingType.createdAt && (
+          <div className="flex items-center gap-2 col-span-2">
+            <Calendar size={14} className="text-[var(--color-text-muted)]" />
+            <span className="text-[var(--color-text-muted)]">
+              {t("contractingTypes.table.createdAt")}:
+            </span>
+            <span className="text-xs text-[var(--color-text)]">
+              {contractingType.createdAt}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2 justify-end">
         <Link to={`/admin-panel/contracting-types/${contractingType.id}`}>
-          <button
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
-            title={t("contractingTypes.actions.view")}
-          >
+          <ActionButton title={t("contractingTypes.actions.view")}>
             <Eye size={16} />
-          </button>
+          </ActionButton>
         </Link>
+
         <Link to={`/admin-panel/contracting-types/edit/${contractingType.id}`}>
-          <button
-            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
+          <ActionButton
             title={t("contractingTypes.actions.edit")}
+            tone="success"
           >
             <Edit size={16} />
-          </button>
+          </ActionButton>
         </Link>
-        <button
-          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
+
+        <ActionButton
           title={t("contractingTypes.actions.delete")}
+          tone="danger"
           onClick={() => handleDeleteClick(contractingType)}
         >
           <Trash2 size={16} />
-        </button>
+        </ActionButton>
       </div>
     </div>
   )
 
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <DeleteContractingTypeModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -276,40 +398,40 @@ function ContractingTypes() {
         info={toDelete}
         contractingTypeName={toDelete.name}
       />
+
       <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)]">
                 {t("contractingTypes.title")}
               </h1>
+
               <div className="flex gap-2 w-full sm:w-auto">
                 <Link to="/admin-panel/contracting-types/create">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors flex-1 sm:flex-none justify-center cursor-pointer">
+                  <button
+                    className={`${createButtonClass} flex-1 sm:flex-none`}
+                  >
                     <Plus size={20} />
+
                     <span className="hidden sm:inline">
                       {t("contractingTypes.addNew")}
                     </span>
+
                     <span className="sm:hidden">
                       {t("contractingTypes.add")}
                     </span>
                   </button>
                 </Link>
-                {/* Mobile table toggle */}
+
                 <button
                   onClick={() => setShowMobileTable(!showMobileTable)}
-                  className={`md:hidden px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
+                  className={`md:hidden px-3 py-2 rounded-lg border transition-colors ${
                     showMobileTable
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        }`
+                      ? "bg-transparent border-2 border-emerald-500 text-emerald-500"
+                      : defaultButtonClass
                   }`}
+                  type="button"
                 >
                   {showMobileTable ? <X size={20} /> : <Menu size={20} />}
                 </button>
@@ -317,12 +439,14 @@ function ContractingTypes() {
             </div>
 
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <div className="flex justify-between items-center">
+              <div className="bg-transparent border-2 border-red-500 text-red-500 px-4 py-3 rounded-xl mb-4 shadow-sm">
+                <div className="flex justify-between items-center gap-4">
                   <span>{error.message}</span>
+
                   <button
                     onClick={() => dispatch(clearError())}
-                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                    className="text-red-500 hover:opacity-80 text-xl leading-none"
+                    type="button"
                   >
                     ×
                   </button>
@@ -331,104 +455,64 @@ function ContractingTypes() {
             )}
           </div>
 
-          {/* Search and Filters */}
-          <div
-            className={`rounded-lg shadow-sm border mb-6 ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
+          <div className={`${theme.card} mb-6`}>
             <div className="p-4">
-              {/* Search Bar */}
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex-1 flex items-center gap-2">
-                  {/* Search Icon Container - Completely separate from input */}
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-200 ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700 text-gray-400"
-                        : "border-gray-300 bg-white text-gray-500"
-                    }`}
-                  >
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg border-2 border-blue-500 bg-transparent text-blue-500 shadow-sm shrink-0">
                     <Search size={20} />
                   </div>
 
-                  {/* Input Container */}
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder={t("contractingTypes.search.placeholder")}
-                      value={searchInput}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                          : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
-                      }`}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder={t("contractingTypes.search.placeholder")}
+                    value={searchInput}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className={`w-full px-4 py-2 ${theme.input}`}
+                  />
                 </div>
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-2 rounded-lg cursor-pointer border transition-colors flex items-center gap-2 justify-center sm:justify-start ${
+                  className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 justify-center sm:justify-start ${
                     showFilters
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark
-                            ? "border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-200 hover:border-gray-400"
-                        }`
+                      ? "bg-transparent border-2 border-emerald-500 text-emerald-500"
+                      : defaultButtonClass
                   }`}
+                  type="button"
                 >
                   <Filter size={20} />
                   {t("contractingTypes.filters.title")}
                 </button>
               </div>
 
-              {/* Advanced Filters */}
               {showFilters && (
-                <div
-                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t ${
-                    isDark ? "border-gray-600" : "border-gray-200"
-                  }`}
-                >
-                  {/* Status Filter */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t border-[var(--color-border)]">
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.status")}
                     </label>
+
                     <select
                       value={filters.statusFilter}
                       onChange={(e) => handleStatusChange(e.target.value)}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full p-2 ${theme.input}`}
                     >
                       <option value={true}>
                         {t("contractingTypes.status.active")}
                       </option>
+
                       <option value={false}>
                         {t("contractingTypes.status.inactive")}
                       </option>
                     </select>
                   </div>
 
-                  {/* Overtime Filter */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.overtime")}
                     </label>
+
                     <select
                       value={
                         filters.allowOvertimeHours === undefined
@@ -436,33 +520,27 @@ function ContractingTypes() {
                           : filters.allowOvertimeHours.toString()
                       }
                       onChange={(e) => handleOvertimeChange(e.target.value)}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full p-2 ${theme.input}`}
                     >
                       <option value="">
                         {t("contractingTypes.filters.allOvertimes")}
                       </option>
+
                       <option value="true">
                         {t("contractingTypes.overtime.allowed")}
                       </option>
+
                       <option value="false">
                         {t("contractingTypes.overtime.notAllowed")}
                       </option>
                     </select>
                   </div>
 
-                  {/* Sort By */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.sortBy")}
                     </label>
+
                     <select
                       value={filters.sortBy}
                       onChange={(e) =>
@@ -471,46 +549,43 @@ function ContractingTypes() {
                           filters.sortDirection
                         )
                       }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full p-2 ${theme.input}`}
                     >
                       <option value={1}>
                         {t("contractingTypes.filters.sortByOptions.nameArabic")}
                       </option>
+
                       <option value={2}>
                         {t(
                           "contractingTypes.filters.sortByOptions.nameEnglish"
                         )}
                       </option>
+
                       <option value={3}>
                         {t(
                           "contractingTypes.filters.sortByOptions.allowOvertime"
                         )}
                       </option>
+
                       <option value={4}>
                         {t("contractingTypes.filters.sortByOptions.maxHours")}
                       </option>
+
                       <option value={6}>
                         {t("contractingTypes.filters.sortByOptions.createdAt")}
                       </option>
+
                       <option value={7}>
                         {t("contractingTypes.filters.sortByOptions.updatedAt")}
                       </option>
                     </select>
                   </div>
 
-                  {/* Sort Direction */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.sortDirection")}
                     </label>
+
                     <select
                       value={filters.sortDirection}
                       onChange={(e) =>
@@ -519,120 +594,81 @@ function ContractingTypes() {
                           parseInt(e.target.value)
                         )
                       }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full p-2 ${theme.input}`}
                     >
                       <option value={0}>
                         {t("contractingTypes.filters.ascending")}
                       </option>
+
                       <option value={1}>
                         {t("contractingTypes.filters.descending")}
                       </option>
                     </select>
                   </div>
 
-                  {/* Min Hours Filter */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.minHours")}
                     </label>
+
                     <input
                       type="number"
                       placeholder={t("contractingTypes.filters.minHours")}
                       value={minHoursInput}
                       onChange={(e) => setMinHoursInput(e.target.value)}
                       onBlur={handleHoursRangeChange}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                          : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
-                      }`}
+                      className={`w-full px-4 py-2 ${theme.input}`}
                     />
                   </div>
 
-                  {/* Max Hours Filter */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.maxHours")}
                     </label>
+
                     <input
                       type="number"
                       placeholder={t("contractingTypes.filters.maxHours")}
                       value={maxHoursInput}
                       onChange={(e) => setMaxHoursInput(e.target.value)}
                       onBlur={handleHoursRangeChange}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                          : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
-                      }`}
+                      className={`w-full px-4 py-2 ${theme.input}`}
                     />
                   </div>
 
-                  {/* Date From */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.fromDate")}
                     </label>
+
                     <input
                       type="date"
                       value={fromDateInput}
                       onChange={(e) => setFromDateInput(e.target.value)}
                       onBlur={handleDateRangeChange}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full px-4 py-2 ${theme.input}`}
                     />
                   </div>
 
-                  {/* Date To */}
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("contractingTypes.filters.toDate")}
                     </label>
+
                     <input
                       type="date"
                       value={toDateInput}
                       onChange={(e) => setToDateInput(e.target.value)}
                       onBlur={handleDateRangeChange}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full px-4 py-2 ${theme.input}`}
                     />
                   </div>
 
-                  {/* Clear Filters Button */}
                   <div className="sm:col-span-2 lg:col-span-3">
                     <button
                       onClick={handleClearFilters}
-                      className={`px-4 py-2 rounded-lg border transition-colors cursor-pointer ${
-                        isDark
-                          ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className={defaultButtonClass}
+                      type="button"
                     >
                       {t("contractingTypes.filters.clear")}
                     </button>
@@ -642,31 +678,13 @@ function ContractingTypes() {
             </div>
           </div>
 
-          {/* Mobile Cards View */}
           <div className={`md:hidden ${showMobileTable ? "hidden" : "block"}`}>
             {loadingGetContractingTypes ? (
-              <div className="text-center p-8">
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span
-                    className={`${isRTL ? "mr-3" : "ml-3"} ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {t("gettingData.contractingTypes")}
-                  </span>
-                </div>
-              </div>
-            ) : contractingTypes && contractingTypes.length === 0 ? (
-              <div
-                className={`text-center p-8 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {t("contractingTypes.noData")}
-              </div>
+              <LoadingState />
+            ) : !contractingTypes || contractingTypes.length === 0 ? (
+              <EmptyState />
             ) : (
-              contractingTypes?.map((contractingType) => (
+              contractingTypes.map((contractingType) => (
                 <ContractingTypeCard
                   key={contractingType.id}
                   contractingType={contractingType}
@@ -675,157 +693,131 @@ function ContractingTypes() {
             )}
           </div>
 
-          {/* Desktop Table View / Mobile Table View */}
           <div
-            className={`${showMobileTable ? "block" : "hidden md:block"} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border`}
+            className={`hidden md:block ${showMobileTable ? "md:hidden" : ""} ${
+              theme.card
+            } overflow-hidden`}
           >
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("contractingTypes.table.nameArabic")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("contractingTypes.table.nameEnglish")}
-                    </th>
-
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("contractingTypes.table.users")}
-                    </th>
-
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("contractingTypes.table.actions")}
-                    </th>
+                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                    {[
+                      t("contractingTypes.table.nameArabic"),
+                      t("contractingTypes.table.nameEnglish"),
+                      t("contractingTypes.table.users"),
+                      t("contractingTypes.table.maxHours") ||
+                        t("contractingTypes.filters.maxHours"),
+                      t("contractingTypes.filters.overtime"),
+                      t("contractingTypes.table.actions"),
+                    ].map((header) => (
+                      <th
+                        key={header}
+                        className={`${
+                          isRTL ? "text-right" : "text-left"
+                        } p-4 font-semibold text-[var(--color-text)]`}
+                      >
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {loadingGetContractingTypes ? (
                     <tr>
-                      <td colSpan="9" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-3" : "ml-3"} ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("gettingData.contractingTypes")}
-                          </span>
-                        </div>
+                      <td colSpan="6">
+                        <LoadingState />
                       </td>
                     </tr>
-                  ) : contractingTypes && contractingTypes.length === 0 ? (
+                  ) : !contractingTypes || contractingTypes.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="text-center p-8">
-                        <span
-                          className={`${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
-                          {t("contractingTypes.noData")}
-                        </span>
+                      <td colSpan="6">
+                        <EmptyState />
                       </td>
                     </tr>
                   ) : (
-                    contractingTypes?.map((contractingType, index) => (
+                    contractingTypes.map((contractingType) => (
                       <tr
                         key={contractingType.id}
-                        className={`border-b ${
-                          isDark ? "border-gray-700" : "border-gray-200"
-                        } hover:${
-                          isDark ? "bg-gray-700" : "bg-gray-50"
-                        } transition-colors`}
+                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
                       >
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
+                        <td className="p-4 font-semibold text-[var(--color-text)]">
                           {contractingType.nameArabic}
                         </td>
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
+
+                        <td className="p-4 text-[var(--color-text)]">
                           {contractingType.nameEnglish}
                         </td>
 
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
+                        <td className="p-4 text-[var(--color-text-muted)]">
                           <div className="flex items-center gap-1">
                             <Users size={16} />
-                            {contractingType.usersCount}
+                            {contractingType.usersCount || 0}
                           </div>
                         </td>
 
                         <td className="p-4">
-                          <div className="flex gap-2">
+                          <div className="flex items-center gap-1">
+                            <Clock
+                              size={14}
+                              className="text-[var(--color-text-muted)]"
+                            />
+
+                            <span className="font-medium text-[var(--color-text)]">
+                              {formatHours(contractingType.maxHoursPerWeek)}h
+                            </span>
+                          </div>
+                        </td>
+
+                        <td className="p-4">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${getOvertimeBadgeClass(
+                              contractingType.allowOvertimeHours
+                            )}`}
+                          >
+                            {contractingType.allowOvertimeHours ? (
+                              <CheckCircle size={13} />
+                            ) : (
+                              <XCircle size={13} />
+                            )}
+
+                            {contractingType.allowOvertimeHours
+                              ? t("contractingTypes.overtime.allowed")
+                              : t("contractingTypes.overtime.notAllowed")}
+                          </span>
+                        </td>
+
+                        <td className="p-4">
+                          <div className="flex gap-1">
                             <Link
                               to={`/admin-panel/contracting-types/${contractingType.id}`}
                             >
-                              <button
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
+                              <ActionButton
                                 title={t("contractingTypes.actions.view")}
                               >
                                 <Eye size={16} />
-                              </button>
+                              </ActionButton>
                             </Link>
+
                             <Link
                               to={`/admin-panel/contracting-types/edit/${contractingType.id}`}
                             >
-                              <button
-                                className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
+                              <ActionButton
                                 title={t("contractingTypes.actions.edit")}
+                                tone="success"
                               >
                                 <Edit size={16} />
-                              </button>
+                              </ActionButton>
                             </Link>
-                            <button
-                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
+
+                            <ActionButton
                               title={t("contractingTypes.actions.delete")}
+                              tone="danger"
                               onClick={() => handleDeleteClick(contractingType)}
                             >
                               <Trash2 size={16} />
-                            </button>
+                            </ActionButton>
                           </div>
                         </td>
                       </tr>
@@ -836,94 +828,191 @@ function ContractingTypes() {
             </div>
           </div>
 
-          {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div
-              className={`mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 ${
-                isDark ? "text-gray-300" : "text-gray-600"
-              }`}
-            >
-              {/* Page Info */}
-              <div className="text-sm">
-                {t("contractingTypes.pagination.showing")}{" "}
-                <span className="font-medium">{pagination.startIndex}</span>{" "}
-                {t("contractingTypes.pagination.to")}{" "}
-                <span className="font-medium">{pagination.endIndex}</span>{" "}
-                {t("contractingTypes.pagination.of")}{" "}
-                <span className="font-medium">{pagination.totalCount}</span>{" "}
-                {t("contractingTypes.pagination.results")}
-              </div>
+          <div
+            className={`md:hidden ${showMobileTable ? "block" : "hidden"} ${
+              theme.card
+            } overflow-hidden`}
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                    <th className="text-center p-2 font-semibold text-[var(--color-text)]">
+                      {t("contractingTypes.table.name")}
+                    </th>
 
-              {/* Pagination Controls */}
-              <div className="flex items-center gap-2">
-                {/* Page Size Selector */}
-                <div className="flex items-center gap-2 text-sm">
-                  <span>{t("contractingTypes.pagination.perPage")}:</span>
-                  <select
-                    value={pagination.pageSize}
-                    onChange={(e) => handlePageSizeChange(e.target.value)}
-                    className={`px-2 py-1 border rounded ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700 text-white"
-                        : "border-gray-300 bg-white text-gray-900"
-                    }`}
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
-                  </select>
+                    <th className="text-center p-2 font-semibold text-[var(--color-text)]">
+                      {t("contractingTypes.table.users")}
+                    </th>
+
+                    <th className="text-center p-2 font-semibold text-[var(--color-text)]">
+                      {t("contractingTypes.table.actions")}
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {loadingGetContractingTypes ? (
+                    <tr>
+                      <td colSpan="3">
+                        <LoadingState small />
+                      </td>
+                    </tr>
+                  ) : !contractingTypes || contractingTypes.length === 0 ? (
+                    <tr>
+                      <td colSpan="3">
+                        <EmptyState compact />
+                      </td>
+                    </tr>
+                  ) : (
+                    contractingTypes.map((contractingType) => (
+                      <tr
+                        key={contractingType.id}
+                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
+                      >
+                        <td className="p-2">
+                          <div className="font-semibold text-xs text-[var(--color-text)]">
+                            {language === "ar"
+                              ? contractingType.nameArabic
+                              : contractingType.nameEnglish}
+                          </div>
+
+                          <div className="text-xs text-[var(--color-text-muted)]">
+                            {language === "ar"
+                              ? contractingType.nameEnglish
+                              : contractingType.nameArabic}
+                          </div>
+                        </td>
+
+                        <td className="p-2">
+                          <div className="flex items-center justify-center gap-1">
+                            <Users
+                              size={12}
+                              className="text-[var(--color-text-muted)]"
+                            />
+
+                            <span className="text-sm font-medium text-[var(--color-text)]">
+                              {contractingType.usersCount || 0}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-[var(--color-text-muted)] text-center">
+                            {formatHours(contractingType.maxHoursPerWeek)}h
+                          </div>
+                        </td>
+
+                        <td className="p-2">
+                          <div className="flex gap-1 justify-center">
+                            <Link
+                              to={`/admin-panel/contracting-types/${contractingType.id}`}
+                            >
+                              <ActionButton
+                                title={t("contractingTypes.actions.view")}
+                              >
+                                <Eye size={14} />
+                              </ActionButton>
+                            </Link>
+
+                            <Link
+                              to={`/admin-panel/contracting-types/edit/${contractingType.id}`}
+                            >
+                              <ActionButton
+                                title={t("contractingTypes.actions.edit")}
+                                tone="success"
+                              >
+                                <Edit size={14} />
+                              </ActionButton>
+                            </Link>
+
+                            <ActionButton
+                              title={t("contractingTypes.actions.delete")}
+                              tone="danger"
+                              onClick={() => handleDeleteClick(contractingType)}
+                            >
+                              <Trash2 size={14} />
+                            </ActionButton>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {pagination && pagination.totalPages > 1 && (
+            <div className={`${theme.card} p-4 mt-6`}>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4 text-sm">
+                  <span className="text-[var(--color-text-muted)]">
+                    {t("contractingTypes.pagination.showing")}{" "}
+                    <span className="font-medium">
+                      {(pagination.page - 1) * pagination.pageSize + 1}
+                    </span>{" "}
+                    {t("contractingTypes.pagination.to")}{" "}
+                    <span className="font-medium">
+                      {Math.min(
+                        pagination.page * pagination.pageSize,
+                        pagination.totalCount
+                      )}
+                    </span>{" "}
+                    {t("contractingTypes.pagination.of")}{" "}
+                    <span className="font-medium">
+                      {pagination.totalCount}
+                    </span>{" "}
+                    {t("contractingTypes.pagination.results")}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={pagination.pageSize}
+                      onChange={(e) => handlePageSizeChange(e.target.value)}
+                      className={`p-1 text-sm ${theme.input}`}
+                    >
+                      {[5, 10, 20, 50].map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+
+                    <span className="text-[var(--color-text-muted)]">
+                      {t("contractingTypes.pagination.perPage")}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Page Navigation */}
-                <div className="flex items-center gap-1">
-                  {/* Previous Page */}
+                <div className="flex items-center gap-1 sm:gap-2">
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={!pagination.hasPreviousPage}
-                    className={`p-2 rounded-lg border cursor-pointer transition-colors ${
-                      pagination.hasPreviousPage
-                        ? `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                            isDark ? "text-gray-300" : "text-gray-700"
-                          }`
-                        : `border-gray-200 dark:border-gray-700 cursor-not-allowed ${
-                            isDark ? "text-gray-500" : "text-gray-400"
-                          }`
-                    }`}
+                    className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
                   >
                     <ChevronLeft size={16} />
                   </button>
 
-                  {/* Page Numbers */}
                   {getPageNumbers().map((pageNum) => (
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      className={`px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                      className={`px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm border ${
                         pageNum === pagination.page
-                          ? "bg-blue-600 border-blue-600 text-white"
-                          : `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`
+                          ? selectedButtonClass
+                          : "border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] text-[var(--color-text)]"
                       }`}
+                      type="button"
                     >
                       {pageNum}
                     </button>
                   ))}
 
-                  {/* Next Page */}
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={!pagination.hasNextPage}
-                    className={`p-2 rounded-lg border cursor-pointer transition-colors ${
-                      pagination.hasNextPage
-                        ? `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                            isDark ? "text-gray-300" : "text-gray-700"
-                          }`
-                        : `border-gray-200 dark:border-gray-700 cursor-not-allowed ${
-                            isDark ? "text-gray-500" : "text-gray-400"
-                          }`
-                    }`}
+                    className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
                   >
                     <ChevronRight size={16} />
                   </button>

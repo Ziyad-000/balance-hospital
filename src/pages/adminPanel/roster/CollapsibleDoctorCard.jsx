@@ -34,32 +34,32 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
 
   const getStatusColor = (count, type) => {
     if (type === "present" && count > 0) {
-      return "text-[var(--color-success)]"
+      return "text-emerald-500"
     }
 
     if (type === "noShow" && count > 0) {
-      return "text-[var(--color-danger)]"
+      return "text-red-500"
     }
 
     if (type === "late" && count > 0) {
-      return "text-[var(--color-warning)]"
+      return "text-amber-500"
     }
 
-    return "text-[var(--color-text-muted)]"
+    return "text-slate-500"
   }
 
   const getStatusSoftBg = (type) => {
     switch (type) {
       case "present":
-        return "bg-[var(--color-success-soft)]"
+        return "bg-transparent border border-emerald-500"
       case "noShow":
-        return "bg-[var(--color-danger-soft)]"
+        return "bg-transparent border border-red-500"
       case "late":
-        return "bg-[var(--color-warning-soft)]"
+        return "bg-transparent border border-amber-500"
       case "pending":
-        return "bg-[var(--color-info-soft)]"
+        return "bg-transparent border border-blue-500"
       default:
-        return "bg-[var(--color-bg-soft)]"
+        return "bg-transparent border border-slate-500"
     }
   }
 
@@ -79,24 +79,24 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
   const StatCard = ({ icon: Icon, label, value, tone = "primary" }) => {
     const toneClasses = {
       primary: {
-        box: "bg-[var(--color-primary-soft)]",
-        icon: "text-[var(--color-primary)]",
+        box: "bg-transparent border border-blue-500",
+        icon: "text-blue-500",
       },
       secondary: {
-        box: "bg-[var(--color-secondary-soft)]",
-        icon: "text-[var(--color-secondary)]",
+        box: "bg-transparent border border-slate-500",
+        icon: "text-slate-500",
       },
       success: {
-        box: "bg-[var(--color-success-soft)]",
-        icon: "text-[var(--color-success)]",
+        box: "bg-transparent border border-emerald-500",
+        icon: "text-emerald-500",
       },
       warning: {
-        box: "bg-[var(--color-warning-soft)]",
-        icon: "text-[var(--color-warning)]",
+        box: "bg-transparent border border-amber-500",
+        icon: "text-amber-500",
       },
       info: {
-        box: "bg-[var(--color-info-soft)]",
-        icon: "text-[var(--color-info)]",
+        box: "bg-transparent border border-cyan-500",
+        icon: "text-cyan-500",
       },
     }
 
@@ -106,7 +106,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
       <div className={`${theme.cardSoft} p-4`}>
         <div className="flex items-center gap-2 mb-2">
           <div
-            className={`h-8 w-8 rounded-lg flex items-center justify-center ${selectedTone.box}`}
+            className={`h-8 w-8 rounded-lg flex items-center justify-center shadow-sm ${selectedTone.box}`}
           >
             <Icon className={`h-4 w-4 ${selectedTone.icon}`} />
           </div>
@@ -125,12 +125,11 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
 
   const BreakdownRow = ({ icon: Icon, title, assignments, hours, tone = "primary" }) => {
     const toneClasses = {
-      primary: "text-[var(--color-primary)] bg-[var(--color-primary-soft)]",
-      secondary:
-        "text-[var(--color-secondary)] bg-[var(--color-secondary-soft)]",
-      success: "text-[var(--color-success)] bg-[var(--color-success-soft)]",
-      warning: "text-[var(--color-warning)] bg-[var(--color-warning-soft)]",
-      info: "text-[var(--color-info)] bg-[var(--color-info-soft)]",
+      primary: "text-blue-500 bg-transparent border border-blue-500",
+      secondary: "text-slate-500 bg-transparent border border-slate-500",
+      success: "text-emerald-500 bg-transparent border border-emerald-500",
+      warning: "text-amber-500 bg-transparent border border-amber-500",
+      info: "text-cyan-500 bg-transparent border border-cyan-500",
     }
 
     return (
@@ -138,7 +137,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className={`h-8 w-8 rounded-lg flex items-center justify-center ${
+              className={`h-8 w-8 rounded-lg flex items-center justify-center shadow-sm ${
                 toneClasses[tone] || toneClasses.primary
               }`}
             >
@@ -171,7 +170,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="p-3 bg-[var(--color-primary-soft)] text-[var(--color-primary)] rounded-xl shrink-0">
+            <div className="p-3 bg-transparent text-blue-500 border border-blue-500 rounded-xl shrink-0 shadow-sm">
               <User className="h-6 w-6" />
             </div>
 
@@ -237,7 +236,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
                 e.stopPropagation()
                 navigate(`/admin-panel/rosters/doctors/${doctorData.doctorId}`)
               }}
-              className="p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] transition-colors"
+              className="p-2 rounded-lg text-slate-500 border border-transparent hover:text-white hover:bg-emerald-600 hover:border-emerald-600 transition-colors"
               title={t("roster.viewDoctorDetails")}
               aria-label={t("roster.viewDoctorDetails")}
               type="button"
@@ -371,12 +370,12 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-[var(--color-info-soft)] text-[var(--color-info)]">
+                <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-transparent text-blue-500 border border-blue-500 shadow-sm">
                   <FileText className="h-4 w-4" />
                 </div>
 
                 <div>
-                  <div className="font-bold text-[var(--color-info)]">
+                  <div className="font-bold text-blue-500">
                     {doctorData.requestsPending}
                   </div>
                   <div className="text-xs text-[var(--color-text-muted)]">
@@ -436,7 +435,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-[var(--color-success)]">
+                <div className="text-2xl font-bold text-emerald-500">
                   {doctorData.requestsApproved}
                 </div>
                 <div className="text-sm text-[var(--color-text-muted)]">
@@ -445,7 +444,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
               </div>
 
               <div className="text-center">
-                <div className="text-2xl font-bold text-[var(--color-danger)]">
+                <div className="text-2xl font-bold text-red-500">
                   {doctorData.requestsRejected}
                 </div>
                 <div className="text-sm text-[var(--color-text-muted)]">
@@ -454,7 +453,7 @@ const CollapsibleDoctorCard = ({ doctorData }) => {
               </div>
 
               <div className="text-center">
-                <div className="text-2xl font-bold text-[var(--color-warning)]">
+                <div className="text-2xl font-bold text-amber-500">
                   {doctorData.requestsPending}
                 </div>
                 <div className="text-sm text-[var(--color-text-muted)]">

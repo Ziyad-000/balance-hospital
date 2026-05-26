@@ -61,21 +61,21 @@ function RosterDepartments() {
   const [visibleContractingTypes, setVisibleContractingTypes] = useState({})
 
   const iconColors = {
-    building: "text-green-600 dark:text-green-400",
-    clock: "text-purple-600 dark:text-purple-400",
-    view: "text-blue-600 dark:text-blue-400",
-    users: "text-orange-600 dark:text-orange-400",
-    success: "text-green-600 dark:text-green-400",
-    danger: "text-red-600 dark:text-red-400",
-    warning: "text-yellow-600 dark:text-yellow-400",
-    muted: "text-[var(--color-text-muted)]",
+    building: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-violet-500 dark:text-violet-500",
+    view: "text-blue-500 dark:text-blue-500",
+    users: "text-orange-500 dark:text-orange-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    danger: "text-red-500 dark:text-red-500",
+    warning: "text-amber-500 dark:text-amber-500",
+    muted: "text-slate-500 dark:text-slate-500",
   }
 
   const iconBg = {
-    building: "bg-green-100 dark:bg-green-900/30",
-    clock: "bg-purple-100 dark:bg-purple-900/30",
-    view: "bg-blue-100 dark:bg-blue-900/30",
-    success: "bg-green-100 dark:bg-green-900/30",
+    building: "bg-transparent dark:bg-transparent border border-emerald-500",
+    clock: "bg-transparent dark:bg-transparent border border-violet-500",
+    view: "bg-transparent dark:bg-transparent border border-blue-500",
+    success: "bg-transparent dark:bg-transparent border border-emerald-500",
   }
 
   const handleUpdateContractingType = (contractingType) => {
@@ -232,8 +232,8 @@ function RosterDepartments() {
     <span
       className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
         active
-          ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
-          : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20"
+          ? "bg-transparent text-emerald-500 border border-emerald-500"
+          : "bg-transparent text-red-500 border border-red-500"
       }`}
     >
       {active
@@ -262,7 +262,7 @@ function RosterDepartments() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="p-4 rounded-xl border bg-[var(--color-success-soft)] border-[var(--color-success)]/20">
+              <div className="p-4 rounded-xl border bg-transparent border-emerald-500">
                 <div className="flex items-start">
                   <AlertCircle
                     className={`mt-0.5 ${iconColors.success} ${
@@ -272,7 +272,7 @@ function RosterDepartments() {
                   />
 
                   <div>
-                    <p className="text-sm text-[var(--color-success)] mt-1">
+                    <p className="text-sm text-emerald-500 mt-1">
                       {t("roster.changesInfo")}
                     </p>
                   </div>
@@ -295,7 +295,7 @@ function RosterDepartments() {
                   onClick={() => handleDepartmentClick(department)}
                   className={`${theme.card} ${
                     isActive
-                      ? "ring-2 ring-[var(--color-primary)] border-[var(--color-primary)]"
+                      ? "ring-2 ring-emerald-500 border-emerald-500"
                       : ""
                   } transition-all duration-200 hover:shadow-[var(--shadow-lg)] cursor-pointer hover:scale-[1.02]`}
                 >
@@ -340,7 +340,7 @@ function RosterDepartments() {
                   <button
                     type="button"
                     onClick={() => openShiftModal(department)}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                    className="w-full inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
                   >
                     <Clock size={16} className={isRTL ? "ml-2" : "mr-2"} />
                     {t("roster.departmentss.addShiftHours")}
@@ -373,7 +373,7 @@ function RosterDepartments() {
 
               {loadingShifts && (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
 
                   <span
                     className={`${
@@ -416,12 +416,12 @@ function RosterDepartments() {
                                 : shift.shiftTypeNameEn || shift.shiftTypeName}
                             </h3>
 
-                            <p className="text-sm text-[var(--color-primary)]">
+                            <p className="text-sm text-blue-500">
                               {shift.shiftPeriod}
                             </p>
                           </div>
 
-                          <span className="text-sm px-3 py-1 rounded-full font-semibold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
+                          <span className="text-sm px-3 py-1 rounded-full font-semibold bg-transparent text-emerald-500 border border-emerald-500">
                             {shift.shiftHours}h
                           </span>
                         </div>
@@ -521,7 +521,7 @@ function RosterDepartments() {
                                                   contractingType
                                                 )
                                               }
-                                              className="p-2 rounded-md transition-all duration-200 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                              className="p-2 rounded-md transition-all duration-200 text-blue-500 dark:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                               title="Update contracting type"
                                             >
                                               <svg
@@ -552,7 +552,7 @@ function RosterDepartments() {
                                                 deleteContractingIdx ===
                                                   contractingIndex
                                               }
-                                              className="p-2 rounded-md transition-all duration-200 disabled:opacity-50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                              className="p-2 rounded-md transition-all duration-200 disabled:opacity-50 text-red-500 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                               title="Delete contracting type"
                                             >
                                               <svg

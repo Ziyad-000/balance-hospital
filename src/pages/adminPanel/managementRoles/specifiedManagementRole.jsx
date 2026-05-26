@@ -269,7 +269,7 @@ function SpecifiedManagementRole() {
   //         </p>
   //         <Link
   //           to="/admin-panel/management-roles"
-  //           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+  //           className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
   //         >
   //           <ArrowLeft size={16} className={isRTL ? "ml-2" : "mr-2"} />
   //           {t("managementRoles.backToList") || "Back to Roles"}
@@ -321,7 +321,7 @@ function SpecifiedManagementRole() {
             {/* Status Badges */}
             <div className="flex flex-wrap gap-2 mb-6">
               {roleUsersPagination?.totalCount > 0 && (
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500">
                   <Users size={14} className="inline mr-1" />
                   {roleUsersPagination.totalCount}{" "}
                   {t("managementRoles.users.users") || "Users"}
@@ -365,7 +365,7 @@ function SpecifiedManagementRole() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
                     activeTab === tab.key
-                      ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                      ? "border-blue-500 text-blue-500 dark:text-blue-500"
                       : `border-transparent hover:border-gray-300 ${
                           isDark
                             ? "text-gray-400 hover:text-gray-300"
@@ -634,7 +634,7 @@ function SpecifiedManagementRole() {
                               !isRTL ? "right-2" : "left-2"
                             }  top-1/2 transform -translate-y-1/2 p-1.5 rounded-md transition-colors ${
                               isDark
-                                ? "hover:bg-gray-600 text-gray-400 hover:text-blue-400"
+                                ? "hover:bg-gray-600 text-gray-400 hover:text-blue-500"
                                 : "hover:bg-gray-100 text-gray-500 hover:text-blue-500"
                             } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1`}
                           >
@@ -938,7 +938,7 @@ function SpecifiedManagementRole() {
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500">
                                       {language === "ar"
                                         ? user?.roleNameAr
                                         : user?.roleNameEn}
@@ -961,8 +961,8 @@ function SpecifiedManagementRole() {
                                     <span
                                       className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                         user.isActive
-                                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                                          ? "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+                                          : "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
                                       }`}
                                     >
                                       {user.isActive
@@ -985,7 +985,7 @@ function SpecifiedManagementRole() {
                                             `/admin-panel/management-roles/role/user-history/${user.id}`
                                           )
                                         }}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
+                                        className="p-2 rounded-lg border bg-transparent text-blue-500 border-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors cursor-pointer"
                                         title={
                                           t(
                                             "managementRoles.users.viewHistory"
@@ -1110,7 +1110,7 @@ function SpecifiedManagementRole() {
                                           }
                                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                             pageNum === usersFilters.page
-                                              ? "z-10 bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                                              ? "z-10 bg-blue-50 border-blue-500 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
                                               : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                           }`}
                                         >
@@ -1255,10 +1255,10 @@ function SpecifiedManagementRole() {
                                   <span
                                     className={`inline-block px-2 py-1 rounded text-xs font-medium mr-2 ${
                                       entry.changeType === "Promoted"
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                        ? "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
                                         : entry.changeType === "Demoted"
-                                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                                        ? "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+                                        : "bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
                                     }`}
                                   >
                                     {entry.changeType}
@@ -1425,7 +1425,7 @@ function SpecifiedManagementRole() {
                                   }
                                   className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                     pageNum === assignmentHistoryPagination.page
-                                      ? "z-10 bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                                      ? "z-10 bg-blue-50 border-blue-500 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
                                       : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                   }`}
                                 >

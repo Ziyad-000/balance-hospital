@@ -50,22 +50,22 @@ function GenerateWorkingHours() {
   )
 
   const iconColors = {
-    info: "text-blue-600 dark:text-blue-400",
-    refresh: "text-blue-600 dark:text-blue-400",
-    building: "text-green-600 dark:text-green-400",
-    clock: "text-purple-600 dark:text-purple-400",
-    degree: "text-orange-600 dark:text-orange-400",
-    success: "text-green-600 dark:text-green-400",
-    warning: "text-yellow-600 dark:text-yellow-400",
-    danger: "text-red-600 dark:text-red-400",
+    info: "text-blue-500 dark:text-blue-500",
+    refresh: "text-blue-500 dark:text-blue-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-violet-500 dark:text-violet-500",
+    degree: "text-orange-500 dark:text-orange-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    warning: "text-amber-500 dark:text-amber-500",
+    danger: "text-red-500 dark:text-red-500",
     muted: "text-[var(--color-text-muted)]",
   }
 
   const iconBg = {
-    info: "bg-blue-100 dark:bg-blue-900/30",
-    building: "bg-green-100 dark:bg-green-900/30",
-    clock: "bg-purple-100 dark:bg-purple-900/30",
-    degree: "bg-orange-100 dark:bg-orange-900/30",
+    info: "bg-transparent dark:bg-transparent border border-blue-500",
+    building: "bg-transparent dark:bg-transparent border border-emerald-500",
+    clock: "bg-transparent dark:bg-transparent border border-violet-500",
+    degree: "bg-transparent dark:bg-transparent border border-orange-500",
   }
 
   useEffect(() => {
@@ -212,28 +212,28 @@ function GenerateWorkingHours() {
   const getProgressColor = (percent) => {
     if (percent === 100) {
       return {
-        text: "text-green-600 dark:text-green-400",
+        text: "text-emerald-500 dark:text-emerald-500",
         bg: "bg-green-500",
         badge:
-          "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20",
+          "bg-transparent border border-emerald-500 text-emerald-500 border border-emerald-500/20",
       }
     }
 
     if (percent > 50) {
       return {
-        text: "text-yellow-600 dark:text-yellow-400",
+        text: "text-amber-500 dark:text-amber-500",
         bg: "bg-yellow-500",
         badge:
-          "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
+          "bg-transparent border border-amber-500 text-amber-500 border border-[var(--color-warning)]/20",
       }
     }
 
     if (percent > 0) {
       return {
-        text: "text-red-600 dark:text-red-400",
+        text: "text-red-500 dark:text-red-500",
         bg: "bg-red-500",
         badge:
-          "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+          "bg-transparent border border-red-500 text-red-500 border border-[var(--color-danger)]/20",
       }
     }
 
@@ -369,7 +369,7 @@ function GenerateWorkingHours() {
 
               {selectedRoster && (
                 <div className="mt-2">
-                  <p className="text-lg text-[var(--color-primary)]">
+                  <p className="text-lg text-blue-500">
                     {selectedRoster.title}
                   </p>
 
@@ -417,11 +417,11 @@ function GenerateWorkingHours() {
                 "Select Structure to Generate"}
             </h2>
 
-            <div className="mb-4 p-3 rounded-lg border-s-4 border-blue-500 bg-[var(--color-info-soft)]">
+            <div className="mb-4 p-3 rounded-lg border-s-4 border-blue-500 bg-transparent border border-blue-500">
               <div className="flex items-start gap-2">
                 <Info className={`${iconColors.info} mt-0.5`} size={14} />
 
-                <p className="text-xs text-[var(--color-info)]">
+                <p className="text-xs text-blue-500">
                   {t("roster.workingHourss.hierarchyInfo") ||
                     "Select departments, then shifts, then scientific degrees. Leave empty to generate for all."}
                 </p>
@@ -737,7 +737,7 @@ function GenerateWorkingHours() {
                   </div>
 
                   {values.overwriteExisting && (
-                    <div className="p-4 rounded-lg border-s-4 border-red-500 bg-[var(--color-danger-soft)]">
+                    <div className="p-4 rounded-lg border-s-4 border-red-500 bg-transparent border border-red-500">
                       <div className="flex items-start gap-2">
                         <AlertCircle
                           className="text-red-500 mt-0.5"
@@ -745,12 +745,12 @@ function GenerateWorkingHours() {
                         />
 
                         <div>
-                          <p className="text-sm font-semibold text-[var(--color-danger)]">
+                          <p className="text-sm font-semibold text-red-500">
                             {t("roster.workingHourss.warningTitle") ||
                               "Warning"}
                           </p>
 
-                          <p className="text-sm mt-1 text-[var(--color-danger)]">
+                          <p className="text-sm mt-1 text-red-500">
                             {t("roster.workingHourss.overwriteWarning") ||
                               "This will remove all doctor assignments!"}
                           </p>

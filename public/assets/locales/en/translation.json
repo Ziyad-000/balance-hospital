@@ -281,7 +281,6 @@
         "noLinkedDepartments": "No departments linked yet",
         "linkDepartmentsToGetStarted": "Link departments to this category to see them here."
       },
-
       "departments": {
         "title": "Available Departments to assign for that Category",
         "count": "departments",
@@ -317,7 +316,6 @@
       "approvalSuccess": "Doctor request approved successfully",
       "rejectionSuccess": "Doctor request rejected successfully"
     },
-
     "table": {
       "doctorName": "Doctor Name",
       "contact": "Contact",
@@ -327,7 +325,6 @@
       "actions": "Actions",
       "scheules": "Doctor Data"
     },
-
     "loading": {
       "categories": "Loading category data...",
       "requests": "Loading requests...",
@@ -423,12 +420,10 @@
     },
     "sections": {
       "manager": "Assign Department Manager",
-
       "basicInfo": "Basic Information",
       "permissions": "Permissions",
       "managerSelection": "Manager Selection"
     },
-
     "fields": {
       "nameArabic": "Arabic Name",
       "nameEnglish": "English Name",
@@ -437,7 +432,6 @@
       "description": "Description",
       "departmentHead": "Department Manager *",
       "categoryHead": "Category Manager *",
-
       "startDate": "Start Date *",
       "canViewDepartment": "Can view department",
       "canEditDepartment": "Can edit department",
@@ -487,7 +481,6 @@
   "department": {
     "title": "Departments",
     "addNew": "Add New Department",
-
     "month": "Month",
     "totalRosters": "Total Rosters",
     "lastUpdated": "Last Updated",
@@ -502,7 +495,6 @@
     "maxDoctors": "Maximum Doctors",
     "rosters": "Rosters",
     "shortfall": "Shortfall",
-
     "add": "Add",
     "fetchError": "Failed to fetch departments",
     "noData": "No departments available",
@@ -511,7 +503,6 @@
     "linkedCategories": "Linked categories",
     "hasManager": "Has manager",
     "noManager": "No manager",
-
     "monthlyStats": {
       "title": "Monthly Performance",
       "error": "Only Department manager can see this part",
@@ -524,7 +515,6 @@
       "doctorsAssigned": "doctors assigned",
       "lastUpdated": "Updated"
     },
-
     "removeManager": {
       "title": "Remove Manager",
       "confirmMessage": "Are you sure you want to remove this manager from the department? This action cannot be undone.",
@@ -543,7 +533,6 @@
       },
       "confirm": "Remove Manager"
     },
-
     "manager": {
       "title": "Department Manager",
       "noName": "No name",
@@ -609,7 +598,6 @@
       "doctors": "Doctors",
       "pendingRequests": "Pending Requests"
     },
-
     "status": {
       "active": "Active",
       "all": "All",
@@ -672,7 +660,6 @@
     },
     "empty": {
       "title": "No Departments Found",
-
       "message": "No departments match your current filters",
       "suggestion": "Try adjusting your search criteria or add a new department"
     },
@@ -691,7 +678,6 @@
       "validation": {
         "codeRequired": "Department code is required",
         "codeLength": "Department code must be exactly 4 characters",
-
         "nameArabicRequired": "Arabic name is required",
         "nameEnglishRequired": "English name is required",
         "departmentRequired": "Department is required",
@@ -857,7 +843,6 @@
   "subDepartmentForm": {
     "title": "Create New Sub Department",
     "editTitle": "Edit Sub Department",
-
     "fields": {
       "nameArabic": "Arabic Name",
       "nameEnglish": "English Name",
@@ -915,7 +900,6 @@
     "endDateAfterStart": "End date must be after start date",
     "invalidOrderBy": "Invalid sorting option"
   },
-
   "users": {
     "doctorProfile": "Doctor Profile",
     "doctorProfileDescription": "Detailed information about the doctor",
@@ -940,7 +924,6 @@
     "lastLogin": "Last Login",
     "lastPasswordChange": "Last Password Change"
   },
-
   "common": {
     "ok": "OK",
     "cancel": "Cancel",
@@ -980,14 +963,12 @@
     "noData": "No data available",
     "active": "Active",
     "inactive": "Inactive",
-
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
     "info": "Information",
     "goBack": "Go Back"
   },
-
   "contractingTypes": {
     "title": "Contracting Types",
     "description": "Manage employment contract types and their configurations",
@@ -1029,7 +1010,6 @@
         "allowOvertime": "Allow Overtime Hours"
       },
       "sortDirection": "اتجاه الترتيب",
-
       "clear": "Clear Filters"
     },
     "table": {
@@ -1161,7 +1141,6 @@
       "ascending": "Ascending",
       "descending": "Descending",
       "codePlaceholder": "Enter scientific degree code",
-
       "code": "Code"
     },
     "table": {
@@ -1248,7 +1227,6 @@
       "dependencyError": "Cannot delete this scientific degree as it has associated users"
     }
   },
-
   "shiftHoursTypes": {
     "title": "Shift Hours Types",
     "addNew": "Add New Shift Hours Type",
@@ -1338,7 +1316,6 @@
     },
     "hours": "hours"
   },
-
   "shiftHourTypeForm": {
     "editTitle": "Edit Shift Hour Type",
     "addTitle": "Add New Shift Hour Type",
@@ -1411,7 +1388,6 @@
       "message": "Code may be used before try another"
     }
   },
-
   "loginSelection": {
     "welcomeBack": "Welcome Back",
     "selectType": "Select your login type to continue",
@@ -1427,7 +1403,6 @@
   },
   "create-specific-department": "Create specific department to that category",
   "create-specific-sub-department": "Create specific sub-department to that department",
-
   "managementRoles": {
     "title": "Management Roles",
     "loading-specific": "Loading role data...",
@@ -1437,7 +1412,6 @@
       "placeholder": "Search roles...",
       "users": "Search users..."
     },
-
     "userHistory": {
       "title": "User Assignment History",
       "subtitle": "Role assignment and change history for user",
@@ -1446,7 +1420,6 @@
       "noHistory": "No Assignment History",
       "noHistoryDescription": "This user has no role assignment history yet."
     },
-
     "filters": {
       "title": "Filters",
       "status": "Status",
@@ -1465,14 +1438,12 @@
         "primaryCategory": "Primary Category"
       }
     },
-
     "stats": {
       "total": "Total Roles",
       "active": "Active Roles",
       "system": "System Roles",
       "custom": "Custom Roles"
     },
-
     "actions": {
       "addNew": "Add New Role",
       "add": "Add",
@@ -1485,17 +1456,14 @@
       "activate": "Activate",
       "deactivate": "Deactivate"
     },
-
     "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
-
     "type": {
       "system": "System",
       "custom": "Custom"
     },
-
     "table": {
       "nameArabic": "Arabic Name",
       "nameEnglish": "English Name",
@@ -1516,11 +1484,9 @@
       "updatedBy": "Updated By",
       "actions": "Actions"
     },
-
     "loading": "Loading...",
     "loadingUsers": "Loading users...",
     "noData": "No roles found",
-
     "pagination": {
       "itemsPerPage": "items per page",
       "displayRange": "Showing {{start}}–{{end}} of {{total}} results",
@@ -1531,7 +1497,6 @@
       "of": "of",
       "results": "results"
     },
-
     "delete": {
       "title": "Delete Role",
       "checking": "Checking if role can be deleted, please wait...",
@@ -1546,29 +1511,24 @@
       "systemRoleWarning": "Warning: This is a system role. Deleting it may affect system functionality.",
       "assignedUsersWarning": "Warning: This role is currently assigned to users. They will lose these permissions."
     },
-
     "notFound": "Role Not Found",
     "notFoundDescription": "The requested role could not be found.",
     "backToList": "Back to Roles",
-
     "overview": {
       "basicInfo": "Basic Information",
       "details": "Role Details"
     },
-
     "form": {
       "roleNameAr": "Arabic Name",
       "roleNameEn": "English Name",
       "description": "Description"
     },
-
     "tabs": {
       "overview": "Overview",
       "permissions": "Permissions",
       "history": "Assignment History",
       "users": "Assigned Users"
     },
-
     "analytics": {
       "activeUsers": "Active Users",
       "recentAssignments": "Recent Assignments",
@@ -1589,7 +1549,6 @@
         "TRANSFERRED": "Transferred"
       }
     },
-
     "history": {
       "reason": "Reason",
       "by": "by ",
@@ -1600,7 +1559,6 @@
       "removed": "Role Removed: {{roleName}}",
       "modified": "Role Changed: {{oldRoleName}} → {{newRoleName}}"
     },
-
     "users": {
       "noUsers": "No Users Assigned",
       "users": "Users",
@@ -1622,10 +1580,8 @@
         "createdAt": "Created",
         "status": "Status"
       },
-
       "noUsersDescription": "This role has not been assigned to any users yet."
     },
-
     "permissions": {
       "core": "Core Management",
       "manageCategory": "Manage Categories",
@@ -1646,7 +1602,6 @@
     }
   },
   "displayRange": "Showing {{start}} - {{end}} of {{total}} items",
-
   "managementRoleForm": {
     "title": "Create Management Role",
     "editTitle": "Edit Management Role",
@@ -1671,7 +1626,6 @@
       "manageSchedules": "Manage Schedules",
       "manageRequests": "Manage Requests"
     },
-
     "sections": {
       "basicInfo": "Basic Information",
       "permissions": "Permissions"
@@ -1713,17 +1667,14 @@
       "title": "Error creating role"
     }
   },
-
   "role-deactived-success": "Role deactivated successfully.",
   "role-activated-success": "Role activated successfully.",
-
   "assignUserRole": {
     "title": "Assign User to Role",
     "editTitle": "Edit User Role Assignment",
     "currentRole": "Current Role",
     "by": "Last Assign By",
     "lastChanged": "Last Changed",
-
     "sections": {
       "assignmentInfo": "Assignment Information"
     },
@@ -1775,7 +1726,6 @@
     "noUsers": "No users available",
     "charactersCount": "characters"
   },
-
   "gettingData": {
     "user-data": "Loading user assignment data",
     "users": "Loading users…",
@@ -1814,7 +1764,6 @@
     "doctorSchedule": "Loading doctor schedule...",
     "userHistory": "Loading user history..."
   },
-
   "error": {
     "status": "System Status",
     "status.maintenance": "Under Maintenance",
@@ -1860,9 +1809,7 @@
       "dashboard": "Dashboard"
     }
   },
-
   "session-expired": "Your session has expired. Please log in again.",
-
   "roster": {
     "title": "Roster Management",
     "departmentCalendar": "Department Calendar",
@@ -1882,7 +1829,6 @@
     "changesInfo": " Any changes on this page require regenerating shift requirements.",
     "totalDays": "Total Days",
     "noAssignedDoctors": "No doctors assigned yet",
-
     "delete": {
       "title": "Delete Roster",
       "confirmMessage": "Are you sure you want to delete this roster? This action cannot be undone. Please provide a reason below.",
@@ -1897,7 +1843,6 @@
         "message": "Failed to delete roster. Please try again."
       }
     },
-
     "doctorSchedule": {
       "title": "Doctor Schedule",
       "totalAssignments": "Total Assignments",
@@ -1920,10 +1865,8 @@
       "hideConflicts": "Hide conflicts",
       "showConflicts": "Show conflicts",
       "priorityScore": "Priority score",
-
       "at": "Assigned At",
       "by": "Assign By",
-
       "unassignTitle": "Unassign Doctor",
       "confirmMessage": "Are you sure you want to unassign this doctor from the shift?",
       "reason": "Reason",
@@ -1932,7 +1875,6 @@
       "departmentPlacholder": "Select Department to add to Roster",
       "confirm": "Unassign",
       "unassignSuccess": "{{name}} was unassigned from the shift successfully.",
-
       "status": {
         "available": "Available",
         "unavailable": "Unavailable",
@@ -1979,7 +1921,6 @@
       },
       "charactersCount": "characters"
     },
-
     "workingHours": {
       "title": "Shifts Requirements",
       "titlee": "Shift Requirements",
@@ -1988,7 +1929,6 @@
       "editSubtitle": "Update required and maximum doctors, add notes, and provide a modification reason.",
       "charactersCount": "characters",
       "assignedBy": "Assigned By",
-
       "fields": {
         "requiredDoctors": "Required Doctors",
         "maxDoctors": "Maximum Doctors",
@@ -2022,11 +1962,9 @@
         "notesMax": "Notes must not exceed 500 characters",
         "modificationReasonRequired": "Modification reason is required",
         "modificationReasonMax": "Modification reason must not exceed 500 characters",
-
         "modificationReasonMaxLength": "Modification reason must not exceed 500 characters"
       }
     },
-
     "updateStatusFor": "Update Status for ",
     "completion": "Completion",
     "completionPercentage": "Completion Percentage",
@@ -2034,7 +1972,6 @@
     "incomplete": "InComplete",
     "allowed": "Allowed",
     "notAllowed": "Not Allowed",
-
     "details": {
       "basicInfo": "Basic Information",
       "progress": "Progress and Statistics",
@@ -2053,7 +1990,6 @@
       "publishedAt": "Published At",
       "closedAt": "Closed At"
     },
-
     "workingHourss": {
       "generateTitle": "Generate Shifts Requirements",
       "generateSubtitle": "Generate working hours for all shifts and departments",
@@ -2112,7 +2048,6 @@
       "charactersCount": "characters",
       "viewContractingTypes": "View Scientific Degrees",
       "hideContractingTypes": "Hide Scientific Degrees",
-
       "addContractingTypes": "Add Scientific Degrees",
       "fields": {
         "contractingTypes": "Scientific Degrees",
@@ -2162,7 +2097,6 @@
         "notesMaxLength": "Notes must not exceed 500 characters"
       }
     },
-
     "departmentss": {
       "title": "Category Departments",
       "subtitle": "Manage and configure shifts for each department in this roster.",
@@ -2183,11 +2117,9 @@
       "delete": "Delete",
       "viewShifts": "View Shifts",
       "hideShifts": "Hide Shifts",
-
       "noDepartments": "No departments added yet",
       "noDepartmentsMessage": "Add departments in the basic roster setup to configure shifts here."
     },
-
     "phaseOne": {
       "title": "Department Shifts Setup",
       "subtitle": "Configure department shifts",
@@ -2235,7 +2167,6 @@
         "message": "An error occurred while adding department shifts"
       }
     },
-
     "actions": {
       "createBasic": "Create Basic Roster",
       "createComplete": "Create Complete Roster",
@@ -2267,7 +2198,6 @@
       "backToList": "Back to Roster List",
       "backToRoster": "Back to Roster"
     },
-
     "status": {
       "draft": "Draft",
       "draftBasic": "Draft (Basic)",
@@ -2320,7 +2250,6 @@
       "department": "Department",
       "allDepartments": "All Departments"
     },
-
     "table": {
       "title": "Title",
       "category": "Category",
@@ -2335,7 +2264,6 @@
       "updatedAt": "Last Updated",
       "completion": "Completion"
     },
-
     "form": {
       "basicInfo": "Basic Information",
       "title": "Roster Title",
@@ -2399,7 +2327,6 @@
       "startDate": "Start Date",
       "endDate": "End Date"
     },
-
     "days": {
       "sunday": "Sunday",
       "monday": "Monday",
@@ -2409,7 +2336,6 @@
       "friday": "Friday",
       "saturday": "Saturday"
     },
-
     "months": {
       "january": "January",
       "february": "February",
@@ -2424,7 +2350,6 @@
       "november": "November",
       "december": "December"
     },
-
     "assignments": "Assignments",
     "hours": "Hours",
     "requests": "Requests",
@@ -2491,7 +2416,6 @@
       "endDayAfterStartDay": "End day must be greater than or equal to start day",
       "notesMaxLength": "Notes cannot exceed 500 characters"
     },
-
     "success": {
       "created": "Roster created successfully",
       "updated": "Roster updated successfully",
@@ -2503,7 +2427,6 @@
       "exported": "Roster exported successfully",
       "statusUpdated": "Roster status updated successfully"
     },
-
     "error": {
       "createFailed": "Failed to create roster",
       "updateFailed": "Failed to update roster",
@@ -2518,11 +2441,9 @@
       "notFound": "Roster not found",
       "updateStatusFailed": "Failed to update roster status"
     },
-
     "pagination": {
       "itemsPerPage": "Items per page"
     },
-
     "totalShifts": "Total Shifts Requirements",
     "assignedDoctors": "Assigned Doctors",
     "fullyBooked": "Fully Booked",
@@ -2534,7 +2455,6 @@
     "progress": "Progress",
     "overBooked": "Overbooked"
   },
-
   "managerPermissions": {
     "title": "Update Manager Permissions",
     "department": "Department",
@@ -2563,7 +2483,6 @@
     },
     "assignManager": "Assign Manager"
   },
-
   "confirmations": {
     "linkDepartment": {
       "title": "Link Department",
@@ -2591,7 +2510,6 @@
       "unlinkDepartmentFailed": "Failed to unlink the department. Please try again."
     }
   },
-
   "categoryHead": {
     "title": "Category Heads",
     "noCategoryHead": "No Category Head Assigned",
@@ -2624,7 +2542,6 @@
     "managerElsewhere": "Manager in Other Category",
     "inactive": "Inactive"
   },
-
   "selectRole": {
     "title": "Select Your Role",
     "title2": "Switch Your Role",
@@ -2654,7 +2571,6 @@
       }
     }
   },
-
   "doctorRequests": {
     "title": "Manage Doctor Requests",
     "notesTooShort": "Notes are too short",
@@ -2676,7 +2592,6 @@
       "confirm": "Confirm Approval",
       "success": "Doctor {{doctorName}}'s request has been approved successfully"
     },
-
     "description": "Review and manage doctor working hours requests",
     "noRequests": "No requests found for status: {{status}}",
     "status": {
@@ -2706,14 +2621,12 @@
       "rejecting": "Rejecting..."
     }
   },
-
   "stats": {
     "totalDays": "Total Days",
     "completeDays": "Complete Days",
     "partialDays": "Partial Days",
     "emptyDays": "Empty Days"
   },
-
   "doctorForm": {
     "editTitle": "Edit Doctor Information",
     "sections": {
@@ -2745,7 +2658,6 @@
       "updated": "Doctor data updated successfully"
     }
   },
-
   "notifications": {
     "title": "Notifications",
     "loading": "Loading notifications...",
@@ -2876,17 +2788,14 @@
       }
     }
   },
-
   "geoFenceForm": {
     "title": "Create GeoFence",
     "editTitle": "Edit GeoFence",
-
     "sections": {
       "basicInfo": "Basic Information",
       "wifi": "WiFi Configuration",
       "beacon": "Beacon Configuration"
     },
-
     "fields": {
       "name": "GeoFence Name",
       "latitude": "Latitude",
@@ -2904,29 +2813,24 @@
       "beaconUuid": "Beacon UUID",
       "beaconPolicy": "Beacon Policy"
     },
-
     "wifiPolicy": {
       "disabled": "Disabled (0)",
       "required": "Required (1)",
       "optional": "Optional (2)"
     },
-
     "beaconPolicy": {
       "disabled": "Disabled (0)",
       "required": "Required (1)",
       "optional": "Optional (2)"
     },
-
     "placeholders": {
       "name": "e.g., Emergency Department - Main Entrance"
     },
-
     "hints": {
       "radius": "Range: 10 - 10,000 meters",
       "priority": "Higher values = higher priority",
       "beaconUuid": "Format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
     },
-
     "errors": {
       "nameRequired": "Name is required",
       "nameMin": "Name must be at least 3 characters",
@@ -2948,7 +2852,6 @@
       "beaconPolicyRequired": "Beacon policy is required",
       "beaconUuidFormat": "Beacon UUID must be in valid format"
     },
-
     "buttons": {
       "cancel": "Cancel",
       "create": "Create GeoFence",
@@ -2956,57 +2859,47 @@
       "update": "Update GeoFence",
       "updating": "Updating..."
     },
-
     "success": {
       "created": "GeoFence created successfully",
       "updated": "GeoFence updated successfully"
     },
-
     "error": {
       "title": "Error"
     }
   },
-
   "geoFence": {
     "title": "GeoFences",
-
     "actions": {
       "create": "Create GeoFence",
       "add": "Add",
       "edit": "Edit",
       "delete": "Delete"
     },
-
     "delete": {
       "confirmTitle": "Delete GeoFence?",
       "confirmMessage": "Are you sure you want to delete this geofence?",
       "warning": "This action cannot be undone.",
       "confirm": "Yes, delete it"
     },
-
     "status": {
       "active": "Active",
       "inactive": "Inactive",
       "currentlyActive": "Live",
       "scheduled": "Scheduled"
     },
-
     "policy": {
       "disabled": "Disabled",
       "required": "Required",
       "optional": "Optional"
     },
-
     "empty": {
       "title": "No GeoFences",
       "description": "This department doesn't have any geofences configured yet."
     },
-
     "error": {
       "title": "Error"
     }
   },
-
   "reports": {
     "title": "Monthly Reports",
     "subtitle": "View and manage monthly attendance reports",
@@ -3028,7 +2921,6 @@
     "dateRangeError": "End day must be greater than or equal to start day",
     "dateRangeInvalid": "Days must be between 1 and {{day}}",
     "showingDays": "Showing days",
-
     "scientificDegree": "Scientific Degree",
     "contractingType": "Contracting Type",
     "allDepartments": "All Departments",
@@ -3060,18 +2952,16 @@
       "printNumber": "Print"
     }
   },
-
   "dashboard": {
     "title": "Dashboard",
     "loading": "Loading dashboard data...",
     "refresh": "Refresh",
     "lastUpdated": "Last updated",
-
     "error": {
       "title": "Error Loading Dashboard",
-      "retry": "Try Again"
+      "retry": "Try Again",
+      "message": "Unable to fetch data"
     },
-
     "charts": {
       "title": "Dashboard Analytics",
       "subtitle": "Visual insights and data analytics",
@@ -3096,7 +2986,6 @@
       "completionPercent": "Completion %",
       "emptyShifts": "Empty Shifts"
     },
-
     "sections": {
       "users": {
         "title": "Users",
@@ -3108,7 +2997,6 @@
         "newUsersThisMonth": "New This Month",
         "pendingUsers": "Pending Users"
       },
-
       "pendingRequests": {
         "title": "Pending Requests",
         "totalPendingRequests": "Total Pending",
@@ -3119,7 +3007,6 @@
         "overdueRequests": "Overdue",
         "recentRequests": "Recent Requests"
       },
-
       "quickStats": {
         "title": "Quick Statistics",
         "dailyAttendanceRate": "Attendance Rate",
@@ -3128,7 +3015,6 @@
         "averageResponseTime": "Avg Response Time",
         "emailsSentToday": "Emails Sent Today"
       },
-
       "categories": {
         "title": "Categories",
         "totalCategories": "Total Categories",
@@ -3142,7 +3028,6 @@
         "manager": "Manager",
         "alerts": "Category Alerts"
       },
-
       "configuration": {
         "title": "Configuration Summary",
         "activeDegrees": "Active Degrees",
@@ -3155,7 +3040,6 @@
         "usageToday": "Max Hours/Week",
         "duration": "Duration"
       },
-
       "departments": {
         "title": "Departments",
         "totalDepartments": "Total Departments",
@@ -3169,7 +3053,6 @@
         "alerts": "Department Alerts",
         "geoFenceCoverage": "GeoFence Coverage"
       },
-
       "rosters": {
         "title": "Rosters",
         "totalRosters": "Total Rosters",
@@ -3177,9 +3060,95 @@
         "overallCompletionRate": "Completion Rate",
         "expiredRosters": "Expired"
       }
+    },
+    "common": {
+      "noData": "No data available",
+      "doctors": "Doctors",
+      "empty": "Empty",
+      "remaining": "Remaining",
+      "schedules": "Schedules",
+      "categories": "Categories",
+      "activity": "Activity"
+    },
+    "sources": {
+      "system": "System",
+      "systemAlert": "System Alert",
+      "warning": "Warning",
+      "request": "Request",
+      "category": "Category",
+      "department": "Department",
+      "roster": "Roster",
+      "rosterAlert": "Roster Alert"
+    },
+    "overview": {
+      "totalUsers": "Total Users",
+      "pendingRequests": "Pending Requests",
+      "criticalAlerts": "Critical Alerts",
+      "todayShifts": "Today Shifts",
+      "rosterCompletion": "Roster Completion",
+      "geoFenceCoverage": "GeoFence Coverage"
+    },
+    "attention": {
+      "title": "Needs Attention",
+      "subtitle": "Important requests and alerts that need immediate action",
+      "empty": "There are no alerts or requests that need attention right now."
+    },
+    "rosters": {
+      "title": "Rosters & Shifts",
+      "subtitle": "Quick summary of roster completion and empty shifts",
+      "completionPercent": "Completion",
+      "daysRemaining": "Days Remaining",
+      "requiredHours": "Required Hours",
+      "assignedHours": "Assigned Hours",
+      "emptyShifts": "Empty Shifts"
+    },
+    "operations": {
+      "todayOperations": "Today Operations",
+      "todayTotalShifts": "Today Total Shifts",
+      "nightShiftsToday": "Night Shifts Today",
+      "averageShiftHours": "Average Shift Hours",
+      "mostUsedShift": "Most Used Shift",
+      "emailsNotifications": "Emails & Notifications",
+      "emailsSentToday": "Emails Sent Today",
+      "failuresToday": "Failures Today",
+      "unreadNotifications": "Unread Notifications",
+      "urgentNotifications": "Urgent Notifications",
+      "departmentsWithGeoFence": "Departments with GeoFence",
+      "activeGeoFences": "Active GeoFences",
+      "coverageRate": "Coverage Rate",
+      "healthStatus": "Health Status"
+    },
+    "coverage": {
+      "activeCategories": "Active Categories",
+      "categoriesWithoutManagers": "{{count}} categories without manager",
+      "noManager": "No Manager",
+      "activeDepartments": "Active Departments",
+      "departmentsWithoutManagers": "{{count}} departments without manager",
+      "geoFence": "GeoFence",
+      "noGeoFence": "No GeoFence"
+    },
+    "roles": {
+      "title": "Roles & Permissions",
+      "activeUsers": "Active Users",
+      "permanentRoles": "Permanent Roles",
+      "temporaryRoles": "Temporary Roles",
+      "usersWithoutRoles": "Users Without Roles"
+    },
+    "configuration": {
+      "title": "Operations Settings",
+      "subtitle": "Most used scientific degrees, contracting types, and shift types",
+      "scientificDegrees": "Scientific Degrees",
+      "contractingTypes": "Contracting Types",
+      "shiftTypes": "Shift Types",
+      "usersValue": "{{count}} users",
+      "contractingValue": "{{users}} users / {{hours}} hours",
+      "shiftValue": "{{usage}} today / {{hours}} hours"
+    },
+    "activity": {
+      "recentNotifications": "Recent Notifications",
+      "recentRoleChanges": "Recent Role Changes"
     }
   },
-
   "doctorReport": {
     "title": "Doctor Report",
     "nationalId": "National ID",
@@ -3324,5 +3293,20 @@
   "pagination": {
     "showing": "Showing",
     "of": "of"
+  },
+  "signalr": {
+  "connected": "Connected",
+  "connecting": "Connecting",
+  "reconnecting": "Reconnecting",
+  "disconnected": "Disconnected",
+  "reconnect": "Reconnect",
+  "reconnected": "Reconnected successfully",
+  "reconnectFailed": "Reconnect failed",
+  "errors": {
+    "noToken": "Please login first",
+    "unauthorized": "Session expired. Please login again",
+    "network": "Network connection error",
+    "maxRetries": "Connection failed after several attempts"
   }
+}
 }

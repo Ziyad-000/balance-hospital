@@ -21,7 +21,6 @@ import {
 } from "lucide-react"
 
 import LoadingGetData from "../../../components/LoadingGetData"
-import { StatCard } from "../../../components/dashboard/stateCard"
 import { DashboardCharts } from "../../../components/dashboard/charts"
 import { getDashboardData } from "../../../state/act/actReports"
 import { clearDashboardError } from "../../../state/slices/reports"
@@ -59,17 +58,16 @@ const getName = (item, lang) => {
 
 const getSeverityClasses = (severity, isDark) => {
   const v = String(severity || "").toLowerCase()
-  if (v.includes("critical") || v.includes("high") || v.includes("red"))
-    return isDark
-      ? "bg-red-900/25 border-red-500/60 text-red-300"
-      : "bg-red-50 border-red-300 text-red-700"
-  if (v.includes("warning") || v.includes("medium") || v.includes("yellow"))
-    return isDark
-      ? "bg-yellow-900/20 border-yellow-500/60 text-yellow-300"
-      : "bg-yellow-50 border-yellow-300 text-yellow-700"
-  return isDark
-    ? "bg-blue-900/20 border-blue-500/60 text-blue-300"
-    : "bg-blue-50 border-blue-300 text-blue-700"
+
+  if (v.includes("critical") || v.includes("high") || v.includes("red")) {
+    return "bg-transparent border-2 border-red-500 text-red-500 dark:bg-transparent dark:border-red-500 dark:text-red-500"
+  }
+
+  if (v.includes("warning") || v.includes("medium") || v.includes("yellow")) {
+    return "bg-transparent border-2 border-amber-500 text-amber-500 dark:bg-transparent dark:border-amber-500 dark:text-amber-500"
+  }
+
+  return "bg-transparent border-2 border-blue-500 text-blue-500 dark:bg-transparent dark:border-blue-500 dark:text-blue-500"
 }
 
 // ─── Primitive UI ─────────────────────────────────────────────────────────────
@@ -84,16 +82,69 @@ const Card = ({ children, isDark, className = "" }) => (
   </div>
 )
 
+const getTone500 = (tone = "blue") => {
+  const toneMap = {
+    blue: "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
+    green: "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
+    emerald: "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
+    red: "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
+    yellow: "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+    amber: "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+    orange: "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
+    purple: "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+    violet: "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+    gray: "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
+    slate: "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
+  }
+
+  return toneMap[tone] || toneMap.blue
+}
+
+const getValueTone500 = (tone = "blue") => {
+  const toneMap = {
+    blue: "text-blue-500 dark:text-blue-500",
+    green: "text-emerald-500 dark:text-emerald-500",
+    emerald: "text-emerald-500 dark:text-emerald-500",
+    red: "text-red-500 dark:text-red-500",
+    yellow: "text-amber-500 dark:text-amber-500",
+    amber: "text-amber-500 dark:text-amber-500",
+    orange: "text-orange-500 dark:text-orange-500",
+    purple: "text-violet-500 dark:text-violet-500",
+    violet: "text-violet-500 dark:text-violet-500",
+    gray: "text-slate-500 dark:text-slate-500",
+    slate: "text-slate-500 dark:text-slate-500",
+  }
+
+  return toneMap[tone] || toneMap.blue
+}
+
+const StatCard = ({ icon: Icon, label, value, color = "blue" }) => (
+  <Card isDark={false} className="p-4 bg-[var(--color-surface)] border-[var(--color-border)] shadow-sm">
+    <div className="flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <p className={`text-2xl font-black tracking-tight ${getValueTone500(color)}`}>
+          {value ?? 0}
+        </p>
+        <p className="text-sm font-bold text-[var(--color-text-muted)] mt-1">
+          {label}
+        </p>
+      </div>
+
+      <div
+        className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center shrink-0 shadow-sm ${getTone500(color)}`}
+      >
+        <Icon className="w-6 h-6" />
+      </div>
+    </div>
+  </Card>
+)
+
 const SectionHeader = ({ icon: Icon, title, subtitle, isDark, action }) => (
   <div className="flex items-start justify-between gap-4 mb-5">
     <div className="flex items-start gap-3">
       {Icon && (
-        <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-            isDark ? "bg-blue-900/30" : "bg-blue-100"
-          }`}
-        >
-          <Icon className={isDark ? "text-blue-300" : "text-blue-600"} size={20} />
+        <div className="w-10 h-10 rounded-xl border-2 flex items-center justify-center flex-shrink-0 bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500 shadow-sm">
+          <Icon className="text-blue-500 dark:text-blue-500" size={20} />
         </div>
       )}
       <div>
@@ -121,7 +172,7 @@ const ProgressBar = ({ value = 0, isDark }) => {
     >
       <div
         className={`h-full rounded-full transition-all ${
-          v >= 80 ? "bg-green-500" : v >= 50 ? "bg-yellow-500" : "bg-red-500"
+          v >= 80 ? "bg-emerald-500" : v >= 50 ? "bg-amber-500" : "bg-red-500"
         }`}
         style={{ width: `${v}%` }}
       />
@@ -131,16 +182,18 @@ const ProgressBar = ({ value = 0, isDark }) => {
 
 const Badge = ({ children, tone = "blue", isDark }) => {
   const cls = {
-    blue:   isDark ? "bg-blue-900/30 text-blue-300"   : "bg-blue-100 text-blue-700",
-    green:  isDark ? "bg-green-900/30 text-green-300" : "bg-green-100 text-green-700",
-    red:    isDark ? "bg-red-900/30 text-red-300"     : "bg-red-100 text-red-700",
-    yellow: isDark ? "bg-yellow-900/30 text-yellow-300": "bg-yellow-100 text-yellow-700",
-    purple: isDark ? "bg-purple-900/30 text-purple-300": "bg-purple-100 text-purple-700",
-    gray:   isDark ? "bg-gray-700 text-gray-300"       : "bg-gray-100 text-gray-700",
+    blue: "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
+    green: "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
+    red: "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
+    yellow: "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+    orange: "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
+    purple: "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+    gray: "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
   }
+
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border-2 shadow-sm ${
         cls[tone] || cls.blue
       }`}
     >
@@ -179,12 +232,12 @@ const InfoRow = ({ label, value, isDark, danger = false }) => (
   </div>
 )
 
-const ListBlock = ({ title, items, isDark }) => (
+const ListBlock = ({ title, items, isDark, emptyText }) => (
   <div>
     <h3 className={`font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>{title}</h3>
     <div className="space-y-2">
       {items.length === 0 ? (
-        <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>لا توجد بيانات</p>
+        <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>{emptyText}</p>
       ) : (
         items.map((item) => (
           <div
@@ -208,7 +261,7 @@ const ListBlock = ({ title, items, isDark }) => (
 
 // ─── Section Components ───────────────────────────────────────────────────────
 
-const DashboardHeader = ({ isDark, title, lastUpdated, loading, onRefresh }) => (
+const DashboardHeader = ({ isDark, title, lastUpdated, lastUpdatedLabel, refreshLabel, loading, onRefresh }) => (
   <Card isDark={isDark} className="p-6">
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
@@ -217,64 +270,64 @@ const DashboardHeader = ({ isDark, title, lastUpdated, loading, onRefresh }) => 
         </h1>
         {lastUpdated && (
           <p className={`text-sm mt-2 ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-            آخر تحديث: {formatDate(lastUpdated)}
+            {lastUpdatedLabel}: {formatDate(lastUpdated)}
           </p>
         )}
       </div>
       <button
         onClick={onRefresh}
         disabled={loading}
-        className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-semibold transition-all shadow-lg"
+        className="inline-flex items-center justify-center gap-2 bg-[var(--color-success)] hover:bg-[var(--color-success-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-5 py-3 rounded-xl font-extrabold transition-all shadow-lg"
       >
         <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-        تحديث البيانات
+        {refreshLabel}
       </button>
     </div>
   </Card>
 )
 
-const OverviewStats = ({ data, isDark }) => {
+const OverviewStats = ({ data, isDark, t }) => {
   const currentRoster = data.rosters?.currentRoster
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
       <StatCard
         icon={Users}
-        label="إجمالي المستخدمين"
+        label={t("dashboard.overview.totalUsers")}
         value={data.users?.totalUsers ?? 0}
         color="blue"
         isDark={isDark}
       />
       <StatCard
         icon={Clock}
-        label="طلبات معلقة"
+        label={t("dashboard.overview.pendingRequests")}
         value={data.pendingRequests?.totalPendingRequests ?? 0}
         color="orange"
         isDark={isDark}
       />
       <StatCard
         icon={AlertTriangle}
-        label="تنبيهات حرجة"
+        label={t("dashboard.overview.criticalAlerts")}
         value={data.systemAlerts?.criticalAlerts ?? 0}
         color="red"
         isDark={isDark}
       />
       <StatCard
         icon={Calendar}
-        label="شيفتات اليوم"
+        label={t("dashboard.overview.todayShifts")}
         value={data.shiftInsights?.todayTotalShifts ?? 0}
         color="purple"
         isDark={isDark}
       />
       <StatCard
         icon={BarChart3}
-        label="إكمال الروستر"
+        label={t("dashboard.overview.rosterCompletion")}
         value={`${currentRoster?.completionPercent ?? 0}%`}
         color="green"
         isDark={isDark}
       />
       <StatCard
         icon={MapPin}
-        label="تغطية GeoFence"
+        label={t("dashboard.overview.geoFenceCoverage")}
         value={`${data.departments?.geoFenceCoverageRate ?? 0}%`}
         color="blue"
         isDark={isDark}
@@ -296,23 +349,23 @@ const dedupeRosterAlerts = (alerts) => {
   return [...map.values()]
 }
 
-const useAttentionItems = (data) =>
+const useAttentionItems = (data, t) =>
   useMemo(() => {
     const systemAlerts =
       data.systemAlerts?.recentAlerts?.map((item, i) => ({
         id: `system-${i}`,
-        source: "System",
-        title: item.alertType || "System Alert",
+        source: t("dashboard.sources.system"),
+        title: item.alertType || t("dashboard.sources.systemAlert"),
         message: item.message,
         date: item.timestamp,
-        severity: item.severity || "Warning",
+        severity: item.severity || t("dashboard.sources.warning"),
         icon: AlertTriangle,
       })) ?? []
 
     const requests =
       data.pendingRequests?.recentRequests?.map((item) => ({
         id: `request-${item.id}`,
-        source: item.requestType || "Request",
+        source: item.requestType || t("dashboard.sources.request"),
         title: item.requesterName,
         message: item.description,
         date: item.requestDate,
@@ -323,7 +376,7 @@ const useAttentionItems = (data) =>
     const categoryAlerts =
       data.categories?.categoryAlerts?.map((item) => ({
         id: `category-${item.categoryId}`,
-        source: "Category",
+        source: t("dashboard.sources.category"),
         title: item.categoryName,
         message: item.message,
         severity: item.severity,
@@ -333,7 +386,7 @@ const useAttentionItems = (data) =>
     const departmentAlerts =
       data.departments?.departmentAlerts?.map((item) => ({
         id: `department-${item.departmentId}`,
-        source: "Department",
+        source: t("dashboard.sources.department"),
         title: item.departmentName,
         message: item.message,
         severity: item.severity,
@@ -344,8 +397,8 @@ const useAttentionItems = (data) =>
       data.rosters?.alerts ?? []
     ).map((item, i) => ({
       id: `roster-${item.rosterId ?? i}`,
-      source: "Roster",
-      title: item.rosterTitle || item.title || "Roster Alert",
+      source: t("dashboard.sources.roster"),
+      title: item.rosterTitle || item.title || t("dashboard.sources.rosterAlert"),
       message: item.message,
       date: item.createdAt,
       severity: item.severity || item.statusColor,
@@ -359,16 +412,16 @@ const useAttentionItems = (data) =>
       ...categoryAlerts,
       ...departmentAlerts,
     ].slice(0, 12)
-  }, [data])
+  }, [data, t])
 
-const NeedsAttention = ({ data, isDark }) => {
-  const items = useAttentionItems(data)
+const NeedsAttention = ({ data, isDark, t }) => {
+  const items = useAttentionItems(data, t)
   return (
     <Card isDark={isDark} className="p-6">
       <SectionHeader
         icon={AlertTriangle}
-        title="محتاج متابعة"
-        subtitle="أهم الطلبات والتنبيهات اللي محتاجة تدخل فوري"
+        title={t("dashboard.attention.title")}
+        subtitle={t("dashboard.attention.subtitle")}
         isDark={isDark}
       />
       {items.length === 0 ? (
@@ -377,7 +430,7 @@ const NeedsAttention = ({ data, isDark }) => {
             isDark ? "bg-gray-700 text-gray-300" : "bg-gray-50 text-gray-600"
           }`}
         >
-          لا توجد تنبيهات أو طلبات تحتاج متابعة حاليًا.
+          {t("dashboard.attention.empty")}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -410,7 +463,7 @@ const NeedsAttention = ({ data, isDark }) => {
   )
 }
 
-const RosterOverview = ({ data, isDark }) => {
+const RosterOverview = ({ data, isDark, t }) => {
   const roster = data.rosters?.currentRoster
   const activeRosters = data.rosters?.activeRosters?.items || []
   if (!roster && activeRosters.length === 0) return null
@@ -419,8 +472,8 @@ const RosterOverview = ({ data, isDark }) => {
     <Card isDark={isDark} className="p-6">
       <SectionHeader
         icon={Calendar}
-        title="الروسترات والشيفتات"
-        subtitle="ملخص سريع عن اكتمال الجداول والشيفتات الفارغة"
+        title={t("dashboard.rosters.title")}
+        subtitle={t("dashboard.rosters.subtitle")}
         isDark={isDark}
       />
 
@@ -447,11 +500,11 @@ const RosterOverview = ({ data, isDark }) => {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-            <MiniMetric title="نسبة الإكمال"     value={`${roster.completionPercent ?? 0}%`} isDark={isDark} />
-            <MiniMetric title="الأيام المتبقية"  value={roster.daysRemaining ?? 0}           isDark={isDark} />
-            <MiniMetric title="الساعات المطلوبة" value={roster.totalRequiredHours ?? 0}       isDark={isDark} />
-            <MiniMetric title="الساعات المسندة"  value={roster.totalAssignedHours ?? 0}       isDark={isDark} />
-            <MiniMetric title="شيفتات فارغة"     value={roster.emptyShiftsCount ?? 0}         isDark={isDark} danger />
+            <MiniMetric title={t("dashboard.rosters.completionPercent")} value={`${roster.completionPercent ?? 0}%`} isDark={isDark} />
+            <MiniMetric title={t("dashboard.rosters.daysRemaining")} value={roster.daysRemaining ?? 0} isDark={isDark} />
+            <MiniMetric title={t("dashboard.rosters.requiredHours")} value={roster.totalRequiredHours ?? 0} isDark={isDark} />
+            <MiniMetric title={t("dashboard.rosters.assignedHours")} value={roster.totalAssignedHours ?? 0} isDark={isDark} />
+            <MiniMetric title={t("dashboard.rosters.emptyShifts")} value={roster.emptyShiftsCount ?? 0} isDark={isDark} danger />
           </div>
 
           <ProgressBar value={roster.completionPercent} isDark={isDark} />
@@ -479,9 +532,9 @@ const RosterOverview = ({ data, isDark }) => {
               <ProgressBar value={item.completionPercent} isDark={isDark} />
 
               <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                <MiniMetric title="أطباء"  value={item.assignedDoctorsCount ?? 0} isDark={isDark} compact />
-                <MiniMetric title="فارغ"   value={item.emptyShiftsCount ?? 0}     isDark={isDark} compact danger />
-                <MiniMetric title="متبقي"  value={item.daysRemaining ?? 0}        isDark={isDark} compact />
+                <MiniMetric title={t("dashboard.common.doctors")} value={item.assignedDoctorsCount ?? 0} isDark={isDark} compact />
+                <MiniMetric title={t("dashboard.common.empty")} value={item.emptyShiftsCount ?? 0} isDark={isDark} compact danger />
+                <MiniMetric title={t("dashboard.common.remaining")} value={item.daysRemaining ?? 0} isDark={isDark} compact />
               </div>
             </div>
           ))}
@@ -491,7 +544,7 @@ const RosterOverview = ({ data, isDark }) => {
   )
 }
 
-const OperationsOverview = ({ data, isDark }) => {
+const OperationsOverview = ({ data, isDark, t }) => {
   const shift = data.shiftInsights
   const email = data.emailQueue
   const quick = data.quickStats
@@ -499,13 +552,13 @@ const OperationsOverview = ({ data, isDark }) => {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
       <Card isDark={isDark} className="p-6">
-        <SectionHeader icon={Activity} title="تشغيل اليوم" isDark={isDark} />
+        <SectionHeader icon={Activity} title={t("dashboard.operations.todayOperations")} isDark={isDark} />
         <div className="space-y-4">
-          <InfoRow label="إجمالي الشيفتات اليوم"  value={shift?.todayTotalShifts ?? 0}     isDark={isDark} />
-          <InfoRow label="الشيفتات الليلية"        value={shift?.nightShiftsToday ?? 0}      isDark={isDark} />
-          <InfoRow label="متوسط ساعات الشيفت"      value={shift?.averageShiftHours ?? 0}     isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.todayTotalShifts")}  value={shift?.todayTotalShifts ?? 0}     isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.nightShiftsToday")}        value={shift?.nightShiftsToday ?? 0}      isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.averageShiftHours")}      value={shift?.averageShiftHours ?? 0}     isDark={isDark} />
           <InfoRow
-            label="أكثر شيفت استخدامًا"
+            label={t("dashboard.operations.mostUsedShift")}
             value={shift?.mostCommonShiftTypeNameAr || shift?.mostCommonShiftTypeNameEn || "-"}
             isDark={isDark}
           />
@@ -513,22 +566,22 @@ const OperationsOverview = ({ data, isDark }) => {
       </Card>
 
       <Card isDark={isDark} className="p-6">
-        <SectionHeader icon={Mail} title="الإيميلات والإشعارات" isDark={isDark} />
+        <SectionHeader icon={Mail} title={t("dashboard.operations.emailsNotifications")} isDark={isDark} />
         <div className="space-y-4">
           <InfoRow
-            label="إيميلات مرسلة اليوم"
+            label={t("dashboard.operations.emailsSentToday")}
             value={email?.sentToday ?? quick?.emailsSentToday ?? 0}
             isDark={isDark}
           />
           <InfoRow
-            label="فشل اليوم"
+            label={t("dashboard.operations.failuresToday")}
             value={email?.failedToday ?? 0}
             isDark={isDark}
             danger={(email?.failedToday ?? 0) > 0}
           />
-          <InfoRow label="إشعارات غير مقروءة" value={data.notifications?.unreadNotifications ?? 0} isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.unreadNotifications")} value={data.notifications?.unreadNotifications ?? 0} isDark={isDark} />
           <InfoRow
-            label="إشعارات عاجلة"
+            label={t("dashboard.operations.urgentNotifications")}
             value={data.notifications?.urgentNotifications ?? 0}
             isDark={isDark}
             danger={(data.notifications?.urgentNotifications ?? 0) > 0}
@@ -539,17 +592,17 @@ const OperationsOverview = ({ data, isDark }) => {
       <Card isDark={isDark} className="p-6">
         <SectionHeader icon={MapPin} title="GeoFence" isDark={isDark} />
         <div className="space-y-4">
-          <InfoRow label="أقسام بها GeoFence" value={data.departments?.departmentsWithGeoFence ?? 0} isDark={isDark} />
-          <InfoRow label="GeoFences نشطة"     value={data.departments?.activeGeoFences ?? 0}          isDark={isDark} />
-          <InfoRow label="نسبة التغطية"        value={`${data.departments?.geoFenceCoverageRate ?? 0}%`} isDark={isDark} />
-          <InfoRow label="حالة الصحة"          value={data.departments?.healthStatus || "-"}           isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.departmentsWithGeoFence")} value={data.departments?.departmentsWithGeoFence ?? 0} isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.activeGeoFences")}     value={data.departments?.activeGeoFences ?? 0}          isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.coverageRate")}        value={`${data.departments?.geoFenceCoverageRate ?? 0}%`} isDark={isDark} />
+          <InfoRow label={t("dashboard.operations.healthStatus")}          value={data.departments?.healthStatus || "-"}           isDark={isDark} />
         </div>
       </Card>
     </div>
   )
 }
 
-const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
+const ManagementCoverage = ({ data, isDark, lang, navigate, t }) => {
   const categories  = data.categories?.topActiveCategories  || []
   const departments = data.departments?.topActiveDepartments || []
   const roles       = data.roles?.distribution               || []
@@ -560,9 +613,10 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
       <Card isDark={isDark} className="p-6">
         <SectionHeader
           icon={Briefcase}
-          title="التخصصات النشطة"
-          subtitle={`${data.categories?.categoriesWithoutManagers ?? 0} تخصص بدون مدير`}
+          title={t("dashboard.coverage.activeCategories")}
+          subtitle={t("dashboard.coverage.categoriesWithoutManagers", { count: data.categories?.categoriesWithoutManagers ?? 0 })}
           isDark={isDark}
+          emptyText={t("dashboard.common.noData")}
         />
         <div className="space-y-3">
           {categories.slice(0, 5).map((cat) => (
@@ -580,7 +634,7 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
                   <div className="flex items-center gap-2 mb-2">
                     <Badge tone="green" isDark={isDark}>{cat.code}</Badge>
                     {!cat.managerName && (
-                      <Badge tone="yellow" isDark={isDark}>بدون مدير</Badge>
+                      <Badge tone="yellow" isDark={isDark}>{t("dashboard.coverage.noManager")}</Badge>
                     )}
                   </div>
                   <p className={`font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
@@ -588,10 +642,10 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
                   </p>
                 </div>
                 <div className="text-end shrink-0">
-                  <p className={`text-xl font-bold ${isDark ? "text-blue-300" : "text-blue-600"}`}>
+                  <p className={`text-xl font-bold ${isDark ? "text-blue-500" : "text-blue-500"}`}>
                     {cat.doctorsCount}
                   </p>
-                  <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>أطباء</p>
+                  <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>{t("dashboard.common.doctors")}</p>
                 </div>
               </div>
             </button>
@@ -603,9 +657,10 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
       <Card isDark={isDark} className="p-6">
         <SectionHeader
           icon={Building}
-          title="الأقسام النشطة"
-          subtitle={`${data.departments?.departmentsWithoutManagers ?? 0} قسم بدون مدير`}
+          title={t("dashboard.coverage.activeDepartments")}
+          subtitle={t("dashboard.coverage.departmentsWithoutManagers", { count: data.departments?.departmentsWithoutManagers ?? 0 })}
           isDark={isDark}
+          emptyText={t("dashboard.common.noData")}
         />
         <div className="space-y-3">
           {departments.slice(0, 5).map((dept) => (
@@ -623,9 +678,9 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
                   <div className="flex items-center gap-2 mb-2">
                     <Badge tone="blue" isDark={isDark}>{dept.code}</Badge>
                     {dept.hasGeoFence ? (
-                      <Badge tone="green" isDark={isDark}>GeoFence</Badge>
+                      <Badge tone="green" isDark={isDark}>{t("dashboard.coverage.geoFence")}</Badge>
                     ) : (
-                      <Badge tone="red" isDark={isDark}>No GeoFence</Badge>
+                      <Badge tone="red" isDark={isDark}>{t("dashboard.coverage.noGeoFence")}</Badge>
                     )}
                   </div>
                   <p className={`font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
@@ -636,16 +691,16 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
                   </p>
                 </div>
                 <div className="text-end shrink-0">
-                  <p className={`text-xl font-bold ${isDark ? "text-purple-300" : "text-purple-600"}`}>
+                  <p className={`text-xl font-bold ${isDark ? "text-violet-500" : "text-violet-500"}`}>
                     {dept.activeSchedulesCount?.toLocaleString() ?? 0}
                   </p>
-                  <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>جداول</p>
+                  <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>{t("dashboard.common.schedules")}</p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center">
-                <MiniMetric title="أطباء"   value={dept.assignedDoctorsCount ?? 0}                        isDark={isDark} compact />
-                <MiniMetric title="تخصصات" value={dept.categoriesCount ?? 0}                              isDark={isDark} compact />
-                <MiniMetric title="نشاط"   value={dept.activityLevelText || dept.activityLevel || "-"}    isDark={isDark} compact />
+                <MiniMetric title={t("dashboard.common.doctors")} value={dept.assignedDoctorsCount ?? 0} isDark={isDark} compact />
+                <MiniMetric title={t("dashboard.common.categories")} value={dept.categoriesCount ?? 0} isDark={isDark} compact />
+                <MiniMetric title={t("dashboard.common.activity")} value={dept.activityLevelText || dept.activityLevel || "-"} isDark={isDark} compact />
               </div>
             </button>
           ))}
@@ -654,13 +709,13 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
 
       {/* Roles */}
       <Card isDark={isDark} className="p-6 xl:col-span-2">
-        <SectionHeader icon={Shield} title="الأدوار والصلاحيات" isDark={isDark} />
+        <SectionHeader icon={Shield} title={t("dashboard.roles.title")} isDark={isDark} />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-          <StatCard icon={UserCheck} label="مستخدمين نشطين" value={data.roles?.kpis?.totalActiveUsers   ?? 0} color="green"  isDark={isDark} />
-          <StatCard icon={Shield}    label="أدوار دائمة"    value={data.roles?.kpis?.permanentRoles      ?? 0} color="blue"   isDark={isDark} />
-          <StatCard icon={Clock}     label="أدوار مؤقتة"   value={data.roles?.kpis?.temporaryRoles      ?? 0} color="orange" isDark={isDark} />
-          <StatCard icon={XCircle}   label="بدون أدوار"    value={data.roles?.kpis?.usersWithoutRoles   ?? 0} color="red"    isDark={isDark} />
+          <StatCard icon={UserCheck} label={t("dashboard.roles.activeUsers")} value={data.roles?.kpis?.totalActiveUsers   ?? 0} color="green"  isDark={isDark} />
+          <StatCard icon={Shield}    label={t("dashboard.roles.permanentRoles")}    value={data.roles?.kpis?.permanentRoles      ?? 0} color="blue"   isDark={isDark} />
+          <StatCard icon={Clock}     label={t("dashboard.roles.temporaryRoles")}   value={data.roles?.kpis?.temporaryRoles      ?? 0} color="orange" isDark={isDark} />
+          <StatCard icon={XCircle}   label={t("dashboard.roles.usersWithoutRoles")}    value={data.roles?.kpis?.usersWithoutRoles   ?? 0} color="red"    isDark={isDark} />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -674,7 +729,7 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
                 <p className={`font-bold text-sm ${isDark ? "text-white" : "text-gray-900"}`}>
                   {lang === "ar" ? role.roleNameAr : role.roleNameEn}
                 </p>
-                <p className={`text-2xl font-black mt-2 ${isDark ? "text-blue-300" : "text-blue-600"}`}>
+                <p className={`text-2xl font-black mt-2 ${isDark ? "text-blue-500" : "text-blue-500"}`}>
                   {role.activeUsersCount}
                 </p>
               </div>
@@ -685,7 +740,7 @@ const ManagementCoverage = ({ data, isDark, lang, navigate }) => {
   )
 }
 
-const ConfigurationSummary = ({ data, isDark, lang }) => {
+const ConfigurationSummary = ({ data, isDark, lang, t }) => {
   if (!data.configurationSummary) return null
 
   const degrees         = data.configurationSummary.topDegreesByUsers  || []
@@ -696,51 +751,54 @@ const ConfigurationSummary = ({ data, isDark, lang }) => {
     <Card isDark={isDark} className="p-6">
       <SectionHeader
         icon={FileText}
-        title="إعدادات التشغيل"
-        subtitle="الدرجات العلمية، أنواع التعاقد، وأنواع الشيفتات الأكثر استخدامًا"
+        title={t("dashboard.configuration.title")}
+        subtitle={t("dashboard.configuration.subtitle")}
         isDark={isDark}
       />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ListBlock
-          title="الدرجات العلمية"
+          title={t("dashboard.configuration.scientificDegrees")}
           items={degrees.map((d) => ({
             id: d.id,
             name: getName(d, lang),
-            value: `${d.usersCount} مستخدم`,
+            value: t("dashboard.configuration.usersValue", { count: d.usersCount }),
           }))}
           isDark={isDark}
+          emptyText={t("dashboard.common.noData")}
         />
         <ListBlock
-          title="أنواع التعاقد"
+          title={t("dashboard.configuration.contractingTypes")}
           items={contractingTypes.slice(0, 6).map((ct) => ({
             id: ct.id,
             name: getName(ct, lang),
-            value: `${ct.usersCount} مستخدم / ${ct.maxHoursPerWeek} ساعة`,
+            value: t("dashboard.configuration.contractingValue", { users: ct.usersCount, hours: ct.maxHoursPerWeek }),
           }))}
           isDark={isDark}
+          emptyText={t("dashboard.common.noData")}
         />
         <ListBlock
-          title="أنواع الشيفتات"
+          title={t("dashboard.configuration.shiftTypes")}
           items={shiftTypes.slice(0, 6).map((st) => ({
             id: st.id,
             name: getName(st, lang),
-            value: `${st.usageToday} اليوم / ${st.totalTime} ساعات`,
+            value: t("dashboard.configuration.shiftValue", { usage: st.usageToday, hours: st.totalTime }),
           }))}
           isDark={isDark}
+          emptyText={t("dashboard.common.noData")}
         />
       </div>
     </Card>
   )
 }
 
-const RecentActivity = ({ data, isDark }) => {
+const RecentActivity = ({ data, isDark, t }) => {
   const notifications = data.notifications?.recentNotifications || []
   const roleChanges   = data.roles?.recentChanges                || []
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <Card isDark={isDark} className="p-6">
-        <SectionHeader icon={Mail} title="آخر الإشعارات" isDark={isDark} />
+        <SectionHeader icon={Mail} title={t("dashboard.activity.recentNotifications")} isDark={isDark} />
         <div className="space-y-3">
           {notifications.slice(0, 5).map((item) => (
             <div
@@ -762,7 +820,7 @@ const RecentActivity = ({ data, isDark }) => {
       </Card>
 
       <Card isDark={isDark} className="p-6">
-        <SectionHeader icon={Shield} title="آخر تغييرات الأدوار" isDark={isDark} />
+        <SectionHeader icon={Shield} title={t("dashboard.activity.recentRoleChanges")} isDark={isDark} />
         <div className="space-y-3">
           {roleChanges.slice(0, 5).map((item) => (
             <div
@@ -791,32 +849,28 @@ const RecentActivity = ({ data, isDark }) => {
   )
 }
 
-const DashboardError = ({ isDark, error, onRetry }) => (
+const DashboardError = ({ isDark, error, onRetry, t }) => (
   <div
     className={`min-h-screen p-6 flex items-center justify-center ${
       isDark ? "bg-gray-900" : "bg-red-50"
     }`}
   >
     <Card isDark={isDark} className="p-8 max-w-xl w-full text-center">
-      <div
-        className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 ${
-          isDark ? "bg-red-900/30" : "bg-red-100"
-        }`}
-      >
+      <div className="w-20 h-20 rounded-full border-2 flex items-center justify-center mx-auto mb-5 bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500">
         <AlertTriangle className="text-red-500" size={36} />
       </div>
       <h2 className={`text-2xl font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>
-        حدث خطأ أثناء تحميل الداشبورد
+        {t("dashboard.error.title")}
       </h2>
       <p className={`mb-6 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-        {error?.message || "تعذر جلب البيانات"}
+        {error?.message || t("dashboard.error.message")}
       </p>
       <button
         onClick={onRetry}
         className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold"
       >
         <RefreshCw size={18} />
-        إعادة المحاولة
+        {t("dashboard.error.retry")}
       </button>
     </Card>
   </div>
@@ -845,7 +899,7 @@ const Dashboard = () => {
 
   if (dashboardError && !dashboardData)
     return (
-      <DashboardError isDark={isDark} error={dashboardError} onRetry={() => dispatch(getDashboardData())} />
+      <DashboardError isDark={isDark} error={dashboardError} onRetry={() => dispatch(getDashboardData())} t={t} />
     )
 
   if (!dashboardData) return null
@@ -865,34 +919,38 @@ const Dashboard = () => {
           isDark={isDark}
           title={t("dashboard.title") || "Dashboard"}
           lastUpdated={lastUpdated}
+          lastUpdatedLabel={t("dashboard.lastUpdated")}
+          refreshLabel={t("dashboard.refresh")}
           loading={loadingGetDashboardData}
           onRefresh={() => dispatch(getDashboardData())}
         />
 
-        <OverviewStats data={dashboardData} isDark={isDark} />
+        <OverviewStats data={dashboardData} isDark={isDark} t={t} />
 
         <DashboardCharts dashboardData={dashboardData} isDark={isDark} t={t} />
 
-        <NeedsAttention data={dashboardData} isDark={isDark} />
+        <NeedsAttention data={dashboardData} isDark={isDark} t={t} />
 
-        <RosterOverview data={dashboardData} isDark={isDark} />
+        <RosterOverview data={dashboardData} isDark={isDark} t={t} />
 
-        <OperationsOverview data={dashboardData} isDark={isDark} />
+        <OperationsOverview data={dashboardData} isDark={isDark} t={t} />
 
         <ManagementCoverage
           data={dashboardData}
           isDark={isDark}
           lang={i18n.language}
           navigate={navigate}
+          t={t}
         />
 
         <ConfigurationSummary
           data={dashboardData}
           isDark={isDark}
           lang={i18n.language}
+          t={t}
         />
 
-        <RecentActivity data={dashboardData} isDark={isDark} />
+        <RecentActivity data={dashboardData} isDark={isDark} t={t} />
 
       </div>
     </div>

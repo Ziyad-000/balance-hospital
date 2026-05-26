@@ -1,21 +1,145 @@
-import { useEffect, useCallback, useState } from "react"
+// src/hooks/use-signalr.js
+
+import { useEffect, useCallback, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { toast } from "react-toastify"
+
 import { signalRService } from "../services/signalRService"
 import { getUnreadCount } from "../state/act/actNotifications"
+
+import {
+  addRealtimeNotification,
+  setSignalRStatus,
+} from "../state/slices/notification"
 
 export const useSignalR = () => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+
+  const token = useSelector((state) => state.auth?.token)
+
   const [isConnected, setIsConnected] = useState(false)
   const [connectionState, setConnectionState] = useState("Disconnected")
   const [connectionError, setConnectionError] = useState(null)
 
-  // ✅ دالة معالجة الإشعار
+  const mountedRef = useRef(true)
+  // ✅ FIX 4: Use a ref to track if we've already started to prevent
+  // rapid re-renders (e.g. StrictMode double-mount) from firing two start() calls
+  const startingRef = useRef(false)
+  const retryTimeoutRef = useRef(null)
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  const getLocalizedValue = useCallback(
+    (payload, arKey, enKey, fallbackKey) => {
+      if (!payload) return ""
+
+      if (i18n.language === "ar") {
+        return payload[arKey] || payload[fallbackKey] || payload[enKey] || ""
+      }
+
+      return payload[enKey] || payload[fallbackKey] || payload[arKey] || ""
+    },
+    [i18n.language]
+  )
+
+  const normalizeNotificationPayload = useCallback(
+    (payload) => {
+      if (!payload) return null
+
+      const title = getLocalizedValue(payload, "titleAr", "titleEn", "title")
+      const message = getLocalizedValue(
+        payload,
+        "messageAr",
+        "messageEn",
+        "message"
+      )
+
+      const id =
+        payload.id ||
+        payload.notificationId ||
+        payload.NotificationId ||
+        payload.guid ||
+        `${Date.now()}-${Math.random()}`
+
+      return {
+        ...payload,
+        id,
+        title,
+        message,
+        isRead: payload.isRead ?? false,
+        createdAt:
+          payload.createdAt ||
+          payload.createdOn ||
+          payload.timestamp ||
+          new Date().toISOString(),
+        priority:
+          payload.priority ||
+          payload.Priority ||
+          payload.severity ||
+          payload.Severity ||
+          "Normal",
+        type:
+          payload.type ||
+          payload.kind ||
+          payload.notificationType ||
+          "notification",
+      }
+    },
+    [getLocalizedValue]
+  )
+
+  const showNotificationToast = useCallback(
+    (notification) => {
+      if (!notification) return
+
+      const title =
+        notification.title || t("notifications.new") || "Notification"
+      const message = notification.message || ""
+
+      const toastText = message ? `${title}: ${message}` : title
+      const priority = String(notification.priority || "Normal").toLowerCase()
+
+      if (priority === "urgent" || priority === "critical") {
+        toast.error(toastText, {
+          autoClose: false,
+          position: "top-center",
+        })
+        return
+      }
+
+      if (priority === "high") {
+        toast.warning(toastText, {
+          autoClose: 8000,
+          position: "top-right",
+        })
+        return
+      }
+
+      if (priority === "low") {
+        toast.success(toastText, {
+          autoClose: 3000,
+          position: "top-right",
+        })
+        return
+      }
+
+      toast.info(toastText, {
+        autoClose: 5000,
+        position: "top-right",
+      })
+    },
+    [t]
+  )
+
+  // ─── Notification Handler ──────────────────────────────────────────────────
+
   const handleNotification = useCallback(
     (payload) => {
-      console.log("📨 استقبال إشعار:", payload)
+      console.log("📨 [SignalR] Notification received:", payload)
+
+      if (!payload) return
 
       if (payload.kind === "diagnostic_ping") {
         toast.info(payload.message || "Ping received!", {
@@ -25,175 +149,260 @@ export const useSignalR = () => {
         return
       }
 
-      if (payload.kind === "notification" || payload.type) {
-        const title =
-          i18n.language === "ar"
-            ? payload.titleAr || payload.title
-            : payload.titleEn || payload.title
-        const message =
-          i18n.language === "ar"
-            ? payload.messageAr || payload.message
-            : payload.messageEn || payload.message
+      const notification = normalizeNotificationPayload(payload)
+      if (!notification) return
 
-        switch (payload.priority) {
-          case "Urgent":
-            toast.error(`${title}: ${message}`, {
-              autoClose: false,
-              position: "top-center",
-            })
-            break
-          case "High":
-            toast.warning(`${title}: ${message}`, {
-              autoClose: 8000,
-              position: "top-right",
-            })
-            break
-          case "Normal":
-            toast.info(`${title}: ${message}`, {
-              autoClose: 5000,
-              position: "top-right",
-            })
-            break
-          case "Low":
-            toast.success(`${title}: ${message}`, {
-              autoClose: 3000,
-              position: "top-right",
-            })
-            break
-          default:
-            toast.info(`${title}: ${message}`, {
-              position: "top-right",
-            })
-        }
-
-        // تحديث عدد الإشعارات
-        dispatch(getUnreadCount())
-      }
+      showNotificationToast(notification)
+      dispatch(addRealtimeNotification(notification))
+      dispatch(getUnreadCount())
     },
-    [i18n.language, dispatch]
+    [dispatch, normalizeNotificationPayload, showNotificationToast]
   )
 
-  // ✅ دالة معالجة الأخطاء
+  // ─── Error Handler ─────────────────────────────────────────────────────────
+
   const handleError = useCallback(
     (error) => {
       console.error("🚨 [SignalR Error]:", error)
+
+      if (!mountedRef.current) return
+
       setConnectionError(error)
 
-      switch (error.code) {
+      dispatch(
+        setSignalRStatus({
+          isConnected: false,
+          connectionState: signalRService.getConnectionState(),
+          error,
+        })
+      )
+
+      switch (error?.code) {
         case "NO_TOKEN":
-          // toast.error(
-          //   t("signalr.errors.noToken") || "يرجى تسجيل الدخول أولاً",
-          //   {
-          //     position: "top-center",
-          //     autoClose: 5000,
-          //   }
-          // )
+          console.warn("[SignalR] Token is missing — skipping toast")
           break
+
         case "UNAUTHORIZED":
-          // toast.error(
-          //   t("signalr.errors.unauthorized") ||
-          //     "انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى",
-          //   {
-          //     position: "top-center",
-          //     autoClose: false,
-          //   }
-          // )
-          // يمكنك هنا إضافة logout logic
+          toast.error(
+            t("signalr.errors.unauthorized") ||
+              "Session expired. Please login again.",
+            { position: "top-center", autoClose: 5000 }
+          )
           break
+
         case "NETWORK_ERROR":
-          // toast.error(t("signalr.errors.network") || "خطأ في الاتصال بالشبكة", {
-          //   position: "top-right",
-          //   autoClose: 5000,
-          // })
+          toast.error(
+            t("signalr.errors.network") || "Network connection error.",
+            { position: "top-right", autoClose: 5000 }
+          )
           break
+
         case "MAX_RETRIES":
-          // toast.error(
-          //   t("signalr.errors.maxRetries") || "فشل الاتصال بعد عدة محاولات",
-          //   {
-          //     position: "top-right",
-          //     autoClose: 5000,
-          //   }
-          // )
+          toast.error(
+            t("signalr.errors.maxRetries") ||
+              "SignalR connection failed after several attempts.",
+            { position: "top-right", autoClose: 5000 }
+          )
           break
+
         default:
-        // toast.error(error.message || "حدث خطأ في الاتصال", {
-        //   position: "top-right",
-        //   autoClose: 5000,
-        // })
+          if (error?.message) {
+            console.warn("[SignalR] Unhandled error:", error.message)
+          }
+          break
       }
     },
-    [t]
+    [dispatch, t]
   )
 
-  useEffect(() => {
-    let notificationUnsubscribe = null
-    let errorUnsubscribe = null
-    let mounted = true
+  // ─── Sync local state with signalRService ──────────────────────────────────
 
-    const initConnection = async () => {
-      // تسجيل الـ handlers
-      notificationUnsubscribe =
-        signalRService.onNotification(handleNotification)
-      errorUnsubscribe = signalRService.onError(handleError)
+  const syncConnectionState = useCallback(() => {
+    if (!mountedRef.current) return
 
-      // محاولة الاتصال
-      const connected = await signalRService.start()
+    const state = signalRService.getConnectionState()
+    const connected = signalRService.isConnected()
 
-      if (mounted) {
-        setIsConnected(connected)
-        setConnectionState(signalRService.getConnectionState())
+    setIsConnected(connected)
+    setConnectionState(state)
 
-        if (!connected) {
-          console.warn("⚠️ فشل الاتصال الأولي")
-        }
-      }
+    dispatch(
+      setSignalRStatus({
+        isConnected: connected,
+        connectionState: state,
+        error: connected ? null : connectionError,
+      })
+    )
+  }, [dispatch, connectionError])
+
+  // ─── Start Connection ──────────────────────────────────────────────────────
+
+  const startConnection = useCallback(async () => {
+    if (startingRef.current) {
+      console.log("[SignalR] ⏳ startConnection() called while already starting — skipping")
+      return false
     }
 
-    initConnection()
+    startingRef.current = true
 
-    // مراقبة حالة الاتصال
-    const interval = setInterval(() => {
-      if (!mounted) return
+    try {
+      const connected = await signalRService.start()
+
+      if (!mountedRef.current) return connected
 
       const state = signalRService.getConnectionState()
-      const connected = signalRService.isConnected()
 
       setIsConnected(connected)
       setConnectionState(state)
 
-      // محاولة إعادة الاتصال فقط إذا كان منفصل تماماً
-      if (!connected && state === "Disconnected") {
-        console.log("🔄 محاولة إعادة الاتصال التلقائية...")
-        signalRService.start()
+      dispatch(
+        setSignalRStatus({
+          isConnected: connected,
+          connectionState: state,
+          error: connected ? null : connectionError,
+        })
+      )
+
+      if (connected) {
+        dispatch(getUnreadCount())
       }
-    }, 10000) // كل 10 ثواني
+
+      return connected
+    } finally {
+      startingRef.current = false
+    }
+  }, [dispatch, connectionError])
+
+  // ─── Main Effect ───────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    mountedRef.current = true
+
+    // No token → disconnect and bail out
+    if (!token) {
+      setIsConnected(false)
+      setConnectionState("Disconnected")
+
+      dispatch(
+        setSignalRStatus({
+          isConnected: false,
+          connectionState: "Disconnected",
+          error: null,
+        })
+      )
+
+      return () => {
+        mountedRef.current = false
+      }
+    }
+
+    // Subscribe to events
+    const notificationUnsubscribe =
+      signalRService.onNotification(handleNotification)
+    const errorUnsubscribe = signalRService.onError(handleError)
+
+    // ✅ FIX 5: Small delay before first connect to avoid React StrictMode
+    // double-invoking the effect and firing two simultaneous start() calls
+    const initTimeout = setTimeout(() => {
+      if (mountedRef.current) {
+        startConnection()
+      }
+    }, 100)
+
+    // ✅ FIX 6: Polling interval — only attempts reconnect when truly Disconnected,
+    // not Connecting/Reconnecting. Avoids flooding the server.
+    const interval = setInterval(() => {
+      if (!mountedRef.current) return
+
+      syncConnectionState()
+
+      const state = signalRService.getConnectionState()
+
+      if (
+        state === "Disconnected" &&
+        !startingRef.current
+      ) {
+        console.log("[SignalR] 🔁 Polling detected disconnected — attempting reconnect")
+        startConnection()
+      }
+    }, 10000)
 
     return () => {
-      mounted = false
+      mountedRef.current = false
+
+      clearTimeout(initTimeout)
+      clearInterval(interval)
+
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+      }
+
       if (notificationUnsubscribe) notificationUnsubscribe()
       if (errorUnsubscribe) errorUnsubscribe()
-      clearInterval(interval)
-      // لا نوقف الاتصال عند unmount للحفاظ عليه
-    }
-  }, [handleNotification, handleError])
 
-  // دالة إعادة الاتصال يدوياً
+      // ✅ NOTE: We intentionally do NOT call signalRService.stop() here.
+      // The service is a singleton and survives React re-renders / layout changes.
+      // Calling stop() on every unmount breaks reconnection on route changes.
+    }
+  }, [
+    token,
+    dispatch,
+    handleNotification,
+    handleError,
+    startConnection,
+    syncConnectionState,
+  ])
+
+  // ─── Manual Reconnect ──────────────────────────────────────────────────────
+
   const reconnect = useCallback(async () => {
-    console.log("🔄 إعادة اتصال يدوية...")
+    console.log("🔄 [SignalR] Manual reconnect...")
+
     setConnectionError(null)
+
+    dispatch(
+      setSignalRStatus({
+        isConnected: false,
+        connectionState: "Reconnecting",
+        error: null,
+      })
+    )
+
     const success = await signalRService.reconnect()
+
+    if (!mountedRef.current) return success
+
+    const state = signalRService.getConnectionState()
+
     setIsConnected(success)
-    setConnectionState(signalRService.getConnectionState())
+    setConnectionState(state)
+
+    dispatch(
+      setSignalRStatus({
+        isConnected: success,
+        connectionState: state,
+        error: success ? null : connectionError,
+      })
+    )
 
     if (success) {
-      toast.success(t("signalr.reconnected") || "تم إعادة الاتصال بنجاح", {
-        position: "top-right",
-        autoClose: 3000,
-      })
+      dispatch(getUnreadCount())
+
+      toast.success(
+        t("signalr.reconnected") || "Reconnected successfully",
+        { position: "top-right", autoClose: 3000 }
+      )
+    } else {
+      toast.error(
+        t("signalr.reconnectFailed") || "Reconnect failed",
+        { position: "top-right", autoClose: 4000 }
+      )
     }
 
     return success
-  }, [t])
+  }, [dispatch, t, connectionError])
+
+  // ─── Return ────────────────────────────────────────────────────────────────
 
   return {
     isConnected,
@@ -202,3 +411,5 @@ export const useSignalR = () => {
     reconnect,
   }
 }
+
+export default useSignalR

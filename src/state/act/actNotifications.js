@@ -1,7 +1,28 @@
+// src/state/act/actNotifications.js
 import { createAsyncThunk } from "@reduxjs/toolkit"
 import axiosInstance from "../../utils/axiosInstance"
 
-// Get Notifications (Light)
+const getToken = () =>
+  localStorage.getItem("token") ||
+  sessionStorage.getItem("token") ||
+  localStorage.getItem("jwt") ||
+  sessionStorage.getItem("jwt") ||
+  ""
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${getToken()}`,
+})
+
+const extractError = (error) => {
+  return (
+    error.response?.data || {
+      success: false,
+      messageEn: error.message || "Request failed",
+      messageAr: "فشل الطلب",
+    }
+  )
+}
+
 export const getNotifications = createAsyncThunk(
   "notificationsSlice/getNotifications",
   async (params = {}, thunkAPI) => {
@@ -9,31 +30,26 @@ export const getNotifications = createAsyncThunk(
 
     try {
       const { page = 1, pageSize = 20, isRead } = params
-
       const queryParams = new URLSearchParams()
+
       queryParams.append("page", page)
       queryParams.append("pageSize", pageSize)
-      if (isRead !== undefined) queryParams.append("isRead", isRead)
+      if (isRead !== undefined && isRead !== null) {
+        queryParams.append("isRead", isRead)
+      }
 
       const res = await axiosInstance.get(
         `/api/v1/Notifications?${queryParams.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: authHeaders() }
       )
 
-      console.log("Notifications fetched successfully:", res)
       return res.data
     } catch (error) {
-      console.log("Error fetching notifications:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Get Notification By Id
 export const getNotificationById = createAsyncThunk(
   "notificationsSlice/getNotificationById",
   async (id, thunkAPI) => {
@@ -41,21 +57,16 @@ export const getNotificationById = createAsyncThunk(
 
     try {
       const res = await axiosInstance.get(`/api/v1/Notifications/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: authHeaders(),
       })
 
-      console.log("Notification fetched successfully:", res)
       return res.data
     } catch (error) {
-      console.log("Error fetching notification:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Mark Notification As Read
 export const markNotificationAsRead = createAsyncThunk(
   "notificationsSlice/markNotificationAsRead",
   async (id, thunkAPI) => {
@@ -65,23 +76,16 @@ export const markNotificationAsRead = createAsyncThunk(
       const res = await axiosInstance.put(
         `/api/v1/Notifications/${id}/read`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: authHeaders() }
       )
 
-      console.log("Notification marked as read:", res)
       return { id, data: res.data }
     } catch (error) {
-      console.log("Error marking notification as read:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Mark Multiple As Read
 export const markMultipleAsRead = createAsyncThunk(
   "notificationsSlice/markMultipleAsRead",
   async (ids, thunkAPI) => {
@@ -89,25 +93,18 @@ export const markMultipleAsRead = createAsyncThunk(
 
     try {
       const res = await axiosInstance.put(
-        `/api/v1/Notifications/mark-multiple-read`,
+        "/api/v1/Notifications/mark-multiple-read",
         ids,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: authHeaders() }
       )
 
-      console.log("Multiple notifications marked as read:", res)
       return { ids, data: res.data }
     } catch (error) {
-      console.log("Error marking multiple notifications as read:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Mark All As Read
 export const markAllAsRead = createAsyncThunk(
   "notificationsSlice/markAllAsRead",
   async (_, thunkAPI) => {
@@ -115,50 +112,35 @@ export const markAllAsRead = createAsyncThunk(
 
     try {
       const res = await axiosInstance.put(
-        `/api/v1/Notifications/mark-all-read`,
+        "/api/v1/Notifications/mark-all-read",
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: authHeaders() }
       )
 
-      console.log("All notifications marked as read:", res)
       return res.data
     } catch (error) {
-      console.log("Error marking all notifications as read:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Get Unread Count
 export const getUnreadCount = createAsyncThunk(
   "notificationsSlice/getUnreadCount",
   async (_, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.get(
-        `/api/v1/Notifications/unread-count`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      const res = await axiosInstance.get("/api/v1/Notifications/unread-count", {
+        headers: authHeaders(),
+      })
 
-      console.log("Unread count fetched successfully:", res)
       return res.data
     } catch (error) {
-      console.log("Error fetching unread count:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Delete Notification
 export const deleteNotification = createAsyncThunk(
   "notificationsSlice/deleteNotification",
   async (id, thunkAPI) => {
@@ -166,69 +148,51 @@ export const deleteNotification = createAsyncThunk(
 
     try {
       const res = await axiosInstance.delete(`/api/v1/Notifications/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: authHeaders(),
       })
 
-      console.log("Notification deleted successfully:", res)
       return { id, data: res.data }
     } catch (error) {
-      console.log("Error deleting notification:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Delete Multiple Notifications
 export const deleteMultipleNotifications = createAsyncThunk(
   "notificationsSlice/deleteMultipleNotifications",
   async (ids, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.delete(
-        `/api/v1/Notifications/bulk-delete`,
-        {
-          data: ids,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      const res = await axiosInstance.delete("/api/v1/Notifications/bulk-delete", {
+        data: ids,
+        headers: authHeaders(),
+      })
 
-      console.log("Multiple notifications deleted successfully:", res)
       return { ids, data: res.data }
     } catch (error) {
-      console.log("Error deleting multiple notifications:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Get Notification Preferences
 export const getNotificationPreferences = createAsyncThunk(
   "notificationsSlice/getNotificationPreferences",
   async (_, thunkAPI) => {
     const { rejectWithValue } = thunkAPI
 
     try {
-      const res = await axiosInstance.get(`/api/v1/Notifications/preferences`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      const res = await axiosInstance.get("/api/v1/Notifications/preferences", {
+        headers: authHeaders(),
       })
 
-      console.log("Notification preferences fetched successfully:", res)
       return res.data
     } catch (error) {
-      console.log("Error fetching notification preferences:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )
 
-// Update Notification Preferences
 export const updateNotificationPreferences = createAsyncThunk(
   "notificationsSlice/updateNotificationPreferences",
   async (preferences, thunkAPI) => {
@@ -236,20 +200,14 @@ export const updateNotificationPreferences = createAsyncThunk(
 
     try {
       const res = await axiosInstance.put(
-        `/api/v1/Notifications/preferences`,
+        "/api/v1/Notifications/preferences",
         preferences,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        { headers: authHeaders() }
       )
 
-      console.log("Notification preferences updated successfully:", res)
       return res.data
     } catch (error) {
-      console.log("Error updating notification preferences:", error)
-      return rejectWithValue(error.response?.data || error.message)
+      return rejectWithValue(extractError(error))
     }
   }
 )

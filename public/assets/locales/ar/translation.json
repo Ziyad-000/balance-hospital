@@ -17,7 +17,6 @@
     }
   },
   "logOut": "تسجيل الخروج",
-
   "validationAuth": {
     "email": {
       "invalid": "يرجى إدخال بريد إلكتروني صالح.",
@@ -318,7 +317,6 @@
       "approvalSuccess": "تمت الموافقة على الطلب بنجاح",
       "rejectionSuccess": "تم رفض الطلب بنجاح"
     },
-
     "table": {
       "doctorName": "اسم الطبيب",
       "contact": "وسيلة التواصل",
@@ -435,7 +433,6 @@
       "description": "الوصف",
       "departmentHead": "مدير المكان *",
       "categoryHead": "مدير التخصص *",
-
       "startDate": "تاريخ البدء *",
       "canViewDepartment": "يمكنه عرض المكان",
       "canEditDepartment": "يمكنه تعديل المكان",
@@ -500,7 +497,6 @@
     "maxDoctors": "الحد الأقصى للأطباء",
     "rosters": "الجداول",
     "shortfall": "العجز",
-
     "add": "إضافة",
     "fetchError": "حدث خطأ أثناء جلب الأماكن.",
     "noData": "لا توجد بيانات متاحه ",
@@ -753,7 +749,6 @@
     "add": "إضافة",
     "filters": "عوامل التصفية",
     "notVerified": "لم يتم التحقق بعد",
-
     "refresh": "تحديث",
     "backToHome": "العودة إلى الصفحة الرئيسية",
     "startDate": "تاريخ البداية",
@@ -778,7 +773,6 @@
     "info": "معلومة",
     "goBack": "العودة"
   },
-
   "subDepartment": {
     "title": "إدارة الأماكن الفرعية",
     "addNew": "إضافة مكان فرعي جديد",
@@ -786,11 +780,9 @@
     "loading": "جاري التحميل...",
     "noData": "لا توجد أماكن فرعية",
     "fetchError": "خطأ في جلب الأماكن الفرعية",
-
     "search": {
       "placeholder": "البحث في الأماكن الفرعية بالاسم أو الموقع..."
     },
-
     "filters": {
       "title": "فلاتر",
       "department": "المكان",
@@ -810,7 +802,6 @@
         "location": "الموقع"
       }
     },
-
     "table": {
       "nameArabic": "الاسم العربي",
       "nameEnglish": "الاسم الإنجليزي",
@@ -823,25 +814,21 @@
       "createdAt": "تاريخ الإنشاء",
       "actions": "الإجراءات"
     },
-
     "status": {
       "active": "نشط",
       "inactive": "غير نشط"
     },
-
     "actions": {
       "view": "عرض التفاصيل",
       "edit": "تعديل",
       "delete": "حذف"
     },
-
     "pagination": {
       "showing": "عرض",
       "of": "من",
       "items": "عنصر",
       "itemsPerPage": "عنصر لكل صفحة"
     },
-
     "form": {
       "create": {
         "title": "إنشاء مكان فرعي جديد",
@@ -885,7 +872,6 @@
         "locationRequired": "الموقع مطلوب"
       }
     },
-
     "messages": {
       "createSuccess": "تم إنشاء المكان الفرعي بنجاح",
       "updateSuccess": "تم تحديث المكان الفرعي بنجاح",
@@ -894,7 +880,6 @@
       "updateError": "خطأ في تحديث المكان الفرعي",
       "deleteError": "خطأ في حذف المكان الفرعي"
     },
-
     "delete": {
       "title": "حذف المكان الفرعي",
       "message": "هل أنت متأكد من حذف هذا المكان الفرعي؟",
@@ -907,7 +892,6 @@
       "confirm": "حذف",
       "cancel": "إلغاء"
     },
-
     "details": {
       "title": "تفاصيل المكان الفرعي",
       "information": "المعلومات الأساسية",
@@ -922,13 +906,11 @@
       "backToSubDepartments": "العودة للأماكن الفرعية",
       "noDepartmentInfo": "لا توجد معلومات عن المكان"
     },
-
     "statistics": {
       "totalEmployees": "إجمالي الموظفين",
       "activeEmployees": "الموظفون النشطون",
       "pendingRequests": "الطلبات المعلقة"
     },
-
     "error": {
       "title": "خطأ",
       "message": "حدث خطأ أثناء معالجة بيانات المكان الفرعي",
@@ -936,7 +918,6 @@
       "noPermission": "ليس لديك صلاحية للوصول لهذا المكان الفرعي",
       "fetchError": "فشل في جلب الأماكن الفرعية"
     },
-
     "empty": {
       "title": "لا توجد أماكن فرعية",
       "message": "لا توجد أماكن فرعية تطابق معايير البحث الحالية",
@@ -944,11 +925,9 @@
       "description": "هذا المكان لا يحتوي على أي أماكن فرعية حتى الآن."
     }
   },
-
   "subDepartments": {
     "fetchError": "خطأ في جلب الأماكن الفرعية"
   },
-
   "subDepartmentForm": {
     "title": "إنشاء مكان فرعي جديد",
     "editTitle": "تعديل المكان الفرعي",
@@ -993,7 +972,6 @@
       "loadFailed": "فشل في تحميل بيانات المكان الفرعي"
     }
   },
-
   "contractingTypes": {
     "title": "أنواع عقود العمل",
     "description": "إدارة أنواع عقود العمل وإعداداتها",
@@ -1035,7 +1013,6 @@
         "allowOvertime": "الساعات الإضافية المسموح بها"
       },
       "sortDirection": "اتجاه الترتيب",
-
       "clear": "مسح الفلاتر"
     },
     "table": {
@@ -1152,7 +1129,6 @@
     "search": {
       "placeholder": "البحث في الدرجات العلمية بالاسم أو الرمز..."
     },
-
     "pagination": {
       "showing": "يعرض",
       "of": "من",
@@ -1254,7 +1230,6 @@
       "dependencyError": "لا يمكن حذف هذه الدرجة العلمية لوجود مستخدمين مرتبطين بها"
     }
   },
-
   "shiftHoursTypes": {
     "title": "أنواع ساعات الدوام",
     "addNew": "إضافة نوع ساعات دوام جديد",
@@ -1303,7 +1278,6 @@
       "nameArabic": "الاسم (عربي)",
       "nameEnglish": "الاسم (إنجليزي)",
       "name": "الاسم",
-
       "code": "الرمز",
       "hours": "الساعات",
       "period": "الفترة",
@@ -1348,7 +1322,6 @@
     },
     "hours": "ساعة"
   },
-
   "shiftHourTypeForm": {
     "editTitle": "تعديل نوع الوردية",
     "addTitle": "إضافة نوع وردية جديد",
@@ -1421,7 +1394,6 @@
       "message": "قد تم استخدام هذا الرمز من قبل، الرجاء تجربة رمز آخر"
     }
   },
-
   "loginSelection": {
     "welcomeBack": "مرحبًا بعودتك",
     "selectType": "اختر نوع تسجيل الدخول للمتابعة",
@@ -1438,7 +1410,6 @@
   "create-specific-department": "إنشاء مكان محدد لهذه التخصص",
   "create-specific-sub-department": "إنشاء مكان فرعي لهذا المكان",
   "displayRange": "عرض {{start}} - {{end}} من {{total}} عنصر",
-
   "managementRoles": {
     "title": "إدارة الأدوار",
     "loading-specific": "جاري تحميل بيانات الدور...",
@@ -1452,12 +1423,10 @@
       "noHistory": "لا يوجد سجل تعيين",
       "noHistoryDescription": "هذا المستخدم ليس لديه سجل تعيين أدوار بعد."
     },
-
     "search": {
       "placeholder": "ابحث عن الأدوار...",
       "users": "ابحث عن المستخدمين..."
     },
-
     "filters": {
       "title": "المرشحات",
       "status": "الحالة",
@@ -1476,14 +1445,12 @@
         "primaryCategory": "التخصص الرئيسية"
       }
     },
-
     "stats": {
       "total": "إجمالي الأدوار",
       "active": "الأدوار النشطة",
       "system": "أدوار النظام",
       "custom": "الأدوار المخصصة"
     },
-
     "actions": {
       "addNew": "إضافة دور جديد",
       "add": "إضافة",
@@ -1496,17 +1463,14 @@
       "activate": "تفعيل",
       "deactivate": "تعطيل"
     },
-
     "status": {
       "active": "نشط",
       "inactive": "غير نشط"
     },
-
     "type": {
       "system": "نظامي",
       "custom": "مخصص"
     },
-
     "table": {
       "nameArabic": "الاسم بالعربية",
       "nameEnglish": "الاسم بالإنجليزية",
@@ -1527,11 +1491,9 @@
       "updatedBy": "حدّثه",
       "actions": "الإجراءات"
     },
-
     "loading": "جاري التحميل...",
     "loadingUsers": "جاري تحميل المستخدمين...",
     "noData": "لا توجد أدوار",
-
     "pagination": {
       "itemsPerPage": "عنصر لكل صفحة",
       "displayRange": "عرض {{start}}–{{end}} من أصل {{total}} نتيجة",
@@ -1542,7 +1504,6 @@
       "of": "من",
       "results": "نتائج"
     },
-
     "delete": {
       "title": "حذف الدور",
       "checking": "جاري التحقق مما إذا كان يمكن حذف الدور، يرجى الانتظار...",
@@ -1557,29 +1518,24 @@
       "systemRoleWarning": "تحذير: هذا دور نظامي. قد يؤثر حذفه على وظائف النظام.",
       "assignedUsersWarning": "تحذير: هذا الدور معين حاليًا لمستخدمين. سيفقدون هذه الصلاحيات."
     },
-
     "notFound": "الدور غير موجود",
     "notFoundDescription": "لم يتم العثور على الدور المطلوب.",
     "backToList": "العودة إلى الأدوار",
-
     "overview": {
       "basicInfo": "معلومات أساسية",
       "details": "تفاصيل الدور"
     },
-
     "form": {
       "roleNameAr": "الاسم بالعربية",
       "roleNameEn": "الاسم بالإنجليزية",
       "description": "الوصف"
     },
-
     "tabs": {
       "overview": "نظرة عامة",
       "permissions": "الصلاحيات",
       "history": "سجل التعيينات",
       "users": "المستخدمون المعينون"
     },
-
     "analytics": {
       "activeUsers": "المستخدمون النشطون",
       "recentAssignments": "التعيينات الأخيرة",
@@ -1600,7 +1556,6 @@
         "TRANSFERRED": "منقول"
       }
     },
-
     "history": {
       "reason": "السبب",
       "by": " بواسطة ",
@@ -1611,12 +1566,10 @@
       "removed": "تم إزالة الدور: {{roleName}}",
       "modified": "تم تغيير الدور: {{oldRoleName}} → {{newRoleName}}"
     },
-
     "users": {
       "noUsers": "لا يوجد مستخدمون",
       "users": "مستخدمين",
       "viewHistory": "عرض السجل",
-
       "delete": {
         "title": "إزالة مستخدم من الدور",
         "confirmMessage": "هل أنت متأكد من أنك تريد إزالة هذا المستخدم من الدور؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -1628,10 +1581,8 @@
         "confirm": "إزالة المستخدم"
       },
       "removeSuccess": "تم إزالة المستخدم \"{{userName}}\" من الدور \"{{roleName}}\" بنجاح",
-
       "noUsersDescription": "لم يتم تعيين هذا الدور لأي مستخدمين حتى الآن."
     },
-
     "permissions": {
       "core": "الإدارة الأساسية",
       "manageCategory": "إدارة التخصصات",
@@ -1717,10 +1668,8 @@
       "editTitile": "خطأ في تحديث الدور"
     }
   },
-
   "role-deactived-success": "تم تعطيل الدور بنجاح",
   "role-activated-success": "تم تفعيل الدور بنجاح",
-
   "assignUserRole": {
     "title": "تعيين مستخدم إلى دور",
     "editTitle": "تعديل تعيين الدور للمستخدم",
@@ -1780,7 +1729,6 @@
     "noUsers": "لا توجد مستخدمين",
     "charactersCount": "أحرف"
   },
-
   "gettingData": {
     "user-data": "جاري تحميل بيانات تعيين المستخدم",
     "users": "جاري تحميل المستخدمين…",
@@ -1819,7 +1767,6 @@
     "doctorSchedule": "جارٍ تحميل جدول الطبيب...",
     "userHistory": "جارٍ تحميل سجل الطبيب..."
   },
-
   "error": {
     "status": "حالة النظام",
     "status.maintenance": "تحت الصيانة",
@@ -1866,7 +1813,6 @@
     }
   },
   "session-expired": "انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.",
-
   "roster": {
     "title": "إدارة الروستر",
     "subtitle": "إدارة جداول ومواعيد طاقم المستشفى",
@@ -1875,17 +1821,15 @@
     "departments": "الاماكن",
     "departmentCalendar": "تقويم مكان",
     "statusWarning": "⚠️ تحذير: تغيير الحالة إلى حالة جديدة لا يمكن التراجع عنه للحالة السابقة",
-
     "count": "روستر",
     "deleteReason": "سبب الحذف",
     "viewDoctorDetails": "عرض تفاصيل الطبيب",
     "dayss": "الأيام",
     "totalDays": "إجمالي الأيام",
-    "changesInfo": "\u00A0أي تغييرات في هذه الصفحة تتطلب إعادة توليد متطلبات الشيفتات.",
+    "changesInfo": " أي تغييرات في هذه الصفحة تتطلب إعادة توليد متطلبات الشيفتات.",
     "shifts": "الشيفتات",
     "capacity": "السعة",
     "fillPercentage": "نسبة الإشغال",
-
     "noDoctorsFound": "لا يوجد أطباء لهذا الجدول",
     "doctorsPerRoster": "الأطباء في الجدول",
     "doctorsPerRosterDescription": "عرض جميع الأطباء المخصصين لهذا الجدول وإحصائياتهم",
@@ -1909,7 +1853,6 @@
     "requestSummary": "ملخص الطلبات",
     "approved": "مقبول",
     "rejected": "مرفوض",
-
     "remainingSlots": "الأماكن المتبقية",
     "noAssignedDoctors": "لا يوجد أطباء معينون",
     "delete": {
@@ -1939,7 +1882,6 @@
         "notFound": "لم يتم العثور على جدول الطبيب."
       }
     },
-
     "assign": {
       "title": "تعيين طبيب",
       "subtitle": "اختر طبيبًا لهذا الشيفت وراجع التوفر والتعارضات وعبء العمل.",
@@ -1956,7 +1898,6 @@
       "reason": "السبب",
       "reasonPlaceholder": "أدخل سبب إلغاء التعيين",
       "departmentPlacholder": "إختر المكان للإضافه",
-
       "reasonRequired": "السبب مطلوب.",
       "confirm": "إلغاء التعيين",
       "unassignSuccess": "تم إلغاء تعيين {{name}} من الشيفت بنجاح.",
@@ -1969,7 +1910,6 @@
       "noAvailableDoctors": "لا يوجد أطباء متاحون لهذا الشيفت.",
       "shiftDetails": "تفاصيل الشيفت",
       "doctors": "أطباء",
-
       "notes": "ملاحظات",
       "searchDoctors": "ابحث عن الأطباء",
       "searchPlaceholder": "ابحث بالاسم أو التخصص...",
@@ -2005,7 +1945,6 @@
       },
       "charactersCount": "حرف"
     },
-
     "workingHours": {
       "title": "متطلبات الشيفتات",
       "titlee": "متطلبات الشيفت",
@@ -2050,7 +1989,6 @@
         "modificationReasonMaxLength": "يجب ألا يتجاوز سبب التعديل 500 حرف"
       }
     },
-
     "updateStatusFor": "تحديث الحالة لـ ",
     "completion": "نسبة الإكمال",
     "completionPercentage": "نسبة الإكمال",
@@ -2058,7 +1996,6 @@
     "incomplete": "غير مكتمل",
     "allowed": "مسموح",
     "notAllowed": "غير مسموح",
-
     "details": {
       "basicInfo": "المعلومات الأساسية",
       "progress": "التقدّم والإحصائيات",
@@ -2077,7 +2014,6 @@
       "publishedAt": "تاريخ النشر",
       "closedAt": "تاريخ الإغلاق"
     },
-
     "workingHourss": {
       "generateTitle": "توليد متطلبات الورديات",
       "generateSubtitle": "توليد ساعات العمل لجميع الورديات والأماكن",
@@ -2136,7 +2072,6 @@
       "charactersCount": "حرف",
       "viewContractingTypes": "عرض الدرجات العلميه",
       "hideContractingTypes": "إخفاء الدرجات العلميه",
-
       "addContractingTypes": "إضافة الدرجات العلميه",
       "fields": {
         "contractingTypes": "الدرجات العلميه",
@@ -2186,7 +2121,6 @@
         "notesMaxLength": "يجب ألا تتجاوز الملاحظات 500 حرف"
       }
     },
-
     "departmentss": {
       "title": "أماكن التخصص",
       "subtitle": "إدارة وضبط الشيفتات لكل مكان في هذا الروستر.",
@@ -2210,7 +2144,6 @@
       "noDepartments": "لا توجد أماكن مُضافة بعد",
       "noDepartmentsMessage": "أضف الأماكن من إعداد الروستر الأساسي لتتمكن من ضبط الشيفتات هنا."
     },
-
     "phaseOne": {
       "title": "تهيئة مناوبات الأماكن",
       "subtitle": "ضبط مناوبات الأماكن",
@@ -2258,7 +2191,6 @@
         "message": "حدث خطأ أثناء إضافة شيفتات المكان"
       }
     },
-
     "actions": {
       "createBasic": "إنشاء روستر أساسي",
       "createComplete": "إنشاء روستر كامل",
@@ -2291,7 +2223,6 @@
       "backToRoster": "الرجوع إلى الروستر",
       "assignDoctor": "تعيين طبيب"
     },
-
     "status": {
       "draft": "مسودة",
       "draftBasic": "مسودة (أساسية)",
@@ -2327,7 +2258,6 @@
       "specialist": "أخصائي",
       "ascending": "تصاعدي",
       "descending": "تنازلي",
-
       "sortBy": {
         "createdAt": "تاريخ الإنشاء",
         "nameArabic": "الاسم العربي",
@@ -2345,7 +2275,6 @@
       "department": "المكان",
       "allDepartments": "كل الأماكن"
     },
-
     "table": {
       "title": "العنوان",
       "category": "التخصص",
@@ -2360,7 +2289,6 @@
       "updatedAt": "آخر تحديث",
       "completion": "نسبة الإكمال"
     },
-
     "form": {
       "basicInfo": "المعلومات الأساسية",
       "title": "عنوان الروستر",
@@ -2424,7 +2352,6 @@
       "startDate": "تاريخ البداية",
       "endDate": "تاريخ النهاية"
     },
-
     "days": {
       "sunday": "الأحد",
       "monday": "الاثنين",
@@ -2434,7 +2361,6 @@
       "friday": "الجمعة",
       "saturday": "السبت"
     },
-
     "months": {
       "january": "يناير",
       "february": "فبراير",
@@ -2449,7 +2375,6 @@
       "november": "نوفمبر",
       "december": "ديسمبر"
     },
-
     "validation": {
       "titleRequired": "عنوان الروستر مطلوب",
       "titleMinLength": "يجب ألا يقل العنوان عن 3 أحرف",
@@ -2493,7 +2418,6 @@
       "endDayAfterStartDay": "يجب أن يكون يوم النهاية أكبر من أو يساوي يوم البداية",
       "notesMaxLength": "لا يجب أن تتجاوز الملاحظات 500 حرف"
     },
-
     "success": {
       "created": "تم إنشاء الروستر بنجاح",
       "updated": "تم تحديث الروستر بنجاح",
@@ -2505,7 +2429,6 @@
       "exported": "تم تصدير الروستر بنجاح",
       "statusUpdated": "تم تحديث حالة الروستر بنجاح"
     },
-
     "error": {
       "createFailed": "فشل إنشاء الروستر",
       "updateFailed": "فشل تحديث الروستر",
@@ -2520,11 +2443,9 @@
       "notFound": "لم يتم العثور على الروستر",
       "updateStatusFailed": "فشل تحديث حالة الروستر"
     },
-
     "pagination": {
       "itemsPerPage": "عناصر لكل صفحة"
     },
-
     "totalShifts": "إجمالي متطلبات الشيفتات",
     "assignedDoctors": "الأطباء المعينون",
     "fullyBooked": "ممتلئ بالكامل",
@@ -2564,7 +2485,6 @@
     },
     "assignManager": "تعيين مدير"
   },
-
   "confirmations": {
     "linkDepartment": {
       "title": "ربط المكان",
@@ -2592,7 +2512,6 @@
       "insufficientPermissions": "صلاحيات غير كافية."
     }
   },
-
   "categoryHead": {
     "title": "رؤساء التخصصات",
     "noCategoryHead": "لا يوجد رئيس تخصص مُعيَّن",
@@ -2625,7 +2544,6 @@
     "managerElsewhere": "رئيس في تخصص أخرى",
     "inactive": "غير نشط"
   },
-
   "selectRole": {
     "title": "اختر دورك",
     "title2": "غير الدور",
@@ -2655,7 +2573,6 @@
       }
     }
   },
-
   "doctorRequests": {
     "title": "إدارة طلبات الأطباء",
     "notesTooShort": "الملاحظات قصيرة جدًا",
@@ -2706,14 +2623,12 @@
       "rejecting": "جاري الرفض..."
     }
   },
-
   "stats": {
     "totalDays": "إجمالي الأيام",
     "completeDays": "الأيام المكتملة",
     "partialDays": "الأيام الجزئية",
     "emptyDays": "الأيام الفارغة"
   },
-
   "doctorForm": {
     "editTitle": "تعديل بيانات الطبيب",
     "sections": {
@@ -2745,7 +2660,6 @@
       "updated": "تم تحديث بيانات الطبيب بنجاح"
     }
   },
-
   "notifications": {
     "title": "الإشعارات",
     "loading": "جاري تحميل الإشعارات...",
@@ -2843,7 +2757,6 @@
       "of": "من",
       "itemsPerPage": "عدد العناصر في الصفحة"
     },
-
     "delete": {
       "title": "حذف الإشعار",
       "text": "هل أنت متأكد أنك تريد حذف هذا الإشعار؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -2877,17 +2790,14 @@
       }
     }
   },
-
   "geoFenceForm": {
     "title": "إنشاء سياج جغرافي",
     "editTitle": "تعديل السياج الجغرافي",
-
     "sections": {
       "basicInfo": "المعلومات الأساسية",
       "wifi": "إعدادات الواي فاي",
       "beacon": "إعدادات البيكون"
     },
-
     "fields": {
       "name": "اسم السياج الجغرافي",
       "latitude": "خط العرض",
@@ -2905,29 +2815,24 @@
       "beaconUuid": "معرّف البيكون (UUID)",
       "beaconPolicy": "سياسة البيكون"
     },
-
     "wifiPolicy": {
       "disabled": "معطل (0)",
       "required": "إلزامي (1)",
       "optional": "اختياري (2)"
     },
-
     "beaconPolicy": {
       "disabled": "معطل (0)",
       "required": "إلزامي (1)",
       "optional": "اختياري (2)"
     },
-
     "placeholders": {
       "name": "مثلاً: مكان الطوارئ - المدخل الرئيسي"
     },
-
     "hints": {
       "radius": "المدى: من 10 إلى 10,000 متر",
       "priority": "كلما زادت القيمة، زادت الأولوية",
       "beaconUuid": "الصيغة: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
     },
-
     "errors": {
       "nameRequired": "الاسم مطلوب",
       "nameMin": "يجب أن لا يقل الاسم عن 3 أحرف",
@@ -2949,7 +2854,6 @@
       "beaconPolicyRequired": "سياسة البيكون مطلوبة",
       "beaconUuidFormat": "يجب أن يكون معرّف البيكون بصيغة صحيحة"
     },
-
     "buttons": {
       "cancel": "إلغاء",
       "create": "إنشاء سياج جغرافي",
@@ -2957,52 +2861,44 @@
       "update": "تحديث السياج الجغرافي",
       "updating": "جارٍ التحديث..."
     },
-
     "success": {
       "created": "تم إنشاء السياج الجغرافي بنجاح",
       "updated": "تم تحديث السياج الجغرافي بنجاح"
     },
-
     "error": {
       "title": "حدث خطأ"
     }
   },
   "geoFence": {
     "title": "الأسوار الجغرافية",
-
     "actions": {
       "create": "إنشاء سياج جغرافي",
       "add": "إضافة",
       "edit": "تعديل",
       "delete": "حذف"
     },
-
     "delete": {
       "confirmTitle": "هل تريد حذف السياج الجغرافي؟",
       "confirmMessage": "هل أنت متأكد أنك تريد حذف هذا السياج الجغرافي؟",
       "warning": "لا يمكن التراجع عن هذا الإجراء.",
       "confirm": "نعم، احذفه"
     },
-
     "status": {
       "active": "نشط",
       "inactive": "غير نشط",
       "currentlyActive": "يعمل الآن",
       "scheduled": "مجدول"
     },
-
     "policy": {
       "disabled": "معطل",
       "required": "إلزامي",
       "optional": "اختياري"
     },
-
     "empty": {
       "title": "لا توجد أسوار جغرافية",
       "description": "لا يحتوي هذا المكان على أي أسوار جغرافية حتى الآن."
     }
   },
-
   "reports": {
     "title": "التقارير الشهرية",
     "subtitle": "عرض وإدارة تقارير الحضور الشهرية",
@@ -3025,7 +2921,6 @@
     "doctor": "الطبيب",
     "scientificDegree": "الدرجة العلمية",
     "showingDays": "عرض الأيام",
-
     "contractingType": "نوع التعاقد",
     "allDepartments": "جميع الأماكن",
     "allDoctors": "جميع الأطباء",
@@ -3056,18 +2951,16 @@
       "printNumber": "رقم الطباعة"
     }
   },
-
   "dashboard": {
     "title": "لوحة التحكم",
     "loading": "جاري تحميل بيانات لوحة التحكم...",
     "refresh": "تحديث",
     "lastUpdated": "آخر تحديث",
-
     "error": {
       "title": "خطأ في تحميل لوحة التحكم",
-      "retry": "حاول مرة أخرى"
+      "retry": "حاول مرة أخرى",
+      "message": "تعذر جلب البيانات"
     },
-
     "charts": {
       "title": "تحليلات لوحة التحكم",
       "subtitle": "رؤى بصرية وتحليلات البيانات",
@@ -3092,7 +2985,6 @@
       "completionPercent": "نسبة الإنجاز %",
       "emptyShifts": "الورديات الفارغة"
     },
-
     "sections": {
       "users": {
         "title": "المستخدمون",
@@ -3104,7 +2996,6 @@
         "newUsersThisMonth": "جدد هذا الشهر",
         "pendingUsers": "المستخدمون المعلقون"
       },
-
       "pendingRequests": {
         "title": "الطلبات المعلقة",
         "totalPendingRequests": "إجمالي المعلقة",
@@ -3115,7 +3006,6 @@
         "overdueRequests": "متأخرة",
         "recentRequests": "الطلبات الأخيرة"
       },
-
       "quickStats": {
         "title": "إحصائيات سريعة",
         "dailyAttendanceRate": "معدل الحضور",
@@ -3124,7 +3014,6 @@
         "averageResponseTime": "متوسط وقت الاستجابة",
         "emailsSentToday": "رسائل البريد المرسلة اليوم"
       },
-
       "categories": {
         "title": "التخصصات",
         "totalCategories": "إجمالي التخصصات",
@@ -3138,7 +3027,6 @@
         "manager": "المدير",
         "alerts": "تنبيهات التخصصات"
       },
-
       "configuration": {
         "title": "ملخص الإعدادات",
         "activeDegrees": "الدرجات النشطة",
@@ -3151,7 +3039,6 @@
         "usageToday": "أقصى ساعات/أسبوع",
         "duration": "المدة"
       },
-
       "departments": {
         "title": "الأماكن",
         "totalDepartments": "إجمالي الأماكن",
@@ -3165,7 +3052,6 @@
         "alerts": "تنبيهات الأماكن",
         "geoFenceCoverage": "تغطية السياج الجغرافي"
       },
-
       "rosters": {
         "title": "الجداول",
         "totalRosters": "إجمالي الجداول",
@@ -3173,9 +3059,95 @@
         "overallCompletionRate": "معدل الإنجاز",
         "expiredRosters": "منتهية الصلاحية"
       }
+    },
+    "common": {
+      "noData": "لا توجد بيانات",
+      "doctors": "أطباء",
+      "empty": "فارغ",
+      "remaining": "متبقي",
+      "schedules": "جداول",
+      "categories": "تخصصات",
+      "activity": "نشاط"
+    },
+    "sources": {
+      "system": "النظام",
+      "systemAlert": "تنبيه النظام",
+      "warning": "تحذير",
+      "request": "طلب",
+      "category": "تخصص",
+      "department": "قسم",
+      "roster": "روستر",
+      "rosterAlert": "تنبيه الروستر"
+    },
+    "overview": {
+      "totalUsers": "إجمالي المستخدمين",
+      "pendingRequests": "طلبات معلقة",
+      "criticalAlerts": "تنبيهات حرجة",
+      "todayShifts": "شيفتات اليوم",
+      "rosterCompletion": "إكمال الروستر",
+      "geoFenceCoverage": "تغطية GeoFence"
+    },
+    "attention": {
+      "title": "محتاج متابعة",
+      "subtitle": "أهم الطلبات والتنبيهات التي تحتاج تدخلًا فوريًا",
+      "empty": "لا توجد تنبيهات أو طلبات تحتاج متابعة حاليًا."
+    },
+    "rosters": {
+      "title": "الروسترات والشيفتات",
+      "subtitle": "ملخص سريع عن اكتمال الجداول والشيفتات الفارغة",
+      "completionPercent": "نسبة الإكمال",
+      "daysRemaining": "الأيام المتبقية",
+      "requiredHours": "الساعات المطلوبة",
+      "assignedHours": "الساعات المسندة",
+      "emptyShifts": "شيفتات فارغة"
+    },
+    "operations": {
+      "todayOperations": "تشغيل اليوم",
+      "todayTotalShifts": "إجمالي الشيفتات اليوم",
+      "nightShiftsToday": "الشيفتات الليلية",
+      "averageShiftHours": "متوسط ساعات الشيفت",
+      "mostUsedShift": "أكثر شيفت استخدامًا",
+      "emailsNotifications": "الإيميلات والإشعارات",
+      "emailsSentToday": "إيميلات مرسلة اليوم",
+      "failuresToday": "فشل اليوم",
+      "unreadNotifications": "إشعارات غير مقروءة",
+      "urgentNotifications": "إشعارات عاجلة",
+      "departmentsWithGeoFence": "أقسام بها GeoFence",
+      "activeGeoFences": "GeoFences نشطة",
+      "coverageRate": "نسبة التغطية",
+      "healthStatus": "حالة الصحة"
+    },
+    "coverage": {
+      "activeCategories": "التخصصات النشطة",
+      "categoriesWithoutManagers": "{{count}} تخصص بدون مدير",
+      "noManager": "بدون مدير",
+      "activeDepartments": "الأقسام النشطة",
+      "departmentsWithoutManagers": "{{count}} قسم بدون مدير",
+      "geoFence": "GeoFence",
+      "noGeoFence": "بدون GeoFence"
+    },
+    "roles": {
+      "title": "الأدوار والصلاحيات",
+      "activeUsers": "مستخدمين نشطين",
+      "permanentRoles": "أدوار دائمة",
+      "temporaryRoles": "أدوار مؤقتة",
+      "usersWithoutRoles": "بدون أدوار"
+    },
+    "configuration": {
+      "title": "إعدادات التشغيل",
+      "subtitle": "الدرجات العلمية، أنواع التعاقد، وأنواع الشيفتات الأكثر استخدامًا",
+      "scientificDegrees": "الدرجات العلمية",
+      "contractingTypes": "أنواع التعاقد",
+      "shiftTypes": "أنواع الشيفتات",
+      "usersValue": "{{count}} مستخدم",
+      "contractingValue": "{{users}} مستخدم / {{hours}} ساعة",
+      "shiftValue": "{{usage}} اليوم / {{hours}} ساعات"
+    },
+    "activity": {
+      "recentNotifications": "آخر الإشعارات",
+      "recentRoleChanges": "آخر تغييرات الأدوار"
     }
   },
-
   "doctorReport": {
     "title": "تقرير الطبيب",
     "nationalId": "الرقم القومي",
@@ -3320,5 +3292,20 @@
   "pagination": {
     "showing": "عرض",
     "of": "من"
+  },
+  "signalr": {
+  "connected": "متصل",
+  "connecting": "جاري الاتصال",
+  "reconnecting": "جاري إعادة الاتصال",
+  "disconnected": "غير متصل",
+  "reconnect": "إعادة الاتصال",
+  "reconnected": "تم إعادة الاتصال بنجاح",
+  "reconnectFailed": "فشل إعادة الاتصال",
+  "errors": {
+    "noToken": "يرجى تسجيل الدخول أولًا",
+    "unauthorized": "انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى",
+    "network": "خطأ في الاتصال بالشبكة",
+    "maxRetries": "فشل الاتصال بعد عدة محاولات"
   }
+}
 }

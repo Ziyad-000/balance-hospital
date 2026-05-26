@@ -41,27 +41,27 @@ function DoctorSchedule() {
   const isRTL = currentLang === "ar"
 
   const iconColors = {
-    user: "text-blue-600 dark:text-blue-400",
-    hash: "text-blue-600 dark:text-blue-400",
-    calendar: "text-blue-600 dark:text-blue-400",
-    timer: "text-green-600 dark:text-green-400",
-    success: "text-green-600 dark:text-green-400",
-    building: "text-green-600 dark:text-green-400",
-    clock: "text-yellow-600 dark:text-yellow-400",
-    briefcase: "text-purple-600 dark:text-purple-400",
-    danger: "text-red-600 dark:text-red-400",
-    muted: "text-[var(--color-text-muted)]",
+    user: "text-blue-500 dark:text-blue-500",
+    hash: "text-blue-500 dark:text-blue-500",
+    calendar: "text-blue-500 dark:text-blue-500",
+    timer: "text-emerald-500 dark:text-emerald-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-amber-500 dark:text-amber-500",
+    briefcase: "text-violet-500 dark:text-violet-500",
+    danger: "text-red-500 dark:text-red-500",
+    muted: "text-slate-500 dark:text-slate-500",
   }
 
   const iconBg = {
-    user: "bg-blue-100 dark:bg-blue-900/30",
-    calendar: "bg-blue-100 dark:bg-blue-900/30",
-    hash: "bg-blue-100 dark:bg-blue-900/30",
-    timer: "bg-green-100 dark:bg-green-900/30",
-    success: "bg-green-100 dark:bg-green-900/30",
-    clock: "bg-yellow-100 dark:bg-yellow-900/30",
-    building: "bg-green-100 dark:bg-green-900/30",
-    briefcase: "bg-purple-100 dark:bg-purple-900/30",
+    user: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    hash: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    timer: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    success: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    clock: "bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500",
+    building: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    briefcase: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
   }
 
   useEffect(() => {
@@ -79,15 +79,15 @@ function DoctorSchedule() {
     switch (status) {
       case "CONFIRMED":
       case "Confirmed":
-        return "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
+        return "bg-transparent text-emerald-500 border-2 border-emerald-500 shadow-sm"
       case "PENDING":
       case "Pending":
-        return "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20"
+        return "bg-transparent text-amber-500 border-2 border-amber-500 shadow-sm"
       case "CANCELLED":
       case "Cancelled":
-        return "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20"
+        return "bg-transparent text-red-500 border-2 border-red-500 shadow-sm"
       default:
-        return "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+        return "bg-transparent text-slate-500 border-2 border-slate-500 shadow-sm"
     }
   }
 
@@ -101,7 +101,7 @@ function DoctorSchedule() {
           <p className="text-sm text-[var(--color-text-muted)]">{label}</p>
         </div>
 
-        <div className={`p-3 rounded-xl ${bgClass}`}>
+        <div className={`p-3 rounded-xl ${bgClass} shadow-sm`}>
           <Icon className={`h-6 w-6 ${iconClass}`} />
         </div>
       </div>
@@ -295,7 +295,7 @@ function DoctorSchedule() {
                       <div className="flex items-start justify-between mb-3 gap-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`p-2 rounded-full ${iconBg.calendar}`}
+                            className={`p-2 rounded-full ${iconBg.calendar} shadow-sm`}
                           >
                             <Calendar
                               size={16}
@@ -399,7 +399,7 @@ function DoctorSchedule() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 text-[var(--color-text-soft)]" />
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-slate-500" />
 
                   <p className="text-sm text-[var(--color-text-muted)]">
                     {t("roster.doctorSchedule.noAssignments")}

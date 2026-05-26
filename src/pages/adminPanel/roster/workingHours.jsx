@@ -67,28 +67,33 @@ function WorkingHours() {
   }, [dispatch, rosterId])
 
   const iconColors = {
-    calendar: "text-blue-600 dark:text-blue-400",
-    clock: "text-purple-600 dark:text-purple-400",
-    timer: "text-blue-600 dark:text-blue-400",
-    doctors: "text-green-600 dark:text-green-400",
-    days: "text-orange-600 dark:text-orange-400",
-    progress: "text-purple-600 dark:text-purple-400",
-    building: "text-green-600 dark:text-green-400",
-    briefcase: "text-purple-600 dark:text-purple-400",
-    users: "text-blue-600 dark:text-blue-400",
-    danger: "text-red-600 dark:text-red-400",
-    success: "text-green-600 dark:text-green-400",
-    filter: "text-blue-600 dark:text-blue-400",
-    excel: "text-green-600 dark:text-green-400",
+    calendar: "text-blue-500 dark:text-blue-500",
+    clock: "text-violet-500 dark:text-violet-500",
+    timer: "text-blue-500 dark:text-blue-500",
+    doctors: "text-emerald-500 dark:text-emerald-500",
+    days: "text-orange-500 dark:text-orange-500",
+    progress: "text-violet-500 dark:text-violet-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    briefcase: "text-violet-500 dark:text-violet-500",
+    users: "text-blue-500 dark:text-blue-500",
+    danger: "text-red-500 dark:text-red-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    filter: "text-blue-500 dark:text-blue-500",
+    excel: "text-emerald-500 dark:text-emerald-500",
+    muted: "text-slate-500 dark:text-slate-500",
   }
 
   const iconBg = {
-    clock: "bg-purple-100 dark:bg-purple-900/30",
-    timer: "bg-blue-100 dark:bg-blue-900/30",
-    doctors: "bg-green-100 dark:bg-green-900/30",
-    days: "bg-orange-100 dark:bg-orange-900/30",
-    progress: "bg-purple-100 dark:bg-purple-900/30",
-    calendar: "bg-blue-100 dark:bg-blue-900/30",
+    clock: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    timer: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    doctors: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    days: "bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500",
+    progress: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    filter: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    excel: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    danger: "bg-transparent dark:bg-transparent border-2 border-red-500 dark:border-red-500",
+    success: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
   }
 
   const handleFilterChange = (key, value) => {
@@ -126,15 +131,15 @@ function WorkingHours() {
   }
 
   const getFillColor = (percentage) => {
-    if (percentage >= 80) return "text-green-600 dark:text-green-400"
-    if (percentage >= 50) return "text-yellow-600 dark:text-yellow-400"
-    if (percentage >= 25) return "text-orange-600 dark:text-orange-400"
-    return "text-red-600 dark:text-red-400"
+    if (percentage >= 80) return "text-emerald-500 dark:text-emerald-500"
+    if (percentage >= 50) return "text-amber-500 dark:text-amber-500"
+    if (percentage >= 25) return "text-orange-500 dark:text-orange-500"
+    return "text-red-500 dark:text-red-500"
   }
 
   const getFillBgColor = (percentage) => {
-    if (percentage >= 80) return "bg-green-500"
-    if (percentage >= 50) return "bg-yellow-500"
+    if (percentage >= 80) return "bg-emerald-500"
+    if (percentage >= 50) return "bg-amber-500"
     if (percentage >= 25) return "bg-orange-500"
     return "bg-red-500"
   }
@@ -797,7 +802,7 @@ function WorkingHours() {
                           : "bg-[var(--color-surface-muted)] opacity-50 cursor-default"
                       } ${
                         isSelected
-                          ? "ring-2 ring-inset ring-[var(--color-primary)] bg-[var(--color-primary-soft)]"
+                          ? "ring-2 ring-inset ring-emerald-500 bg-transparent"
                           : ""
                       }`}
                     >
@@ -805,19 +810,19 @@ function WorkingHours() {
                         <span
                           className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
                             dayData
-                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                              : "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)]"
+                              ? "bg-transparent text-blue-500 border border-blue-500"
+                              : "bg-transparent text-slate-500 border border-slate-500"
                           }`}
                         >
                           {day.dayNumber}
                         </span>
 
                         {dayData && stats?.overBookedCount > 0 && (
-                          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                          <AlertCircle className="h-4 w-4 text-red-500 dark:text-red-500" />
                         )}
 
                         {dayData && stats?.fullyBookedCount > 0 && stats?.overBookedCount === 0 && (
-                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          <CheckCircle className="h-4 w-4 text-emerald-500 dark:text-emerald-500" />
                         )}
                       </div>
 
@@ -920,7 +925,7 @@ function WorkingHours() {
                   onClick={() => setViewMode("rows")}
                   className={`px-4 py-2 text-sm font-medium flex items-center gap-2 transition-colors ${
                     viewMode === "rows"
-                      ? "bg-[var(--color-primary)] text-white"
+                      ? "bg-emerald-600 text-white"
                       : "bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
                   }`}
                 >
@@ -939,7 +944,7 @@ function WorkingHours() {
                   }}
                   className={`px-4 py-2 text-sm font-medium flex items-center gap-2 transition-colors border-s border-[var(--color-border)] ${
                     viewMode === "calendar"
-                      ? "bg-[var(--color-primary)] text-white"
+                      ? "bg-emerald-600 text-white"
                       : "bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)]"
                   }`}
                 >
@@ -952,7 +957,7 @@ function WorkingHours() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-colors flex items-center gap-2 ${
                   showFilters
-                    ? "bg-[var(--color-primary)] text-white"
+                    ? "bg-emerald-600 text-white"
                     : "bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-bg-soft)] border border-[var(--color-border)]"
                 }`}
                 type="button"
@@ -977,7 +982,7 @@ function WorkingHours() {
 
               <button
                 onClick={applyFilters}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <RefreshCw size={16} />
@@ -1063,7 +1068,7 @@ function WorkingHours() {
               <div className="flex items-end gap-2">
                 <button
                   onClick={applyFilters}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                   type="button"
                 >
                   <Search size={16} />
@@ -1168,7 +1173,7 @@ function WorkingHours() {
         <div className="space-y-6">
           {Object.keys(groupedWorkingHours).length === 0 ? (
             <div className={`${theme.card} p-12 text-center`}>
-              <Clock className="h-12 w-12 mx-auto mb-4 text-[var(--color-text-muted)]" />
+              <Clock className="h-12 w-12 mx-auto mb-4 text-slate-500" />
 
               <p className="text-lg text-[var(--color-text-muted)]">
                 {t("roster.noWorkingHours")}

@@ -579,7 +579,7 @@ function UsersIndex() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-[var(--color-text)] flex items-center gap-3">
-              <Users className="w-8 h-8 text-[var(--color-primary)]" />
+              <Users className="w-8 h-8 text-blue-5000" />
               {currentLang === "ar" ? "إدارة المستخدمين" : "Users Management"}
             </h1>
 
@@ -1070,7 +1070,7 @@ function UsersTable({
                 </td>
 
                 <td className="p-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-neutral-soft)] text-[var(--color-neutral)] border border-[var(--color-neutral-border)]">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-transparent text-slate-5000 border border-[var(--color-neutral-border)]">
                     {roleName}
                   </span>
                 </td>
@@ -1112,7 +1112,7 @@ function UsersTable({
                     <button
                       type="button"
                       onClick={() => navigate(`/admin-panel/users/${user.id}`)}
-                      className="p-2 rounded-lg bg-[var(--color-primary-soft)] text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20 transition-colors"
+                      className="p-2 rounded-lg bg-transparent text-blue-5000 hover:bg-[var(--color-primary-muted)] border border-blue-5000/20 transition-colors"
                       title={currentLang === "ar" ? "عرض" : "View"}
                     >
                       <Eye size={16} />
@@ -1126,7 +1126,7 @@ function UsersTable({
                             `/admin-panel/users/doctor-analytics/${user.id}`
                           )
                         }
-                        className="p-2 rounded-lg bg-[var(--color-purple-soft)] text-[var(--color-purple)] hover:bg-[var(--color-purple-soft)] border border-[var(--color-purple-border)] transition-colors"
+                        className="p-2 rounded-lg bg-transparent text-violet-5000 hover:bg-transparent border border-violet-5000 transition-colors"
                         title={
                           currentLang === "ar"
                             ? "تحليلات الدكتور"
@@ -1143,7 +1143,7 @@ function UsersTable({
                           type="button"
                           disabled={loadingApproveUser}
                           onClick={() => handleApprove(user.id)}
-                          className="p-2 rounded-lg bg-[var(--color-success-soft)] text-[var(--color-success)] hover:opacity-85 border border-[var(--color-success-border)] transition-colors disabled:opacity-50"
+                          className="p-2 rounded-lg bg-transparent text-emerald-5000 hover:opacity-85 border border-emerald-5000 transition-colors disabled:opacity-50"
                         >
                           <UserCheck size={16} />
                         </button>
@@ -1152,7 +1152,7 @@ function UsersTable({
                           type="button"
                           disabled={loadingRejectUser}
                           onClick={() => handleReject(user.id)}
-                          className="p-2 rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] hover:opacity-85 border border-[var(--color-danger-border)] transition-colors disabled:opacity-50"
+                          className="p-2 rounded-lg bg-transparent text-red-5000 hover:opacity-85 border border-red-5000 transition-colors disabled:opacity-50"
                         >
                           <UserMinus size={16} />
                         </button>
@@ -1164,7 +1164,7 @@ function UsersTable({
                         type="button"
                         disabled={loadingDeleteUser}
                         onClick={() => handleDelete(user.id)}
-                        className="p-2 rounded-lg bg-[var(--color-danger-soft)] text-[var(--color-danger)] hover:opacity-85 border border-[var(--color-danger-border)] transition-colors disabled:opacity-50"
+                        className="p-2 rounded-lg bg-transparent text-red-5000 hover:opacity-85 border border-red-5000 transition-colors disabled:opacity-50"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -1273,7 +1273,7 @@ function QuickSearchTab({
                     <button
                       type="button"
                       onClick={() => navigate(`/admin-panel/users/${user.id}`)}
-                      className="p-2 rounded-lg bg-[var(--color-primary-soft)] text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20 transition-colors"
+                      className="p-2 rounded-lg bg-transparent text-blue-5000 hover:bg-[var(--color-primary-muted)] border border-blue-5000/20 transition-colors"
                     >
                       <Eye size={16} />
                     </button>
@@ -1390,7 +1390,7 @@ function PaginationFooter({ pagination, currentLang, onPageChange, loading }) {
           {currentLang === "ar" ? "السابق" : "Previous"}
         </button>
 
-        <span className="px-4 py-2 rounded-xl text-sm font-bold bg-[var(--color-primary)] text-white">
+        <span className="px-4 py-2 rounded-xl text-sm font-bold bg-[var(--color-success)] text-white">
           {currentPage}
         </span>
 
@@ -1410,34 +1410,34 @@ function PaginationFooter({ pagination, currentLang, onPageChange, loading }) {
 function StatCard({ title, value, icon: Icon, tone = "blue" }) {
   const toneMap = {
     blue: {
-      bg: "bg-[var(--color-primary-soft)]",
-      text: "text-[var(--color-primary)]",
-      border: "border-[var(--color-primary)]/25",
+      bg: "bg-transparent",
+      text: "text-blue-5000",
+      border: "border-blue-5000/25",
     },
     green: {
-      bg: "bg-[var(--color-success-soft)]",
-      text: "text-[var(--color-success)]",
-      border: "border-[var(--color-success-border)]",
+      bg: "bg-transparent",
+      text: "text-emerald-5000",
+      border: "border-emerald-5000",
     },
     yellow: {
-      bg: "bg-[var(--color-warning-soft)]",
-      text: "text-[var(--color-warning)]",
-      border: "border-[var(--color-warning-border)]",
+      bg: "bg-transparent",
+      text: "text-amber-5000",
+      border: "border-amber-5000",
     },
     purple: {
-      bg: "bg-[var(--color-purple-soft)]",
-      text: "text-[var(--color-purple)]",
-      border: "border-[var(--color-purple-border)]",
+      bg: "bg-transparent",
+      text: "text-violet-5000",
+      border: "border-violet-5000",
     },
     red: {
-      bg: "bg-[var(--color-danger-soft)]",
-      text: "text-[var(--color-danger)]",
-      border: "border-[var(--color-danger-border)]",
+      bg: "bg-transparent",
+      text: "text-red-5000",
+      border: "border-red-5000",
     },
     orange: {
-      bg: "bg-[var(--color-warning-soft)]",
-      text: "text-[var(--color-warning)]",
-      border: "border-[var(--color-warning-border)]",
+      bg: "bg-transparent",
+      text: "text-amber-5000",
+      border: "border-amber-5000",
     },
   }
 
@@ -1472,20 +1472,20 @@ function TabButton({ id, activeTab, setActiveTab, icon: Icon, label, count }) {
     <button
       type="button"
       onClick={() => setActiveTab(id)}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${
         isActive
-          ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
-          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-primary)] active:bg-[var(--color-primary-active)]"
+          ? "bg-[var(--color-success)] text-white border-emerald-5000"
+          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-5000 active:bg-[var(--color-success-hover)]"
       }`}
     >
       <Icon size={16} />
       {label}
       {count !== undefined && (
         <span
-          className={`px-2 py-0.5 rounded-full text-[11px] ${
+          className={`px-2 py-0.5 rounded-full text-[11px] border ${
             isActive
-              ? "bg-white/20 text-white"
-              : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+              ? "bg-white/20 text-white border-white/20"
+              : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]"
           }`}
         >
           {count}
@@ -1508,8 +1508,8 @@ function StatusBadge({ enabled, trueText, falseText }) {
     <span
       className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold border ${
         enabled
-          ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
-          : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border-[var(--color-danger-border)]"
+          ? "bg-transparent text-emerald-5000 border-emerald-5000"
+          : "bg-transparent text-red-5000 border-red-5000"
       }`}
     >
       {enabled ? trueText : falseText}
@@ -1555,7 +1555,7 @@ function EmptyState({ title, description }) {
 
 function ErrorBox({ message }) {
   return (
-    <div className="p-5 rounded-2xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]">
+    <div className="p-5 rounded-2xl bg-transparent text-red-5000 border border-red-5000">
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 mt-0.5" />
         <p className="text-sm font-bold">{message || "Error"}</p>

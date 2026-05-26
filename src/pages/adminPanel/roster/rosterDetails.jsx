@@ -88,34 +88,35 @@ function RosterDetails() {
     "group inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] hover:bg-[var(--color-success-hover)] hover:border-[var(--color-success-hover)] transition-colors shadow-sm w-full h-full min-h-[42px]"
 
   const iconColors = {
-    calendar: "text-[var(--color-primary)]",
-    info: "text-[var(--color-primary)]",
-    activity: "text-[var(--color-primary)]",
-    building: "text-[var(--color-success)]",
-    plus: "text-[var(--color-success)]",
-    briefcase: "text-[var(--color-success)]",
-    settings: "text-[var(--color-purple)]",
-    timer: "text-[var(--color-purple)]",
-    target: "text-[var(--color-warning)]",
-    deadline: "text-[var(--color-warning)]",
-    success: "text-[var(--color-success)]",
-    danger: "text-[var(--color-danger)]",
-    file: "text-[var(--color-text-muted)]",
-    muted: "text-[var(--color-text-muted)]",
+    calendar: "text-blue-500 dark:text-blue-500",
+    info: "text-blue-500 dark:text-blue-500",
+    activity: "text-blue-500 dark:text-blue-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    plus: "text-emerald-500 dark:text-emerald-500",
+    briefcase: "text-emerald-500 dark:text-emerald-500",
+    settings: "text-violet-500 dark:text-violet-500",
+    timer: "text-violet-500 dark:text-violet-500",
+    target: "text-amber-500 dark:text-amber-500",
+    deadline: "text-amber-500 dark:text-amber-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    danger: "text-red-500 dark:text-red-500",
+    file: "text-slate-500 dark:text-slate-500",
+    muted: "text-slate-500 dark:text-slate-500",
   }
 
   const iconBg = {
-    calendar: "bg-[var(--color-primary-soft)]",
-    info: "bg-[var(--color-primary-soft)]",
-    activity: "bg-[var(--color-primary-soft)]",
-    building: "bg-[var(--color-success-soft)]",
-    briefcase: "bg-[var(--color-success-soft)]",
-    settings: "bg-[var(--color-purple-soft)]",
-    timer: "bg-[var(--color-purple-soft)]",
-    target: "bg-[var(--color-warning-soft)]",
-    success: "bg-[var(--color-success-soft)]",
-    danger: "bg-[var(--color-danger-soft)]",
-    deadline: "bg-[var(--color-warning-soft)]",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    info: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    activity: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    building: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    briefcase: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    settings: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    timer: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    target: "bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500",
+    success: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    danger: "bg-transparent dark:bg-transparent border-2 border-red-500 dark:border-red-500",
+    deadline: "bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500",
+    file: "bg-transparent dark:bg-transparent border-2 border-slate-500 dark:border-slate-500",
   }
 
   useEffect(() => {
@@ -131,43 +132,43 @@ function RosterDetails() {
       DRAFT_BASIC: {
         name: t("roster.status.draftBasic"),
         color:
-          "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+          "bg-transparent text-slate-500 border-2 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
         icon: FileText,
       },
       DRAFT_PARTIAL: {
         name: t("roster.status.draftPartial"),
         color:
-          "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
+          "bg-transparent text-amber-500 border-2 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
         icon: Clock,
       },
       DRAFT: {
         name: t("roster.status.draft"),
         color:
-          "bg-[var(--color-info-soft)] text-[var(--color-info)] border border-[var(--color-info)]/20",
+          "bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
         icon: PenTool,
       },
       DRAFT_READY: {
         name: t("roster.status.draftReady"),
         color:
-          "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-success)]/20",
+          "bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
         icon: Send,
       },
       PUBLISHED: {
         name: t("roster.status.published"),
         color:
-          "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20",
+          "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
         icon: CheckCircle,
       },
       CLOSED: {
         name: t("roster.status.closed"),
         color:
-          "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+          "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
         icon: XCircle,
       },
       ARCHIVED: {
         name: t("roster.status.archived"),
         color:
-          "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+          "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
         icon: Archive,
       },
     }
@@ -215,8 +216,8 @@ function RosterDetails() {
     <span
       className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${
         value
-          ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
-          : "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20"
+          ? "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+          : "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
       }`}
     >
       {value ? (
@@ -242,7 +243,7 @@ function RosterDetails() {
   )
 
   const StatBox = ({ icon: Icon, iconClass, bgClass, value, label }) => (
-    <div className={`text-center p-4 rounded-xl ${bgClass}`}>
+    <div className={`text-center p-4 rounded-xl border-2 shadow-sm ${bgClass}`}>
       <Icon className={`h-6 w-6 mx-auto mb-2 ${iconClass}`} />
 
       <p className={`text-2xl font-bold ${iconClass}`}>{value}</p>
@@ -253,7 +254,7 @@ function RosterDetails() {
 
   const DateRow = ({ icon: Icon, iconClass, bgClass, label, value }) => (
     <div
-      className={`flex items-center justify-between p-3 rounded-xl ${bgClass}`}
+      className={`flex items-center justify-between p-3 rounded-xl border-2 shadow-sm ${bgClass}`}
     >
       <div className="flex items-center">
         <Icon className={`h-5 w-5 ${iconClass} ${isRTL ? "ml-2" : "mr-2"}`} />
@@ -450,7 +451,7 @@ function RosterDetails() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
-            <div className={`p-3 rounded-xl ${iconBg.calendar}`}>
+            <div className={`p-3 rounded-xl ${iconBg.calendar} shadow-sm`}>
               <Calendar className={`h-8 w-8 ${iconColors.calendar}`} />
             </div>
 
@@ -633,7 +634,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Building}
                     iconClass={iconColors.calendar}
-                    bgClass="bg-[var(--color-primary-soft)]"
+                    bgClass="bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
                     value={selectedRoster.departmentsCount}
                     label={t("roster.departments")}
                   />
@@ -641,7 +642,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Briefcase}
                     iconClass={iconColors.briefcase}
-                    bgClass="bg-[var(--color-success-soft)]"
+                    bgClass="bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
                     value={selectedRoster.shiftsCount}
                     label={t("roster.shifts")}
                   />
@@ -649,7 +650,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Timer}
                     iconClass={iconColors.timer}
-                    bgClass="bg-[var(--color-purple-soft)]"
+                    bgClass="bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500"
                     value={selectedRoster.workingHoursCount}
                     label={t("roster.workingHours.title")}
                   />
@@ -657,7 +658,7 @@ function RosterDetails() {
                   <StatBox
                     icon={Target}
                     iconClass={iconColors.target}
-                    bgClass="bg-[var(--color-warning-soft)]"
+                    bgClass="bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
                     value={`${Math.round(
                       selectedRoster.completionPercentage
                     )}%`}
@@ -836,7 +837,7 @@ function RosterDetails() {
                   <DateRow
                     icon={PlusCircle}
                     iconClass={iconColors.plus}
-                    bgClass="bg-[var(--color-success-soft)]"
+                    bgClass="bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
                     label={t("roster.details.startDate")}
                     value={formatDate(selectedRoster.startDate)}
                   />
@@ -844,7 +845,7 @@ function RosterDetails() {
                   <DateRow
                     icon={XCircle}
                     iconClass={iconColors.danger}
-                    bgClass="bg-[var(--color-danger-soft)]"
+                    bgClass="bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
                     label={t("roster.details.endDate")}
                     value={formatDate(selectedRoster.endDate)}
                   />
@@ -852,7 +853,7 @@ function RosterDetails() {
                   <DateRow
                     icon={AlertCircle}
                     iconClass={iconColors.deadline}
-                    bgClass="bg-[var(--color-warning-soft)]"
+                    bgClass="bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
                     label={t("roster.details.deadline")}
                     value={formatDate(selectedRoster.submissionDeadline)}
                   />

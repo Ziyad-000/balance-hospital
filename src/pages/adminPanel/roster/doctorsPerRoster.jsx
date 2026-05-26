@@ -144,40 +144,32 @@ function DoctorsPerRoster() {
   const getColorClasses = (color, isActive) => {
     const colors = {
       blue: {
-        active: isDark
-          ? "bg-blue-600 border-blue-500 text-white"
-          : "bg-blue-500 border-blue-500 text-white",
+        active: "bg-emerald-600 border-emerald-600 text-white",
         inactive: isDark
-          ? "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-          : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50",
-        icon: isDark ? "text-blue-300" : "text-blue-400",
+          ? "bg-gray-800 border-gray-600 text-gray-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600"
+          : "bg-white border-gray-300 text-gray-800 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+        icon: "text-blue-500",
       },
       green: {
-        active: isDark
-          ? "bg-green-600 border-green-500 text-white"
-          : "bg-green-500 border-green-500 text-white",
+        active: "bg-emerald-600 border-emerald-600 text-white",
         inactive: isDark
-          ? "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-          : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50",
-        icon: isDark ? "text-green-300" : "text-green-400",
+          ? "bg-gray-800 border-gray-600 text-gray-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600"
+          : "bg-white border-gray-300 text-gray-800 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+        icon: "text-emerald-500",
       },
       purple: {
-        active: isDark
-          ? "bg-purple-600 border-purple-500 text-white"
-          : "bg-purple-500 border-purple-500 text-white",
+        active: "bg-emerald-600 border-emerald-600 text-white",
         inactive: isDark
-          ? "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-          : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50",
-        icon: isDark ? "text-purple-300" : "text-purple-400",
+          ? "bg-gray-800 border-gray-600 text-gray-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600"
+          : "bg-white border-gray-300 text-gray-800 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+        icon: "text-violet-500",
       },
       orange: {
-        active: isDark
-          ? "bg-orange-600 border-orange-500 text-white"
-          : "bg-orange-500 border-orange-500 text-white",
+        active: "bg-emerald-600 border-emerald-600 text-white",
         inactive: isDark
-          ? "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-          : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50",
-        icon: isDark ? "text-orange-300" : "text-orange-400",
+          ? "bg-gray-800 border-gray-600 text-gray-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600"
+          : "bg-white border-gray-300 text-gray-800 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+        icon: "text-orange-500",
       },
     }
 
@@ -197,10 +189,10 @@ function DoctorsPerRoster() {
         <div className="text-center">
           <AlertCircle
             className={`h-12 w-12 mx-auto mb-4 ${
-              isDark ? "text-red-400" : "text-red-500"
+              "text-red-500"
             }`}
           />
-          <p className={`text-lg ${isDark ? "text-red-400" : "text-red-600"}`}>
+          <p className={`text-lg ${"text-red-500"}`}>
             {errors.general}
           </p>
         </div>
@@ -214,7 +206,7 @@ function DoctorsPerRoster() {
         <div className="text-center">
           <Users
             className={`h-12 w-12 mx-auto mb-4 ${
-              isDark ? "text-gray-400" : "text-gray-500"
+              "text-slate-500"
             }`}
           />
           <p
@@ -269,9 +261,7 @@ function DoctorsPerRoster() {
             {selectedFilter !== "all" && (
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  isDark
-                    ? "bg-blue-900/50 text-blue-300"
-                    : "bg-blue-100 text-blue-800"
+                  "bg-transparent text-blue-500 border border-blue-500"
                 }`}
               >
                 {t("roster.filtered", "Filtered")}: {filteredDoctors.length}{" "}
@@ -289,7 +279,7 @@ function DoctorsPerRoster() {
               <div className="flex items-center gap-2 mb-2">
                 <Users
                   className={`h-4 w-4 ${
-                    isDark ? "text-blue-400" : "text-blue-600"
+                    "text-blue-500"
                   }`}
                 />
                 <span
@@ -317,7 +307,7 @@ function DoctorsPerRoster() {
               <div className="flex items-center gap-2 mb-2">
                 <Clock
                   className={`h-4 w-4 ${
-                    isDark ? "text-purple-400" : "text-purple-600"
+                    "text-violet-500"
                   }`}
                 />
                 <span
@@ -345,7 +335,7 @@ function DoctorsPerRoster() {
               <div className="flex items-center gap-2 mb-2">
                 <Building
                   className={`h-4 w-4 ${
-                    isDark ? "text-orange-400" : "text-orange-600"
+                    "text-orange-500"
                   }`}
                 />
                 <span
@@ -371,7 +361,7 @@ function DoctorsPerRoster() {
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
                 <span
                   className={`text-sm font-medium ${
                     isDark ? "text-gray-300" : "text-gray-700"
@@ -395,7 +385,7 @@ function DoctorsPerRoster() {
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                <div className="w-4 h-4 rounded-full bg-amber-500"></div>
                 <span
                   className={`text-sm font-medium ${
                     isDark ? "text-gray-300" : "text-gray-700"
@@ -464,8 +454,8 @@ function DoctorsPerRoster() {
               onClick={() => setSelectedFilter("all")}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isDark
-                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-gray-800 text-gray-200 border border-gray-600 hover:bg-emerald-600 hover:text-white hover:border-emerald-600"
+                  : "bg-white text-gray-800 border border-gray-300 hover:bg-emerald-600 hover:text-white hover:border-emerald-600"
               }`}
             >
               <Filter className="h-4 w-4" />
@@ -480,7 +470,7 @@ function DoctorsPerRoster() {
             <div className="text-center">
               <Users
                 className={`h-8 w-8 mx-auto mb-2 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
+                  "text-slate-500"
                 }`}
               />
               <p

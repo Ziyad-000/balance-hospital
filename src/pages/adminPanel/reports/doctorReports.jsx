@@ -76,38 +76,38 @@ function DoctorReports() {
     "inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-extrabold border bg-[var(--color-success)] text-white border-[var(--color-success)] hover:bg-[var(--color-success-hover)] hover:border-[var(--color-success-hover)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
 
   const iconColors = {
-    user: "text-blue-900 dark:text-blue-500",
-    mail: "text-cyan-900 dark:text-cyan-500",
-    phone: "text-emerald-900 dark:text-emerald-500",
-    id: "text-slate-900 dark:text-slate-500",
-    award: "text-violet-900 dark:text-violet-500",
-    calendar: "text-blue-900 dark:text-blue-500",
-    check: "text-emerald-900 dark:text-emerald-500",
-    clock: "text-amber-900 dark:text-amber-500",
-    activity: "text-violet-900 dark:text-violet-500",
-    chart: "text-blue-900 dark:text-blue-500",
-    file: "text-indigo-900 dark:text-indigo-500",
-    filter: "text-blue-900 dark:text-blue-500",
-    danger: "text-red-900 dark:text-red-500",
-    warning: "text-orange-900 dark:text-orange-500",
-    muted: "text-slate-800 dark:text-slate-200",
+    user: "text-blue-500 dark:text-blue-500",
+    mail: "text-cyan-500 dark:text-cyan-500",
+    phone: "text-emerald-500 dark:text-emerald-500",
+    id: "text-slate-500 dark:text-slate-500",
+    award: "text-violet-500 dark:text-violet-500",
+    calendar: "text-blue-500 dark:text-blue-500",
+    check: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-amber-500 dark:text-amber-500",
+    activity: "text-violet-500 dark:text-violet-500",
+    chart: "text-blue-500 dark:text-blue-500",
+    file: "text-indigo-500 dark:text-indigo-500",
+    filter: "text-blue-500 dark:text-blue-500",
+    danger: "text-red-500 dark:text-red-500",
+    warning: "text-orange-500 dark:text-orange-500",
+    muted: "text-slate-500 dark:text-slate-500",
   }
 
   const iconBg = {
-    user: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
-    mail: "bg-cyan-200 dark:bg-cyan-900/7 border border-cyan-400 dark:border-cyan-500",
-    phone: "bg-emerald-200 dark:bg-emerald-900/70 border border-emerald-400 dark:border-emerald-500",
-    id: "bg-slate-200 dark:bg-slate-800 border border-slate-400 dark:border-slate-500",
-    award: "bg-violet-200 dark:bg-violet-900/70 border border-violet-400 dark:border-violet-500",
-    calendar: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
-    check: "bg-emerald-200 dark:bg-emerald-900/7 border border-emerald-400 dark:border-emerald-500",
-    clock: "bg-amber-200 dark:bg-amber-900/7 border border-amber-400 dark:border-amber-500",
-    activity: "bg-violet-200 dark:bg-violet-900/7 border border-violet-400 dark:border-violet-500",
-    chart: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
-    file: "bg-indigo-200 dark:bg-indigo-900/7 border border-indigo-400 dark:border-indigo-500",
-    filter: "bg-blue-200 dark:bg-blue-900/7 border border-blue-400 dark:border-blue-500",
-    danger: "bg-red-200 dark:bg-red-900/70 border border-red-400 dark:border-red-500",
-    warning: "bg-orange-200 dark:bg-orange-900/70 border border-orange-400 dark:border-orange-500",
+    user: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    mail: "bg-transparent dark:bg-transparent border-2 border-cyan-500 dark:border-cyan-500",
+    phone: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    id: "bg-transparent dark:bg-transparent border-2 border-slate-500 dark:border-slate-500",
+    award: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    check: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    clock: "bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500",
+    activity: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    chart: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    file: "bg-transparent dark:bg-transparent border-2 border-indigo-500 dark:border-indigo-500",
+    filter: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    danger: "bg-transparent dark:bg-transparent border-2 border-red-500 dark:border-red-500",
+    warning: "bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500",
   }
 
   useEffect(() => {
@@ -155,34 +155,34 @@ function DoctorReports() {
   const getComplianceStatusColor = (status) => {
     const statusColors = {
       OVER_ASSIGNED:
-        "bg-orange-100 text-orange-900 border border-orange-400 dark:bg-orange-900/70 dark:text-orange-500 dark:border-orange-500",
+        "bg-transparent text-orange-500 border-2 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
       COMPLIANT:
-        "bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-900/70 dark:text-emerald-500 dark:border-emerald-500",
+        "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
       UNDER_ASSIGNED:
-        "bg-red-100 text-red-900 border border-red-400 dark:bg-red-900/70 dark:text-red-500 dark:border-red-500",
+        "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
     }
 
     return (
       statusColors[status] ||
-      "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+      "bg-transparent text-slate-500 border-2 border-slate-500"
     )
   }
 
   const getAttendanceStatusColor = (status) => {
     const statusColors = {
       OnTime:
-        "bg-emerald-200 text-emerald-950 border-2 border-emerald-500 dark:bg-emerald-800/80 dark:text-white dark:border-emerald-400 shadow-sm",
+        "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500 shadow-sm",
       Late:
-        "bg-amber-200 text-amber-950 border-2 border-amber-500 dark:bg-amber-800/80 dark:text-white dark:border-amber-400 shadow-sm",
+        "bg-transparent text-amber-500 border-2 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500 shadow-sm",
       Absent:
-        "bg-red-200 text-red-950 border-2 border-red-500 dark:bg-red-800/80 dark:text-white dark:border-red-400 shadow-sm",
+        "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500 shadow-sm",
       EarlyCheckout:
-        "bg-orange-200 text-orange-950 border-2 border-orange-500 dark:bg-orange-800/80 dark:text-white dark:border-orange-400 shadow-sm",
+        "bg-transparent text-orange-500 border-2 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500 shadow-sm",
     }
 
     return (
       statusColors[status] ||
-      "bg-[var(--color-surface-muted)] text-[var(--color-text)] border-2 border-[var(--color-border-strong)] shadow-sm"
+      "bg-transparent text-slate-500 border-2 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500 shadow-sm"
     )
   }
 
@@ -190,41 +190,41 @@ function DoctorReports() {
     const tones = {
       OnTime: {
         icon: CheckCircle,
-        iconClass: "text-emerald-950 dark:text-white",
-        bgClass: "bg-emerald-200 dark:bg-emerald-800/80",
-        borderClass: "border-emerald-500 dark:border-emerald-400",
-        labelClass: "text-emerald-950 dark:text-white",
+        iconClass: "text-emerald-500 dark:text-emerald-500",
+        bgClass: "bg-transparent dark:bg-transparent",
+        borderClass: "border-emerald-500 dark:border-emerald-500",
+        labelClass: "text-emerald-500 dark:text-emerald-500",
       },
       Late: {
         icon: Clock,
-        iconClass: "text-amber-950 dark:text-white",
-        bgClass: "bg-amber-200 dark:bg-amber-800/80",
-        borderClass: "border-amber-500 dark:border-amber-400",
-        labelClass: "text-amber-950 dark:text-white",
+        iconClass: "text-amber-500 dark:text-amber-500",
+        bgClass: "bg-transparent dark:bg-transparent",
+        borderClass: "border-amber-500 dark:border-amber-500",
+        labelClass: "text-amber-500 dark:text-amber-500",
       },
       Absent: {
         icon: XCircle,
-        iconClass: "text-red-950 dark:text-white",
-        bgClass: "bg-red-200 dark:bg-red-800/80",
-        borderClass: "border-red-500 dark:border-red-400",
-        labelClass: "text-red-950 dark:text-white",
+        iconClass: "text-red-500 dark:text-red-500",
+        bgClass: "bg-transparent dark:bg-transparent",
+        borderClass: "border-red-500 dark:border-red-500",
+        labelClass: "text-red-500 dark:text-red-500",
       },
       EarlyCheckout: {
         icon: AlertCircle,
-        iconClass: "text-orange-950 dark:text-white",
-        bgClass: "bg-orange-200 dark:bg-orange-800/80",
-        borderClass: "border-orange-500 dark:border-orange-400",
-        labelClass: "text-orange-950 dark:text-white",
+        iconClass: "text-orange-500 dark:text-orange-500",
+        bgClass: "bg-transparent dark:bg-transparent",
+        borderClass: "border-orange-500 dark:border-orange-500",
+        labelClass: "text-orange-500 dark:text-orange-500",
       },
     }
 
     return (
       tones[status] || {
         icon: Activity,
-        iconClass: "text-slate-900 dark:text-slate-100",
-        bgClass: "bg-slate-200 dark:bg-slate-700",
-        borderClass: "border-slate-400 dark:border-slate-500",
-        labelClass: "text-slate-900 dark:text-slate-100",
+        iconClass: "text-slate-500 dark:text-slate-500",
+        bgClass: "bg-transparent dark:bg-transparent",
+        borderClass: "border-slate-500 dark:border-slate-500",
+        labelClass: "text-slate-500 dark:text-slate-500",
       }
     )
   }
@@ -361,7 +361,7 @@ function DoctorReports() {
           </div>
 
           {record.lateMinutes > 0 && (
-            <span className="text-[10px] font-bold text-amber-900 dark:text-amber-100 bg-amber-200 dark:bg-amber-900/70 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold text-amber-500 dark:text-amber-500 bg-transparent dark:bg-transparent border border-amber-500 px-2 py-0.5 rounded-full">
               +{record.lateMinutes}m
             </span>
           )}
@@ -579,14 +579,14 @@ function DoctorReports() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <span className="px-4 py-2 rounded-full text-sm font-bold bg-violet-100 text-violet-900 border border-violet-400 dark:bg-violet-900/70 dark:text-violet-100 dark:border-violet-500">
+                <span className="px-4 py-2 rounded-full text-sm font-bold bg-transparent text-violet-500 border-2 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500">
                   {getLocalized(
                     report.scientificDegreeNameAr,
                     report.scientificDegreeNameEn
                   )}
                 </span>
 
-                <span className="px-4 py-2 rounded-full text-sm font-bold bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-900/70 dark:text-emerald-100 dark:border-emerald-500">
+                <span className="px-4 py-2 rounded-full text-sm font-bold bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500">
                   {getLocalized(
                     report.contractingTypeNameAr,
                     report.contractingTypeNameEn
@@ -722,8 +722,8 @@ function DoctorReports() {
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-bold ${
                             role.isActive
-                              ? "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
-                              : "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+                              ? "bg-transparent text-emerald-500 border-2 border-emerald-500"
+                              : "bg-transparent text-slate-500 border-2 border-slate-500"
                           }`}
                         >
                           {role.isActive
@@ -880,10 +880,10 @@ function DoctorReports() {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold ${
                           roster.compliancePercentage >= 90
-                            ? "bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-900/70 dark:text-emerald-100 dark:border-emerald-500"
+                            ? "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
                             : roster.compliancePercentage >= 70
-                            ? "bg-amber-100 text-amber-900 border border-amber-400 dark:bg-amber-900/70 dark:text-amber-100 dark:border-amber-500"
-                            : "bg-red-100 text-red-900 border border-red-400 dark:bg-red-900/70 dark:text-red-100 dark:border-red-500"
+                            ? "bg-transparent text-amber-500 border-2 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+                            : "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
                         }`}
                       >
                         {roster.compliancePercentage.toFixed(1)}%
@@ -903,54 +903,54 @@ function DoctorReports() {
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-5 rounded-xl bg-emerald-200 dark:bg-emerald-800/80 border-2 border-emerald-500 dark:border-emerald-400 shadow-sm">
+            <div className="p-5 rounded-xl bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <CheckCircle className="w-5 h-5 text-emerald-950 dark:text-white" />
-                <span className="text-2xl font-black text-emerald-950 dark:text-white">
+                <CheckCircle className="w-5 h-5 text-emerald-500 dark:text-emerald-500" />
+                <span className="text-2xl font-black text-emerald-500 dark:text-emerald-500">
                   {report.attendanceChart.onTime}
                 </span>
               </div>
 
-              <p className="text-sm font-black text-emerald-950 dark:text-white">
+              <p className="text-sm font-black text-emerald-500 dark:text-emerald-500">
                 {t("doctorReport.attendanceChart.onTime")}
               </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-amber-200 dark:bg-amber-800/80 border-2 border-amber-500 dark:border-amber-400 shadow-sm">
+            <div className="p-5 rounded-xl bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <Clock className="w-5 h-5 text-amber-950 dark:text-white" />
-                <span className="text-2xl font-black text-amber-950 dark:text-white">
+                <Clock className="w-5 h-5 text-amber-500 dark:text-amber-500" />
+                <span className="text-2xl font-black text-amber-500 dark:text-amber-500">
                   {report.attendanceChart.late}
                 </span>
               </div>
 
-              <p className="text-sm font-black text-amber-950 dark:text-white">
+              <p className="text-sm font-black text-amber-500 dark:text-amber-500">
                 {t("doctorReport.attendanceChart.late")}
               </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-red-200 dark:bg-red-800/80 border-2 border-red-500 dark:border-red-400 shadow-sm">
+            <div className="p-5 rounded-xl bg-transparent dark:bg-transparent border-2 border-red-500 dark:border-red-500 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <XCircle className="w-5 h-5 text-red-950 dark:text-white" />
-                <span className="text-2xl font-black text-red-950 dark:text-white">
+                <XCircle className="w-5 h-5 text-red-500 dark:text-red-500" />
+                <span className="text-2xl font-black text-red-500 dark:text-red-500">
                   {report.attendanceChart.absent}
                 </span>
               </div>
 
-              <p className="text-sm font-black text-red-950 dark:text-white">
+              <p className="text-sm font-black text-red-500 dark:text-red-500">
                 {t("doctorReport.attendanceChart.absent")}
               </p>
             </div>
 
-            <div className="p-5 rounded-xl bg-orange-200 dark:bg-orange-800/80 border-2 border-orange-500 dark:border-orange-400 shadow-sm">
+            <div className="p-5 rounded-xl bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <AlertCircle className="w-5 h-5 text-orange-950 dark:text-white" />
-                <span className="text-2xl font-black text-orange-950 dark:text-white">
+                <AlertCircle className="w-5 h-5 text-orange-500 dark:text-orange-500" />
+                <span className="text-2xl font-black text-orange-500 dark:text-orange-500">
                   {report.attendanceChart.earlyCheckout}
                 </span>
               </div>
 
-              <p className="text-sm font-black text-orange-950 dark:text-white">
+              <p className="text-sm font-black text-orange-500 dark:text-orange-500">
                 {t("doctorReport.attendanceChart.earlyCheckout")}
               </p>
             </div>
@@ -1021,7 +1021,7 @@ function DoctorReports() {
                   className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
                     attendanceViewMode === "rows"
                       ? "border bg-[var(--color-success)] text-white border-[var(--color-success)]"
-                      : "border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-primary)] hover:text-white hover:border-[var(--color-success)]"
+                      : "border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
                   }`}
                 >
                   <Rows3 size={16} />
@@ -1176,7 +1176,7 @@ function DoctorReports() {
                             })}
                           </p>
 
-                          <p className="text-xl font-black text-blue-950 dark:text-white">
+                          <p className="text-xl font-black text-blue-500 dark:text-blue-500">
                             {dayItem.day}
                           </p>
                         </div>

@@ -42,16 +42,16 @@ function WorkingHour() {
   const isRTL = currentLang === "ar"
 
   const defaultButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const selectedButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-emerald-500 transition-colors"
 
   const iconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const dangerIconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const handleNavigateToSchedule = (doctor) => {
     navigate(`/admin-panel/rosters/doctors/${doctor.doctorId}`)
@@ -76,10 +76,10 @@ function WorkingHour() {
   }
 
   const getFillColor = (percentage) => {
-    if (percentage >= 80) return "text-[var(--color-success)]"
-    if (percentage >= 50) return "text-[var(--color-warning)]"
-    if (percentage >= 25) return "text-[var(--color-warning)]"
-    return "text-[var(--color-danger)]"
+    if (percentage >= 80) return "text-emerald-500"
+    if (percentage >= 50) return "text-amber-500"
+    if (percentage >= 25) return "text-amber-500"
+    return "text-red-500"
   }
 
   const getFillBgColor = (percentage) => {
@@ -90,28 +90,28 @@ function WorkingHour() {
   }
 
   const iconColors = {
-    clock: "text-[var(--color-primary)]",
-    calendar: "text-[var(--color-primary)]",
-    target: "text-[var(--color-primary)]",
-    userCheck: "text-[var(--color-success)]",
-    building: "text-[var(--color-success)]",
-    users: "text-[var(--color-warning)]",
-    briefcase: "text-[var(--color-purple)]",
-    user: "text-[var(--color-warning)]",
-    file: "text-[var(--color-text-muted)]",
-    danger: "text-[var(--color-danger)]",
-    success: "text-[var(--color-success)]",
+    clock: "text-blue-500 dark:text-blue-500",
+    calendar: "text-blue-500 dark:text-blue-500",
+    target: "text-blue-500 dark:text-blue-500",
+    userCheck: "text-emerald-500 dark:text-emerald-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    users: "text-amber-500 dark:text-amber-500",
+    briefcase: "text-violet-500 dark:text-violet-500",
+    user: "text-orange-500 dark:text-orange-500",
+    file: "text-slate-500 dark:text-slate-500",
+    danger: "text-red-500 dark:text-red-500",
+    success: "text-emerald-500 dark:text-emerald-500",
   }
 
   const iconBg = {
-    clock: "bg-[var(--color-primary-soft)]",
-    target: "bg-[var(--color-primary-soft)]",
-    userCheck: "bg-[var(--color-success-soft)]",
-    building: "bg-[var(--color-success-soft)]",
-    users: "bg-[var(--color-warning-soft)]",
-    briefcase: "bg-[var(--color-purple-soft)]",
-    user: "bg-[var(--color-warning-soft)]",
-    file: "bg-[var(--color-neutral-soft)]",
+    clock: "bg-transparent dark:bg-transparent border border-blue-500",
+    target: "bg-transparent dark:bg-transparent border border-blue-500",
+    userCheck: "bg-transparent dark:bg-transparent border border-emerald-500",
+    building: "bg-transparent dark:bg-transparent border border-emerald-500",
+    users: "bg-transparent dark:bg-transparent border border-amber-500",
+    briefcase: "bg-transparent dark:bg-transparent border border-violet-500",
+    user: "bg-transparent dark:bg-transparent border border-orange-500",
+    file: "bg-transparent dark:bg-transparent border border-slate-500",
   }
 
   const InfoRow = ({ icon: Icon, iconClass, label, value, subValue }) => (
@@ -162,9 +162,9 @@ function WorkingHour() {
         <div className="max-w-6xl mx-auto">
           <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
-              <AlertCircle className="h-12 w-12 text-[var(--color-danger)] mx-auto mb-4" />
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
 
-              <div className="text-[var(--color-danger)] text-lg mb-4">
+              <div className="text-red-500 text-lg mb-4">
                 {errors.workingHours}
               </div>
 
@@ -223,7 +223,7 @@ function WorkingHour() {
                     `/admin-panel/rosters/working-hours/${workingHourId}/edit`
                   )
                 }
-                className="bg-[var(--color-primary)] hover:bg-[var(--color-success)] text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <Edit size={16} />
@@ -236,7 +236,7 @@ function WorkingHour() {
                     `/admin-panel/rosters/working-hours/${workingHourId}/assign-doctors`
                   )
                 }
-                className="bg-[var(--color-success)] hover:bg-[var(--color-success-hover)] text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 type="button"
               >
                 <UserPlus size={16} />
@@ -291,7 +291,7 @@ function WorkingHour() {
           <StatCard
             icon={Timer}
             iconClass={getFillColor(workingHour.fillPercentage)}
-            bgClass="bg-[var(--color-bg-soft)]"
+            bgClass="bg-transparent dark:bg-transparent border border-blue-500"
             value={`${Math.round(workingHour.fillPercentage)}%`}
             valueClass={getFillColor(workingHour.fillPercentage)}
             label={t("roster.fillPercentage")}
@@ -356,7 +356,7 @@ function WorkingHour() {
               <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
                 <div className="flex flex-wrap items-center gap-4">
                   {workingHour.isFullyBooked && (
-                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-transparent text-emerald-500 border border-emerald-500">
                       <CheckCircle
                         size={16}
                         className={isRTL ? "ml-2" : "mr-2"}
@@ -366,7 +366,7 @@ function WorkingHour() {
                   )}
 
                   {workingHour.isOverBooked && (
-                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full bg-transparent text-red-500 border border-red-500">
                       <AlertCircle
                         size={16}
                         className={isRTL ? "ml-2" : "mr-2"}
@@ -470,8 +470,8 @@ function WorkingHour() {
                           <span
                             className={`text-xs px-2 py-1 rounded-full border ${
                               doctor.assignmentMethod === "MANUAL"
-                                ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border-[var(--color-primary)]/25"
-                                : "bg-[var(--color-success-soft)] text-[var(--color-success)] border-[var(--color-success-border)]"
+                                ? "bg-transparent text-blue-500 border-blue-500/25"
+                                : "bg-transparent text-emerald-500 border-emerald-500"
                             }`}
                           >
                             {doctor.assignmentMethod}
@@ -479,7 +479,7 @@ function WorkingHour() {
 
                           <button
                             onClick={() => handleNavigateToSchedule(doctor)}
-                            className="px-3 py-1 text-xs rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-success)] text-white transition-colors"
+                            className="px-3 py-1 text-xs rounded-md bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
                             type="button"
                           >
                             {t("roster.doctorSchedule.title")}

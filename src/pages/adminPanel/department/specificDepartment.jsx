@@ -67,46 +67,46 @@ function SpecificDepartment() {
     "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
 
   const dangerIconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
 
   const dangerButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-danger)] border-[var(--color-border-strong)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-red-500 border-[var(--color-border-strong)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const toneMap = {
     blue: {
-      bg: "bg-[var(--color-primary-soft)]",
-      text: "text-[var(--color-primary)]",
-      border: "border-[var(--color-primary)]/25",
+      bg: "bg-transparent",
+      text: "text-blue-500",
+      border: "border-blue-500",
     },
     green: {
-      bg: "bg-[var(--color-success-soft)]",
-      text: "text-[var(--color-success)]",
-      border: "border-[var(--color-success-border)]",
+      bg: "bg-transparent",
+      text: "text-emerald-500",
+      border: "border-emerald-500",
     },
     red: {
-      bg: "bg-[var(--color-danger-soft)]",
-      text: "text-[var(--color-danger)]",
-      border: "border-[var(--color-danger-border)]",
+      bg: "bg-transparent",
+      text: "text-red-500",
+      border: "border-red-500",
     },
     yellow: {
-      bg: "bg-[var(--color-warning-soft)]",
-      text: "text-[var(--color-warning)]",
-      border: "border-[var(--color-warning-border)]",
+      bg: "bg-transparent",
+      text: "text-amber-500",
+      border: "border-amber-500",
     },
     purple: {
-      bg: "bg-[var(--color-purple-soft)]",
-      text: "text-[var(--color-purple)]",
-      border: "border-[var(--color-purple-border)]",
+      bg: "bg-transparent",
+      text: "text-violet-500",
+      border: "border-violet-500",
     },
     orange: {
-      bg: "bg-[var(--color-warning-soft)]",
-      text: "text-[var(--color-warning)]",
-      border: "border-[var(--color-warning-border)]",
+      bg: "bg-transparent",
+      text: "text-orange-500",
+      border: "border-orange-500",
     },
     neutral: {
-      bg: "bg-[var(--color-neutral-soft)]",
-      text: "text-[var(--color-neutral)]",
-      border: "border-[var(--color-neutral-border)]",
+      bg: "bg-transparent",
+      text: "text-slate-500",
+      border: "border-slate-500",
     },
   }
 
@@ -333,7 +333,7 @@ function SpecificDepartment() {
 
     if (value >= 90) {
       return {
-        text: "text-[var(--color-success)]",
+        text: "text-emerald-500",
         bg: "bg-[var(--color-success-soft)]",
         border: "border-[var(--color-success-border)]",
         bar: "bg-[var(--color-success)]",
@@ -342,7 +342,7 @@ function SpecificDepartment() {
 
     if (value >= 70) {
       return {
-        text: "text-[var(--color-warning)]",
+        text: "text-amber-500",
         bg: "bg-[var(--color-warning-soft)]",
         border: "border-[var(--color-warning-border)]",
         bar: "bg-[var(--color-warning)]",
@@ -350,7 +350,7 @@ function SpecificDepartment() {
     }
 
     return {
-      text: "text-[var(--color-danger)]",
+      text: "text-red-500",
       bg: "bg-[var(--color-danger-soft)]",
       border: "border-[var(--color-danger-border)]",
       bar: "bg-[var(--color-danger)]",
@@ -425,10 +425,10 @@ function SpecificDepartment() {
   const PermissionItem = ({ enabled, icon: Icon, label }) => (
     <div className={`${theme.cardSoft} p-3 flex items-center gap-3`}>
       <span
-        className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+        className={`w-7 h-7 rounded-lg flex items-center justify-center border ${
           enabled
-            ? "bg-[var(--color-success-soft)] text-[var(--color-success)]"
-            : "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
+            ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+            : "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
         }`}
       >
         {enabled ? <CheckCircle size={15} /> : <XCircle size={15} />}
@@ -510,7 +510,7 @@ function SpecificDepartment() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className={`${theme.card} p-6 xl:col-span-2`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <Info className="w-5 h-5 text-[var(--color-primary)]" />
+            <Info className="w-5 h-5 text-blue-500" />
             {currentLang === "ar" ? "بيانات القسم" : "Department Information"}
           </h2>
 
@@ -582,7 +582,7 @@ function SpecificDepartment() {
 
         <div className={`${theme.card} p-6`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] mb-5 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-[var(--color-purple)]" />
+            <Shield className="w-5 h-5 text-violet-500" />
             {currentLang === "ar" ? "إجراءات سريعة" : "Quick Actions"}
           </h2>
 
@@ -638,7 +638,7 @@ function SpecificDepartment() {
     <div className="space-y-5">
       <div className={`${theme.card} p-4`}>
         <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-          <Link2 className="w-5 h-5 text-[var(--color-primary)]" />
+          <Link2 className="w-5 h-5 text-blue-500" />
           {currentLang === "ar" ? "التخصصات المرتبطة" : "Linked Categories"}
         </h2>
 
@@ -658,7 +658,7 @@ function SpecificDepartment() {
           }
         />
       ) : departmentCategoriesError ? (
-        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
+        <div className={`${theme.card} p-6 text-red-500`}>
           {departmentCategoriesError?.message}
         </div>
       ) : linkedCategories.length === 0 ? (
@@ -720,7 +720,7 @@ function SpecificDepartment() {
       <div className="space-y-5">
         <div className={`${theme.card} p-4`}>
           <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-            <UserCog className="w-5 h-5 text-[var(--color-purple)]" />
+            <UserCog className="w-5 h-5 text-violet-500" />
             {currentLang === "ar" ? "مدير القسم" : "Department Manager"}
           </h2>
 
@@ -857,7 +857,7 @@ function SpecificDepartment() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-[var(--color-warning)]" />
+              <CalendarDays className="w-5 h-5 text-amber-500" />
               {currentLang === "ar"
                 ? "شهور وروسترات القسم"
                 : "Department Months & Rosters"}
@@ -890,7 +890,7 @@ function SpecificDepartment() {
           }
         />
       ) : departmentMonthListError ? (
-        <div className={`${theme.card} p-6 text-[var(--color-danger)]`}>
+        <div className={`${theme.card} p-6 text-red-500`}>
           {departmentMonthListError?.message ||
             (currentLang === "ar"
               ? "تعذر تحميل شهور القسم"
@@ -932,7 +932,7 @@ function SpecificDepartment() {
                     </p>
                   </div>
 
-                  <Eye className="w-5 h-5 text-[var(--color-primary)]" />
+                  <Eye className="w-5 h-5 text-blue-500" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -966,8 +966,8 @@ function SpecificDepartment() {
                     value={shortfall}
                     valueClass={
                       shortfall > 0
-                        ? "text-[var(--color-danger)]"
-                        : "text-[var(--color-success)]"
+                        ? "text-red-500"
+                        : "text-emerald-500"
                     }
                   />
                 </div>
@@ -990,7 +990,7 @@ function SpecificDepartment() {
                 </div>
 
                 {shortfall > 0 && (
-                  <div className="mt-4 flex items-start gap-2 text-xs text-[var(--color-warning)]">
+                  <div className="mt-4 flex items-start gap-2 text-xs text-amber-500">
                     <AlertTriangle size={15} className="mt-0.5" />
                     <span>
                       {currentLang === "ar"
@@ -1010,7 +1010,7 @@ function SpecificDepartment() {
   const renderGeoFenceTab = () => (
     <div className="space-y-5">
       {getDepartmentGeoFencesError && (
-        <div className={`${theme.card} p-4 text-[var(--color-danger)]`}>
+        <div className={`${theme.card} p-4 text-red-500`}>
           {getDepartmentGeoFencesError?.message}
         </div>
       )}
@@ -1054,7 +1054,7 @@ function SpecificDepartment() {
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-5xl mx-auto">
           <div className={`${theme.card} p-8 text-center`}>
-            <XCircle className="w-14 h-14 text-[var(--color-danger)] mx-auto mb-4" />
+            <XCircle className="w-14 h-14 text-red-500 mx-auto mb-4" />
 
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
               {currentLang === "ar"
@@ -1121,7 +1121,7 @@ function SpecificDepartment() {
             <button
               type="button"
               onClick={() => navigate("/admin-panel/departments")}
-              className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-success)]"
+              className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-emerald-500"
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
               {currentLang === "ar" ? "رجوع للأقسام" : "Back to Departments"}
@@ -1152,7 +1152,7 @@ function SpecificDepartment() {
         <div className={`${theme.card} p-6`}>
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-blue-500 flex items-center justify-center">
                 <Building2 className="w-7 h-7" />
               </div>
 
@@ -1195,7 +1195,7 @@ function SpecificDepartment() {
                   </span>
 
                   {hasManager && (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-purple-soft)] text-[var(--color-purple)] border border-[var(--color-purple-border)]">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-purple-soft)] text-violet-500 border border-[var(--color-purple-border)]">
                       {getManagerName()}
                     </span>
                   )}

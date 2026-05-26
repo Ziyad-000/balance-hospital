@@ -167,37 +167,37 @@ function Roster() {
     const statusMap = {
       DRAFT_BASIC: {
         color:
-          "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+          "bg-transparent text-slate-500 border-2 border-slate-500",
         name: t("roster.status.draftBasic"),
       },
       DRAFT_PARTIAL: {
         color:
-          "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
+          "bg-transparent text-amber-500 border-2 border-amber-500",
         name: t("roster.status.draftPartial"),
       },
       DRAFT: {
         color:
-          "bg-[var(--color-info-soft)] text-[var(--color-info)] border border-[var(--color-info)]/20",
+          "bg-transparent text-blue-500 border-2 border-blue-500",
         name: t("roster.status.draft"),
       },
       DRAFT_READY: {
         color:
-          "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-success)]/20",
+          "bg-transparent text-blue-500 border-2 border-blue-500",
         name: t("roster.status.draftReady"),
       },
       PUBLISHED: {
         color:
-          "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20",
+          "bg-transparent text-emerald-500 border-2 border-emerald-500",
         name: t("roster.status.published"),
       },
       CLOSED: {
         color:
-          "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20",
+          "bg-transparent text-amber-500 border-2 border-amber-500",
         name: t("roster.status.closed"),
       },
       ARCHIVED: {
         color:
-          "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20",
+          "bg-transparent text-red-500 border-2 border-red-500",
         name: t("roster.status.archived"),
       },
     }
@@ -205,7 +205,7 @@ function Roster() {
     return (
       statusMap[status] || {
         color:
-          "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
+          "bg-transparent text-slate-500 border-2 border-slate-500",
         name: status,
       }
     )
@@ -234,12 +234,13 @@ function Roster() {
   const ActionButton = ({ children, title, tone = "primary", onClick }) => {
     const toneClasses = {
       primary:
-        "text-[var(--color-primary)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]",
+        "bg-transparent text-blue-500 border border-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
       warning:
-        "text-[var(--color-warning)] hover:bg-[var(--color-warning-soft)]",
+        "bg-transparent text-amber-500 border border-amber-500 hover:bg-amber-600 hover:text-white hover:border-amber-600",
       success:
-        "text-[var(--color-success)] hover:bg-[var(--color-success-soft)]",
-      danger: "text-[var(--color-danger)] hover:bg-[var(--color-danger-soft)]",
+        "bg-transparent text-emerald-500 border border-emerald-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+      danger:
+        "bg-transparent text-red-500 border border-red-500 hover:bg-red-600 hover:text-white hover:border-red-600",
     }
 
     return (
@@ -256,11 +257,8 @@ function Roster() {
 
   const EmptyState = ({ compact = false }) => (
     <div className={`text-center ${compact ? "p-8" : "p-12"}`}>
-      <div className="w-14 h-14 bg-[var(--color-bg-soft)] rounded-full flex items-center justify-center mx-auto mb-4">
-        <FileText
-          size={compact ? 24 : 32}
-          className="text-[var(--color-text-soft)]"
-        />
+      <div className="w-14 h-14 bg-transparent rounded-full border-2 border-slate-500 text-slate-500 flex items-center justify-center mx-auto mb-4 shadow-sm">
+        <FileText size={compact ? 24 : 32} className="text-slate-500" />
       </div>
 
       <h3
@@ -421,7 +419,7 @@ function Roster() {
                 onClick={() => setShowMobileTable(!showMobileTable)}
                 className={`md:hidden px-3 py-2 rounded-lg border transition-colors ${
                   showMobileTable
-                    ? "bg-[var(--color-primary-soft)] border-[var(--color-success)] text-[var(--color-success)]"
+                    ? "bg-transparent border-2 border-emerald-500 text-emerald-500"
                     : defaultButtonClass
                 }`}
                 type="button"
@@ -432,12 +430,12 @@ function Roster() {
           </div>
 
           {errors?.general && (
-            <div className="bg-[var(--color-danger-soft)] border border-[var(--color-danger)]/30 text-[var(--color-danger)] px-4 py-3 rounded-xl mb-4">
+            <div className="bg-transparent border-2 border-red-500 text-red-500 px-4 py-3 rounded-xl mb-4 shadow-sm">
               <div className="flex justify-between items-center gap-4">
                 <span>{errors.general}</span>
                 <button
                   onClick={() => dispatch(clearAllErrors())}
-                  className="text-[var(--color-danger)] hover:opacity-80 text-xl leading-none"
+                  className="text-red-500 hover:opacity-80 text-xl leading-none"
                   type="button"
                 >
                   ×
@@ -451,7 +449,7 @@ function Roster() {
           <div className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <div className="flex-1 flex items-center gap-2">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg border-2 border-blue-500 bg-transparent text-blue-500 shadow-sm">
                   <Search size={20} />
                 </div>
 
@@ -470,7 +468,7 @@ function Roster() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 justify-center sm:justify-start ${
                   showFilters
-                    ? "bg-[var(--color-primary-soft)] border-[var(--color-success)] text-[var(--color-success)]"
+                    ? "bg-transparent border-2 border-emerald-500 text-emerald-500"
                     : defaultButtonClass
                 }`}
                 type="button"

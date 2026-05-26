@@ -15,6 +15,7 @@ import {
   Clock,
   Hash,
   Calendar,
+  FileText,
 } from "lucide-react"
 
 import {
@@ -26,81 +27,70 @@ import {
   clearFilters,
 } from "../../../state/slices/shiftHours"
 import { Link } from "react-router-dom"
-import LoadingGetData from "../../../components/LoadingGetData"
 import { getShiftHoursTypes } from "../../../state/act/actShiftHours"
 import DeleteShiftHoursTypeModal from "../../../components/modals/DeleteShiftHoursTypeModal"
+import { getPageTheme } from "../../../utils/themeClasses"
 import "../../../styles/general.css"
 import { formatDate } from "../../../utils/formtDate"
 
 function ShiftHours() {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
+  const theme = getPageTheme()
+
   const [modalOpen, setModalOpen] = useState(false)
   const [toDelete, setToDelete] = useState({ id: null, name: "" })
-
-  const {
-    shiftHoursTypes,
-    loadingGetShiftHoursTypes,
-    pagination,
-    filters,
-    error,
-  } = useSelector((state) => state.shiftHour)
-
-  const { mymode } = useSelector((state) => state.mode)
-
-  const [searchInput, setSearchInput] = useState(filters.search || "")
+  const [searchInput, setSearchInput] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [showMobileTable, setShowMobileTable] = useState(false)
-
-  // Debounced search
   const [searchTimeout, setSearchTimeout] = useState(null)
 
-  // Check if we're in dark mode
-  const isDark = mymode === "dark"
+  const { shiftHoursTypes, loadingGetShiftHoursTypes, pagination, filters, error } =
+    useSelector((state) => state.shiftHour)
 
-  // Check if current language is RTL
   const language = i18n.language
   const isRTL = language === "ar"
 
-  // Fetch shift hours types with current filters
+  // ── Button classes (Roster system) ──────────────────────────────────────
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const createButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] hover:bg-[var(--color-success-hover)] hover:border-[var(--color-success-hover)] active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const selectedButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+
+  // ── Fetch ────────────────────────────────────────────────────────────────
   useEffect(() => {
     dispatch(getShiftHoursTypes(filters))
   }, [dispatch, filters])
 
-  // Clear error on mount
   useEffect(() => {
     dispatch(clearError())
   }, [dispatch])
 
+  // ── Handlers ─────────────────────────────────────────────────────────────
   const handleSearchChange = useCallback(
     (value) => {
       setSearchInput(value)
-
-      if (searchTimeout) {
-        clearTimeout(searchTimeout)
-      }
-
+      if (searchTimeout) clearTimeout(searchTimeout)
       const timeout = setTimeout(() => {
         dispatch(setFilters({ search: value, page: 1 }))
       }, 500)
-
       setSearchTimeout(timeout)
     },
     [dispatch, searchTimeout]
   )
 
-  // Handle filter changes
   const handleFilterChange = (key, value) => {
-    console.log(`Filter changed: ${key} = ${value}`)
     dispatch(setFilters({ [key]: value, page: 1 }))
   }
 
-  // Handle status filter change
   const handleStatusChange = (newStatus) => {
     dispatch(setShiftHoursStatusFilter(newStatus))
   }
 
-  // Handle pagination
   const handlePageChange = (newPage) => {
     dispatch(setCurrentPage(newPage))
   }
@@ -109,203 +99,217 @@ function ShiftHours() {
     dispatch(setPageSize(parseInt(newPageSize)))
   }
 
-  // Handle delete action
   const handleDeleteClick = (shiftHoursType) => {
-    const name =
-      language === "ar" ? shiftHoursType.nameArabic : shiftHoursType.nameEnglish
+    const name = language === "ar" ? shiftHoursType.nameArabic : shiftHoursType.nameEnglish
     setToDelete({ id: shiftHoursType.id, name })
     setModalOpen(true)
   }
 
-  // Get shift hours type name based on current language
-  const getShiftHoursTypeName = (shiftHoursType) => {
-    return language === "ar"
-      ? shiftHoursType.nameArabic
-      : shiftHoursType.nameEnglish
-  }
   const handleClearFilters = () => {
     dispatch(clearFilters())
     setSearchInput("")
   }
 
-  // Format hours for display
-  const formatHours = (hours) => {
-    if (!hours) return "0"
-    return parseFloat(hours).toString()
+  const formatHours = (hours) => (hours ? parseFloat(hours).toString() : "0")
+
+  const normalizePeriod = (period) => {
+    if (!period) return ""
+
+    const value = String(period).toLowerCase().trim()
+
+    if (value.includes("morning")) return "morning"
+    if (value.includes("afternoon")) return "afternoon"
+    if (value.includes("evening")) return "evening"
+    if (value.includes("night")) return "night"
+    if (value.includes("daily")) return "daily"
+    if (value.includes("weekly")) return "weekly"
+    if (value.includes("monthly")) return "monthly"
+
+    return value
   }
 
-  // Get period display text
   const getPeriodDisplay = (period) => {
-    const periodMap = {
-      daily: t("shiftHoursTypes.periods.daily"),
-      weekly: t("shiftHoursTypes.periods.weekly"),
-      monthly: t("shiftHoursTypes.periods.monthly"),
+    const normalized = normalizePeriod(period)
+
+    const translationMap = {
+      daily: "shiftHoursTypes.periods.daily",
+      weekly: "shiftHoursTypes.periods.weekly",
+      monthly: "shiftHoursTypes.periods.monthly",
+      morning: "shiftHoursTypes.periods.morning",
+      afternoon: "shiftHoursTypes.periods.afternoon",
+      evening: "shiftHoursTypes.periods.evening",
+      night: "shiftHoursTypes.periods.night",
     }
-    return periodMap[period] || period
+
+    const translationKey = translationMap[normalized]
+
+    if (translationKey) {
+      const translated = t(translationKey)
+      if (translated && translated !== translationKey) return translated
+    }
+
+    const fallbackMap = {
+      daily: language === "ar" ? "يومي" : "Daily",
+      weekly: language === "ar" ? "أسبوعي" : "Weekly",
+      monthly: language === "ar" ? "شهري" : "Monthly",
+      morning: language === "ar" ? "صباحي" : "Morning",
+      afternoon: language === "ar" ? "بعد الظهر" : "Afternoon",
+      evening: language === "ar" ? "مسائي" : "Evening",
+      night: language === "ar" ? "ليلي" : "Night",
+    }
+
+    return fallbackMap[normalized] || period || "-"
   }
 
-  // Generate page numbers for pagination
+  const getPeriodBadgeClass = (period) => {
+    const normalized = normalizePeriod(period)
+
+    if (normalized === "morning" || normalized === "daily") {
+      return "bg-transparent text-blue-500 border-2 border-blue-500"
+    }
+
+    if (normalized === "evening" || normalized === "weekly") {
+      return "bg-transparent text-amber-500 border-2 border-amber-500"
+    }
+
+    if (normalized === "afternoon") {
+      return "bg-transparent text-orange-500 border-2 border-orange-500"
+    }
+
+    if (normalized === "night" || normalized === "monthly") {
+      return "bg-transparent text-violet-500 border-2 border-violet-500"
+    }
+
+    return "bg-transparent text-slate-500 border-2 border-slate-500"
+  }
+
   const getPageNumbers = () => {
     const pages = []
     const totalPages = pagination?.totalPages || 1
     const currentPage = pagination?.page || 1
-
-    // Show up to 3 page numbers on mobile, 5 on desktop
     const maxPages = window.innerWidth < 768 ? 3 : 5
     let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2))
     let endPage = Math.min(totalPages, startPage + maxPages - 1)
-
-    if (endPage - startPage < maxPages - 1) {
-      startPage = Math.max(1, endPage - maxPages + 1)
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i)
-    }
-
+    if (endPage - startPage < maxPages - 1) startPage = Math.max(1, endPage - maxPages + 1)
+    for (let i = startPage; i <= endPage; i++) pages.push(i)
     return pages
   }
 
-  // Mobile card component for each shift hours type
+  // ── ActionButton (Roster pattern) ────────────────────────────────────────
+  const ActionButton = ({ children, title, tone = "primary", onClick }) => {
+    const toneClasses = {
+      primary:
+        "bg-transparent text-blue-500 border border-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+      warning:
+        "bg-transparent text-amber-500 border border-amber-500 hover:bg-amber-600 hover:text-white hover:border-amber-600",
+      success:
+        "bg-transparent text-emerald-500 border border-emerald-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+      danger:
+        "bg-transparent text-red-500 border border-red-500 hover:bg-red-600 hover:text-white hover:border-red-600",
+    }
+    return (
+      <button
+        onClick={onClick}
+        className={`p-2 rounded-lg transition-colors ${toneClasses[tone]}`}
+        title={title}
+        type="button"
+      >
+        {children}
+      </button>
+    )
+  }
+
+  // ── Sub-components ────────────────────────────────────────────────────────
+  const LoadingState = ({ small = false }) => (
+    <div className="text-center p-8">
+      <div className="flex items-center justify-center">
+        <div
+          className={`animate-spin rounded-full border-b-2 border-[var(--color-success)] ${
+            small ? "h-6 w-6" : "h-8 w-8"
+          }`}
+        />
+        <span className={`${isRTL ? "mr-3" : "ml-3"} text-[var(--color-text-muted)]`}>
+          {t("gettingData.shiftHourData")}
+        </span>
+      </div>
+    </div>
+  )
+
+  const EmptyState = ({ compact = false }) => (
+    <div className={`text-center ${compact ? "p-8" : "p-12"}`}>
+      <div className="w-14 h-14 bg-transparent rounded-full border-2 border-slate-500 text-slate-500 flex items-center justify-center mx-auto mb-4 shadow-sm">
+        <FileText size={compact ? 24 : 32} />
+      </div>
+      <h3 className={`font-semibold text-[var(--color-text)] mb-2 ${compact ? "text-base" : "text-lg"}`}>
+        {t("shiftHoursTypes.noData")}
+      </h3>
+    </div>
+  )
+
   const ShiftHoursTypeCard = ({ shiftHoursType }) => (
-    <div
-      className={`p-4 rounded-lg border mb-3 ${
-        isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-      }`}
-    >
-      <div className="flex justify-between items-start mb-3">
+    <div className={`${theme.card} p-4 mb-3`}>
+      <div className="flex justify-between items-start mb-3 gap-3">
         <div className="flex-1">
-          <h3
-            className={`font-semibold text-lg ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
+          <h3 className="font-semibold text-lg text-[var(--color-text)]">
             {shiftHoursType.nameArabic}
           </h3>
-          <p
-            className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}
-          >
+          <p className="text-sm text-[var(--color-text-muted)]">
             {shiftHoursType.nameEnglish}
           </p>
           {shiftHoursType.code && (
-            <div className="flex items-center mt-1">
-              <Hash
-                className={`h-3 w-3 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                } ${isRTL ? "ml-1" : "mr-1"}`}
-              />
-              <span
-                className={`text-xs font-mono px-2 py-1 rounded ${
-                  isDark
-                    ? "bg-gray-700 text-gray-300"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
+            <div className="flex items-center mt-1 gap-1">
+              <Hash className="h-3 w-3 text-[var(--color-text-muted)]" />
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text)]">
                 {shiftHoursType.code}
               </span>
             </div>
           )}
         </div>
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPeriodBadgeClass(shiftHoursType.period)}`}>
+          {getPeriodDisplay(shiftHoursType.period)}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm mb-3">
         <div className="flex items-center gap-2">
-          <Clock size={14} className="text-gray-500" />
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("shiftHoursTypes.table.hours")}:
-          </span>
-          <span className={`${isDark ? "text-gray-200" : "text-gray-800"}`}>
-            {formatHours(shiftHoursType.hoursCountCount)}h
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`font-medium ${
-              isDark ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            {t("shiftHoursTypes.table.period")}:
-          </span>
-          <span className={`${isDark ? "text-gray-200" : "text-gray-800"}`}>
-            {getPeriodDisplay(shiftHoursType.period)}
-          </span>
+          <Clock size={14} className="text-[var(--color-text-muted)]" />
+          <span className="text-[var(--color-text-muted)]">{t("shiftHoursTypes.table.hours")}:</span>
+          <span className="font-semibold text-[var(--color-text)]">{formatHours(shiftHoursType.hoursCountCount)}h</span>
         </div>
         {shiftHoursType.createdAt && (
           <div className="flex items-center gap-2 col-span-2">
-            <Calendar size={14} className="text-gray-500" />
-            <span
-              className={`font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              }`}
-            >
-              {t("shiftHoursTypes.table.createdAt")}:
-            </span>
-            <span
-              className={`text-xs ${
-                isDark ? "text-gray-200" : "text-gray-800"
-              }`}
-            >
-              {formatDate(shiftHoursType.createdAt)}
-            </span>
+            <Calendar size={14} className="text-[var(--color-text-muted)]" />
+            <span className="text-[var(--color-text-muted)]">{t("shiftHoursTypes.table.createdAt")}:</span>
+            <span className="text-xs text-[var(--color-text)]">{formatDate(shiftHoursType.createdAt)}</span>
           </div>
         )}
       </div>
 
-      {shiftHoursType.description && (
-        <div className="mb-3">
-          <p
-            className={`text-xs ${
-              isDark ? "text-gray-400" : "text-gray-600"
-            } line-clamp-2`}
-          >
-            {language === "ar"
-              ? shiftHoursType.descriptionArabic
-              : shiftHoursType.descriptionEnglish}
-          </p>
-        </div>
-      )}
-
       <div className="flex gap-2 justify-end">
         <Link to={`/admin-panel/shift-hours-types/${shiftHoursType.id}`}>
-          <button
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 cursor-pointer rounded-lg transition-colors"
-            title={t("shiftHoursTypes.actions.view")}
-          >
+          <ActionButton title={t("shiftHoursTypes.actions.view")}>
             <Eye size={16} />
-          </button>
+          </ActionButton>
         </Link>
         <Link to={`/admin-panel/shift-hours-types/edit/${shiftHoursType.id}`}>
-          <button
-            className="p-2 text-green-600 cursor-pointer hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
-            title={t("shiftHoursTypes.actions.edit")}
-          >
+          <ActionButton title={t("shiftHoursTypes.actions.edit")} tone="success">
             <Edit size={16} />
-          </button>
+          </ActionButton>
         </Link>
-        <button
-          className="p-2 text-red-600 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors"
+        <ActionButton
           title={t("shiftHoursTypes.actions.delete")}
+          tone="danger"
           onClick={() => handleDeleteClick(shiftHoursType)}
         >
           <Trash2 size={16} />
-        </button>
+        </ActionButton>
       </div>
     </div>
   )
 
-  // if (loadingGetShiftHoursTypes) {
-  //   return <LoadingGetData />;
-  // }
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <DeleteShiftHoursTypeModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -313,40 +317,34 @@ function ShiftHours() {
         info={toDelete}
         shiftHoursTypeName={toDelete.name}
       />
+
       <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+
+          {/* ── Header ── */}
           <div className="mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-text)]">
                 {t("shiftHoursTypes.title")}
               </h1>
+
               <div className="flex gap-2 w-full sm:w-auto">
                 <Link to="/admin-panel/shift-hours-types/create">
-                  <button className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors flex-1 sm:flex-none justify-center">
+                  <button className={`${createButtonClass} flex-1 sm:flex-none`}>
                     <Plus size={20} />
-                    <span className="hidden sm:inline">
-                      {t("shiftHoursTypes.addNew")}
-                    </span>
-                    <span className="sm:hidden">
-                      {t("shiftHoursTypes.add")}
-                    </span>
+                    <span className="hidden sm:inline">{t("shiftHoursTypes.addNew")}</span>
+                    <span className="sm:hidden">{t("shiftHoursTypes.add")}</span>
                   </button>
                 </Link>
-                {/* Mobile table toggle */}
+
                 <button
                   onClick={() => setShowMobileTable(!showMobileTable)}
-                  className={`md:hidden px-3 py-2 cursor-pointer rounded-lg border transition-colors ${
+                  className={`md:hidden px-3 py-2 rounded-lg border transition-colors ${
                     showMobileTable
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark ? "text-gray-300" : "text-gray-700"
-                        }`
+                      ? "bg-transparent border-2 border-emerald-500 text-emerald-500"
+                      : defaultButtonClass
                   }`}
+                  type="button"
                 >
                   {showMobileTable ? <X size={20} /> : <Menu size={20} />}
                 </button>
@@ -354,12 +352,13 @@ function ShiftHours() {
             </div>
 
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <div className="flex justify-between items-center">
+              <div className="bg-transparent border-2 border-red-500 text-red-500 px-4 py-3 rounded-xl mb-4 shadow-sm">
+                <div className="flex justify-between items-center gap-4">
                   <span>{error.message}</span>
                   <button
                     onClick={() => dispatch(clearError())}
-                    className="text-red-500 cursor-pointer hover:text-red-700"
+                    className="text-red-500 hover:opacity-80 text-xl leading-none"
+                    type="button"
                   >
                     ×
                   </button>
@@ -368,211 +367,104 @@ function ShiftHours() {
             )}
           </div>
 
-          {/* Search and Filters */}
-          <div
-            className={`rounded-lg shadow-sm border mb-6 ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
-          >
+          {/* ── Search & Filters ── */}
+          <div className={`${theme.card} mb-6`}>
             <div className="p-4">
-              {/* Search Bar */}
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex-1 flex items-center gap-2">
-                  {/* Search Icon Container - Completely separate from input */}
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-lg border transition-all duration-200 ${
-                      isDark
-                        ? "border-gray-600 bg-gray-700 text-gray-400"
-                        : "border-gray-300 bg-white text-gray-500"
-                    }`}
-                  >
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg border-2 border-blue-500 bg-transparent text-blue-500 shadow-sm shrink-0">
                     <Search size={20} />
                   </div>
-
-                  {/* Input Container */}
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder={t("shiftHoursTypes.search.placeholder")}
-                      value={searchInput}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white placeholder-gray-400"
-                          : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
-                      }`}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder={t("shiftHoursTypes.search.placeholder")}
+                    value={searchInput}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className={`w-full px-4 py-2 ${theme.input}`}
+                  />
                 </div>
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-2 cursor-pointer rounded-lg border transition-colors flex items-center gap-2 justify-center sm:justify-start ${
+                  className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 justify-center sm:justify-start ${
                     showFilters
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
-                      : `hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                          isDark
-                            ? "border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-200 hover:border-gray-400"
-                        }`
+                      ? "bg-transparent border-2 border-emerald-500 text-emerald-500"
+                      : defaultButtonClass
                   }`}
+                  type="button"
                 >
                   <Filter size={20} />
                   {t("shiftHoursTypes.filters.title")}
                 </button>
               </div>
 
-              {/* Advanced Filters */}
               {showFilters && (
-                <div
-                  className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t ${
-                    isDark ? "border-gray-600" : "border-gray-200"
-                  }`}
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-[var(--color-border)]">
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("shiftHoursTypes.filters.status")}
                     </label>
                     <select
                       value={filters.statusFilter || "all"}
                       onChange={(e) => handleStatusChange(e.target.value)}
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`w-full p-2 ${theme.input}`}
                     >
-                      <option value="all">
-                        {t("shiftHoursTypes.filters.allStatuses")}
-                      </option>
-                      <option value="active">
-                        {t("shiftHoursTypes.status.active")}
-                      </option>
-                      <option value="inactive">
-                        {t("shiftHoursTypes.status.inactive")}
-                      </option>
+                      <option value="all">{t("shiftHoursTypes.filters.allStatuses")}</option>
+                      <option value="active">{t("shiftHoursTypes.status.active")}</option>
+                      <option value="inactive">{t("shiftHoursTypes.status.inactive")}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("shiftHoursTypes.filters.period")}
                     </label>
                     <select
                       value={filters.period || ""}
-                      onChange={(e) =>
-                        handleFilterChange("period", e.target.value || null)
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      onChange={(e) => handleFilterChange("period", e.target.value || null)}
+                      className={`w-full p-2 ${theme.input}`}
                     >
-                      <option value="">
-                        {t("shiftHoursTypes.filters.allPeriods")}
-                      </option>
-                      <option value="Morning">
-                        {t("shiftHoursTypes.periods.morning")}
-                      </option>
-                      <option value="Evening">
-                        {t("shiftHoursTypes.periods.evening")}
-                      </option>
-                      <option value="Night">
-                        {t("shiftHoursTypes.periods.night")}
-                      </option>
+                      <option value="">{t("shiftHoursTypes.filters.allPeriods")}</option>
+                      <option value="Morning">{t("shiftHoursTypes.periods.morning")}</option>
+                      <option value="Evening">{t("shiftHoursTypes.periods.evening")}</option>
+                      <option value="Night">{t("shiftHoursTypes.periods.night")}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("shiftHoursTypes.filters.orderBy")}
                     </label>
                     <select
                       value={filters.orderBy || "nameArabic"}
-                      onChange={(e) =>
-                        handleFilterChange("orderBy", e.target.value)
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      onChange={(e) => handleFilterChange("orderBy", e.target.value)}
+                      className={`w-full p-2 ${theme.input}`}
                     >
-                      <option value="NameArabic">
-                        {t("shiftHoursTypes.filters.sortBy.nameArabic")}
-                      </option>
-                      <option value="NameEnglish">
-                        {t("shiftHoursTypes.filters.sortBy.nameEnglish")}
-                      </option>
-                      <option value="Period">
-                        {t("shiftHoursTypes.filters.sortBy.period")}
-                      </option>
-                      <option value="HoursCount">
-                        {t("shiftHoursTypes.filters.sortBy.hours")}
-                      </option>
-                      <option value="CreatedAt">
-                        {t("shiftHoursTypes.filters.sortBy.createdAt")}
-                      </option>
-                      <option value="UpdatedAt">
-                        {t("shiftHoursTypes.filters.sortBy.updatedAt")}
-                      </option>
+                      <option value="NameArabic">{t("shiftHoursTypes.filters.sortBy.nameArabic")}</option>
+                      <option value="NameEnglish">{t("shiftHoursTypes.filters.sortBy.nameEnglish")}</option>
+                      <option value="Period">{t("shiftHoursTypes.filters.sortBy.period")}</option>
+                      <option value="HoursCount">{t("shiftHoursTypes.filters.sortBy.hours")}</option>
+                      <option value="CreatedAt">{t("shiftHoursTypes.filters.sortBy.createdAt")}</option>
+                      <option value="UpdatedAt">{t("shiftHoursTypes.filters.sortBy.updatedAt")}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label
-                      className={`block text-sm font-medium mb-2 ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
+                    <label className="block text-sm font-semibold mb-2 text-[var(--color-text)]">
                       {t("shiftHoursTypes.filters.orderDirection")}
                     </label>
                     <select
                       value={filters.orderDesc?.toString() || "true"}
-                      onChange={(e) =>
-                        handleFilterChange(
-                          "orderDesc",
-                          e.target.value === "true"
-                        )
-                      }
-                      className={`w-full p-2 border rounded-lg ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      onChange={(e) => handleFilterChange("orderDesc", e.target.value === "true")}
+                      className={`w-full p-2 ${theme.input}`}
                     >
-                      <option value="true">
-                        {t("shiftHoursTypes.filters.descending")}
-                      </option>
-                      <option value="false">
-                        {t("shiftHoursTypes.filters.ascending")}
-                      </option>
+                      <option value="true">{t("shiftHoursTypes.filters.descending")}</option>
+                      <option value="false">{t("shiftHoursTypes.filters.ascending")}</option>
                     </select>
                   </div>
 
-                  <div className="sm:col-span-2 lg:col-span-3">
-                    <button
-                      onClick={handleClearFilters}
-                      className={`px-4 py-2 rounded-lg border transition-colors ${
-                        isDark
-                          ? "border-gray-600 cursor-pointer text-gray-300 hover:bg-gray-700"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
+                  <div className="sm:col-span-2 lg:col-span-4">
+                    <button onClick={handleClearFilters} className={defaultButtonClass} type="button">
                       {t("contractingTypes.filters.clear")}
                     </button>
                   </div>
@@ -581,231 +473,107 @@ function ShiftHours() {
             </div>
           </div>
 
-          {/* Mobile Cards View */}
+          {/* ── Mobile Cards View ── */}
           <div className={`md:hidden ${showMobileTable ? "hidden" : "block"}`}>
             {loadingGetShiftHoursTypes ? (
-              <div className="text-center p-8">
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span
-                    className={`${isRTL ? "mr-3" : "ml-3"} ${
-                      isDark ? "text-gray-400" : "text-gray-600"
-                    }`}
-                  >
-                    {t("gettingData.shiftHourData")}
-                  </span>
-                </div>
-              </div>
+              <LoadingState />
             ) : !shiftHoursTypes || shiftHoursTypes.length === 0 ? (
-              <div
-                className={`text-center p-8 ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {t("shiftHoursTypes.noData")}
-              </div>
+              <EmptyState />
             ) : (
-              shiftHoursTypes.map((shiftHoursType) => (
-                <ShiftHoursTypeCard
-                  key={shiftHoursType.id}
-                  shiftHoursType={shiftHoursType}
-                />
+              shiftHoursTypes.map((item) => (
+                <ShiftHoursTypeCard key={item.id} shiftHoursType={item} />
               ))
             )}
           </div>
 
-          {/* Desktop Table View */}
+          {/* ── Desktop Table ── */}
           <div
-            className={`hidden md:block ${showMobileTable ? "md:hidden" : ""} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border`}
+            className={`hidden md:block ${showMobileTable ? "md:hidden" : ""} ${theme.card} overflow-hidden`}
           >
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.table.nameArabic")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.table.nameEnglish")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.table.code")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.table.hours")}
-                    </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.table.period")}
-                    </th>
-
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-4 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.table.actions")}
-                    </th>
+                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                    {[
+                      t("shiftHoursTypes.table.nameArabic"),
+                      t("shiftHoursTypes.table.nameEnglish"),
+                      t("shiftHoursTypes.table.code"),
+                      t("shiftHoursTypes.table.hours"),
+                      t("shiftHoursTypes.table.period"),
+                      t("shiftHoursTypes.table.actions"),
+                    ].map((header) => (
+                      <th
+                        key={header}
+                        className={`${isRTL ? "text-right" : "text-left"} p-4 font-semibold text-[var(--color-text)]`}
+                      >
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {loadingGetShiftHoursTypes ? (
                     <tr>
-                      <td colSpan="8" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-3" : "ml-3"} ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("gettingData.shiftHourData")}
-                          </span>
-                        </div>
+                      <td colSpan="6">
+                        <LoadingState />
                       </td>
                     </tr>
                   ) : !shiftHoursTypes || shiftHoursTypes.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan="8"
-                        className={`text-center p-8 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {t("shiftHoursTypes.noData")}
+                      <td colSpan="6">
+                        <EmptyState />
                       </td>
                     </tr>
                   ) : (
-                    shiftHoursTypes.map((shiftHoursType) => (
+                    shiftHoursTypes.map((item) => (
                       <tr
-                        key={shiftHoursType.id}
-                        className={`border-b transition-colors ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
+                        key={item.id}
+                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
                       >
-                        <td
-                          className={`p-4 font-semibold ${
-                            isDark ? "text-white" : "text-gray-900"
-                          }`}
-                        >
-                          {shiftHoursType.nameArabic}
+                        <td className="p-4 font-semibold text-[var(--color-text)]">
+                          {item.nameArabic}
                         </td>
-                        <td
-                          className={`p-4 ${
-                            isDark ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {shiftHoursType.nameEnglish}
+                        <td className="p-4 text-[var(--color-text-muted)]">
+                          {item.nameEnglish}
                         </td>
                         <td className="p-4">
-                          <span
-                            className={`text-xs font-mono px-2 py-1 rounded ${
-                              isDark
-                                ? "bg-gray-700 text-gray-300"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {shiftHoursType.code || "N/A"}
+                          <span className="text-xs font-mono px-2 py-1 rounded bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text)]">
+                            {item.code || "N/A"}
                           </span>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-1">
-                            <Clock size={14} className="text-gray-500" />
-                            <span
-                              className={`font-medium ${
-                                isDark ? "text-gray-300" : "text-gray-900"
-                              }`}
-                            >
-                              {formatHours(shiftHoursType.hoursCount)}h
+                            <Clock size={14} className="text-[var(--color-text-muted)]" />
+                            <span className="font-medium text-[var(--color-text)]">
+                              {formatHours(item.hoursCount)}h
                             </span>
                           </div>
                         </td>
                         <td className="p-4">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                              shiftHoursType.period === "daily"
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                : shiftHoursType.period === "weekly"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                            }`}
-                          >
-                            {getPeriodDisplay(shiftHoursType.period)}
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPeriodBadgeClass(item.period)}`}>
+                            {getPeriodDisplay(item.period)}
                           </span>
                         </td>
-
                         <td className="p-4">
-                          <div className="flex gap-2">
-                            <Link
-                              to={`/admin-panel/shift-hours-types/${shiftHoursType.id}`}
-                            >
-                              <button
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("shiftHoursTypes.actions.view")}
-                              >
+                          <div className="flex gap-1">
+                            <Link to={`/admin-panel/shift-hours-types/${item.id}`}>
+                              <ActionButton title={t("shiftHoursTypes.actions.view")}>
                                 <Eye size={16} />
-                              </button>
+                              </ActionButton>
                             </Link>
-                            <Link
-                              to={`/admin-panel/shift-hours-types/edit/${shiftHoursType.id}`}
-                            >
-                              <button
-                                className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors cursor-pointer"
-                                title={t("shiftHoursTypes.actions.edit")}
-                              >
+                            <Link to={`/admin-panel/shift-hours-types/edit/${item.id}`}>
+                              <ActionButton title={t("shiftHoursTypes.actions.edit")} tone="success">
                                 <Edit size={16} />
-                              </button>
+                              </ActionButton>
                             </Link>
-                            <button
-                              onClick={() => handleDeleteClick(shiftHoursType)}
-                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors cursor-pointer"
+                            <ActionButton
                               title={t("shiftHoursTypes.actions.delete")}
+                              tone="danger"
+                              onClick={() => handleDeleteClick(item)}
                             >
                               <Trash2 size={16} />
-                            </button>
+                            </ActionButton>
                           </div>
                         </td>
                       </tr>
@@ -816,50 +584,21 @@ function ShiftHours() {
             </div>
           </div>
 
-          {/* Mobile Table View (when toggled) */}
+          {/* ── Mobile Table (toggled) ── */}
           <div
-            className={`md:hidden ${showMobileTable ? "block" : "hidden"} ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            } rounded-lg shadow-sm border overflow-hidden`}
+            className={`md:hidden ${showMobileTable ? "block" : "hidden"} ${theme.card} overflow-hidden`}
           >
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr
-                    className={`border-b ${
-                      isDark
-                        ? "border-gray-700 bg-gray-750"
-                        : "border-gray-200 bg-gray-50"
-                    }`}
-                  >
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                  <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                    <th className="text-center p-2 font-semibold text-[var(--color-text)]">
                       {t("shiftHoursTypes.table.name")}
                     </th>
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                    <th className="text-center p-2 font-semibold text-[var(--color-text)]">
                       {t("shiftHoursTypes.table.hours")}
                     </th>
-
-                    <th
-                      className={`${
-                        isRTL ? "text-right" : "text-left"
-                      } p-2 font-semibold ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
+                    <th className="text-center p-2 font-semibold text-[var(--color-text)]">
                       {t("shiftHoursTypes.table.actions")}
                     </th>
                   </tr>
@@ -867,102 +606,60 @@ function ShiftHours() {
                 <tbody>
                   {loadingGetShiftHoursTypes ? (
                     <tr>
-                      <td colSpan="4" className="text-center p-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          <span
-                            className={`${isRTL ? "mr-2" : "ml-2"} text-sm ${
-                              isDark ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {t("gettingData.shiftHourData")}
-                          </span>
-                        </div>
+                      <td colSpan="3">
+                        <LoadingState small />
                       </td>
                     </tr>
                   ) : !shiftHoursTypes || shiftHoursTypes.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan="4"
-                        className={`text-center p-8 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        {t("shiftHoursTypes.noData")}
+                      <td colSpan="3">
+                        <EmptyState compact />
                       </td>
                     </tr>
                   ) : (
-                    shiftHoursTypes.map((shiftHoursType) => (
+                    shiftHoursTypes.map((item) => (
                       <tr
-                        key={shiftHoursType.id}
-                        className={`border-b transition-colors ${
-                          isDark
-                            ? "border-gray-700 hover:bg-gray-750"
-                            : "border-gray-200 hover:bg-gray-50"
-                        }`}
+                        key={item.id}
+                        className="border-b border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
                       >
                         <td className="p-2">
-                          <div>
-                            <div
-                              className={`font-semibold ${
-                                isDark ? "text-white" : "text-gray-900"
-                              }`}
-                            >
-                              {language === "ar"
-                                ? shiftHoursType.nameArabic
-                                : shiftHoursType.nameEnglish}
-                            </div>
-                            <div
-                              className={`text-xs ${
-                                isDark ? "text-gray-400" : "text-gray-500"
-                              }`}
-                            >
-                              {shiftHoursType.code || "N/A"}
-                            </div>
+                          <div className="font-semibold text-xs text-[var(--color-text)]">
+                            {language === "ar" ? item.nameArabic : item.nameEnglish}
+                          </div>
+                          <div className="text-xs text-[var(--color-text-muted)]">
+                            {item.code || "N/A"}
                           </div>
                         </td>
                         <td className="p-2">
                           <div className="flex items-center gap-1">
-                            <Clock size={12} className="text-gray-500" />
-                            <span
-                              className={`text-sm font-medium ${
-                                isDark ? "text-gray-300" : "text-gray-900"
-                              }`}
-                            >
-                              {formatHours(shiftHoursType.hoursCountCount)}h
+                            <Clock size={12} className="text-[var(--color-text-muted)]" />
+                            <span className="text-sm font-medium text-[var(--color-text)]">
+                              {formatHours(item.hoursCountCount)}h
                             </span>
                           </div>
-                          <div
-                            className={`text-xs ${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            {getPeriodDisplay(shiftHoursType.period)}
+                          <div className="text-xs text-[var(--color-text-muted)]">
+                            {getPeriodDisplay(item.period)}
                           </div>
                         </td>
-
                         <td className="p-2">
-                          <div className="flex gap-1">
-                            <Link
-                              to={`/admin-panel/shift-hours-types/${shiftHoursType.id}`}
-                            >
-                              <button className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded transition-colors cursor-pointer">
+                          <div className="flex gap-1 justify-center">
+                            <Link to={`/admin-panel/shift-hours-types/${item.id}`}>
+                              <ActionButton title={t("shiftHoursTypes.actions.view")}>
                                 <Eye size={14} />
-                              </button>
+                              </ActionButton>
                             </Link>
-                            <Link
-                              to={`/admin-panel/shift-hours-types/edit/${shiftHoursType.id}`}
-                            >
-                              <button className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded transition-colors cursor-pointer">
+                            <Link to={`/admin-panel/shift-hours-types/edit/${item.id}`}>
+                              <ActionButton title={t("shiftHoursTypes.actions.edit")} tone="success">
                                 <Edit size={14} />
-                              </button>
+                              </ActionButton>
                             </Link>
-                            <button
-                              className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors cursor-pointer"
-                              onClick={() => handleDeleteClick(shiftHoursType)}
+                            <ActionButton
+                              title={t("shiftHoursTypes.actions.delete")}
+                              tone="danger"
+                              onClick={() => handleDeleteClick(item)}
                             >
                               <Trash2 size={14} />
-                            </button>
+                            </ActionButton>
                           </div>
                         </td>
                       </tr>
@@ -973,49 +670,30 @@ function ShiftHours() {
             </div>
           </div>
 
-          {/* Pagination */}
+          {/* ── Pagination ── */}
           {pagination && pagination.totalPages > 1 && (
-            <div
-              className={`border-t p-4 mt-6 ${
-                isDark
-                  ? "bg-gray-800 border-gray-700"
-                  : "bg-white border-gray-200"
-              } rounded-lg`}
-            >
+            <div className={`${theme.card} p-4 mt-6`}>
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex flex-col sm:flex-row items-center gap-4 text-sm">
-                  <span
-                    className={`${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
+                  <span className="text-[var(--color-text-muted)]">
                     {t("shiftHoursTypes.pagination.showing")}{" "}
                     {(pagination.page - 1) * pagination.pageSize + 1} -{" "}
-                    {Math.min(
-                      pagination.page * pagination.pageSize,
-                      pagination.totalCount
-                    )}{" "}
+                    {Math.min(pagination.page * pagination.pageSize, pagination.totalCount)}{" "}
                     {t("shiftHoursTypes.pagination.of")} {pagination.totalCount}{" "}
                     {t("shiftHoursTypes.pagination.items")}
                   </span>
+
                   <div className="flex items-center gap-2">
                     <select
                       value={pagination.pageSize}
                       onChange={(e) => handlePageSizeChange(e.target.value)}
-                      className={`p-1 border rounded text-sm ${
-                        isDark
-                          ? "border-gray-600 bg-gray-700 text-white"
-                          : "border-gray-300 bg-white text-gray-900"
-                      }`}
+                      className={`p-1 text-sm ${theme.input}`}
                     >
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="20">20</option>
-                      <option value="50">50</option>
+                      {[5, 10, 20, 50].map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
                     </select>
-                    <span
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
+                    <span className="text-[var(--color-text-muted)]">
                       {t("shiftHoursTypes.pagination.itemsPerPage")}
                     </span>
                   </div>
@@ -1025,11 +703,8 @@ function ShiftHours() {
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={!pagination.hasPreviousPage}
-                    className={`p-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                      isDark
-                        ? "border-gray-600 hover:bg-gray-700"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -1038,13 +713,12 @@ function ShiftHours() {
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      className={`px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm cursor-pointer ${
+                      className={`px-2 sm:px-3 py-2 rounded-lg transition-colors text-sm border ${
                         pageNum === pagination.page
-                          ? "bg-blue-600 text-white"
-                          : isDark
-                          ? "border border-gray-600 hover:bg-gray-700 text-gray-300"
-                          : "border border-gray-300 hover:bg-gray-50 text-gray-700"
+                          ? selectedButtonClass
+                          : "border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] text-[var(--color-text)]"
                       }`}
+                      type="button"
                     >
                       {pageNum}
                     </button>
@@ -1053,11 +727,8 @@ function ShiftHours() {
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={!pagination.hasNextPage}
-                    className={`p-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                      isDark
-                        ? "border-gray-600 hover:bg-gray-700"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
                   >
                     <ChevronLeft size={16} />
                   </button>

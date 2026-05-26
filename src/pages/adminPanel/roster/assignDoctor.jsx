@@ -38,37 +38,37 @@ const WORKLOAD_THRESHOLDS = {
 }
 
 const iconColors = {
-  assign: "text-purple-600 dark:text-purple-400",
-  clock: "text-blue-600 dark:text-blue-400",
-  search: "text-blue-600 dark:text-blue-400",
-  calendar: "text-blue-600 dark:text-blue-400",
-  users: "text-blue-600 dark:text-blue-400",
-  building: "text-green-600 dark:text-green-400",
-  briefcase: "text-purple-600 dark:text-purple-400",
-  award: "text-orange-600 dark:text-orange-400",
-  success: "text-green-600 dark:text-green-400",
-  warning: "text-yellow-600 dark:text-yellow-400",
-  danger: "text-red-600 dark:text-red-400",
+  assign: "text-violet-500 dark:text-violet-500",
+  clock: "text-blue-500 dark:text-blue-500",
+  search: "text-blue-500 dark:text-blue-500",
+  calendar: "text-blue-500 dark:text-blue-500",
+  users: "text-blue-500 dark:text-blue-500",
+  building: "text-emerald-500 dark:text-emerald-500",
+  briefcase: "text-violet-500 dark:text-violet-500",
+  award: "text-orange-500 dark:text-orange-500",
+  success: "text-emerald-500 dark:text-emerald-500",
+  warning: "text-amber-500 dark:text-amber-500",
+  danger: "text-red-500 dark:text-red-500",
   muted: "text-[var(--color-text-muted)]",
 }
 
 const iconBg = {
-  assign: "bg-purple-100 dark:bg-purple-900/30",
-  clock: "bg-blue-100 dark:bg-blue-900/30",
-  search: "bg-blue-100 dark:bg-blue-900/30",
-  users: "bg-blue-100 dark:bg-blue-900/30",
+  assign: "bg-transparent dark:bg-transparent",
+  clock: "bg-transparent dark:bg-transparent",
+  search: "bg-transparent dark:bg-transparent",
+  users: "bg-transparent dark:bg-transparent",
 }
 
 const getDoctorStatusColor = (doctor) => {
   if (!doctor.isAvailable) {
-    return "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20"
+    return "bg-transparent text-red-5000 border border-red-5000/20"
   }
 
   if (doctor.hasConflict) {
-    return "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20"
+    return "bg-transparent text-amber-5000 border border-amber-5000/20"
   }
 
-  return "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20"
+  return "bg-transparent text-emerald-5000 border border-emerald-5000/20"
 }
 
 const getDoctorStatusIcon = (doctor) => {
@@ -80,21 +80,21 @@ const getDoctorStatusIcon = (doctor) => {
 const getWorkloadColor = (percentage) => {
   if (percentage > WORKLOAD_THRESHOLDS.HIGH) {
     return {
-      text: "text-red-600 dark:text-red-400",
-      bg: "bg-red-500",
+      text: "text-red-500 dark:text-red-500",
+      bg: "bg-transparent0",
     }
   }
 
   if (percentage > WORKLOAD_THRESHOLDS.MEDIUM) {
     return {
-      text: "text-yellow-600 dark:text-yellow-400",
-      bg: "bg-yellow-500",
+      text: "text-amber-500 dark:text-amber-500",
+      bg: "bg-transparent0",
     }
   }
 
   return {
-    text: "text-green-600 dark:text-green-400",
-    bg: "bg-green-500",
+    text: "text-emerald-500 dark:text-emerald-500",
+    bg: "bg-transparent0",
   }
 }
 
@@ -160,7 +160,7 @@ const ConflictDetails = ({ doctor, showConflictDetails, onToggle, t }) => {
       <button
         type="button"
         onClick={onToggle}
-        className="text-xs underline text-yellow-600 dark:text-yellow-400 hover:opacity-80"
+        className="text-xs underline text-amber-500 dark:text-amber-500 hover:opacity-80"
       >
         {showConflictDetails
           ? t("roster.assign.hideConflicts")
@@ -168,7 +168,7 @@ const ConflictDetails = ({ doctor, showConflictDetails, onToggle, t }) => {
       </button>
 
       {showConflictDetails && (
-        <div className="mt-1 p-2 rounded-lg text-xs bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20">
+        <div className="mt-1 p-2 rounded-lg text-xs bg-transparent text-amber-5000 border border-amber-5000/20">
           {conflicts.map((conflict, index) => (
             <div
               key={index}
@@ -210,7 +210,7 @@ const DoctorCard = ({
     <div
       className={`border rounded-xl p-4 cursor-pointer transition-colors ${
         isSelected
-          ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)]"
+          ? "border-blue-5000 bg-transparent"
           : "border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-bg-soft)]"
       }`}
       onClick={handleClick}
@@ -292,7 +292,7 @@ const DoctorCard = ({
             type="radio"
             name="doctorId"
             value={doctor.doctorId}
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+            className="w-4 h-4 text-blue-500 bg-transparent border-slate-500 focus:ring-emerald-5000 focus:ring-2"
           />
         </div>
       </div>
@@ -425,31 +425,31 @@ const ShiftInfo = ({ workingHour, isRTL, t }) => {
 
           <div className="flex flex-wrap gap-2 mt-4">
             {workingHour.isFullyBooked && (
-              <span className="px-2 py-1 text-xs rounded-full bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger)]/20">
+              <span className="px-2 py-1 text-xs rounded-full bg-transparent text-red-5000 border border-red-5000/20">
                 {t("roster.fullyBooked")}
               </span>
             )}
 
             {workingHour.isOverBooked && (
-              <span className="px-2 py-1 text-xs rounded-full bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning)]/20">
+              <span className="px-2 py-1 text-xs rounded-full bg-transparent text-amber-5000 border border-amber-5000/20">
                 {t("roster.overBooked")}
               </span>
             )}
 
             {workingHour.remainingSlots > 0 && (
-              <span className="px-2 py-1 text-xs rounded-full bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success)]/20">
+              <span className="px-2 py-1 text-xs rounded-full bg-transparent text-emerald-5000 border border-emerald-5000/20">
                 {workingHour.remainingSlots} {t("roster.remainingSlots")}
               </span>
             )}
           </div>
 
           {workingHour.notes && (
-            <div className="mt-4 p-3 rounded-lg bg-[var(--color-info-soft)] border border-[var(--color-info)]/20">
-              <div className="text-sm font-semibold text-[var(--color-info)] mb-1">
+            <div className="mt-4 p-3 rounded-lg bg-transparent border border-[var(--color-info)]/20">
+              <div className="text-sm font-semibold text-blue-5000 mb-1">
                 {t("roster.assign.notes")}
               </div>
 
-              <div className="text-sm text-[var(--color-info)]">
+              <div className="text-sm text-blue-5000">
                 {workingHour.notes}
               </div>
             </div>
@@ -629,9 +629,9 @@ function AssignDoctor() {
         <div className="max-w-6xl mx-auto">
           <div className={`${theme.card} p-6`}>
             <div className="text-center py-12">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <AlertCircle className="h-12 w-12 text-red-5000 mx-auto mb-4" />
 
-              <div className="text-red-500 text-lg mb-4">
+              <div className="text-red-5000 text-lg mb-4">
                 {errors.workingHours || errors.availableDoctors}
               </div>
 
@@ -745,7 +745,7 @@ function AssignDoctor() {
                     <ErrorMessage
                       name="doctorId"
                       component="div"
-                      className="text-sm text-[var(--color-danger)] mt-2"
+                      className="text-sm text-red-5000 mt-2"
                     />
                   </div>
 
@@ -770,7 +770,7 @@ function AssignDoctor() {
                     <ErrorMessage
                       name="notes"
                       component="div"
-                      className="mt-1 text-sm text-[var(--color-danger)]"
+                      className="mt-1 text-sm text-red-5000"
                     />
 
                     <p className="mt-1 text-xs text-[var(--color-text-muted)]">
@@ -798,7 +798,7 @@ function AssignDoctor() {
                         type="checkbox"
                         id="overrideConflicts"
                         name="overrideConflicts"
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-0.5"
+                        className="w-4 h-4 text-blue-500 bg-transparent border-slate-500 rounded focus:ring-emerald-5000 focus:ring-2 mt-0.5"
                       />
                     </div>
                   </div>

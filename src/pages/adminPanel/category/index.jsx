@@ -215,29 +215,29 @@ function Category() {
     "px-4 py-4 text-sm text-[var(--color-text)] border-b border-[var(--color-border)] align-middle"
 
   const defaultButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)] transition-colors"
 
   const dangerIconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-red-500 transition-colors"
 
   const iconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 transition-colors"
 
 
   const SummaryCard = ({ icon: Icon, title, value, tone = "blue" }) => {
     const toneMap = {
       blue:
-        "bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20",
+        "bg-transparent text-blue-500 border border-blue-500",
       green:
-        "bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]",
+        "bg-transparent text-emerald-500 border border-emerald-500",
       red:
-        "bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]",
+        "bg-transparent text-red-500 border border-red-500",
       yellow:
-        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
+        "bg-transparent text-amber-500 border border-amber-500",
       purple:
-        "bg-[var(--color-purple-soft)] text-[var(--color-purple)] border border-[var(--color-purple-border)]",
+        "bg-transparent text-violet-500 border border-violet-500",
       orange:
-        "bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]",
+        "bg-transparent text-amber-500 border border-amber-500",
     }
 
     return (
@@ -279,7 +279,7 @@ function Category() {
     <div className={`${theme.card} p-4`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-start gap-3">
-          <div className="w-11 h-11 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl bg-transparent text-blue-500 flex items-center justify-center">
             <Stethoscope size={22} />
           </div>
 
@@ -301,7 +301,7 @@ function Category() {
 
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Building className="w-4 h-4 mx-auto mb-1 text-[var(--color-primary)]" />
+          <Building className="w-4 h-4 mx-auto mb-1 text-blue-500" />
           <p className="font-bold text-[var(--color-text)]">
             {category.departmentsCount ?? 0}
           </p>
@@ -311,7 +311,7 @@ function Category() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Users className="w-4 h-4 mx-auto mb-1 text-[var(--color-success)]" />
+          <Users className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
           <p className="font-bold text-[var(--color-text)]">
             {getUsersCount(category)}
           </p>
@@ -321,7 +321,7 @@ function Category() {
         </div>
 
         <div className={`${theme.cardSoft} p-3 text-center`}>
-          <Clock className="w-4 h-4 mx-auto mb-1 text-[var(--color-warning)]" />
+          <Clock className="w-4 h-4 mx-auto mb-1 text-amber-500" />
           <p className="font-bold text-[var(--color-text)]">
             {getPendingCount(category)}
           </p>
@@ -390,7 +390,7 @@ function Category() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-extrabold text-[var(--color-text)] flex items-center gap-3">
-              <span className="w-12 h-12 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+              <span className="w-12 h-12 rounded-2xl bg-transparent text-blue-500 flex items-center justify-center">
                 <Stethoscope className="w-7 h-7" />
               </span>
               {t("categories.title") || "Categories"}
@@ -423,16 +423,16 @@ function Category() {
         </div>
 
         {error && (
-          <div className="p-4 mb-5 rounded-2xl bg-[var(--color-danger-soft)] text-[var(--color-danger)] border border-[var(--color-danger-border)]">
+          <div className="p-4 mb-5 rounded-2xl bg-transparent text-red-500 border border-red-500">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[var(--color-danger)] text-sm font-semibold">
+              <p className="text-red-500 text-sm font-semibold">
                 {error.message || String(error)}
               </p>
 
               <button
                 type="button"
                 onClick={() => dispatch(clearError())}
-                className="text-[var(--color-danger)]"
+                className="text-red-500"
               >
                 <X size={18} />
               </button>
@@ -496,7 +496,7 @@ function Category() {
                 placeholder={t("categories.search.placeholder") || "Search categories..."}
                 value={searchInput}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-soft)] focus:border-[var(--color-primary)]"
+                className="w-full px-4 py-3 rounded-xl bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-success)]/20 focus:border-blue-500"
               />
             </div>
 
@@ -674,7 +674,7 @@ function Category() {
 
                       <td className={`${tableCellClass}`}>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-xl bg-transparent text-blue-500 flex items-center justify-center">
                             <Stethoscope size={20} />
                           </div>
 
@@ -695,7 +695,7 @@ function Category() {
 
                       <td className={`${tableCellClass} text-center`}>
                         <Link to={`/admin-panel/category/${category.id}`}>
-                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/25">
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-transparent text-blue-500 border border-blue-500">
                             <Building size={13} />
                             {category.departmentsCount ?? 0}
                           </span>
@@ -704,7 +704,7 @@ function Category() {
 
                       <td className={`${tableCellClass} text-center`}>
                         <Link to={`/admin-panel/category/${category.id}`}>
-                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-success-soft)] text-[var(--color-success)] border border-[var(--color-success-border)]">
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-transparent text-emerald-500 border border-emerald-500">
                             <Users size={13} />
                             {getUsersCount(category)}
                           </span>
@@ -713,7 +713,7 @@ function Category() {
 
                       <td className={`${tableCellClass} text-center`}>
                         <Link to={`/admin-panel/category/${category.id}`}>
-                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-warning-soft)] text-[var(--color-warning)] border border-[var(--color-warning-border)]">
+                          <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-transparent text-amber-500 border border-amber-500">
                             <Clock size={13} />
                             {getPendingCount(category)}
                           </span>
@@ -724,7 +724,7 @@ function Category() {
                         <div className="flex items-center gap-2">
                           <UserCheck
                             size={16}
-                            className="text-[var(--color-purple)]"
+                            className="text-violet-500"
                           />
                           <span className="text-[var(--color-text-muted)]">
                             {getChiefName(category)}
@@ -832,8 +832,8 @@ function Category() {
                     onClick={() => handlePageChange(pageNum)}
                     className={`px-3 py-2 rounded-lg border transition-colors ${
                       pageNum === pagination.page
-                        ? "bg-[var(--color-success)] text-white border-[var(--color-success)]"
-                        : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
+                        ? "bg-[var(--color-success)] text-white border-emerald-500"
+                        : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500"
                     }`}
                   >
                     {pageNum}
@@ -860,7 +860,7 @@ function Category() {
 function LoadingBlock({ text }) {
   return (
     <div className="flex items-center justify-center gap-3 py-8 text-[var(--color-text-muted)]">
-      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[var(--color-primary)]" />
+      <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-500" />
       <span className="text-sm font-semibold">{text}</span>
     </div>
   )

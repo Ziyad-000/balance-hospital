@@ -35,10 +35,10 @@ function RosterAttendanceTab({
     "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border transition-colors"
 
   const viewButtonActive =
-    "bg-[var(--color-success)] text-white border-[var(--color-success)] shadow-sm"
+    "bg-[var(--color-success)] text-white border-emerald-500 shadow-sm"
 
   const viewButtonInactive =
-    "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
+    "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500"
 
   const totals = useMemo(() => {
     const base = {
@@ -112,9 +112,9 @@ function RosterAttendanceTab({
     ) {
       return {
         label: currentLang === "ar" ? "حاضر" : "Present",
-        bg: "bg-emerald-200 dark:bg-emerald-700/70",
-        text: "text-emerald-950 dark:text-white",
-        border: "border-emerald-500 dark:border-emerald-400",
+        bg: "bg-transparent dark:bg-transparent",
+        text: "text-emerald-500 dark:text-emerald-500",
+        border: "border-emerald-500 dark:border-emerald-500",
         ring: "shadow-[0_0_0_1px_rgba(16,185,129,0.25)]",
       }
     }
@@ -122,9 +122,9 @@ function RosterAttendanceTab({
     if (value.includes("late")) {
       return {
         label: currentLang === "ar" ? "متأخر" : "Late",
-        bg: "bg-amber-200 dark:bg-amber-700/70",
-        text: "text-amber-950 dark:text-white",
-        border: "border-amber-500 dark:border-amber-400",
+        bg: "bg-transparent dark:bg-transparent",
+        text: "text-amber-500 dark:text-amber-500",
+        border: "border-amber-500 dark:border-amber-500",
         ring: "shadow-[0_0_0_1px_rgba(245,158,11,0.25)]",
       }
     }
@@ -132,9 +132,9 @@ function RosterAttendanceTab({
     if (value.includes("absent")) {
       return {
         label: currentLang === "ar" ? "غائب" : "Absent",
-        bg: "bg-red-200 dark:bg-red-700/70",
-        text: "text-red-950 dark:text-white",
-        border: "border-red-500 dark:border-red-400",
+        bg: "bg-transparent dark:bg-transparent",
+        text: "text-red-500 dark:text-red-500",
+        border: "border-red-500 dark:border-red-500",
         ring: "shadow-[0_0_0_1px_rgba(239,68,68,0.25)]",
       }
     }
@@ -142,9 +142,9 @@ function RosterAttendanceTab({
     if (value.includes("early")) {
       return {
         label: currentLang === "ar" ? "خروج مبكر" : "Early",
-        bg: "bg-orange-200 dark:bg-orange-700/70",
-        text: "text-orange-950 dark:text-white",
-        border: "border-orange-500 dark:border-orange-400",
+        bg: "bg-transparent dark:bg-transparent",
+        text: "text-orange-500 dark:text-orange-500",
+        border: "border-orange-500 dark:border-orange-500",
         ring: "shadow-[0_0_0_1px_rgba(249,115,22,0.25)]",
       }
     }
@@ -152,18 +152,18 @@ function RosterAttendanceTab({
     if (value.includes("exception") || value.includes("excused")) {
       return {
         label: currentLang === "ar" ? "استثناء" : "Exception",
-        bg: "bg-violet-200 dark:bg-violet-700/70",
-        text: "text-violet-950 dark:text-white",
-        border: "border-violet-500 dark:border-violet-400",
+        bg: "bg-transparent dark:bg-transparent",
+        text: "text-violet-500 dark:text-violet-500",
+        border: "border-violet-500 dark:border-violet-500",
         ring: "shadow-[0_0_0_1px_rgba(139,92,246,0.25)]",
       }
     }
 
     return {
       label: currentLang === "ar" ? "لا يوجد" : "No Record",
-      bg: "bg-slate-200 dark:bg-slate-700",
-      text: "text-slate-900 dark:text-slate-100",
-      border: "border-slate-400 dark:border-slate-500",
+      bg: "bg-transparent dark:bg-transparent",
+      text: "text-slate-500 dark:text-slate-500",
+      border: "border-slate-500 dark:border-slate-500",
       ring: "shadow-[0_0_0_1px_rgba(100,116,139,0.18)]",
     }
   }
@@ -205,28 +205,22 @@ function RosterAttendanceTab({
   const SummaryCard = ({ icon: Icon, title, value, tone }) => {
     const toneMap = {
       blue: {
-        box: "bg-blue-200 text-blue-900 border-blue-400 dark:bg-blue-700/70 dark:text-white dark:border-blue-400",
-        icon: "bg-blue-600 text-white dark:bg-blue-500",
+        box: "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
       },
       green: {
-        box: "bg-emerald-200 text-emerald-950 border-emerald-500 dark:bg-emerald-700/70 dark:text-white dark:border-emerald-400",
-        icon: "bg-emerald-600 text-white dark:bg-emerald-500",
+        box: "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
       },
       red: {
-        box: "bg-red-200 text-red-950 border-red-500 dark:bg-red-700/70 dark:text-white dark:border-red-400",
-        icon: "bg-red-600 text-white dark:bg-red-500",
+        box: "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
       },
       yellow: {
-        box: "bg-amber-200 text-amber-950 border-amber-500 dark:bg-amber-700/70 dark:text-white dark:border-amber-400",
-        icon: "bg-amber-600 text-white dark:bg-amber-500",
+        box: "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
       },
       orange: {
-        box: "bg-orange-200 text-orange-950 border-orange-500 dark:bg-orange-700/70 dark:text-white dark:border-orange-400",
-        icon: "bg-orange-600 text-white dark:bg-orange-500",
+        box: "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
       },
       purple: {
-        box: "bg-violet-200 text-violet-950 border-violet-500 dark:bg-violet-700/70 dark:text-white dark:border-violet-400",
-        icon: "bg-violet-600 text-white dark:bg-violet-500",
+        box: "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
       },
     }
 
@@ -248,13 +242,9 @@ function RosterAttendanceTab({
           </div>
 
           <div
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-sm ${selectedTone.box}`}
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-2 shadow-sm ${selectedTone.box}`}
           >
-            <div
-              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${selectedTone.icon}`}
-            >
-              <Icon className="w-5 h-5 shrink-0" />
-            </div>
+            <Icon className="w-5 h-5 shrink-0" />
           </div>
         </div>
       </div>
@@ -279,17 +269,17 @@ function RosterAttendanceTab({
   const LegendBadge = ({ code, label, tone }) => {
     const toneMap = {
       green:
-        "bg-emerald-200 text-emerald-950 border-emerald-500 dark:bg-emerald-700/70 dark:text-white dark:border-emerald-400",
+        "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
       yellow:
-        "bg-amber-200 text-amber-950 border-amber-500 dark:bg-amber-700/70 dark:text-white dark:border-amber-400",
+        "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
       red:
-        "bg-red-200 text-red-950 border-red-500 dark:bg-red-700/70 dark:text-white dark:border-red-400",
+        "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
       orange:
-        "bg-orange-200 text-orange-950 border-orange-500 dark:bg-orange-700/70 dark:text-white dark:border-orange-400",
+        "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
       purple:
-        "bg-violet-200 text-violet-950 border-violet-500 dark:bg-violet-700/70 dark:text-white dark:border-violet-400",
+        "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
       slate:
-        "bg-slate-200 text-slate-900 border-slate-400 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500",
+        "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
     }
 
     return (
@@ -321,7 +311,7 @@ function RosterAttendanceTab({
   if (error) {
     return (
       <div className={`${theme.card} p-8 text-center`}>
-        <AlertCircle className="w-14 h-14 mx-auto mb-4 text-red-700 dark:text-red-300" />
+        <AlertCircle className="w-14 h-14 mx-auto mb-4 text-red-500 dark:text-red-500" />
         <h3 className="text-xl font-bold text-[var(--color-text)]">
           {currentLang === "ar"
             ? "تعذر تحميل تقرير الحضور"
@@ -337,7 +327,7 @@ function RosterAttendanceTab({
   if (!rows.length) {
     return (
       <div className={`${theme.card} p-8 text-center`}>
-        <Activity className="w-14 h-14 mx-auto mb-4 text-blue-700 dark:text-blue-300" />
+        <Activity className="w-14 h-14 mx-auto mb-4 text-blue-500 dark:text-blue-500" />
         <h3 className="text-xl font-bold text-[var(--color-text)]">
           {currentLang === "ar"
             ? "لا توجد بيانات حضور لهذا الروستر"
@@ -358,7 +348,7 @@ function RosterAttendanceTab({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
           <div>
             <h2 className="text-2xl font-black text-[var(--color-text)] flex items-center gap-2">
-              <Activity className="w-7 h-7 shrink-0 text-violet-700 dark:text-violet-300" />
+              <Activity className="w-7 h-7 shrink-0 text-violet-500 dark:text-violet-500" />
               {currentLang === "ar" ? "حضور الروستر" : "Roster Attendance"}
             </h2>
 

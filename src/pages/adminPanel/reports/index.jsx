@@ -121,109 +121,92 @@ function Reports() {
   const [dateRangeError, setDateRangeError] = useState("")
 
   const primaryActionButton =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 active:bg-[var(--color-success-hover)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
 
   const selectedActionButton =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border bg-[var(--color-success)] text-white border-[var(--color-success)] shadow-sm transition-colors"
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold border bg-[var(--color-success)] text-white border-emerald-500 shadow-sm transition-colors"
 
   const smallActionButton =
-    "inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-xs font-extrabold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const iconButton =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors cursor-pointer"
+    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 transition-colors cursor-pointer"
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-success)]/20 focus:border-[var(--color-success)] transition-colors"
+    "w-full px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-success)]/20 focus:border-emerald-500 transition-colors"
 
   const labelClass =
     "block text-xs font-black text-[var(--color-text)] mb-1.5"
 
   const iconColors = {
     calendar: "text-blue-500 dark:text-blue-500",
-    filter: "text-blue-100 dark:text-blue-500",
-    view: "text-blue-800 dark:text-blue-500",
-    users: "text-blue-800 dark:text-blue-500",
-    building: "text-emerald-800 dark:text-emerald-500",
-    briefcase: "text-violet-800 dark:text-violet-500",
-    degree: "text-orange-800 dark:text-orange-500",
-    user: "text-blue-800 dark:text-blue-500",
-    phone: "text-emerald-800 dark:text-emerald-500",
-    hash: "text-slate-800 dark:text-slate-500",
-    id: "text-cyan-800 dark:text-cyan-500",
-    file: "text-slate-800 dark:text-slate-500",
-    refresh: "text-slate-800 dark:text-slate-500",
-    danger: "text-red-800 dark:text-red-500",
-    success: "text-emerald-800 dark:text-emerald-500",
-    warning: "text-amber-800 dark:text-amber-500",
-    muted: "text-slate-700 dark:text-slate-300",
-    chart: "text-blue-800 dark:text-blue-500",
-    activity: "text-violet-800 dark:text-violet-500",
+    filter: "text-blue-500 dark:text-blue-500",
+    view: "text-blue-500 dark:text-blue-500",
+    users: "text-blue-500 dark:text-blue-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    briefcase: "text-violet-500 dark:text-violet-500",
+    degree: "text-orange-500 dark:text-orange-500",
+    user: "text-blue-500 dark:text-blue-500",
+    phone: "text-cyan-500 dark:text-cyan-500",
+    hash: "text-slate-500 dark:text-slate-500",
+    id: "text-cyan-500 dark:text-cyan-500",
+    file: "text-slate-500 dark:text-slate-500",
+    refresh: "text-slate-500 dark:text-slate-500",
+    danger: "text-red-500 dark:text-red-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    warning: "text-amber-500 dark:text-amber-500",
+    muted: "text-slate-500 dark:text-slate-500",
+    chart: "text-violet-500 dark:text-violet-500",
+    activity: "text-violet-500 dark:text-violet-500",
   }
 
   const iconBg = {
-    calendar:
-      "bg-blue-200 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
-    filter:
-      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
-    view:
-      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
-    users:
-      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
-    building:
-      "bg-emerald-100 dark:bg-emerald-900/5 border border-emerald-300 dark:border-emerald-700",
-    briefcase:
-      "bg-violet-100 dark:bg-violet-900/5 border border-violet-300 dark:border-violet-700",
-    degree:
-      "bg-orange-100 dark:bg-orange-900/5 border border-orange-300 dark:border-orange-700",
-    user:
-      "bg-blue-100 dark:bg-blue-900/5 border border-blue-300 dark:border-blue-700",
-    phone:
-      "bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-700",
-    hash:
-      "bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600",
-    id: "bg-cyan-100 dark:bg-cyan-900/50 border border-cyan-300 dark:border-cyan-700",
-    file:
-      "bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600",
-    refresh:
-      "bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-600",
-    danger:
-      "bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700",
-    success:
-      "bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-700",
-    warning:
-      "bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700",
-    chart:
-      "bg-blue-100 dark:bg-blue-900/50 border border-blue-300 dark:border-blue-700",
-    activity:
-      "bg-violet-100 dark:bg-violet-900/50 border border-violet-300 dark:border-violet-700",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    filter: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    view: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    users: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    building: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    briefcase: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    degree: "bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500",
+    user: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    phone: "bg-transparent dark:bg-transparent border-2 border-cyan-500 dark:border-cyan-500",
+    hash: "bg-transparent dark:bg-transparent border-2 border-slate-500 dark:border-slate-500",
+    id: "bg-transparent dark:bg-transparent border-2 border-cyan-500 dark:border-cyan-500",
+    file: "bg-transparent dark:bg-transparent border-2 border-slate-500 dark:border-slate-500",
+    refresh: "bg-transparent dark:bg-transparent border-2 border-slate-500 dark:border-slate-500",
+    danger: "bg-transparent dark:bg-transparent border-2 border-red-500 dark:border-red-500",
+    success: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    warning: "bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500",
+    chart: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    activity: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
   }
 
   const shiftPalette = [
   {
     bg: "bg-blue-50 dark:bg-blue-950/40",
     border: "border-blue-400 dark:border-blue-600",
-    text: "text-blue-950 dark:text-blue-100",
+    text: "text-blue-500 dark:text-blue-500",
     badge: "bg-blue-700 dark:bg-blue-500",
     ring: "ring-blue-200 dark:ring-blue-800",
   },
   {
     bg: "bg-emerald-50 dark:bg-emerald-950/40",
     border: "border-emerald-400 dark:border-emerald-600",
-    text: "text-emerald-950 dark:text-emerald-100",
+    text: "text-emerald-500 dark:text-emerald-100",
     badge: "bg-emerald-700 dark:bg-emerald-500",
     ring: "ring-emerald-200 dark:ring-emerald-800",
   },
   {
     bg: "bg-violet-50 dark:bg-violet-950/40",
     border: "border-violet-400 dark:border-violet-600",
-    text: "text-violet-950 dark:text-violet-100",
+    text: "text-violet-500 dark:text-violet-100",
     badge: "bg-violet-700 dark:bg-violet-500",
     ring: "ring-violet-200 dark:ring-violet-800",
   },
   {
     bg: "bg-amber-50 dark:bg-amber-950/40",
     border: "border-amber-400 dark:border-amber-600",
-    text: "text-amber-950 dark:text-amber-100",
+    text: "text-amber-500 dark:text-amber-100",
     badge: "bg-amber-700 dark:bg-amber-500",
     ring: "ring-amber-200 dark:ring-amber-800",
   },
@@ -504,39 +487,39 @@ function Reports() {
   const SummaryCard = ({ title, value, tone, icon: Icon }) => {
     const toneMap = {
       doctors: {
-        box: "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700",
+        box: "bg-transparent text-blue-500 border-blue-300 dark:bg-transparent dark:text-blue-500 dark:border-blue-700",
         icon: "bg-blue-600 text-white dark:bg-blue-500",
-        value: "text-blue-900 dark:text-blue-500",
+        value: "text-blue-500 dark:text-blue-500",
       },
       records: {
-        box: "bg-violet-100 text-violet-900 border-violet-300 dark:bg-violet-900/50 dark:text-violet-100 dark:border-violet-700",
+        box: "bg-transparent text-violet-500 border-violet-300 dark:bg-transparent dark:text-violet-100 dark:border-violet-700",
         icon: "bg-violet-600 text-white dark:bg-violet-500",
-        value: "text-violet-900 dark:text-violet-500",
+        value: "text-violet-500 dark:text-violet-500",
       },
       start: {
-        box: "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-700",
+        box: "bg-transparent text-emerald-500 border-emerald-300 dark:bg-transparent dark:text-emerald-100 dark:border-emerald-700",
         icon: "bg-emerald-600 text-white dark:bg-emerald-500",
-        value: "text-emerald-900 dark:text-emerald-500",
+        value: "text-emerald-500 dark:text-emerald-500",
       },
       end: {
-        box: "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-900/50 dark:text-orange-100 dark:border-orange-700",
+        box: "bg-transparent text-orange-500 border-orange-300 dark:bg-transparent dark:text-orange-100 dark:border-orange-700",
         icon: "bg-orange-600 text-white dark:bg-orange-500",
-        value: "text-orange-900 dark:text-orange-500",
+        value: "text-orange-500 dark:text-orange-500",
       },
       warning: {
-        box: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/50 dark:text-amber-100 dark:border-amber-700",
+        box: "bg-transparent text-amber-500 border-amber-300 dark:bg-amber-900/50 dark:text-amber-100 dark:border-amber-700",
         icon: "bg-amber-600 text-white dark:bg-amber-500",
-        value: "text-amber-900 dark:text-amber-500",
+        value: "text-amber-500 dark:text-amber-500",
       },
       chart: {
-        box: "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700",
+        box: "bg-transparent text-blue-500 border-blue-300 dark:bg-transparent dark:text-blue-500 dark:border-blue-700",
         icon: "bg-blue-600 text-white dark:bg-blue-500",
-        value: "text-blue-900 dark:text-blue-500",
+        value: "text-blue-500 dark:text-blue-500",
       },
       activity: {
-        box: "bg-violet-100 text-violet-900 border-violet-300 dark:bg-violet-900/50 dark:text-violet-100 dark:border-violet-700",
+        box: "bg-transparent text-violet-500 border-violet-300 dark:bg-transparent dark:text-violet-100 dark:border-violet-700",
         icon: "bg-violet-600 text-white dark:bg-violet-500",
-        value: "text-violet-900 dark:text-violet-500",
+        value: "text-violet-500 dark:text-violet-500",
       },
     }
 
@@ -667,7 +650,7 @@ function Reports() {
     if (attendanceSummaryError) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <FileText className="w-12 h-12 mx-auto mb-4 text-[var(--color-danger)]" />
+          <FileText className="w-12 h-12 mx-auto mb-4 text-red-500" />
 
           <h3 className="text-xl font-black text-[var(--color-text)]">
             {currentLang === "ar"
@@ -703,7 +686,7 @@ function Reports() {
       <div className="space-y-6">
         <div className={`${theme.card} p-6`}>
           <div className="flex items-center gap-3 mb-5">
-            <BarChart3 className="w-6 h-6 shrink-0 text-blue-800 dark:text-blue-200" />
+            <BarChart3 className="w-6 h-6 shrink-0 text-blue-500 dark:text-blue-200" />
 
             <h2 className="text-2xl font-black text-[var(--color-text)]">
               {currentLang === "ar" ? "ملخص الحضور" : "Attendance Summary"}
@@ -758,7 +741,7 @@ function Reports() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div className={`${theme.card} p-6`}>
             <h3 className="text-xl font-black text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <Building className="w-5 h-5 shrink-0 text-emerald-800 dark:text-emerald-200" />
+              <Building className="w-5 h-5 shrink-0 text-emerald-500 dark:text-emerald-200" />
               {currentLang === "ar" ? "إحصائيات الأقسام" : "Department Stats"}
             </h3>
 
@@ -806,7 +789,7 @@ function Reports() {
                         </td>
 
                         <td className="p-3 text-center">
-                          <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-700">
+                          <span className="px-3 py-1 rounded-full text-xs font-black bg-transparent text-emerald-500 border border-emerald-300 dark:bg-transparent dark:text-emerald-100 dark:border-emerald-700">
                             {item.attendanceRate ?? 0}%
                           </span>
                         </td>
@@ -830,7 +813,7 @@ function Reports() {
 
           <div className={`${theme.card} p-6`}>
             <h3 className="text-xl font-black text-[var(--color-text)] mb-4 flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 shrink-0 text-orange-800 dark:text-orange-200" />
+              <GraduationCap className="w-5 h-5 shrink-0 text-orange-500 dark:text-orange-200" />
               {currentLang === "ar"
                 ? "إحصائيات الدرجات العلمية"
                 : "Degree Stats"}
@@ -856,7 +839,7 @@ function Reports() {
                       </p>
                     </div>
 
-                    <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-transparent text-blue-500 border border-blue-300 dark:bg-transparent dark:text-blue-500 dark:border-blue-700">
                       {item.attendanceRate ?? 0}%
                     </span>
                   </div>
@@ -893,7 +876,7 @@ function Reports() {
     if (getReportsAttendError) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <Activity className="w-14 h-14 mx-auto mb-4 text-[var(--color-danger)]" />
+          <Activity className="w-14 h-14 mx-auto mb-4 text-red-500" />
 
           <h3 className="text-xl font-black text-[var(--color-text)] mb-2">
             {currentLang === "ar"
@@ -911,7 +894,7 @@ function Reports() {
     if (!rows.length) {
       return (
         <div className={`${theme.card} p-8 text-center`}>
-          <Activity className="w-14 h-14 mx-auto mb-4 text-blue-800 dark:text-blue-200" />
+          <Activity className="w-14 h-14 mx-auto mb-4 text-blue-500 dark:text-blue-200" />
 
           <h3 className="text-xl font-black text-[var(--color-text)] mb-2">
             {currentLang === "ar"
@@ -931,7 +914,7 @@ function Reports() {
     return (
       <div className={`${theme.card} p-6`}>
         <div className="flex items-center gap-3 mb-5">
-          <Activity className="w-6 h-6 shrink-0 text-violet-800 dark:text-violet-200" />
+          <Activity className="w-6 h-6 shrink-0 text-violet-500 dark:text-violet-200" />
 
           <div>
             <h2 className="text-2xl font-black text-[var(--color-text)]">
@@ -1008,16 +991,16 @@ function Reports() {
                     {row.totalScheduledDays ?? row.scheduledDays ?? "-"}
                   </td>
 
-                  <td className="p-3 text-center text-emerald-800 dark:text-emerald-200 font-black">
+                  <td className="p-3 text-center text-emerald-500 dark:text-emerald-200 font-black">
                     {row.totalWorkedDays ?? row.workedDays ?? "-"}
                   </td>
 
-                  <td className="p-3 text-center text-red-800 dark:text-red-200 font-black">
+                  <td className="p-3 text-center text-red-500 dark:text-red-200 font-black">
                     {row.totalAbsentDays ?? row.absentDays ?? "-"}
                   </td>
 
                   <td className="p-3 text-center">
-                    <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-900/50 dark:text-blue-100 dark:border-blue-700">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-transparent text-blue-500 border border-blue-300 dark:bg-transparent dark:text-blue-500 dark:border-blue-700">
                       {row.attendanceRate ?? row.averageAttendanceRate ?? 0}%
                     </span>
                   </td>
@@ -1406,16 +1389,16 @@ function Reports() {
             </div>
 
             {dateRangeError && (
-              <div className="mt-3 p-3 bg-[var(--color-danger-soft)] border border-[var(--color-danger)]/20 rounded-lg">
-                <p className="text-[var(--color-danger)] text-sm font-semibold">
+              <div className="mt-3 p-3 bg-transparent border border-red-500 rounded-lg">
+                <p className="text-red-500 text-sm font-semibold">
                   {dateRangeError}
                 </p>
               </div>
             )}
 
             {hasDateRangeFilter && (
-              <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-[var(--color-info-soft)] border border-[var(--color-info)]/20 rounded-lg">
-                <p className="text-[var(--color-info)] text-sm font-bold flex-1">
+              <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-transparent border border-blue-500 rounded-lg">
+                <p className="text-blue-500 text-sm font-bold flex-1">
                   {t("reports.showingDays") || "Showing days"}:{" "}
                   {appliedDateRange.startDay} - {appliedDateRange.endDay}
                 </p>
@@ -1483,7 +1466,7 @@ function Reports() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="px-3 py-1 rounded-full text-sm font-black bg-[var(--color-primary-soft)] text-[var(--color-primary)] border border-[var(--color-primary)]/20">
+                  <span className="px-3 py-1 rounded-full text-sm font-black bg-transparent text-blue-500 border border-blue-500">
                     {filters.page} / {totalPages || 1}
                   </span>
 
@@ -1689,7 +1672,7 @@ function Reports() {
                                   {t("reports.table.day") || "Day"}
                                 </span>
 
-                                <span className="text-blue-800 dark:text-blue-200 text-sm font-black">
+                                <span className="text-blue-500 dark:text-blue-200 text-sm font-black">
                                   {day}
                                 </span>
                               </div>

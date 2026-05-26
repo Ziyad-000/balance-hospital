@@ -23,25 +23,25 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
       case "approved":
         return {
           color:
-            "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+            "bg-transparent text-emerald-500 border border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
           icon: CheckCircle,
-          iconClass: "text-green-700 dark:text-green-300",
+          iconClass: "text-emerald-500 dark:text-emerald-500",
           text: t("doctorReport.leaveRecords.approved"),
         }
       case "pending":
         return {
           color:
-            "bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+            "bg-transparent text-amber-500 border border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
           icon: AlertCircle,
-          iconClass: "text-yellow-700 dark:text-yellow-300",
+          iconClass: "text-amber-500 dark:text-amber-500",
           text: t("doctorReport.leaveRecords.pending"),
         }
       case "rejected":
         return {
           color:
-            "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+            "bg-transparent text-red-500 border border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
           icon: XCircle,
-          iconClass: "text-red-700 dark:text-red-300",
+          iconClass: "text-red-500 dark:text-red-500",
           text: t("doctorReport.leaveRecords.rejected"),
         }
       default:
@@ -49,7 +49,7 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
           color:
             "bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]",
           icon: Clock,
-          iconClass: "text-slate-600 dark:text-slate-300",
+          iconClass: "text-slate-500 dark:text-slate-500",
           text: status,
         }
     }
@@ -71,7 +71,7 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Calendar className="w-5 h-5 text-blue-700 dark:text-blue-300 flex-shrink-0" />
+            <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-500 flex-shrink-0" />
 
             <div className="flex-1 min-w-0 text-start">
               <div className="font-bold text-[var(--color-text)] truncate">
@@ -94,9 +94,9 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
             </span>
 
             {isCollapsed ? (
-              <ChevronRight className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+              <ChevronRight className="h-5 w-5 text-slate-500 dark:text-slate-500" />
             ) : (
-              <ChevronDown className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+              <ChevronDown className="h-5 w-5 text-slate-500 dark:text-slate-500" />
             )}
           </div>
         </div>
@@ -107,14 +107,14 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InfoBox
               icon={Calendar}
-              iconClass="text-blue-700 dark:text-blue-300"
+              iconClass="text-blue-500 dark:text-blue-500"
               label={t("doctorReport.leaveRecords.startDate")}
               value={formatDate(leave.leaveDate)}
             />
 
             <InfoBox
               icon={Calendar}
-              iconClass="text-green-700 dark:text-green-300"
+              iconClass="text-emerald-500 dark:text-emerald-500"
               label={t("doctorReport.leaveRecords.endDate")}
               value={formatDate(leave.leaveEndDate)}
             />
@@ -122,7 +122,7 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
 
           <InfoBox
             icon={Clock}
-            iconClass="text-purple-700 dark:text-purple-300"
+            iconClass="text-violet-500 dark:text-violet-500"
             label={t("doctorReport.leaveRecords.duration")}
             value={`${leave.leaveDays} ${t("doctorReport.leaveRecords.days")}`}
           />
@@ -130,7 +130,7 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
           {leave.reason && (
             <InfoBox
               icon={FileText}
-              iconClass="text-orange-700 dark:text-orange-300"
+              iconClass="text-orange-500 dark:text-orange-500"
               label={t("doctorReport.leaveRecords.reason")}
               value={leave.reason}
               multiline
@@ -138,19 +138,19 @@ const CollapsibleLeaveCard = ({ leave, currentLang, t, formatDate }) => {
           )}
 
           {leave.status?.toLowerCase() === "approved" && leave.approvedAt && (
-            <div className="p-3 rounded-xl bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700">
+            <div className="p-3 rounded-xl bg-transparent dark:bg-transparent border border-emerald-500 dark:border-emerald-500">
               <div className="flex items-center gap-2 mb-1">
-                <User className="w-4 h-4 text-green-700 dark:text-green-300" />
-                <span className="text-xs font-bold text-green-800 dark:text-green-200">
+                <User className="w-4 h-4 text-emerald-500 dark:text-emerald-500" />
+                <span className="text-xs font-bold text-emerald-500 dark:text-emerald-500">
                   {t("doctorReport.leaveRecords.approvedBy")}
                 </span>
               </div>
 
-              <div className="text-sm font-bold text-green-800 dark:text-green-200">
+              <div className="text-sm font-bold text-emerald-500 dark:text-emerald-500">
                 {getLocalized(leave.approvedByNameAr, leave.approvedByName)}
               </div>
 
-              <div className="text-xs mt-1 text-green-700 dark:text-green-300">
+              <div className="text-xs mt-1 text-emerald-500 dark:text-emerald-500">
                 {new Date(leave.approvedAt).toLocaleDateString(
                   currentLang === "en" ? "en-US" : "ar-EG",
                   {
@@ -213,12 +213,12 @@ export const LeaveRecordsSection = ({
 
   const StatBox = ({ value, label, tone }) => {
     const tones = {
-      total: "bg-slate-100 text-slate-800 dark:bg-slate-800/80 dark:text-slate-200",
+      total: "bg-transparent text-slate-500 dark:bg-transparent dark:text-slate-500",
       approved:
-        "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200",
+        "bg-transparent text-emerald-500 dark:bg-transparent dark:text-emerald-500",
       pending:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200",
-      rejected: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200",
+        "bg-transparent text-amber-500 dark:bg-transparent dark:text-amber-500",
+      rejected: "bg-transparent text-red-500 dark:bg-transparent dark:text-red-500",
     }
 
     return (
@@ -233,7 +233,7 @@ export const LeaveRecordsSection = ({
     <div className={`${theme.card} p-6`}>
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <Calendar className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+          <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-500" />
 
           <h3 className="text-lg font-extrabold text-[var(--color-text)]">
             {t("doctorReport.leaveRecords.title")}
@@ -278,7 +278,7 @@ export const LeaveRecordsSection = ({
         </div>
       ) : (
         <div className="text-center py-8">
-          <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-500 dark:text-slate-300" />
+          <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-5000 dark:text-slate-500" />
           <p className="text-sm text-[var(--color-text-muted)]">
             {t("doctorReport.leaveRecords.noRecords")}
           </p>

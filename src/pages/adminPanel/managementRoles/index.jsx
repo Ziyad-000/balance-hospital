@@ -91,7 +91,7 @@ export default function ManagementRoles() {
       <div className="flex gap-2 justify-end">
         <Link to={`/admin-panel/management-roles/role/${role.value}`}>
           <button
-            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
+            className="p-2 rounded-lg border bg-transparent text-blue-500 border-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors cursor-pointer"
             title={t("managementRoles.actions.view") || "View"}
           >
             <Eye size={16} />
@@ -126,7 +126,7 @@ export default function ManagementRoles() {
                   onClick={() => setShowMobileTable(!showMobileTable)}
                   className={`md:hidden px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
                     showMobileTable
-                      ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900 dark:border-blue-600 dark:text-blue-300"
+                      ? "bg-transparent border-2 border-blue-500 text-blue-500 dark:bg-transparent dark:border-blue-500 dark:text-blue-500"
                       : `border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 ${
                           isDark ? "text-gray-300" : "text-gray-700"
                         }`
@@ -171,7 +171,7 @@ export default function ManagementRoles() {
                       ? roleStat.roleNameAr
                       : roleStat.roleNameEn}
                   </h3>
-                  <p className="text-xl text-blue-600">
+                  <p className="text-xl text-blue-500">
                     {roleStat.activeUsersCount}
                   </p>
                   <span className="text-xs text-gray-500">
@@ -197,7 +197,7 @@ export default function ManagementRoles() {
                         ? statistics.generalStatistics.totalActiveUsers.nameAr
                         : statistics.generalStatistics.totalActiveUsers.nameEn}
                     </h3>
-                    <p className="text-xl text-green-600">
+                    <p className="text-xl text-emerald-500">
                       {statistics.generalStatistics.totalActiveUsers.count}
                     </p>
                   </div>
@@ -216,7 +216,7 @@ export default function ManagementRoles() {
                         ? statistics.generalStatistics.usersWithoutRoles.nameAr
                         : statistics.generalStatistics.usersWithoutRoles.nameEn}
                     </h3>
-                    <p className="text-xl text-orange-600">
+                    <p className="text-xl text-orange-500">
                       {statistics.generalStatistics.usersWithoutRoles.count}
                     </p>
                   </div>
@@ -235,7 +235,7 @@ export default function ManagementRoles() {
                         ? statistics.generalStatistics.temporaryRoles.nameAr
                         : statistics.generalStatistics.temporaryRoles.nameEn}
                     </h3>
-                    <p className="text-xl text-purple-600">
+                    <p className="text-xl text-violet-500">
                       {statistics.generalStatistics.temporaryRoles.count}
                     </p>
                   </div>
@@ -254,7 +254,7 @@ export default function ManagementRoles() {
                         ? statistics.generalStatistics.permanentRoles.nameAr
                         : statistics.generalStatistics.permanentRoles.nameEn}
                     </h3>
-                    <p className="text-xl text-blue-600">
+                    <p className="text-xl text-blue-500">
                       {statistics.generalStatistics.permanentRoles.count}
                     </p>
                   </div>
@@ -420,7 +420,7 @@ export default function ManagementRoles() {
                               }`}
                             >
                               <button
-                                className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors cursor-pointer"
+                                className="p-2 rounded-lg border bg-transparent text-blue-500 border-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-colors cursor-pointer"
                                 title={
                                   t("managementRoles.actions.view") || "View"
                                 }
@@ -567,7 +567,7 @@ export default function ManagementRoles() {
                             >
                               <button
                                 tton
-                                className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded transition-colors cursor-pointer"
+                                className="p-1 text-blue-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 dark:hover:bg-blue-900 rounded transition-colors cursor-pointer"
                               >
                                 <Eye size={14} />
                               </button>

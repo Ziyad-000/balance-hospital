@@ -25,10 +25,8 @@ import {
   Sunrise,
   Sunset,
   Timer,
-  MapPin,
   AlertTriangle,
 } from "lucide-react"
-import i18next from "i18next"
 import { formatDate } from "../../../utils/formtDate"
 
 function SpecificShiftHoursType() {
@@ -45,10 +43,40 @@ function SpecificShiftHoursType() {
   const { mymode } = useSelector((state) => state.mode)
   const { t, i18n } = useTranslation()
 
-  // Get current language direction
   const isRTL = i18n.language === "ar"
   const currentLang = i18n.language || "ar"
   const isDark = mymode === "dark"
+
+  const pageClass = isDark
+    ? "min-h-screen p-4 sm:p-6 bg-gray-950 text-white"
+    : "min-h-screen p-4 sm:p-6 bg-slate-50 text-slate-950"
+
+  const cardClass = isDark
+    ? "bg-gray-900 border-gray-700 shadow-sm"
+    : "bg-white border-slate-200 shadow-sm"
+
+  const softCardClass = isDark
+    ? "bg-gray-800/90 border-gray-600"
+    : "bg-slate-100 border-slate-300"
+
+  const textMain = isDark ? "text-white" : "text-slate-950"
+  const textMuted = isDark ? "text-slate-300" : "text-slate-700"
+  const textSoft = isDark ? "text-slate-300" : "text-slate-600"
+
+  const defaultButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border bg-white text-slate-950 border-slate-400 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 active:bg-emerald-700 dark:bg-gray-900 dark:text-white dark:border-gray-600 dark:hover:bg-emerald-600 dark:hover:border-emerald-600 transition-colors shadow-sm"
+
+  const editButtonClass =
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 hover:border-emerald-700 active:bg-emerald-800 transition-colors shadow-sm"
+
+  const iconBoxBlue =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
+
+  const iconBoxAmber =
+    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+
+  const smallIconClass = "w-5 h-5 shrink-0"
+  const sectionTitleClass = `text-xl font-black ${textMain} flex items-center gap-3`
 
   useEffect(() => {
     if (id) {
@@ -72,43 +100,75 @@ function SpecificShiftHoursType() {
     }
   }, [singleShiftHoursTypeError, navigate])
 
-  // Get shift hours type name based on current language
   const getShiftHoursTypeName = () => {
     if (!selectedShiftHoursType) return ""
+
     return currentLang === "en"
       ? selectedShiftHoursType.nameEnglish
       : selectedShiftHoursType.nameArabic
   }
 
-  // Get shift hours type secondary name (opposite language)
   const getShiftHoursTypeSecondaryName = () => {
     if (!selectedShiftHoursType) return ""
+
     return currentLang === "en"
       ? selectedShiftHoursType.nameArabic
       : selectedShiftHoursType.nameEnglish
   }
 
-  // Get user name based on current language
   const getUserName = (user) => {
     if (!user) return ""
     return currentLang === "en" ? user.nameEnglish : user.nameArabic
   }
 
-  // Format date
-
-  // Format time
   const formatTime = (timeString) => {
     if (!timeString) return "-"
+
     const [hours, minutes] = timeString.split(":")
     const hour24 = parseInt(hours)
     const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24
     const ampm = hour24 >= 12 ? "PM" : "AM"
+
     return `${hour12}:${minutes} ${ampm}`
   }
 
-  // Get period icon
+  const normalizePeriod = (period) => {
+    if (!period) return ""
+
+    const value = String(period).toLowerCase().trim()
+
+    if (value.includes("morning")) return "morning"
+    if (value.includes("afternoon")) return "afternoon"
+    if (value.includes("evening")) return "evening"
+    if (value.includes("night")) return "night"
+
+    return value
+  }
+
+  const getPeriodLabel = (period) => {
+    const normalized = normalizePeriod(period)
+
+    const translationKey = `shiftHoursTypes.periods.${normalized}`
+    const translated = t(translationKey)
+
+    if (translated && translated !== translationKey) {
+      return translated
+    }
+
+    const fallbackMap = {
+      morning: currentLang === "ar" ? "صباحي" : "Morning",
+      afternoon: currentLang === "ar" ? "بعد الظهر" : "Afternoon",
+      evening: currentLang === "ar" ? "مسائي" : "Evening",
+      night: currentLang === "ar" ? "ليلي" : "Night",
+    }
+
+    return fallbackMap[normalized] || period || "-"
+  }
+
   const getPeriodIcon = (period) => {
-    switch (period?.toLowerCase()) {
+    const normalized = normalizePeriod(period)
+
+    switch (normalized) {
       case "morning":
         return Sunrise
       case "afternoon":
@@ -122,54 +182,196 @@ function SpecificShiftHoursType() {
     }
   }
 
-  // Get period color
-  const getPeriodColor = (period) => {
-    switch (period?.toLowerCase()) {
+  const getPeriodTone = (period) => {
+    const normalized = normalizePeriod(period)
+
+    switch (normalized) {
       case "morning":
-        return "text-yellow-500"
+        return {
+          box: "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+          badge:
+            "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+          stat:
+            "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+          gradient: "from-amber-500 to-orange-500",
+        }
+
       case "afternoon":
-        return "text-orange-500"
+        return {
+          box: "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
+          badge:
+            "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
+          stat:
+            "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
+          gradient: "from-orange-500 to-red-500",
+        }
+
       case "evening":
-        return "text-purple-500"
+        return {
+          box: "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+          badge:
+            "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+          stat:
+            "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+          gradient: "from-violet-500 to-blue-500",
+        }
+
       case "night":
-        return "text-blue-500"
+        return {
+          box: "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
+          badge:
+            "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
+          stat:
+            "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
+          gradient: "from-blue-500 to-indigo-500",
+        }
+
       default:
-        return "text-gray-500"
+        return {
+          box: "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
+          badge:
+            "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
+          stat:
+            "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
+          gradient: "from-slate-500 to-slate-700",
+        }
     }
   }
 
-  if (loadingGetSingleShiftHoursType)
+  const InfoField = ({ icon: Icon, label, value, dir, tone = "blue" }) => {
+    const toneClass =
+      tone === "emerald"
+        ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+        : tone === "amber"
+        ? "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
+        : tone === "orange"
+        ? "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500"
+        : tone === "red"
+        ? "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+        : tone === "violet"
+        ? "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500"
+        : "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
+
+    return (
+      <div className={`rounded-2xl border p-4 ${softCardClass}`}>
+        <div className="flex items-start gap-3">
+          <div
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${toneClass}`}
+          >
+            <Icon className="w-5 h-5 shrink-0" />
+          </div>
+
+          <div className="min-w-0">
+            <p className={`text-xs font-black mb-1 ${textSoft}`}>{label}</p>
+
+            <p
+              className={`text-sm sm:text-base font-extrabold ${textMain} break-words`}
+              dir={dir}
+            >
+              {value || "-"}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const CodeBadge = ({ code }) => (
+    <span className="inline-flex items-center gap-1.5 text-sm font-black px-3 py-1.5 rounded-full border-2 bg-slate-200 text-slate-950 border-slate-500 dark:bg-slate-800 dark:text-white dark:border-slate-400 shadow-sm">
+      <Hash className="w-4 h-4 shrink-0" />
+      {code || "-"}
+    </span>
+  )
+
+  const StatusBadge = ({ isActive }) => (
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black border-2 shadow-sm ${
+        isActive
+          ? "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+          : "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
+      }`}
+    >
+      {isActive ? (
+        <CheckCircle className="w-4 h-4 shrink-0" />
+      ) : (
+        <XCircle className="w-4 h-4 shrink-0" />
+      )}
+
+      {isActive
+        ? t("shiftHoursTypes.status.active")
+        : t("shiftHoursTypes.status.inactive")}
+    </span>
+  )
+
+  const OvertimeBadge = ({ isOvertime }) => (
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black border-2 shadow-sm ${
+        isOvertime
+          ? "bg-transparent text-orange-500 border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500"
+          : "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
+      }`}
+    >
+      {isOvertime ? (
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+      ) : (
+        <CheckCircle className="w-4 h-4 shrink-0" />
+      )}
+
+      {isOvertime ? t("shiftHoursTypes.overtime") : t("shiftHoursTypes.regular")}
+    </span>
+  )
+
+  const StatBox = ({ icon: Icon, label, value, tone = "blue" }) => {
+    const toneClass =
+      tone === "emerald"
+        ? "bg-emerald-200 text-emerald-950 border-emerald-500 dark:bg-emerald-800/80 dark:text-white dark:border-emerald-400"
+        : tone === "amber"
+        ? "bg-amber-200 text-amber-950 border-amber-500 dark:bg-amber-800/80 dark:text-white dark:border-amber-400"
+        : tone === "orange"
+        ? "bg-orange-200 text-orange-950 border-orange-500 dark:bg-orange-800/80 dark:text-white dark:border-orange-400"
+        : tone === "violet"
+        ? "bg-violet-200 text-violet-950 border-violet-500 dark:bg-violet-800/80 dark:text-white dark:border-violet-400"
+        : "bg-blue-200 text-blue-950 border-blue-500 dark:bg-blue-800/80 dark:text-white dark:border-blue-400"
+
+    return (
+      <div className={`rounded-2xl border-2 p-5 shadow-sm ${toneClass}`}>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Icon className="w-6 h-6 shrink-0" />
+            <span className="text-sm font-black truncate">{label}</span>
+          </div>
+
+          <span className="text-2xl font-black shrink-0">{value}</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (loadingGetSingleShiftHoursType) {
     return <LoadingGetData text={t("gettingData.shiftHourData")} />
+  }
 
   if (singleShiftHoursTypeError) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
-        <div className="max-w-4xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="text-center py-12">
-              <div className="text-red-500 text-lg mb-4">
-                {singleShiftHoursTypeError?.message ||
-                  t("shiftHoursTypes.fetchError")}
-              </div>
-              <Link
-                to="/admin-panel/shift-hours-types"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
-                  {t("shiftHoursTypes.backToList")}
-                </span>
-              </Link>
+      <div className={pageClass} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-3xl mx-auto">
+          <div className={`${cardClass} rounded-2xl border p-8 text-center`}>
+            <div className="w-20 h-20 rounded-full bg-red-200 text-red-950 border-2 border-red-500 dark:bg-red-800/80 dark:text-white dark:border-red-400 flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <XCircle className="w-10 h-10" />
             </div>
+
+            <div className="text-lg font-black mb-6 text-red-800 dark:text-red-100">
+              {singleShiftHoursTypeError?.message ||
+                t("shiftHoursTypes.fetchError")}
+            </div>
+
+            <Link
+              to="/admin-panel/shift-hours-types"
+              className={defaultButtonClass}
+            >
+              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {t("shiftHoursTypes.backToList")}
+            </Link>
           </div>
         </div>
       </div>
@@ -178,36 +380,24 @@ function SpecificShiftHoursType() {
 
   if (!selectedShiftHoursType) {
     return (
-      <div
-        className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-        dir={isRTL ? "rtl" : "ltr"}
-      >
-        <div className="max-w-4xl mx-auto">
-          <div
-            className={`${
-              isDark ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-sm border ${
-              isDark ? "border-gray-700" : "border-gray-200"
-            } p-6`}
-          >
-            <div className="text-center py-12">
-              <div
-                className={`text-lg mb-4 ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                {t("shiftHoursTypes.notFound")}
-              </div>
-              <Link
-                to="/admin-panel/shift-hours-types"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-                <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
-                  {t("shiftHoursTypes.backToList")}
-                </span>
-              </Link>
+      <div className={pageClass} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="max-w-3xl mx-auto">
+          <div className={`${cardClass} rounded-2xl border p-8 text-center`}>
+            <div className="w-20 h-20 rounded-full bg-slate-200 text-slate-950 border-2 border-slate-500 dark:bg-slate-800 dark:text-white dark:border-slate-400 flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <FileText className="w-10 h-10" />
             </div>
+
+            <div className={`text-lg font-black mb-6 ${textMuted}`}>
+              {t("shiftHoursTypes.notFound")}
+            </div>
+
+            <Link
+              to="/admin-panel/shift-hours-types"
+              className={defaultButtonClass}
+            >
+              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {t("shiftHoursTypes.backToList")}
+            </Link>
           </div>
         </div>
       </div>
@@ -215,436 +405,247 @@ function SpecificShiftHoursType() {
   }
 
   const PeriodIcon = getPeriodIcon(selectedShiftHoursType.period)
+  const periodTone = getPeriodTone(selectedShiftHoursType.period)
+  const periodLabel = getPeriodLabel(selectedShiftHoursType.period)
 
   return (
-    <div
-      className={`min-h-screen p-6 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
+    <div className={pageClass} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
             <Link
               to="/admin-panel/shift-hours-types"
-              className={`inline-flex items-center px-3 py-2 text-sm font-medium ${
-                isDark
-                  ? "text-gray-300 hover:text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              } transition-colors`}
+              className={defaultButtonClass}
             >
               {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-              <span className={`${isRTL ? "mr-2" : "ml-2"}`}>
-                {t("shiftHoursTypes.backToList")}
-              </span>
+              {t("shiftHoursTypes.backToList")}
             </Link>
 
             <Link
               to={`/admin-panel/shift-hours-types/edit/${selectedShiftHoursType.id}`}
             >
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors flex-1 sm:flex-none justify-center">
-                <Edit size={16} className={`${isRTL ? "ml-2" : "mr-2"}`} />
+              <button type="button" className={editButtonClass}>
+                <Edit size={16} className="shrink-0" />
                 {t("shiftHoursTypes.actions.edit")}
               </button>
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div
-              className={`p-3 ${
-                isDark ? "bg-gray-700" : "bg-blue-100"
-              } rounded-lg`}
-            >
-              <PeriodIcon
-                className={`h-8 w-8 ${
-                  isDark
-                    ? "text-blue-400"
-                    : getPeriodColor(selectedShiftHoursType.period)
-                }`}
-              />
-            </div>
-            <div>
-              <h1
-                className={`text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {getShiftHoursTypeName()}
-              </h1>
-              {/* <p
-                className={`text-lg ${
-                  isDark ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                {getShiftHoursTypeSecondaryName()}
-              </p> */}
-              {selectedShiftHoursType.code && (
-                <div className="flex items-center mt-2">
-                  <Hash
-                    className={`h-4 w-4 ${
-                      isDark ? "text-gray-400" : "text-gray-500"
-                    } ${isRTL ? "ml-1" : "mr-1"}`}
-                  />
-                  <span
-                    className={`text-sm font-mono px-2 py-1 rounded ${
-                      isDark
-                        ? "bg-gray-700 text-gray-300"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {selectedShiftHoursType.code}
-                  </span>
+          <div className={`${cardClass} rounded-3xl border p-6`}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4 min-w-0">
+                <div
+                  className={`w-20 h-20 rounded-3xl flex items-center justify-center shrink-0 shadow-sm border-2 ${periodTone.box}`}
+                >
+                  <PeriodIcon className="w-10 h-10 shrink-0" />
                 </div>
-              )}
+
+                <div className="min-w-0">
+                  <h1
+                    className={`text-3xl font-black tracking-tight ${textMain}`}
+                  >
+                    {getShiftHoursTypeName()}
+                  </h1>
+
+                  {getShiftHoursTypeSecondaryName() && (
+                    <p className={`mt-1 text-base font-bold ${textMuted}`}>
+                      {getShiftHoursTypeSecondaryName()}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
+                    <CodeBadge code={selectedShiftHoursType.code} />
+
+                    <span
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black border-2 shadow-sm ${periodTone.badge}`}
+                    >
+                      <PeriodIcon className="w-4 h-4 shrink-0" />
+                      {periodLabel}
+                    </span>
+
+                    <StatusBadge isActive={selectedShiftHoursType.isActive} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
+                <div className="rounded-2xl border-2 bg-blue-200 text-blue-950 border-blue-500 dark:bg-blue-800/80 dark:text-white dark:border-blue-400 px-4 py-3 shadow-sm">
+                  <p className="text-xs font-black opacity-90">
+                    {t("shiftHoursTypes.form.hoursCount")}
+                  </p>
+                  <p className="text-2xl font-black">
+                    {selectedShiftHoursType.hours ?? 0}h
+                  </p>
+                </div>
+
+                <div
+                  className={`rounded-2xl border-2 px-4 py-3 shadow-sm ${periodTone.stat}`}
+                >
+                  <p className="text-xs font-black opacity-90">
+                    {t("shiftHoursTypes.form.period")}
+                  </p>
+                  <p className="text-lg font-black truncate">{periodLabel}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Information */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Basic Information */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h2
-                className={`text-xl font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-6 flex items-center`}
-              >
-                <Info
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h2 className={`${sectionTitleClass} mb-6`}>
+                <span className={iconBoxBlue}>
+                  <Info className={smallIconClass} />
+                </span>
                 {t("shiftHoursTypes.details.basicInfo")}
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.nameArabic")}
-                  </label>
-                  <p
-                    className={`text-base ${
-                      isDark ? "text-white" : "text-gray-900"
-                    } font-medium`}
-                    dir="rtl"
-                  >
-                    {selectedShiftHoursType.nameArabic}
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField
+                  icon={FileText}
+                  label={t("shiftHoursTypes.form.nameArabic")}
+                  value={selectedShiftHoursType.nameArabic}
+                  dir="rtl"
+                  tone="blue"
+                />
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.nameEnglish")}
-                  </label>
-                  <p
-                    className={`text-base ${
-                      isDark ? "text-white" : "text-gray-900"
-                    } font-medium`}
-                    dir="ltr"
-                  >
-                    {selectedShiftHoursType.nameEnglish}
-                  </p>
-                </div>
+                <InfoField
+                  icon={FileText}
+                  label={t("shiftHoursTypes.form.nameEnglish")}
+                  value={selectedShiftHoursType.nameEnglish}
+                  dir="ltr"
+                  tone="blue"
+                />
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.period")}
-                  </label>
-                  <div className="flex items-center">
-                    <PeriodIcon
-                      className={`${getPeriodColor(
-                        selectedShiftHoursType.period
-                      )} ${isRTL ? "ml-2" : "mr-2"}`}
-                      size={18}
-                    />
-                    <span
-                      className={`text-base ${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-medium`}
+                <InfoField
+                  icon={PeriodIcon}
+                  label={t("shiftHoursTypes.form.period")}
+                  value={periodLabel}
+                  tone="amber"
+                />
+
+                <InfoField
+                  icon={Timer}
+                  label={t("shiftHoursTypes.form.hoursCount")}
+                  value={`${selectedShiftHoursType.hours ?? 0} ${t(
+                    "shiftHoursTypes.hours"
+                  )}`}
+                  tone="blue"
+                />
+
+                <div className={`rounded-2xl border p-4 ${softCardClass}`}>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${
+                        selectedShiftHoursType.isActive
+                          ? "bg-emerald-200 text-emerald-950 border-emerald-500 dark:bg-emerald-900/70 dark:text-emerald-100 dark:border-emerald-400"
+                          : "bg-red-200 text-red-950 border-red-500 dark:bg-red-900/70 dark:text-red-100 dark:border-red-400"
+                      }`}
                     >
-                      {selectedShiftHoursType.period}
-                    </span>
+                      {selectedShiftHoursType.isActive ? (
+                        <CheckCircle className="w-5 h-5 shrink-0" />
+                      ) : (
+                        <XCircle className="w-5 h-5 shrink-0" />
+                      )}
+                    </div>
+
+                    <div>
+                      <p className={`text-xs font-black mb-2 ${textSoft}`}>
+                        {t("shiftHoursTypes.table.status")}
+                      </p>
+                      <StatusBadge isActive={selectedShiftHoursType.isActive} />
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.hoursCount")}
-                  </label>
-                  <div className="flex items-center">
-                    <Timer
-                      className={`${
-                        isDark ? "text-gray-400" : "text-gray-500"
-                      } ${isRTL ? "ml-2" : "mr-2"}`}
-                      size={18}
-                    />
-                    <span
-                      className={`text-base ${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-medium`}
+                <div className={`rounded-2xl border p-4 ${softCardClass}`}>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${
+                        selectedShiftHoursType.isOvertime
+                          ? "bg-orange-200 text-orange-950 border-orange-500 dark:bg-orange-900/70 dark:text-orange-100 dark:border-orange-400"
+                          : "bg-emerald-200 text-emerald-950 border-emerald-500 dark:bg-emerald-900/70 dark:text-emerald-100 dark:border-emerald-400"
+                      }`}
                     >
-                      {selectedShiftHoursType.hours}{" "}
-                      {t("shiftHoursTypes.hours")}
-                    </span>
+                      {selectedShiftHoursType.isOvertime ? (
+                        <AlertTriangle className="w-5 h-5 shrink-0" />
+                      ) : (
+                        <CheckCircle className="w-5 h-5 shrink-0" />
+                      )}
+                    </div>
+
+                    <div>
+                      <p className={`text-xs font-black mb-2 ${textSoft}`}>
+                        {t("shiftHoursTypes.form.isOvertime")}
+                      </p>
+                      <OvertimeBadge
+                        isOvertime={selectedShiftHoursType.isOvertime}
+                      />
+                    </div>
                   </div>
-                </div>
-
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.table.status")}
-                  </label>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${
-                      selectedShiftHoursType.isActive
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                    }`}
-                  >
-                    {selectedShiftHoursType.isActive ? (
-                      <CheckCircle
-                        size={14}
-                        className={`${isRTL ? "ml-1" : "mr-1"}`}
-                      />
-                    ) : (
-                      <XCircle
-                        size={14}
-                        className={`${isRTL ? "ml-1" : "mr-1"}`}
-                      />
-                    )}
-                    {selectedShiftHoursType.isActive
-                      ? t("shiftHoursTypes.status.active")
-                      : t("shiftHoursTypes.status.inactive")}
-                  </span>
-                </div>
-
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.isOvertime")}
-                  </label>
-                  <span
-                    className={`inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full ${
-                      selectedShiftHoursType.isOvertime
-                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                    }`}
-                  >
-                    {selectedShiftHoursType.isOvertime ? (
-                      <AlertTriangle
-                        size={14}
-                        className={`${isRTL ? "ml-1" : "mr-1"}`}
-                      />
-                    ) : (
-                      <CheckCircle
-                        size={14}
-                        className={`${isRTL ? "ml-1" : "mr-1"}`}
-                      />
-                    )}
-                    {selectedShiftHoursType.isOvertime
-                      ? t("shiftHoursTypes.overtime")
-                      : t("shiftHoursTypes.regular")}
-                  </span>
                 </div>
 
                 {selectedShiftHoursType.description && (
                   <div className="md:col-span-2">
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-2`}
-                    >
-                      {t("shiftHoursTypes.form.description")}
-                    </label>
-                    <div
-                      className={`p-3 ${
-                        isDark ? "bg-gray-700" : "bg-gray-50"
-                      } rounded-lg border ${
-                        isDark ? "border-gray-600" : "border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-start">
-                        <FileText
-                          className={`h-5 w-5 ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          } ${isRTL ? "ml-2" : "mr-2"} mt-0.5 flex-shrink-0`}
-                        />
-                        <p
-                          className={`text-sm ${
-                            isDark ? "text-gray-300" : "text-gray-700"
-                          } leading-relaxed`}
-                        >
-                          {selectedShiftHoursType.description}
-                        </p>
-                      </div>
-                    </div>
+                    <InfoField
+                      icon={FileText}
+                      label={t("shiftHoursTypes.form.description")}
+                      value={selectedShiftHoursType.description}
+                      tone="violet"
+                    />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Time Information */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h2
-                className={`text-xl font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-6 flex items-center`}
-              >
-                <Clock
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h2 className={`${sectionTitleClass} mb-6`}>
+                <span className={iconBoxAmber}>
+                  <Clock className={smallIconClass} />
+                </span>
                 {t("shiftHoursTypes.details.timeInfo")}
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.startTime")}
-                  </label>
-                  <div className="flex items-center">
-                    <div
-                      className={`p-2 ${
-                        isDark ? "bg-green-900/20" : "bg-green-100"
-                      } rounded-lg ${isRTL ? "ml-3" : "mr-3"}`}
-                    >
-                      <Sunrise
-                        className={`h-5 w-5 ${
-                          isDark ? "text-green-400" : "text-green-600"
-                        }`}
-                      />
-                    </div>
-                    <span
-                      className={`text-lg font-mono ${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-bold`}
-                    >
-                      {formatTime(selectedShiftHoursType.startTime)}
-                    </span>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoField
+                  icon={Sunrise}
+                  label={t("shiftHoursTypes.form.startTime")}
+                  value={formatTime(selectedShiftHoursType.startTime)}
+                  tone="emerald"
+                />
 
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-2`}
-                  >
-                    {t("shiftHoursTypes.form.endTime")}
-                  </label>
-                  <div className="flex items-center">
-                    <div
-                      className={`p-2 ${
-                        isDark ? "bg-red-900/20" : "bg-red-100"
-                      } rounded-lg ${isRTL ? "ml-3" : "mr-3"}`}
-                    >
-                      <Sunset
-                        className={`h-5 w-5 ${
-                          isDark ? "text-red-400" : "text-red-600"
-                        }`}
-                      />
-                    </div>
-                    <span
-                      className={`text-lg font-mono ${
-                        isDark ? "text-white" : "text-gray-900"
-                      } font-bold`}
-                    >
-                      {formatTime(selectedShiftHoursType.endTime)}
-                    </span>
-                  </div>
-                </div>
+                <InfoField
+                  icon={Sunset}
+                  label={t("shiftHoursTypes.form.endTime")}
+                  value={formatTime(selectedShiftHoursType.endTime)}
+                  tone="red"
+                />
               </div>
 
-              {/* Visual Timeline */}
               <div className="mt-6">
-                <label
-                  className={`block text-sm font-medium ${
-                    isDark ? "text-gray-300" : "text-gray-500"
-                  } mb-4`}
-                >
+                <label className={`block text-sm font-black mb-4 ${textSoft}`}>
                   {t("shiftHoursTypes.details.timeline")}
                 </label>
-                <div
-                  className={`relative h-16 ${
-                    isDark ? "bg-gray-700" : "bg-gray-100"
-                  } rounded-lg overflow-hidden`}
-                >
-                  {/* 24 hour timeline background */}
+
+                <div className="relative h-20 rounded-2xl overflow-hidden border-2 border-slate-300 bg-slate-200 dark:bg-gray-800 dark:border-gray-600 shadow-sm">
                   <div className="absolute inset-0 flex">
                     {Array.from({ length: 24 }, (_, i) => (
                       <div
                         key={i}
-                        className={`flex-1 border-r ${
-                          isDark ? "border-gray-600" : "border-gray-200"
-                        } last:border-r-0 relative`}
+                        className="flex-1 border-r border-slate-400/50 dark:border-gray-600 last:border-r-0 relative"
                       >
-                        <span
-                          className={`absolute top-1 left-1 text-xs ${
-                            isDark ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
+                        <span className="absolute top-1 left-1 text-[10px] font-black text-slate-700 dark:text-slate-300">
                           {i.toString().padStart(2, "0")}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Shift duration bar */}
                   {selectedShiftHoursType.startTime &&
                     selectedShiftHoursType.endTime && (
                       <div
-                        className={`absolute top-6 h-6 bg-gradient-to-r ${
-                          selectedShiftHoursType.period?.toLowerCase() ===
-                          "morning"
-                            ? "from-yellow-400 to-orange-400"
-                            : selectedShiftHoursType.period?.toLowerCase() ===
-                              "afternoon"
-                            ? "from-orange-400 to-red-400"
-                            : selectedShiftHoursType.period?.toLowerCase() ===
-                              "evening"
-                            ? "from-purple-400 to-blue-400"
-                            : "from-blue-400 to-indigo-400"
-                        } rounded`}
+                        className={`absolute top-9 h-7 bg-gradient-to-r ${periodTone.gradient} rounded-xl shadow-md border border-white/40`}
                         style={{
                           left: `${
                             (parseInt(
@@ -653,12 +654,10 @@ function SpecificShiftHoursType() {
                               24) *
                             100
                           }%`,
-                          width: `${
-                            (selectedShiftHoursType.hours / 24) * 100
-                          }%`,
+                          width: `${(selectedShiftHoursType.hours / 24) * 100}%`,
                         }}
                       >
-                        <div className="flex items-center justify-center h-full text-white text-xs font-bold">
+                        <div className="flex items-center justify-center h-full text-white text-xs font-black">
                           {selectedShiftHoursType.hours}h
                         </div>
                       </div>
@@ -668,238 +667,114 @@ function SpecificShiftHoursType() {
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Stats */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4 flex items-center`}
-              >
-                <Timer
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h3 className={`${sectionTitleClass} mb-5`}>
+                <span className={iconBoxBlue}>
+                  <Timer className={smallIconClass} />
+                </span>
                 {t("shiftHoursTypes.details.quickStats")}
               </h3>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                  <div className="flex items-center">
-                    <Timer
-                      className={`h-5 w-5 ${
-                        isDark ? "text-blue-400" : "text-blue-600"
-                      } ${isRTL ? "ml-2" : "mr-2"}`}
-                    />
-                    <span
-                      className={`text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.form.hoursCount")}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-2xl font-bold ${
-                      isDark ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  >
-                    {selectedShiftHoursType.hours}
-                  </span>
-                </div>
+                <StatBox
+                  icon={Timer}
+                  label={t("shiftHoursTypes.form.hoursCount")}
+                  value={`${selectedShiftHoursType.hours ?? 0}h`}
+                  tone="blue"
+                />
 
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
-                  <div className="flex items-center">
-                    <PeriodIcon
-                      className={`h-5 w-5 ${
-                        isDark ? "text-green-400" : "text-green-600"
-                      } ${isRTL ? "ml-2" : "mr-2"}`}
-                    />
-                    <span
-                      className={`text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.form.period")}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm font-bold px-2 py-1 rounded ${
-                      isDark
-                        ? "bg-green-900/40 text-green-300"
-                        : "bg-green-200 text-green-800"
-                    }`}
-                  >
-                    {selectedShiftHoursType.period}
-                  </span>
-                </div>
+                <StatBox
+                  icon={PeriodIcon}
+                  label={t("shiftHoursTypes.form.period")}
+                  value={periodLabel}
+                  tone="amber"
+                />
 
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg">
-                  <div className="flex items-center">
-                    <AlertTriangle
-                      className={`h-5 w-5 ${
-                        isDark ? "text-orange-400" : "text-orange-600"
-                      } ${isRTL ? "ml-2" : "mr-2"}`}
-                    />
-                    <span
-                      className={`text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {t("shiftHoursTypes.form.isOvertime")}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-sm font-bold px-2 py-1 rounded ${
-                      selectedShiftHoursType.isOvertime
-                        ? isDark
-                          ? "bg-orange-900/40 text-orange-300"
-                          : "bg-orange-200 text-orange-800"
-                        : isDark
-                        ? "bg-gray-900/40 text-gray-300"
-                        : "bg-gray-200 text-gray-800"
-                    }`}
-                  >
-                    {selectedShiftHoursType.isOvertime
+                <StatBox
+                  icon={
+                    selectedShiftHoursType.isOvertime
+                      ? AlertTriangle
+                      : CheckCircle
+                  }
+                  label={t("shiftHoursTypes.form.isOvertime")}
+                  value={
+                    selectedShiftHoursType.isOvertime
                       ? t("shiftHoursTypes.yes")
-                      : t("shiftHoursTypes.no")}
-                  </span>
-                </div>
+                      : t("shiftHoursTypes.no")
+                  }
+                  tone={selectedShiftHoursType.isOvertime ? "orange" : "emerald"}
+                />
               </div>
             </div>
 
-            {/* Audit Information */}
-            <div
-              className={`${
-                isDark ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-sm border ${
-                isDark ? "border-gray-700" : "border-gray-200"
-              } p-6`}
-            >
-              <h3
-                className={`text-lg font-semibold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } mb-4 flex items-center`}
-              >
-                <Calendar
-                  className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"} ${
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  }`}
-                />
+            <div className={`${cardClass} rounded-3xl border p-6`}>
+              <h3 className={`${sectionTitleClass} mb-5`}>
+                <span className={iconBoxAmber}>
+                  <Calendar className={smallIconClass} />
+                </span>
                 {t("shiftHoursTypes.details.auditInfo")}
               </h3>
 
               <div className="space-y-4">
-                <div>
-                  <label
-                    className={`block text-sm font-medium ${
-                      isDark ? "text-gray-300" : "text-gray-500"
-                    } mb-1`}
-                  >
-                    {t("shiftHoursTypes.details.createdAt")}
-                  </label>
-                  <p
-                    className={`text-sm ${
-                      isDark ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {formatDate(selectedShiftHoursType.createdAt)}
-                  </p>
-                </div>
+                <InfoField
+                  icon={Calendar}
+                  label={t("shiftHoursTypes.details.createdAt")}
+                  value={formatDate(selectedShiftHoursType.createdAt)}
+                  tone="amber"
+                />
 
                 {selectedShiftHoursType.createdByUser && (
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("shiftHoursTypes.details.createdBy")}
-                    </label>
-                    <div className="flex items-center">
-                      <User
-                        className={`h-4 w-4 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        } ${isRTL ? "ml-2" : "mr-2"}`}
-                      />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {getUserName(selectedShiftHoursType.createdByUser)}
-                      </span>
-                    </div>
-                    <p
-                      className={`text-xs mt-1 ${
-                        isDark ? "text-gray-400" : "text-gray-500"
+                  <>
+                    <InfoField
+                      icon={User}
+                      label={t("shiftHoursTypes.details.createdBy")}
+                      value={getUserName(selectedShiftHoursType.createdByUser)}
+                      tone="blue"
+                    />
+
+                    <InfoField
+                      icon={FileText}
+                      label={
+                        currentLang === "ar" ? "بيانات المنشئ" : "Creator Info"
+                      }
+                      value={`${selectedShiftHoursType.createdByUser.role || "-"} • ${
+                        selectedShiftHoursType.createdByUser.email || "-"
                       }`}
-                    >
-                      {selectedShiftHoursType.createdByUser.role} •{" "}
-                      {selectedShiftHoursType.createdByUser.email}
-                    </p>
-                  </div>
+                      tone="violet"
+                    />
+                  </>
                 )}
 
                 {selectedShiftHoursType.updatedAt && (
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("shiftHoursTypes.details.updatedAt")}
-                    </label>
-                    <p
-                      className={`text-sm ${
-                        isDark ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {formatDate(selectedShiftHoursType.updatedAt)}
-                    </p>
-                  </div>
+                  <InfoField
+                    icon={Clock}
+                    label={t("shiftHoursTypes.details.updatedAt")}
+                    value={formatDate(selectedShiftHoursType.updatedAt)}
+                    tone="amber"
+                  />
                 )}
 
                 {selectedShiftHoursType.updatedByUser && (
-                  <div>
-                    <label
-                      className={`block text-sm font-medium ${
-                        isDark ? "text-gray-300" : "text-gray-500"
-                      } mb-1`}
-                    >
-                      {t("shiftHoursTypes.details.updatedBy")}
-                    </label>
-                    <div className="flex items-center">
-                      <User
-                        className={`h-4 w-4 ${
-                          isDark ? "text-gray-400" : "text-gray-500"
-                        } ${isRTL ? "ml-2" : "mr-2"}`}
-                      />
-                      <span
-                        className={`text-sm ${
-                          isDark ? "text-white" : "text-gray-900"
-                        }`}
-                      >
-                        {getUserName(selectedShiftHoursType.updatedByUser)}
-                      </span>
-                    </div>
-                    <p
-                      className={`text-xs mt-1 ${
-                        isDark ? "text-gray-400" : "text-gray-500"
+                  <>
+                    <InfoField
+                      icon={User}
+                      label={t("shiftHoursTypes.details.updatedBy")}
+                      value={getUserName(selectedShiftHoursType.updatedByUser)}
+                      tone="blue"
+                    />
+
+                    <InfoField
+                      icon={FileText}
+                      label={
+                        currentLang === "ar" ? "بيانات المعدل" : "Updater Info"
+                      }
+                      value={`${selectedShiftHoursType.updatedByUser.role || "-"} • ${
+                        selectedShiftHoursType.updatedByUser.email || "-"
                       }`}
-                    >
-                      {selectedShiftHoursType.updatedByUser.role} •{" "}
-                      {selectedShiftHoursType.updatedByUser.email}
-                    </p>
-                  </div>
+                      tone="violet"
+                    />
+                  </>
                 )}
               </div>
             </div>

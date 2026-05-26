@@ -1,220 +1,42 @@
+// signalRService.js
 import * as signalR from "@microsoft/signalr"
+
+const DEFAULT_EVENT_NAMES = [
+  "notification",
+  "Notification",
+  "ReceiveNotification",
+  "NotificationReceived",
+  "NewNotification",
+]
 
 class SignalRService {
   constructor() {
     this.connection = null
     this.isConnecting = false
-    this.reconnectAttempts = 0
-    this.maxReconnectAttempts = 5
-    this.notificationHandlers = []
-    this.errorHandlers = []
+    this.notificationHandlers = new Set()
+    this.errorHandlers = new Set()
+    this.stateHandlers = new Set()
     this.hubUrl = import.meta.env.VITE_SIGNALR_HUB_URL
+    this.eventNames = DEFAULT_EVENT_NAMES
   }
 
-  // ✅ دالة محسّنة لجلب التوكن
+  // ✅ FIX 1: return null instead of "" so SignalR doesn't send empty token
   getToken = () => {
-    // جرب كل الأماكن الممكنة للتوكن
     const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("jwt") ||
+      localStorage.getItem("authToken") ||
       sessionStorage.getItem("token") ||
       sessionStorage.getItem("jwt") ||
       sessionStorage.getItem("authToken") ||
-      localStorage.getItem("token") ||
-      localStorage.getItem("jwt") ||
-      localStorage.getItem("authToken")
+      null
 
     if (!token) {
-      console.error("❌ [SignalR] لا يوجد توكن! تأكد من تسجيل الدخول")
-      this.triggerError("NO_TOKEN", "Authentication token not found")
+      console.warn("[SignalR] ⚠️ No token found in storage")
+      return null
     }
 
-    console.log("🔑 [SignalR] التوكن موجود:", token ? "✓" : "✗")
-    return token || ""
-  }
-
-  // ✅ دالة بناء الاتصال المحسّنة
-  initializeConnection() {
-    if (this.connection) {
-      return
-    }
-
-    const token = this.getToken()
-    if (!token) {
-      console.error("❌ لا يمكن إنشاء الاتصال بدون توكن")
-      return
-    }
-
-    console.log("🔧 [SignalR] بناء الاتصال...")
-
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(this.hubUrl, {
-        accessTokenFactory: this.getToken,
-        skipNegotiation: false,
-        transport:
-          signalR.HttpTransportType.WebSockets |
-          signalR.HttpTransportType.ServerSentEvents |
-          signalR.HttpTransportType.LongPolling, // إضافة LongPolling كخيار احتياطي
-      })
-      .withAutomaticReconnect({
-        nextRetryDelayInMilliseconds: (retryContext) => {
-          if (retryContext.previousRetryCount < 5) return 2000
-          if (retryContext.previousRetryCount < 10) return 5000
-          return 10000
-        },
-      })
-      .configureLogging(signalR.LogLevel.Debug) // Debug في التطوير
-      .build()
-
-    // معالجة الإشعارات
-    this.connection.on("notification", (payload) => {
-      console.log("📩 [SignalR] إشعار جديد:", payload)
-      this.notificationHandlers.forEach((handler) => {
-        try {
-          handler(payload)
-        } catch (error) {
-          console.error("❌ خطأ في معالجة الإشعار:", error)
-        }
-      })
-    })
-
-    // معالجة إغلاق الاتصال
-    this.connection.onclose((error) => {
-      console.warn("⚠️ [SignalR] الاتصال اتقفل:", error)
-      this.isConnecting = false
-
-      if (
-        error?.message?.includes("401") ||
-        error?.message?.includes("Unauthorized")
-      ) {
-        console.error("❌ مشكلة في التوكن! يرجى تسجيل الدخول مرة أخرى")
-        this.triggerError("UNAUTHORIZED", "Token expired or invalid")
-        return // لا تحاول إعادة الاتصال
-      }
-
-      // محاولة إعادة الاتصال
-      setTimeout(() => {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          this.reconnectAttempts++
-          console.log(
-            `🔄 محاولة إعادة الاتصال (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`
-          )
-          this.start()
-        } else {
-          console.error("❌ فشل الاتصال بعد عدة محاولات")
-          this.triggerError("MAX_RETRIES", "Failed after maximum retries")
-        }
-      }, 3000)
-    })
-
-    this.connection.onreconnecting((error) => {
-      console.log("🔄 [SignalR] جاري إعادة الاتصال...", error)
-    })
-
-    this.connection.onreconnected((connectionId) => {
-      console.log("✅ [SignalR] تم إعادة الاتصال بنجاح! ID:", connectionId)
-      this.reconnectAttempts = 0
-    })
-  }
-
-  // ✅ دالة بدء الاتصال المحسّنة
-  async start() {
-    if (!this.connection) {
-      this.initializeConnection()
-    }
-
-    if (!this.connection) {
-      console.error("❌ فشل إنشاء الاتصال - تحقق من التوكن")
-      return false
-    }
-
-    if (
-      this.isConnecting ||
-      this.connection?.state === signalR.HubConnectionState.Connected
-    ) {
-      console.log("⚠️ الاتصال شغال فعلاً أو جاري الاتصال")
-      return true
-    }
-
-    this.isConnecting = true
-
-    try {
-      console.log("🚀 [SignalR] محاولة الاتصال...")
-      await this.connection.start()
-      console.log(
-        "✅ [SignalR] تم الاتصال بنجاح! ID:",
-        this.connection.connectionId
-      )
-      this.isConnecting = false
-      this.reconnectAttempts = 0
-      return true
-    } catch (error) {
-      console.error("❌ [SignalR] فشل الاتصال:", error)
-      console.error("تفاصيل الخطأ:", {
-        message: error.message,
-        statusCode: error.statusCode,
-        stack: error.stack,
-      })
-      this.isConnecting = false
-
-      // تحليل نوع الخطأ
-      if (error.message?.includes("401") || error.statusCode === 401) {
-        console.error("❌ التوكن غير صالح أو منتهي الصلاحية!")
-        this.triggerError("UNAUTHORIZED", "Token is invalid or expired")
-      } else if (error.message?.includes("Failed to fetch")) {
-        console.error("❌ خطأ في الشبكة - تحقق من الاتصال بالإنترنت")
-        this.triggerError("NETWORK_ERROR", "Network connection failed")
-      } else if (error.message?.includes("CORS")) {
-        console.error("❌ خطأ CORS - تحقق من إعدادات السيرفر")
-        this.triggerError("CORS_ERROR", "CORS policy error")
-      }
-
-      return false
-    }
-  }
-
-  async stop() {
-    if (
-      this.connection &&
-      this.connection.state !== signalR.HubConnectionState.Disconnected
-    ) {
-      try {
-        await this.connection.stop()
-        console.log("🛑 [SignalR] تم إيقاف الاتصال")
-      } catch (error) {
-        console.error("❌ خطأ في إيقاف الاتصال:", error)
-      }
-    }
-  }
-
-  onNotification(handler) {
-    this.notificationHandlers.push(handler)
-    return () => {
-      const index = this.notificationHandlers.indexOf(handler)
-      if (index > -1) {
-        this.notificationHandlers.splice(index, 1)
-      }
-    }
-  }
-
-  // ✅ دالة جديدة للاستماع للأخطاء
-  onError(handler) {
-    this.errorHandlers.push(handler)
-    return () => {
-      const index = this.errorHandlers.indexOf(handler)
-      if (index > -1) {
-        this.errorHandlers.splice(index, 1)
-      }
-    }
-  }
-
-  // ✅ دالة تفعيل الأخطاء
-  triggerError(code, message) {
-    this.errorHandlers.forEach((handler) => {
-      try {
-        handler({ code, message })
-      } catch (error) {
-        console.error("❌ خطأ في معالجة الخطأ:", error)
-      }
-    })
+    return token
   }
 
   getConnectionState() {
@@ -222,13 +44,255 @@ class SignalRService {
   }
 
   isConnected() {
-    return this.connection?.state === signalR.HubConnectionState.Connected
+    return this.getConnectionState() === signalR.HubConnectionState.Connected
+  }
+
+  emitState(error = null) {
+    const payload = {
+      state: this.getConnectionState(),
+      isConnected: this.isConnected(),
+      connectionId: this.connection?.connectionId || null,
+      error,
+    }
+
+    this.stateHandlers.forEach((handler) => {
+      try {
+        handler(payload)
+      } catch (handlerError) {
+        console.error("[SignalR] state handler error:", handlerError)
+      }
+    })
+  }
+
+  triggerError(code, message, rawError = null) {
+    const payload = { code, message, rawError }
+
+    this.errorHandlers.forEach((handler) => {
+      try {
+        handler(payload)
+      } catch (handlerError) {
+        console.error("[SignalR] error handler error:", handlerError)
+      }
+    })
+
+    this.emitState(payload)
+  }
+
+  normalizeNotification(payload) {
+    const data = payload?.data || payload?.notification || payload
+
+    return {
+      ...data,
+      id:
+        data?.id ||
+        data?.notificationId ||
+        data?.NotificationId ||
+        `realtime-${Date.now()}`,
+      title:
+        data?.title ||
+        data?.titleEn ||
+        data?.titleAr ||
+        "New notification",
+      message: data?.message || data?.messageEn || data?.messageAr || "",
+      isRead: data?.isRead ?? false,
+      createdAt: data?.createdAt || data?.timestamp || new Date().toISOString(),
+      receivedAt: new Date().toISOString(),
+      isRealtime: true,
+    }
+  }
+
+  initializeConnection() {
+    if (this.connection) return true
+
+    if (!this.hubUrl) {
+      console.error("[SignalR] ❌ VITE_SIGNALR_HUB_URL is not defined in .env")
+      this.triggerError(
+        "NO_HUB_URL",
+        "VITE_SIGNALR_HUB_URL is missing in environment variables"
+      )
+      return false
+    }
+
+    const token = this.getToken()
+    if (!token) {
+      this.triggerError("NO_TOKEN", "Authentication token not found")
+      return false
+    }
+
+    console.log("[SignalR] 🔗 Initializing connection to:", this.hubUrl)
+
+    // ✅ FIX 2: Remove explicit transport flags — let SignalR negotiate automatically.
+    // Forcing transport bitmask caused handshake failures with some server configs.
+    this.connection = new signalR.HubConnectionBuilder()
+      .withUrl(this.hubUrl, {
+        accessTokenFactory: this.getToken,
+        // ✅ No transport restriction — let it try WebSockets → SSE → LongPolling
+      })
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 15000, 30000])
+      .configureLogging(
+        import.meta.env.MODE === "development"
+          ? signalR.LogLevel.Information
+          : signalR.LogLevel.Warning
+      )
+      .build()
+
+    // ✅ Register all event name variants to handle case differences
+    this.eventNames.forEach((eventName) => {
+      this.connection.on(eventName, (payload) => {
+        console.log(`[SignalR] 📨 Event received on "${eventName}":`, payload)
+        const notification = this.normalizeNotification(payload)
+
+        this.notificationHandlers.forEach((handler) => {
+          try {
+            handler(notification)
+          } catch (handlerError) {
+            console.error("[SignalR] notification handler error:", handlerError)
+          }
+        })
+      })
+    })
+
+    this.connection.onreconnecting((error) => {
+      console.warn("[SignalR] 🔄 Reconnecting...", error)
+      this.isConnecting = false
+      this.emitState(error)
+    })
+
+    this.connection.onreconnected((connectionId) => {
+      console.log("[SignalR] ✅ Reconnected! ConnectionId:", connectionId)
+      this.isConnecting = false
+      this.emitState(null)
+    })
+
+    this.connection.onclose((error) => {
+      console.warn("[SignalR] 🔌 Connection closed.", error)
+      this.isConnecting = false
+
+      if (
+        error?.message?.includes("401") ||
+        error?.message?.includes("Unauthorized")
+      ) {
+        this.triggerError("UNAUTHORIZED", "Token expired or invalid", error)
+        return
+      }
+
+      this.emitState(error || null)
+    })
+
+    this.emitState(null)
+    return true
+  }
+
+  async start() {
+    // ✅ FIX 3: If connection exists but is disconnected (e.g. after stop()),
+    // destroy it so initializeConnection() rebuilds it fresh with latest token.
+    if (
+      this.connection &&
+      this.connection.state === signalR.HubConnectionState.Disconnected
+    ) {
+      this.connection = null
+    }
+
+    if (!this.connection && !this.initializeConnection()) return false
+
+    if (!this.connection) return false
+
+    if (this.connection.state === signalR.HubConnectionState.Connected) {
+      this.emitState(null)
+      return true
+    }
+
+    if (
+      this.connection.state === signalR.HubConnectionState.Connecting ||
+      this.connection.state === signalR.HubConnectionState.Reconnecting ||
+      this.isConnecting
+    ) {
+      console.log("[SignalR] ⏳ Already connecting, skipping duplicate start()")
+      return true
+    }
+
+    this.isConnecting = true
+    this.emitState(null)
+
+    try {
+      console.log("[SignalR] 🚀 Starting connection...")
+      await this.connection.start()
+      this.isConnecting = false
+      console.log(
+        "[SignalR] ✅ Connected! ConnectionId:",
+        this.connection.connectionId
+      )
+      this.emitState(null)
+      return true
+    } catch (error) {
+      this.isConnecting = false
+      console.error("[SignalR] ❌ Connection failed:", error)
+
+      if (error?.message?.includes("401") || error?.statusCode === 401) {
+        this.triggerError("UNAUTHORIZED", "Token is invalid or expired", error)
+      } else if (
+        error?.message?.includes("Failed to fetch") ||
+        error?.message?.includes("ERR_CONNECTION_REFUSED")
+      ) {
+        this.triggerError("NETWORK_ERROR", "Network connection failed", error)
+      } else if (error?.message?.includes("CORS")) {
+        this.triggerError("CORS_ERROR", "CORS policy error", error)
+      } else {
+        this.triggerError(
+          "CONNECTION_ERROR",
+          error?.message || "SignalR connection failed",
+          error
+        )
+      }
+
+      return false
+    }
+  }
+
+  async stop() {
+    if (!this.connection) return
+
+    console.log("[SignalR] 🛑 Stopping connection...")
+    try {
+      if (
+        this.connection.state !== signalR.HubConnectionState.Disconnected
+      ) {
+        await this.connection.stop()
+      }
+    } finally {
+      this.connection = null
+      this.isConnecting = false
+      this.emitState(null)
+    }
   }
 
   async reconnect() {
+    console.log("[SignalR] 🔄 Manual reconnect triggered")
     await this.stop()
-    return await this.start()
+    return this.start()
+  }
+
+  onNotification(handler) {
+    this.notificationHandlers.add(handler)
+    return () => this.notificationHandlers.delete(handler)
+  }
+
+  onError(handler) {
+    this.errorHandlers.add(handler)
+    return () => this.errorHandlers.delete(handler)
+  }
+
+  onStateChange(handler) {
+    this.stateHandlers.add(handler)
+    handler({
+      state: this.getConnectionState(),
+      isConnected: this.isConnected(),
+      connectionId: this.connection?.connectionId || null,
+      error: null,
+    })
+    return () => this.stateHandlers.delete(handler)
   }
 }
 
 export const signalRService = new SignalRService()
+export default signalRService

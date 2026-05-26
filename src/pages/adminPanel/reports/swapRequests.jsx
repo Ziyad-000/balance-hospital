@@ -22,19 +22,19 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
       case "approved":
         return {
           color:
-            "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700",
+            "bg-transparent text-emerald-500 border border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
           text: t("doctorReport.swapRecords.approved"),
         }
       case "pending":
         return {
           color:
-            "bg-yellow-100 text-yellow-800 border border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700",
+            "bg-transparent text-amber-500 border border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
           text: t("doctorReport.swapRecords.pending"),
         }
       case "rejected":
         return {
           color:
-            "bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700",
+            "bg-transparent text-red-500 border border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
           text: t("doctorReport.swapRecords.rejected"),
         }
       default:
@@ -61,7 +61,7 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <RefreshCw className="w-5 h-5 text-purple-700 dark:text-purple-300 flex-shrink-0" />
+            <RefreshCw className="w-5 h-5 text-violet-500 dark:text-violet-500 flex-shrink-0" />
 
             <div className="flex-1 min-w-0 text-start">
               <div className="font-bold text-[var(--color-text)] truncate">
@@ -82,9 +82,9 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
             </span>
 
             {isCollapsed ? (
-              <ChevronRight className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+              <ChevronRight className="h-5 w-5 text-slate-500 dark:text-slate-500" />
             ) : (
-              <ChevronDown className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+              <ChevronDown className="h-5 w-5 text-slate-500 dark:text-slate-500" />
             )}
           </div>
         </div>
@@ -95,7 +95,7 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <InfoBox
               icon={Calendar}
-              iconClass="text-blue-700 dark:text-blue-300"
+              iconClass="text-blue-500 dark:text-blue-500"
               label={t("doctorReport.swapRecords.dateRange")}
               value={`${formatDate(swap.fromDate)} - ${formatDate(
                 swap.toDate
@@ -104,7 +104,7 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
 
             <InfoBox
               icon={Clock}
-              iconClass="text-green-700 dark:text-green-300"
+              iconClass="text-emerald-500 dark:text-emerald-500"
               label={t("doctorReport.swapRecords.shiftType")}
               value={getLocalized(swap.shiftTypeNameAr, swap.shiftTypeNameEn)}
             />
@@ -112,7 +112,7 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
 
           <InfoBox
             icon={Building}
-            iconClass="text-orange-700 dark:text-orange-300"
+            iconClass="text-orange-500 dark:text-orange-500"
             label={t("doctorReport.swapRecords.department")}
             value={getLocalized(swap.departmentNameAr, swap.departmentNameEn)}
           />
@@ -120,7 +120,7 @@ const CollapsibleSwapCard = ({ swap, currentLang, t, formatDate }) => {
           {swap.reason && (
             <InfoBox
               icon={FileText}
-              iconClass="text-slate-700 dark:text-slate-300"
+              iconClass="text-slate-500 dark:text-slate-500"
               label={t("doctorReport.swapRecords.reason")}
               value={swap.reason}
               multiline
@@ -170,12 +170,12 @@ export const SwapRecordsSection = ({ report, currentLang, t, formatDate }) => {
 
   const StatBox = ({ value, label, tone }) => {
     const tones = {
-      total: "bg-slate-100 text-slate-800 dark:bg-slate-800/80 dark:text-slate-200",
+      total: "bg-transparent text-slate-500 dark:bg-transparent dark:text-slate-500",
       approved:
-        "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200",
+        "bg-transparent text-emerald-500 dark:bg-transparent dark:text-emerald-500",
       pending:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200",
-      rejected: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200",
+        "bg-transparent text-amber-500 dark:bg-transparent dark:text-amber-500",
+      rejected: "bg-transparent text-red-500 dark:bg-transparent dark:text-red-500",
     }
 
     return (
@@ -190,7 +190,7 @@ export const SwapRecordsSection = ({ report, currentLang, t, formatDate }) => {
     <div className={`${theme.card} p-6`}>
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
-          <Users className="w-5 h-5 text-purple-700 dark:text-purple-300" />
+          <Users className="w-5 h-5 text-violet-500 dark:text-violet-500" />
 
           <h3 className="text-lg font-extrabold text-[var(--color-text)]">
             {t("doctorReport.swapRecords.title")}
@@ -235,7 +235,7 @@ export const SwapRecordsSection = ({ report, currentLang, t, formatDate }) => {
         </div>
       ) : (
         <div className="text-center py-8">
-          <Users className="w-12 h-12 mx-auto mb-3 text-slate-500 dark:text-slate-300" />
+          <Users className="w-12 h-12 mx-auto mb-3 text-slate-5000 dark:text-slate-500" />
           <p className="text-sm text-[var(--color-text-muted)]">
             {t("doctorReport.swapRecords.noRecords")}
           </p>

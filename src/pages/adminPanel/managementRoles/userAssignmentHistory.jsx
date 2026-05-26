@@ -99,9 +99,9 @@ function UserAssignmentHistory() {
   const getChangeTypeStyle = (changeType) => {
     switch (changeType?.toLowerCase()) {
       case "إلغاء":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+        return "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
       case "تعيين":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+        return "bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500"
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
     }
@@ -174,7 +174,7 @@ function UserAssignmentHistory() {
             {/* Stats */}
             {userAssignmentHistoryPagination?.totalCount > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-transparent text-blue-500 border-2 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500">
                   <History size={14} className="inline mr-1" />
                   {userAssignmentHistoryPagination.totalCount}{" "}
                   {t("managementRoles.userHistory.entries") ||
@@ -268,7 +268,7 @@ function UserAssignmentHistory() {
                                     }`}
                                   >
                                     {t("managementRoles.history.by") || "by"}{" "}
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                                    <span className="font-medium text-blue-500 dark:text-blue-500">
                                       {entry.changedByName}
                                     </span>
                                   </span>
@@ -462,7 +462,7 @@ function UserAssignmentHistory() {
                                     onClick={() => handlePageChange(pageNum)}
                                     className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                                       pageNum === historyFilters.page
-                                        ? "z-10 bg-blue-50 border-blue-500 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
+                                        ? "z-10 bg-blue-50 border-blue-500 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
                                         : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                                     }`}
                                   >

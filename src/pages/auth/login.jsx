@@ -1,553 +1,681 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Formik, Form, Field, ErrorMessage } from "formik"
-import * as Yup from "yup"
-import { logIn } from "../../state/act/actAuth"
 import { useDispatch, useSelector } from "react-redux"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { toast } from "react-toastify"
 import Swal from "sweetalert2"
 import i18next from "i18next"
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Lock,
+  LogIn,
+  Mail,
+  ShieldCheck,
+  User,
+} from "lucide-react"
+
+import { logIn } from "../../state/act/actAuth"
 import UseInitialValues from "../../hooks/use-initial-values"
 import UseFormValidation from "../../hooks/use-form-validation"
 import UseDirection from "../../hooks/use-direction"
-import { useNavigate } from "react-router-dom"
-
-import useDirection from "../../hooks/use-direction"
 import { signalRService } from "../../services/signalRService"
 
-const UserIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-)
+const getApiData = (payload) => payload?.data || payload || {}
 
-const MailIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-    <polyline points="22,6 12,13 2,6"></polyline>
-  </svg>
-)
+const getApiUser = (payload) => {
+  const data = getApiData(payload)
+  return data?.user || null
+}
 
-const LockIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-    <circle cx="12" cy="16" r="1"></circle>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-  </svg>
-)
+const getApiMessage = (payload, currentLang, fallback) => {
+  return currentLang === "ar"
+    ? payload?.messageAr ||
+        payload?.data?.messageAr ||
+        payload?.message ||
+        fallback
+    : payload?.messageEn ||
+        payload?.data?.messageEn ||
+        payload?.message ||
+        fallback
+}
 
-const EyeIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-    <circle cx="12" cy="12" r="3"></circle>
-  </svg>
-)
+const getErrorMessage = (error, currentLang, fallback) => {
+  const data = error?.data || error?.response?.data || error?.raw?.response?.data
 
-const EyeOffIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-    <line x1="1" y1="1" x2="23" y2="23"></line>
-  </svg>
-)
+  if (currentLang === "ar") {
+    return (
+      data?.messageAr ||
+      error?.message ||
+      data?.message ||
+      error?.response?.data?.messageAr ||
+      fallback
+    )
+  }
+
+  return (
+    data?.messageEn ||
+    error?.message ||
+    data?.message ||
+    error?.response?.data?.messageEn ||
+    fallback
+  )
+}
+
+const isSystemAdministrator = (role) => {
+  const roleEn = role?.roleNameEn || ""
+  const roleAr = role?.roleNameAr || ""
+
+  return (
+    roleEn === "System Administrator" ||
+    roleEn.toLowerCase().includes("system administrator") ||
+    roleAr === "مدير النظام"
+  )
+}
+
+const isHybridHead = (role) => {
+  const roleEn = role?.roleNameEn || ""
+  const roleAr = role?.roleNameAr || ""
+
+  return (
+    roleEn === "Category & Department Head" ||
+    roleEn.toLowerCase().includes("category & department") ||
+    roleAr.includes("رئيس تخصص وقسم")
+  )
+}
+
+const isDepartmentManager = (role) => {
+  const roleEn = role?.roleNameEn || ""
+  const roleAr = role?.roleNameAr || ""
+
+  return (
+    roleEn === "Department Manager" ||
+    roleEn === "Department Head" ||
+    roleEn.toLowerCase().includes("department") ||
+    roleAr.includes("مدير قسم") ||
+    roleAr.includes("رئيس قسم")
+  )
+}
+
+const isCategoryManager = (role) => {
+  const roleEn = role?.roleNameEn || ""
+  const roleAr = role?.roleNameAr || ""
+
+  return (
+    roleEn === "Category Manager" ||
+    roleEn === "Category Head" ||
+    roleEn.toLowerCase().includes("category") ||
+    roleAr.includes("رئيس تخصص") ||
+    roleAr.includes("مدير تخصص")
+  )
+}
+
+const getRoleTargetPath = (user) => {
+  const role = user?.loginRoleResponseDto
+  const departmentManager = user?.departmentManager
+  const categoryManager = user?.categoryManager
+
+  if (isHybridHead(role)) {
+    return "/specify-role"
+  }
+
+  if (isSystemAdministrator(role)) {
+    return "/admin-panel/dashboard"
+  }
+
+  if (isDepartmentManager(role) && departmentManager?.departmentId) {
+    return `/admin-panel/department/${departmentManager.departmentId}`
+  }
+
+  if (isCategoryManager(role) && categoryManager?.categoryId) {
+    return `/admin-panel/category/${categoryManager.categoryId}`
+  }
+
+  if (user?.userId) {
+    return `/admin-panel/doctors/${user.userId}`
+  }
+
+  return "/admin-panel/dashboard"
+}
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
-  const { t } = useTranslation()
-  const { loadingAuth } = useSelector((state) => state.auth)
-  const { mymode } = useSelector((state) => state.mode)
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
-  // Initial form values
+  const { loadingAuth } = useSelector((state) => state.auth)
+  const { mymode } = useSelector((state) => state.mode)
+
+  const currentLang = i18next.language || "ar"
+  const isDark = mymode === "dark"
+
   const { INITIAL_VALUES_LOGIN } = UseInitialValues()
-  const currentLang = i18next.language
-
-  const { direction } = UseDirection()
-  const isRTL = direction.direction === "rtl"
-
-  // Yup validation schema
   const { VALIDATION_SCHEMA_LOGIN } = UseFormValidation()
+  const { direction } = UseDirection()
 
-  const [selectedRole, setSelectedRole] = useState(null)
+  const isRTL = direction?.direction === "rtl" || currentLang === "ar"
 
-  const handleRoleSelect = (roleId) => {
-    setSelectedRole(roleId)
-    // Handle navigation or next steps
-    console.log("Selected role:", roleId)
+  const theme = useMemo(() => {
+    return {
+      page: isDark
+        ? "min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]"
+        : "min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]",
+
+      card: isDark
+        ? "bg-[var(--color-surface)] border border-[var(--color-border-strong)] shadow-2xl shadow-black/30"
+        : "bg-[var(--color-surface)] border border-[var(--color-border-strong)] shadow-2xl shadow-slate-200/70",
+
+      cardSoft:
+        "bg-[var(--color-bg-soft)] border border-[var(--color-border)]",
+
+      title: "text-[var(--color-text)]",
+      subtitle: "text-[var(--color-text-muted)]",
+
+      input:
+        "w-full rounded-xl border bg-[var(--color-surface)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] text-sm font-bold outline-none transition-all focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10",
+
+      inputNormal: "border-[var(--color-border)]",
+      inputError: "border-red-500 focus:border-red-500 focus:ring-red-500/10",
+
+      label: "text-sm font-black text-[var(--color-text)]",
+
+      primaryButton:
+        "w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-success)] px-5 py-3 text-sm font-black text-white border border-emerald-500 shadow-sm transition-all hover:bg-[var(--color-success-hover)] disabled:opacity-60 disabled:cursor-not-allowed",
+
+      secondaryButton:
+        "inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-surface)] px-4 py-2 text-sm font-black text-[var(--color-text)] border border-[var(--color-border-strong)] transition-all hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500",
+
+      link: "font-black text-blue-500 hover:text-blue-600 transition-colors",
+
+      danger: "text-red-500",
+      success: "text-emerald-500",
+      blue: "text-blue-500",
+      violet: "text-violet-500",
+      amber: "text-amber-500",
+      muted: "text-[var(--color-text-muted)]",
+    }
+  }, [isDark])
+
+  const getIconState = ({ hasValue, hasFocus, hasError }) => {
+    if (hasError) return "error"
+    if (hasFocus) return "focused"
+    if (hasValue) return "filled"
+    return "default"
   }
 
-  // Handle form submission
+  const getIconClass = (state) => {
+    const base = "w-4 h-4 transition-all duration-200"
+
+    switch (state) {
+      case "error":
+        return `${base} text-red-500`
+      case "focused":
+        return `${base} text-blue-500`
+      case "filled":
+        return `${base} text-emerald-500`
+      default:
+        return `${base} text-slate-500`
+    }
+  }
+
+  const getInputPadding = (_hasRightIcon = false) => ""
+
+  const startSignalR = async () => {
+    try {
+      const connected = await signalRService.start()
+
+      if (!connected) {
+        console.warn("SignalR connection failed")
+      }
+    } catch (error) {
+      console.warn("SignalR connection error:", error)
+    }
+  }
+
+  
+  const showLoginError = (error) => {
+    Swal.fire({
+      title: t("login.error.title") || "Login failed",
+      text: getErrorMessage(
+        error,
+        currentLang,
+        t("login.error.message") || "Invalid login credentials"
+      ),
+      icon: "error",
+      confirmButtonText: t("common.ok") || "OK",
+      confirmButtonColor: "#ef4444",
+      background: isDark ? "#111827" : "#ffffff",
+      color: isDark ? "#f9fafb" : "#111827",
+    })
+  }
+
   const handleSubmit = async (values, { setSubmitting }) => {
-    dispatch(
-      logIn({
-        emailOrMobile: values.email,
-        password: values.password,
-        rememberMe: values.rememberMe,
-      })
-    )
-      .unwrap()
-      .then((data) => {
-        toast.success(t("login.success"), {
+    try {
+      const response = await dispatch(
+        logIn({
+          emailOrMobile: values.email,
+          password: values.password,
+          rememberMe: Boolean(values.rememberMe),
+        })
+      ).unwrap()
+
+      const user = getApiUser(response)
+
+      toast.success(
+        getApiMessage(
+          response,
+          currentLang,
+          t("login.success") || "Logged in successfully"
+        ),
+        {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2500,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-        })
-        console.log("data", data.data.user)
-
-        signalRService
-          .start()
-          .then((connected) => {
-            if (connected) {
-              console.log("✅ SignalR connected successfully!")
-            } else {
-              console.warn("⚠️ SignalR connection failed")
-            }
-          })
-          .catch((error) => {
-            console.error("❌ SignalR connection error:", error)
-          })
-
-        localStorage.setItem(
-          "categoryArabicName",
-          data.data.user.categoryManager?.categoryNameAr
-        )
-        localStorage.setItem(
-          "categoryEnglishName",
-          data.data.user.categoryManager?.categoryNameEn
-        )
-        localStorage.setItem(
-          "departmentArabicName",
-          data.data.user.departmentManager?.departmentNameAr
-        )
-        localStorage.setItem(
-          "departmentEnglishName",
-          data.data.user.departmentManager?.departmentNameEn
-        )
-        if (
-          data.data.user.loginRoleResponseDto.roleNameEn ==
-          "Category & Department Head"
-        ) {
-          navigate("/specify-role")
-        } else if (
-          data.data.user.loginRoleResponseDto.roleNameAr === "مدير قسم" &&
-          data.data.user.departmentManager?.departmentId
-        ) {
-          console.log("hello dep head", data.data.user.departmentManager)
-          navigate(
-            `/admin-panel/department/${data.data.user.departmentManager?.departmentId}`
-          )
-        } else if (
-          data.data.user.loginRoleResponseDto.roleNameAr === "رئيس تخصص" &&
-          data.data.user.categoryManager?.categoryId
-        ) {
-          console.log("hello cat head")
-          navigate(
-            `/admin-panel/category/${data.data.user.categoryManager?.categoryId}`
-          )
-        } else if (
-          data.data.user.loginRoleResponseDto.roleNameAr === "مدير النظام"
-        ) {
-          console.log("hello cat head")
-          navigate(`/admin-panel/dashboard`)
-        } else {
-          navigate(`/admin-panel/doctors/${data.data.user.userId}`)
         }
-      })
-      .catch((error) => {
-        console.log("error", error)
-        // Error handling with SweetAlert
-        Swal.fire({
-          title: t("login.error.title"),
-          text:
-            currentLang === "en"
-              ? error?.response?.data?.messageEn
-              : error?.response?.data?.messageAr || t("login.error.message"),
-          icon: "error",
-          confirmButtonText: t("common.ok"),
-          confirmButtonColor: "#ef4444",
-          background: mymode === "dark" ? "#1f2937" : "#ffffff",
-          color: mymode === "dark" ? "#f9fafb" : "#111827",
-        })
-      })
-  }
+      )
 
-  // Generate margin class based on direction
-  const getMarginClass = () => {
-    return isRTL ? "mr-2" : "ml-2"
-  }
+      startSignalR()
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+      navigate(getRoleTargetPath(user))
+    } catch (error) {
+      const errorStatus = error?.status || error?.response?.status
+      const errorMessage =
+        error?.message ||
+        error?.data?.messageEn ||
+        error?.data?.messageAr ||
+        error?.response?.data?.messageEn ||
+        error?.response?.data?.messageAr ||
+        ""
 
-  // Enhanced icon state logic
-  const getIconState = (fieldName, hasValue, hasFocus, hasError) => {
-    if (hasError) {
-      return "error"
-    }
-    if (hasFocus) {
-      return "focused"
-    }
-    if (hasValue) {
-      return "filled"
-    }
-    return "default"
-  }
+      const normalizedMessage = String(errorMessage).toLowerCase()
+      const identifier = values.email?.trim()
 
-  // Theme-based classes
-  const getThemeClasses = () => {
-    const isDark = mymode === "dark"
-    return {
-      container: isDark
-        ? "bg-gray-900 text-gray-100"
-        : "bg-gray-50 text-gray-900",
-      card: isDark
-        ? "bg-gray-800 border-gray-700 shadow-xl"
-        : "bg-white border-gray-200 shadow-lg",
-      iconContainer: isDark
-        ? "bg-gray-700 text-gray-300"
-        : "bg-gray-100 text-gray-600",
-      title: isDark ? "text-gray-100" : "text-gray-900",
-      subtitle: isDark ? "text-gray-400" : "text-gray-600",
-      label: isDark ? "text-gray-200" : "text-gray-700",
-      input: isDark
-        ? "bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus:ring-blue-500 focus:border-blue-500"
-        : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:ring-blue-500 focus:border-blue-500",
-      inputError: isDark
-        ? "border-red-500 focus:ring-red-500"
-        : "border-red-500 focus:ring-red-500",
-      // Enhanced icon states
-      iconDefault: isDark ? "text-gray-500" : "text-gray-400",
-      iconFocused: isDark ? "text-blue-400" : "text-blue-500",
-      iconFilled: isDark ? "text-gray-300" : "text-gray-600",
-      iconError: isDark ? "text-red-400" : "text-red-500",
-      iconHover: isDark ? "hover:text-gray-300" : "hover:text-gray-600",
-      checkbox: isDark
-        ? "bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-        : "bg-gray-100 border-gray-300 text-blue-600 focus:ring-blue-500",
-      button: isDark
-        ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-        : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
-      link: isDark
-        ? "text-blue-400 hover:text-blue-300"
-        : "text-blue-600 hover:text-blue-700",
+      const shouldGoToVerification =
+        errorStatus === 403 &&
+        (normalizedMessage.includes("verify your email") ||
+          normalizedMessage.includes("email first") ||
+          normalizedMessage.includes("email verification") ||
+          normalizedMessage.includes("تفعيل البريد") ||
+          normalizedMessage.includes("تأكيد البريد"))
+
+      if (shouldGoToVerification) {
+        const identifier = values.email?.trim()
+
+        if (identifier?.includes("@")) {
+          localStorage.setItem("pendingVerificationEmail", identifier)
+          localStorage.setItem("signupEmail", identifier)
+          navigate("/verify-email", { state: { email: identifier } })
+        } else {
+          localStorage.setItem("pendingVerificationMobile", identifier)
+          localStorage.setItem("signupMobile", identifier)
+          navigate("/verify-email", { state: { mobile: identifier } })
+        }
+
+        return
+      }
+
+      showLoginError(error)
+    } finally {
+      setSubmitting(false)
     }
   }
-
-  const themeClasses = getThemeClasses()
-
-  // Helper function to get directional classes
-  const getDirectionalClasses = () => {
-    return {
-      // Icon positioning classes
-      iconLeft: isRTL ? "right-0 pr-3" : "left-0 pl-3",
-      iconRight: isRTL ? "left-0 pl-3" : "right-0 pr-3",
-      // Input padding classes
-      inputPaddingWithLeftIcon: isRTL ? "pr-9 pl-3" : "pl-9 pr-3",
-      inputPaddingWithBothIcons: isRTL ? "pr-9 pl-10" : "pl-9 pr-10",
-    }
-  }
-
-  const directionalClasses = getDirectionalClasses()
-
-  // Get icon classes based on state
-  const getIconClasses = (iconState) => {
-    const baseClasses = "transition-all duration-300 ease-in-out transform"
-
-    switch (iconState) {
-      case "focused":
-        return `${baseClasses} ${themeClasses.iconFocused} scale-105 drop-shadow-sm`
-      case "filled":
-        return `${baseClasses} ${themeClasses.iconFilled} scale-100`
-      case "error":
-        return `${baseClasses} ${themeClasses.iconError} scale-105 animate-pulse`
-      default:
-        return `${baseClasses} ${themeClasses.iconDefault} scale-95`
-    }
-  }
-
-  const leftStyle = `${direction.left}-[100%]`
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-200 ${themeClasses.container}`}
-      dir={direction.direction}
-    >
-      <div className="w-full max-w-sm">
-        <div
-          className={`signin-card rounded-lg p-6 transition-all duration-200 ${themeClasses.card}`}
-        >
-          <div className="text-center mb-6">
-            <div
-              className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 transition-colors duration-200 ${themeClasses.iconContainer}`}
-            >
-              <UserIcon />
-            </div>
-            <h1
-              className={`text-2xl font-semibold mb-2 transition-colors duration-200 ${themeClasses.title}`}
-            >
-              {t("login.title")}
-            </h1>
-            <p
-              className={`text-sm transition-colors duration-200 ${themeClasses.subtitle}`}
-            >
-              {t("login.subtitle")}
-            </p>
-          </div>
-          <Formik
-            initialValues={INITIAL_VALUES_LOGIN}
-            validationSchema={VALIDATION_SCHEMA_LOGIN}
-            onSubmit={handleSubmit}
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div
+            className={`${theme.card} rounded-3xl p-8 sm:p-10 flex flex-col justify-between overflow-hidden relative`}
           >
-            {({ isSubmitting, errors, touched, values }) => (
-              <Form className="space-y-4">
-                {/* Email Field */}
-                <div className="space-y-2 group">
-                  <label
-                    className={`text-sm font-medium transition-colors duration-200 ${themeClasses.label}`}
-                  >
-                    {t("login.email")}
-                  </label>
+            <div className="absolute inset-0 pointer-events-none opacity-40">
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
+            </div>
 
-                  <div className="flex items-center space-x-2">
-                    {/* Icon Container - Completely separate from input */}
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-md border transition-all duration-200 ${getIconClasses(
-                        getIconState(
-                          "email",
-                          values.email,
-                          focusedField === "email",
-                          errors.email && touched.email
-                        )
-                      )} ${
-                        errors.email && touched.email
-                          ? themeClasses.inputError
-                          : themeClasses.input
-                      }`}
-                    >
-                      <MailIcon />
-                    </div>
+            <div className="relative">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl border-2 border-blue-500 bg-transparent mb-6">
+                <ShieldCheck className="w-8 h-8 text-blue-500" />
+              </div>
 
-                    {/* Input Container */}
-                    <div className="relative flex-1">
-                      <Field
-                        type="email"
-                        name="email"
-                        placeholder={t("login.emailPlaceholder")}
-                        onFocus={() => setFocusedField("email")}
-                        onBlur={() => setFocusedField(null)}
-                        className={`signin-input w-full px-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 group-focus-within:shadow-sm ${
-                          errors.email && touched.email
-                            ? themeClasses.inputError
-                            : `${themeClasses.input}`
-                        }`}
-                      />
+              <h1 className={`text-3xl sm:text-4xl font-black ${theme.title}`}>
+                {currentLang === "ar"
+                  ? "مرحبًا بك في Balance"
+                  : "Welcome to Balance"}
+              </h1>
 
-                      {/* Field state indicator */}
-                      {values.email && !errors.email && (
-                        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                          <div
-                            className={`w-1.5 h-1.5 rounded-full ${themeClasses.iconFocused} animate-pulse`}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              <p
+                className={`mt-4 text-sm sm:text-base font-bold leading-7 ${theme.subtitle}`}
+              >
+                {currentLang === "ar"
+                  ? "سجّل الدخول لإدارة الجداول، الروسترات، الحضور، الأقسام، والتقارير من مكان واحد."
+                  : "Sign in to manage schedules, rosters, attendance, departments, and reports from one place."}
+              </p>
 
-                  <ErrorMessage
-                    name="email"
-                    component="div"
-                    className="text-red-500 text-xs mt-1 animate-in slide-in-from-top-1 duration-200"
-                  />
-                </div>
-                {/* Password Field */}
-                <div className="space-y-2 group">
-                  <label
-                    className={`text-sm font-medium transition-colors duration-200 ${themeClasses.label}`}
-                  >
-                    {t("login.password")}
-                  </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
+                <InfoCard
+                  icon={User}
+                  title={currentLang === "ar" ? "الأطباء" : "Doctors"}
+                  value={currentLang === "ar" ? "إدارة" : "Manage"}
+                  tone="blue"
+                />
 
-                  <div className="flex items-center space-x-2">
-                    {/* Lock Icon Container - Completely separate from input */}
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-md border transition-all duration-200 ${getIconClasses(
-                        getIconState(
-                          "password",
-                          values.password,
-                          focusedField === "password",
-                          errors.password && touched.password
-                        )
-                      )} ${
-                        errors.password && touched.password
-                          ? themeClasses.inputError
-                          : themeClasses.input
-                      }`}
-                    >
-                      <LockIcon />
-                    </div>
+                <InfoCard
+                  icon={CheckCircle}
+                  title={currentLang === "ar" ? "الحضور" : "Attendance"}
+                  value={currentLang === "ar" ? "متابعة" : "Track"}
+                  tone="emerald"
+                />
 
-                    {/* Input Container */}
-                    <div className="relative flex-1">
-                      <Field
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        placeholder={t("login.passwordPlaceholder")}
-                        onFocus={() => setFocusedField("password")}
-                        onBlur={() => setFocusedField(null)}
-                        className={`signin-input w-full pl-4 pr-12 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 group-focus-within:shadow-sm ${
-                          errors.password && touched.password
-                            ? themeClasses.inputError
-                            : `${themeClasses.input}`
-                        }`}
-                      />
+                <InfoCard
+                  icon={ShieldCheck}
+                  title={currentLang === "ar" ? "الصلاحيات" : "Roles"}
+                  value={currentLang === "ar" ? "تحكم" : "Control"}
+                  tone="violet"
+                />
+              </div>
+            </div>
 
-                      {/* Eye toggle button - stays inside input */}
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        style={{ [direction.left]: "100%" }}
-                        className={`absolute inset-y-0  flex items-center transition-all duration-200 z-10 ${
-                          focusedField === "password"
-                            ? themeClasses.iconFocused
-                            : themeClasses.iconDefault
-                        } ${
-                          themeClasses.iconHover
-                        } hover:scale-110 focus:outline-none focus:scale-110`}
-                      >
-                        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                      </button>
+            <div className="relative mt-10">
+              <div className={`${theme.cardSoft} rounded-2xl p-4`}>
+                <p className={`text-xs font-black ${theme.subtitle}`}>
+                  {currentLang === "ar" ? "نصيحة أمان" : "Security Tip"}
+                </p>
+                <p className={`mt-1 text-sm font-bold ${theme.title}`}>
+                  {currentLang === "ar"
+                    ? "لا تشارك بيانات الدخول أو كود التحقق مع أي شخص."
+                    : "Never share your login credentials or verification code."}
+                </p>
+              </div>
+            </div>
+          </div>
 
-                      {/* Field state indicator - positioned before eye button */}
-                      {values.password && !errors.password && (
-                        <div className="absolute inset-y-0 right-10 flex items-center pointer-events-none">
-                          <div
-                            className={`w-1.5 h-1.5 rounded-full ${themeClasses.iconFocused} animate-pulse`}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="text-red-500 text-xs mt-1 animate-in slide-in-from-top-1 duration-200"
-                  />
+          <div className={`${theme.card} rounded-3xl p-6 sm:p-8`}>
+            <div className="mb-8">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl border-2 border-emerald-500 bg-transparent">
+                  <LogIn className="w-6 h-6 text-emerald-500" />
                 </div>
 
-                {/* Remember Me */}
-                <div className="flex items-center group">
-                  <Field
-                    type="checkbox"
-                    name="rememberMe"
-                    id="rememberMe"
-                    className={`w-4 h-4 rounded focus:ring-2 transition-all duration-200 hover:scale-105 ${themeClasses.checkbox}`}
-                  />
-                  <label
-                    htmlFor="rememberMe"
-                    className={`text-sm font-medium transition-colors duration-200 cursor-pointer ${
-                      themeClasses.label
-                    } ${getMarginClass()} group-hover:${
-                      themeClasses.iconFocused
-                    }`}
-                  >
-                    {t("login.rememberMe")}
-                  </label>
+                <div>
+                  <h2 className={`text-2xl font-black ${theme.title}`}>
+                    {t("login.title") || "Login"}
+                  </h2>
+                  <p className={`text-sm font-bold mt-1 ${theme.subtitle}`}>
+                    {t("login.subtitle") ||
+                      (currentLang === "ar"
+                        ? "أدخل بيانات حسابك للمتابعة"
+                        : "Enter your account details to continue")}
+                  </p>
                 </div>
+              </div>
+            </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loadingAuth || isSubmitting}
-                  className={`w-full disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] ${themeClasses.button}`}
-                >
-                  {loadingAuth || isSubmitting ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {t("login.loading")}
-                    </div>
-                  ) : (
-                    t("login.button")
-                  )}
-                </button>
-              </Form>
-            )}
-          </Formik>
-
-          <div className="mt-6 text-center">
-            <Link
-              to="/forget-password"
-              className={`font-medium hover:underline transition-all duration-200 hover:scale-105 inline-block ${themeClasses.link}`}
+            <Formik
+              initialValues={INITIAL_VALUES_LOGIN}
+              validationSchema={VALIDATION_SCHEMA_LOGIN}
+              onSubmit={handleSubmit}
             >
-              {t("login.forgetPassword")}
-            </Link>
+              {({ values, errors, touched, isSubmitting }) => {
+                const emailHasError = Boolean(touched.email && errors.email)
+                const passwordHasError = Boolean(
+                  touched.password && errors.password
+                )
+
+                const emailState = getIconState({
+                  hasValue: Boolean(values.email),
+                  hasFocus: focusedField === "email",
+                  hasError: emailHasError,
+                })
+
+                const passwordState = getIconState({
+                  hasValue: Boolean(values.password),
+                  hasFocus: focusedField === "password",
+                  hasError: passwordHasError,
+                })
+
+                return (
+                  <Form className="space-y-5">
+                    <div>
+                      <label htmlFor="email" className={theme.label}>
+                        {t("login.email") ||
+                          (currentLang === "ar"
+                            ? "البريد الإلكتروني أو رقم الهاتف"
+                            : "Email or mobile")}
+                      </label>
+
+                      <div
+                        className={`flex items-stretch rounded-xl border transition-all focus-within:ring-4 ${
+                          emailHasError
+                            ? "border-red-500 focus-within:ring-red-500/10"
+                            : "border-[var(--color-border)] focus-within:border-emerald-500 focus-within:ring-emerald-500/10"
+                        }`}
+                      >
+                        <div className="flex items-center justify-center px-3 bg-[var(--color-bg-soft)] border-e border-[var(--color-border)] rounded-s-xl shrink-0">
+                          <Mail className="w-4 h-4 text-blue-500" />
+                        </div>
+
+                        <Field
+                          id="email"
+                          name="email"
+                          type="text"
+                          autoComplete="username"
+                          placeholder={
+                            t("login.emailPlaceholder") ||
+                            (currentLang === "ar"
+                              ? "اكتب البريد أو رقم الهاتف"
+                              : "Enter email or mobile")
+                          }
+                          onFocus={() => setFocusedField("email")}
+                          onBlur={(event) => {
+                            setFocusedField(null)
+                            event.target.dispatchEvent(
+                              new Event("blur", { bubbles: true })
+                            )
+                          }}
+                          className="flex-1 min-w-0 bg-transparent text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] text-sm font-bold outline-none px-3 py-3"
+                        />
+                      </div>
+
+                      <ErrorMessage
+                        name="email"
+                        component="p"
+                        className="mt-2 text-xs font-black text-red-500"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between gap-3">
+                        <label htmlFor="password" className={theme.label}>
+                          {t("login.password") ||
+                            (currentLang === "ar"
+                              ? "كلمة المرور"
+                              : "Password")}
+                        </label>
+
+                      </div>
+
+                      <div
+                        className={`flex items-stretch rounded-xl border mt-2 transition-all focus-within:ring-4 ${
+                          passwordHasError
+                            ? "border-red-500 focus-within:ring-red-500/10"
+                            : "border-[var(--color-border)] focus-within:border-emerald-500 focus-within:ring-emerald-500/10"
+                        }`}
+                      >
+                        <div className="flex items-center justify-center px-3 bg-[var(--color-bg-soft)] border-e border-[var(--color-border)] rounded-s-xl shrink-0">
+                          <Lock className="w-4 h-4 text-slate-500" />
+                        </div>
+
+                        <Field
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          autoComplete="current-password"
+                          placeholder={
+                            t("login.passwordPlaceholder") ||
+                            (currentLang === "ar"
+                              ? "اكتب كلمة المرور"
+                              : "Enter password")
+                          }
+                          onFocus={() => setFocusedField("password")}
+                          onBlur={(event) => {
+                            setFocusedField(null)
+                            event.target.dispatchEvent(
+                              new Event("blur", { bubbles: true })
+                            )
+                          }}
+                          className="flex-1 min-w-0 bg-transparent text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] text-sm font-bold outline-none px-3 py-3"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          className="flex items-center justify-center px-3 bg-[var(--color-bg-soft)] border-s border-[var(--color-border)] rounded-e-xl shrink-0 text-[var(--color-text-muted)] hover:text-blue-500 transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+
+                      <ErrorMessage
+                        name="password"
+                        component="p"
+                        className="mt-2 text-xs font-black text-red-500"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <Field
+                          type="checkbox"
+                          name="rememberMe"
+                          className="w-4 h-4 rounded border-[var(--color-border)] text-emerald-500 focus:ring-emerald-500"
+                        />
+                        <span
+                          className={`text-sm font-bold ${theme.subtitle}`}
+                        >
+                          {t("login.rememberMe") ||
+                            (currentLang === "ar"
+                              ? "تذكرني"
+                              : "Remember me")}
+                        </span>
+                      </label>
+
+                      <Link to="/forget-password" className={theme.link}>
+                          {
+                            (currentLang === "ar"
+                              ? "نسيت كلمة المرور؟"
+                              : "Forgot password?")}
+                        </Link>
+
+                      <Link to="/signup" className={theme.link}>
+                        {
+                          (currentLang === "ar"
+                            ? "إنشاء حساب"
+                            : "Create account")}
+                      </Link>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loadingAuth || isSubmitting}
+                      className={theme.primaryButton}
+                    >
+                      {loadingAuth || isSubmitting ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          {currentLang === "ar"
+                            ? "جاري تسجيل الدخول..."
+                            : "Signing in..."}
+                        </>
+                      ) : (
+                        <>
+                          <LogIn className="w-4 h-4" />
+                          {
+                            (currentLang === "ar"
+                              ? "تسجيل الدخول"
+                              : "Login")}
+                        </>
+                      )}
+                    </button>
+                  </Form>
+                )
+              }}
+            </Formik>
+
+            <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
+              <Link to="/login-selection">
+                <button type="button" className={theme.secondaryButton}>
+                  {isRTL ? (
+                    <ArrowRight className="w-4 h-4 text-blue-500" />
+                  ) : (
+                    <ArrowLeft className="w-4 h-4 text-blue-500" />
+                  )}
+
+                  {currentLang === "ar"
+                    ? "رجوع لاختيار نوع الدخول"
+                    : "Back to login selection"}
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function InfoCard({ icon: Icon, title, value, tone = "blue" }) {
+  const toneMap = {
+    blue: {
+      box: "border-blue-500",
+      icon: "text-blue-500",
+      value: "text-blue-500",
+    },
+    emerald: {
+      box: "border-emerald-500",
+      icon: "text-emerald-500",
+      value: "text-emerald-500",
+    },
+    violet: {
+      box: "border-violet-500",
+      icon: "text-violet-500",
+      value: "text-violet-500",
+    },
+  }
+
+  const selectedTone = toneMap[tone] || toneMap.blue
+
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <div
+        className={`w-10 h-10 rounded-xl border-2 ${selectedTone.box} bg-transparent flex items-center justify-center mb-3`}
+      >
+        <Icon className={`w-5 h-5 ${selectedTone.icon}`} />
+      </div>
+
+      <p className="text-xs font-black text-[var(--color-text-muted)]">
+        {title}
+      </p>
+
+      <p className={`text-sm font-black mt-1 ${selectedTone.value}`}>
+        {value}
+      </p>
     </div>
   )
 }

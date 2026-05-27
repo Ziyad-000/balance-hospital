@@ -26,6 +26,9 @@ const EditDoctorData = lazy(() =>
   import("../pages/adminPanel/category/editDoctorData.jsx")
 )
 
+
+const VerifyEmail = lazy(() => import("../pages/auth/verifyEmail"))
+
 // Roster Management Components
 // const EditManagerPermission = lazy(() =>
 //   import("../pages/adminPanel/department/editManagerPermission")
@@ -570,6 +573,10 @@ const router = createBrowserRouter([
       {
         path: "reset-password",
         element: withSuspense(ResetPassword),
+      },
+      {
+        path: "verify-email",
+        element: withSuspense(VerifyEmail),
       },
       {
         path: "specify-role",

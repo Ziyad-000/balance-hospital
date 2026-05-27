@@ -1,392 +1,558 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+"use client"
+
+import { useMemo, useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
 import { useFormik } from "formik"
 import * as Yup from "yup"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
-import { forgetPassword } from "../../state/act/actAuth"
 import { toast } from "react-toastify"
 import Swal from "sweetalert2"
 import i18next from "i18next"
-import UseInitialValues from "../../hooks/use-initial-values"
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  IdCard,
+  KeyRound,
+  Mail,
+  Phone,
+  RefreshCw,
+  ShieldCheck,
+} from "lucide-react"
 
-const MailIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-    <polyline points="22,6 12,13 2,6"></polyline>
-  </svg>
-)
+import { forgetPassword } from "../../state/act/actAuth"
+import { getPageTheme } from "../../utils/themeClasses"
 
-const PhoneIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-  </svg>
-)
+const getErrorMessage = (error, currentLang, fallback) => {
+  const data = error?.data || error?.response?.data || error?.raw?.response?.data
 
-const UserIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-)
-
-const KeyIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-  </svg>
-)
-
-const ArrowLeftIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <line x1="19" y1="12" x2="5" y2="12"></line>
-    <polyline points="12,19 5,12 12,5"></polyline>
-  </svg>
-)
-
-const ForgetPassword = () => {
-  const [resetMethod, setResetMethod] = useState("email")
-  const navigate = useNavigate()
-  const { t } = useTranslation()
-  const { loadingAuth } = useSelector((state) => state.auth)
-  const { mymode } = useSelector((state) => state.mode)
-  const currentLanguage = i18next.language
-
-  // Validation schema
-  const getValidationSchema = () => {
-    switch (resetMethod) {
-      case "email":
-        return Yup.object({
-          inputValue: Yup.string()
-            .email(t("errors.email_format"))
-            .matches(
-              /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-              t("errors.email_format")
-            )
-            .required(t("errors.email_required")),
-        })
-      case "mobile":
-        return Yup.object({
-          inputValue: Yup.string()
-            .matches(/^\d{11}$/, t("errors.phone_format"))
-            .required(t("errors.phone_required")),
-        })
-      case "nationalId":
-        return Yup.object({
-          inputValue: Yup.string()
-            .matches(/^\d{14}$/, t("errors.id_format"))
-            .required(t("errors.id_required")),
-        })
-      default:
-        return Yup.object({
-          inputValue: Yup.string().required(t("errors.email_required")),
-        })
-    }
+  if (currentLang === "ar") {
+    return (
+      data?.messageAr ||
+      error?.message ||
+      data?.message ||
+      error?.response?.data?.messageAr ||
+      fallback
+    )
   }
 
-  // Initial values
-  const { INITIAL_VALUES_FORGET_PASSWORD } = UseInitialValues()
-  const dispatch = useDispatch()
+  return (
+    data?.messageEn ||
+    error?.message ||
+    data?.message ||
+    error?.response?.data?.messageEn ||
+    fallback
+  )
+}
 
-  // Form handler
+const getApiMessage = (payload, currentLang, fallback) => {
+  return currentLang === "ar"
+    ? payload?.messageAr ||
+        payload?.data?.messageAr ||
+        payload?.message ||
+        fallback
+    : payload?.messageEn ||
+        payload?.data?.messageEn ||
+        payload?.message ||
+        fallback
+}
+
+const getResetPayload = (method, value) => {
+  if (method === "email") {
+    return { email: value.trim() }
+  }
+
+  if (method === "mobile") {
+    return { mobile: value.trim() }
+  }
+
+  return { nationalId: value.trim() }
+}
+
+const getIdentifierLabel = (method, currentLang) => {
+  if (method === "email") {
+    return currentLang === "ar" ? "البريد الإلكتروني" : "Email"
+  }
+
+  if (method === "mobile") {
+    return currentLang === "ar" ? "رقم الهاتف" : "Mobile"
+  }
+
+  return currentLang === "ar" ? "الرقم القومي" : "National ID"
+}
+
+const getIdentifierPlaceholder = (method, currentLang) => {
+  if (method === "email") {
+    return currentLang === "ar"
+      ? "example@email.com"
+      : "example@email.com"
+  }
+
+  if (method === "mobile") {
+    return currentLang === "ar" ? "010xxxxxxxx" : "010xxxxxxxx"
+  }
+
+  return currentLang === "ar" ? "اكتب الرقم القومي" : "Enter national ID"
+}
+
+const getMethodIcon = (method) => {
+  if (method === "email") return Mail
+  if (method === "mobile") return Phone
+  return IdCard
+}
+
+function ForgetPassword() {
+  const [resetMethod, setResetMethod] = useState("email")
+  const [focusedField, setFocusedField] = useState(null)
+
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { t } = useTranslation()
+  const theme = getPageTheme()
+
+  const currentLang = i18next.language || "ar"
+  const isRTL = currentLang === "ar"
+
+  const { loadingAuth } = useSelector((state) => state.auth)
+  const { mymode } = useSelector((state) => state.mode)
+
+  const isDark = mymode === "dark"
+
+  const validationSchema = useMemo(() => {
+    if (resetMethod === "email") {
+      return Yup.object({
+        inputValue: Yup.string()
+          .trim()
+          .email(t("errors.email_format") || "Invalid email format")
+          .matches(
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+            t("errors.email_format") || "Invalid email format"
+          )
+          .required(t("errors.email_required") || "Email is required"),
+      })
+    }
+
+    if (resetMethod === "mobile") {
+      return Yup.object({
+        inputValue: Yup.string()
+          .trim()
+          .matches(
+            /^01[0-9]{9}$/,
+            t("errors.phone_format") ||
+              (currentLang === "ar"
+                ? "رقم الهاتف يجب أن يكون 11 رقم ويبدأ بـ 01"
+                : "Mobile must be 11 digits and start with 01")
+          )
+          .required(t("errors.phone_required") || "Mobile is required"),
+      })
+    }
+
+    return Yup.object({
+      inputValue: Yup.string()
+        .trim()
+        .matches(
+          /^[0-9]{14,20}$/,
+          t("errors.id_format") ||
+            (currentLang === "ar"
+              ? "الرقم القومي يجب أن يكون من 14 إلى 20 رقم"
+              : "National ID must be 14 to 20 digits")
+        )
+        .required(t("errors.id_required") || "National ID is required"),
+    })
+  }, [resetMethod, t, currentLang])
+
   const formik = useFormik({
-    initialValues: INITIAL_VALUES_FORGET_PASSWORD,
-    validationSchema: getValidationSchema(),
+    initialValues: {
+      inputValue: "",
+    },
+    validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      localStorage.setItem("identifier", values.inputValue)
-      dispatch(forgetPassword({ [resetMethod]: values.inputValue }))
-        .unwrap()
-        .then(() => {
-          toast.success(t("forgetPassword.success"), {
+      const identifier = values.inputValue.trim()
+      const payload = getResetPayload(resetMethod, identifier)
+
+      try {
+        const response = await dispatch(forgetPassword(payload)).unwrap()
+
+        localStorage.setItem("identifier", identifier)
+        localStorage.setItem("resetMethod", resetMethod)
+        localStorage.setItem("valueReset", identifier)
+
+        toast.success(
+          getApiMessage(
+            response,
+            currentLang,
+            t("forgetPassword.success") ||
+              (currentLang === "ar"
+                ? "تم إرسال كود إعادة تعيين كلمة المرور"
+                : "Reset code sent successfully")
+          ),
+          {
             position: "top-right",
-            autoClose: 3000,
+            autoClose: 2500,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
-          })
-          localStorage.setItem("resetMethod", resetMethod)
-          localStorage.setItem("valueReset", values.inputValue)
-          navigate("/reset-password")
+          }
+        )
+
+        navigate("/reset-password")
+      } catch (error) {
+        Swal.fire({
+          title:
+            t("forgetPassword.error.title") ||
+            (currentLang === "ar" ? "تعذر إرسال الكود" : "Failed to send code"),
+          text: getErrorMessage(
+            error,
+            currentLang,
+            t("forgetPassword.error.message") ||
+              (currentLang === "ar"
+                ? "تأكد من البيانات وحاول مرة أخرى"
+                : "Please check your data and try again")
+          ),
+          icon: "error",
+          confirmButtonText: t("common.ok") || "OK",
+          confirmButtonColor: "#ef4444",
+          background: isDark ? "#111827" : "#ffffff",
+          color: isDark ? "#f9fafb" : "#111827",
         })
-        .catch((error) => {
-          console.log("Reset error:", error)
-          Swal.fire({
-            title: t("forgetPassword.error.title"),
-            text:
-              currentLanguage === "ar"
-                ? error?.response?.data?.messageAr ||
-                  t("forgetPassword.error.message")
-                : error?.response?.data?.messageEn ||
-                  t("forgetPassword.error.message"),
-            icon: "error",
-            confirmButtonText: t("common.ok"),
-            confirmButtonColor: "#ef4444",
-            background: mymode === "dark" ? "#1f2937" : "#ffffff",
-            color: mymode === "dark" ? "#f9fafb" : "#111827",
-          })
-        })
+      }
     },
   })
 
-  const getIcon = () =>
-    resetMethod === "email" ? (
-      <MailIcon />
-    ) : resetMethod === "mobile" ? (
-      <PhoneIcon />
-    ) : resetMethod === "nationalId" ? (
-      <UserIcon />
-    ) : (
-      <MailIcon />
-    )
+  const MethodIcon = getMethodIcon(resetMethod)
 
-  const getPlaceholder = () => t(`${resetMethod}_placeholder`)
-  const getLabel = () => t(`${resetMethod}_label`)
-  const getInputType = () =>
-    resetMethod === "email"
-      ? "email"
-      : resetMethod === "mobile"
-      ? "tel"
-      : "text"
+  const inputHasError = Boolean(formik.touched.inputValue && formik.errors.inputValue)
+
+  const methodOptions = [
+    {
+      id: "email",
+      icon: Mail,
+      title: currentLang === "ar" ? "البريد الإلكتروني" : "Email",
+      description:
+        currentLang === "ar"
+          ? "استلام الكود عبر البريد"
+          : "Receive code by email",
+      tone: "blue",
+    },
+    {
+      id: "mobile",
+      icon: Phone,
+      title: currentLang === "ar" ? "رقم الهاتف" : "Mobile",
+      description:
+        currentLang === "ar"
+          ? "استلام الكود عبر الهاتف"
+          : "Receive code by mobile",
+      tone: "emerald",
+    },
+    {
+      id: "nationalId",
+      icon: IdCard,
+      title: currentLang === "ar" ? "الرقم القومي" : "National ID",
+      description:
+        currentLang === "ar"
+          ? "البحث باستخدام الرقم القومي"
+          : "Find account by national ID",
+      tone: "violet",
+    },
+  ]
 
   const handleMethodChange = (method) => {
     setResetMethod(method)
-    formik.setFieldValue("inputValue", "")
-    formik.setFieldError("inputValue", "")
-    formik.setFieldTouched("inputValue", false)
+    formik.resetForm()
   }
-
-  // Theme-based classes
-  const getThemeClasses = () => {
-    const isDark = mymode === "dark"
-    return {
-      container: isDark
-        ? "bg-gray-900 text-gray-100"
-        : "bg-gray-50 text-gray-900",
-      card: isDark
-        ? "bg-gray-800 border-gray-700 shadow-xl"
-        : "bg-white border-gray-200 shadow-lg",
-      iconContainer: isDark
-        ? "bg-gray-700 text-gray-300"
-        : "bg-gray-100 text-gray-600",
-      title: isDark ? "text-gray-100" : "text-gray-900",
-      subtitle: isDark ? "text-gray-400" : "text-gray-600",
-      label: isDark ? "text-gray-200" : "text-gray-700",
-      input: isDark
-        ? "bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus:ring-blue-500 focus:border-blue-500"
-        : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:ring-blue-500 focus:border-blue-500",
-      inputError: isDark
-        ? "border-red-500 focus:ring-red-500"
-        : "border-red-500 focus:ring-red-500",
-      icon: isDark ? "text-gray-400" : "text-gray-500",
-      methodButton: {
-        active: isDark
-          ? "bg-blue-600 text-white border-blue-600"
-          : "bg-blue-600 text-white border-blue-600",
-        inactive: isDark
-          ? "bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:border-gray-500"
-          : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400",
-      },
-      button: isDark
-        ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-        : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
-      link: isDark
-        ? "text-blue-400 hover:text-blue-300"
-        : "text-blue-600 hover:text-blue-700",
-      errorText: isDark ? "text-red-400" : "text-red-500",
-    }
-  }
-
-  const themeClasses = getThemeClasses()
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-200 ${themeClasses.container}`}
-    >
-      <div className="w-full max-w-sm">
-        <div
-          className={`signin-card rounded-lg p-6 transition-all duration-200 ${themeClasses.card}`}
-        >
-          <div className="text-center mb-6">
-            <div
-              className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 transition-colors duration-200 ${themeClasses.iconContainer}`}
-            >
-              <KeyIcon />
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div className={`${theme.card} rounded-3xl p-8 sm:p-10 relative overflow-hidden`}>
+            <div className="absolute inset-0 pointer-events-none opacity-40">
+              <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-blue-500/10 blur-3xl" />
+              <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl" />
             </div>
-            <h1
-              className={`text-2xl font-semibold mb-2 transition-colors duration-200 ${themeClasses.title}`}
-            >
-              {t("reset_password")}
-            </h1>
-            <p
-              className={`text-sm transition-colors duration-200 ${themeClasses.subtitle}`}
-            >
-              {t("choose_method")}
-            </p>
+
+            <div className="relative h-full flex flex-col justify-between">
+              <div>
+                <div className="w-16 h-16 rounded-3xl border-2 border-blue-500 bg-transparent flex items-center justify-center mb-6">
+                  <KeyRound className="w-8 h-8 text-blue-500" />
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl font-black text-[var(--color-text)]">
+                  {currentLang === "ar"
+                    ? "استعادة كلمة المرور"
+                    : "Recover your password"}
+                </h1>
+
+                <p className="mt-4 text-sm sm:text-base font-bold leading-7 text-[var(--color-text-muted)]">
+                  {currentLang === "ar"
+                    ? "اختر طريقة التحقق المناسبة، وسنرسل لك كود إعادة تعيين كلمة المرور."
+                    : "Choose a verification method and we will send you a reset code."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
+                <InfoCard
+                  icon={Mail}
+                  title={currentLang === "ar" ? "Email" : "Email"}
+                  value={currentLang === "ar" ? "متاح" : "Available"}
+                  tone="blue"
+                />
+
+                <InfoCard
+                  icon={Phone}
+                  title={currentLang === "ar" ? "Mobile" : "Mobile"}
+                  value={currentLang === "ar" ? "متاح" : "Available"}
+                  tone="emerald"
+                />
+
+                <InfoCard
+                  icon={ShieldCheck}
+                  title={currentLang === "ar" ? "Secure" : "Secure"}
+                  value={currentLang === "ar" ? "محمي" : "Protected"}
+                  tone="violet"
+                />
+              </div>
+
+              <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-soft)] p-4">
+                <p className="text-xs font-black text-[var(--color-text-muted)]">
+                  {currentLang === "ar" ? "ملاحظة" : "Note"}
+                </p>
+
+                <p className="mt-1 text-sm font-bold text-[var(--color-text)] leading-6">
+                  {currentLang === "ar"
+                    ? "بعد استلام الكود، ستنتقل لصفحة تعيين كلمة مرور جديدة."
+                    : "After receiving the code, you will continue to the reset password page."}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={formik.handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label
-                className={`text-sm font-medium transition-colors duration-200 ${themeClasses.label}`}
-              >
-                {t("reset_method")}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {["email", "mobile", "nationalId"].map((method) => (
-                  <button
-                    key={method}
-                    type="button"
-                    onClick={() => handleMethodChange(method)}
-                    className={`flex flex-col items-center justify-center p-3 text-xs font-medium rounded-md border transition-all duration-200 ${
-                      resetMethod === method
-                        ? themeClasses.methodButton.active
-                        : themeClasses.methodButton.inactive
+          <div className={`${theme.card} rounded-3xl p-6 sm:p-8`}>
+            <div className="mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl border-2 border-emerald-500 bg-transparent flex items-center justify-center">
+                  <RefreshCw className="w-6 h-6 text-emerald-500" />
+                </div>
+
+                <div>
+                  <h2 className="text-2xl font-black text-[var(--color-text)]">
+                    {t("forgetPassword.title") ||
+                      (currentLang === "ar"
+                        ? "نسيت كلمة المرور؟"
+                        : "Forgot password?")}
+                  </h2>
+
+                  <p className="text-sm font-bold text-[var(--color-text-muted)] mt-1">
+                    {currentLang === "ar"
+                      ? "اختر طريقة الاستعادة وأدخل البيانات"
+                      : "Choose recovery method and enter your data"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              {methodOptions.map((option) => (
+                <MethodCard
+                  key={option.id}
+                  option={option}
+                  active={resetMethod === option.id}
+                  onClick={() => handleMethodChange(option.id)}
+                />
+              ))}
+            </div>
+
+            <form onSubmit={formik.handleSubmit} className="space-y-5">
+              <div>
+                <label
+                  htmlFor="inputValue"
+                  className="block text-sm font-black text-[var(--color-text)] mb-2"
+                >
+                  {getIdentifierLabel(resetMethod, currentLang)}
+                </label>
+
+                <div className="relative">
+                  <div
+                    className={`flex items-stretch rounded-xl border transition-all focus-within:ring-4 ${
+                      inputHasError
+                        ? "border-red-500 focus-within:ring-red-500/10"
+                        : "border-[var(--color-border)] focus-within:border-emerald-500 focus-within:ring-emerald-500/10"
                     }`}
                   >
-                    <div className="mb-1">
-                      {method === "email" ? (
-                        <MailIcon />
-                      ) : method === "mobile" ? (
-                        <PhoneIcon />
-                      ) : (
-                        <UserIcon />
-                      )}
+                    <div className="flex items-center justify-center px-3 bg-[var(--color-bg-soft)] border-e border-[var(--color-border)] rounded-s-xl shrink-0">
+                      <MethodIcon
+                        className={`w-4 h-4 ${
+                          resetMethod === "email"
+                            ? "text-blue-500"
+                            : resetMethod === "mobile"
+                            ? "text-emerald-500"
+                            : "text-indigo-500"
+                        }`}
+                      />
                     </div>
-                    <span className="text-xs">{t(method)}</span>
-                  </button>
-                ))}
+
+                    <input
+                      id="inputValue"
+                      name="inputValue"
+                      type="text"
+                      value={formik.values.inputValue}
+                      onChange={formik.handleChange}
+                      onBlur={(event) => {
+                        setFocusedField(null)
+                        formik.handleBlur(event)
+                      }}
+                      onFocus={() => setFocusedField("inputValue")}
+                      placeholder={getIdentifierPlaceholder(resetMethod, currentLang)}
+                      className="flex-1 min-w-0 bg-transparent text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] text-sm font-bold outline-none px-3 py-3"
+                    />
+                  </div>
+                </div>
+
+                {inputHasError && (
+                  <p className="mt-2 text-xs font-black text-red-500">
+                    {formik.errors.inputValue}
+                  </p>
+                )}
               </div>
-            </div>
-            <div className="space-y-2">
-              <label
-                className={`text-sm font-medium transition-colors duration-200 ${themeClasses.label}`}
+
+              <button
+                type="submit"
+                disabled={loadingAuth || formik.isSubmitting}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-success)] px-5 py-3 text-sm font-black text-white border border-emerald-500 shadow-sm transition-all hover:bg-[var(--color-success-hover)] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {getLabel()}
-              </label>
+                {loadingAuth || formik.isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    {currentLang === "ar" ? "جاري الإرسال..." : "Sending..."}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    {currentLang === "ar" ? "إرسال كود الاستعادة" : "Send reset code"}
+                  </>
+                )}
+              </button>
+            </form>
 
-              <div className="flex items-center space-x-2">
-                {/* Icon Container - Completely separate from input */}
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-md border transition-all duration-200 ${
-                    formik.values.inputValue ? "opacity-60" : "opacity-100"
-                  } ${
-                    formik.touched.inputValue && formik.errors.inputValue
-                      ? themeClasses.inputError
-                      : themeClasses.input
-                  } ${themeClasses.icon}`}
-                >
-                  {getIcon()}
-                </div>
+            <div className="mt-8 pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-4 py-2 text-sm font-black text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-500 transition-colors"
+              >
+                {isRTL ? (
+                  <ArrowRight className="w-4 h-4 text-blue-500" />
+                ) : (
+                  <ArrowLeft className="w-4 h-4 text-blue-500" />
+                )}
+                {currentLang === "ar" ? "رجوع لتسجيل الدخول" : "Back to login"}
+              </Link>
 
-                {/* Input Container */}
-                <div className="relative flex-1">
-                  <input
-                    type={getInputType()}
-                    name="inputValue"
-                    value={formik.values.inputValue}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder={getPlaceholder()}
-                    className={`signin-input w-full px-4 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
-                      formik.touched.inputValue && formik.errors.inputValue
-                        ? themeClasses.inputError
-                        : `${themeClasses.input}`
-                    }`}
-                  />
-                </div>
-              </div>
-
-              {formik.touched.inputValue && formik.errors.inputValue && (
-                <p
-                  className={`text-xs mt-1 transition-colors duration-200 ${themeClasses.errorText}`}
-                >
-                  {formik.errors.inputValue}
-                </p>
-              )}
+              <Link
+                to="/signup"
+                className="text-sm font-black text-blue-500 hover:text-blue-600 transition-colors text-center"
+              >
+                {currentLang === "ar" ? "إنشاء حساب جديد" : "Create new account"}
+              </Link>
             </div>
-            <button
-              type="submit"
-              disabled={loadingAuth}
-              className={`w-full disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${themeClasses.button}`}
-            >
-              {loadingAuth ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {t("forgetPassword.loading")}
-                </div>
-              ) : (
-                t("forgetPassword.button")
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <Link
-              to="/login"
-              className={`inline-flex items-center font-medium hover:underline transition-colors duration-200 ${themeClasses.link}`}
-            >
-              <ArrowLeftIcon className="mr-2" />
-              <span>{t("back_to_login")}</span>
-            </Link>
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function MethodCard({ option, active, onClick }) {
+  const Icon = option.icon
+
+  const toneMap = {
+    blue: {
+      border: "border-blue-500",
+      text: "text-blue-500",
+    },
+    emerald: {
+      border: "border-emerald-500",
+      text: "text-emerald-500",
+    },
+    violet: {
+      border: "border-violet-500",
+      text: "text-violet-500",
+    },
+  }
+
+  const selectedTone = toneMap[option.tone] || toneMap.blue
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-start rounded-2xl border p-4 transition-all ${
+        active
+          ? `${selectedTone.border} bg-[var(--color-bg-soft)]`
+          : "border-[var(--color-border)] bg-[var(--color-surface)] hover:border-emerald-500"
+      }`}
+    >
+      <div
+        className={`w-10 h-10 rounded-xl border-2 bg-transparent flex items-center justify-center mb-3 ${
+          active ? selectedTone.border : "border-slate-500"
+        }`}
+      >
+        <Icon
+          className={`w-5 h-5 ${
+            active ? selectedTone.text : "text-slate-500"
+          }`}
+        />
+      </div>
+
+      <p className="text-sm font-black text-[var(--color-text)]">
+        {option.title}
+      </p>
+
+      <p className="text-xs font-bold text-[var(--color-text-muted)] mt-1">
+        {option.description}
+      </p>
+    </button>
+  )
+}
+
+function InfoCard({ icon: Icon, title, value, tone = "blue" }) {
+  const toneMap = {
+    blue: {
+      box: "border-blue-500",
+      icon: "text-blue-500",
+      value: "text-blue-500",
+    },
+    emerald: {
+      box: "border-emerald-500",
+      icon: "text-emerald-500",
+      value: "text-emerald-500",
+    },
+    violet: {
+      box: "border-violet-500",
+      icon: "text-violet-500",
+      value: "text-violet-500",
+    },
+  }
+
+  const selectedTone = toneMap[tone] || toneMap.blue
+
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+      <div
+        className={`w-10 h-10 rounded-xl border-2 ${selectedTone.box} bg-transparent flex items-center justify-center mb-3`}
+      >
+        <Icon className={`w-5 h-5 ${selectedTone.icon}`} />
+      </div>
+
+      <p className="text-xs font-black text-[var(--color-text-muted)]">
+        {title}
+      </p>
+
+      <p className={`text-sm font-black mt-1 ${selectedTone.value}`}>
+        {value}
+      </p>
     </div>
   )
 }

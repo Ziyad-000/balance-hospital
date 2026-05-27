@@ -579,7 +579,7 @@ function UsersIndex() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-[var(--color-text)] flex items-center gap-3">
-              <Users className="w-8 h-8 text-blue-5000" />
+              <Users className="w-8 h-8 text-blue-500" />
               {currentLang === "ar" ? "إدارة المستخدمين" : "Users Management"}
             </h1>
 
@@ -1070,7 +1070,7 @@ function UsersTable({
                 </td>
 
                 <td className="p-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-transparent text-slate-5000 border border-[var(--color-neutral-border)]">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-transparent text-slate-500 border border-slate-500">
                     {roleName}
                   </span>
                 </td>
@@ -1112,7 +1112,7 @@ function UsersTable({
                     <button
                       type="button"
                       onClick={() => navigate(`/admin-panel/users/${user.id}`)}
-                      className="p-2 rounded-lg bg-transparent text-blue-5000 hover:bg-[var(--color-primary-muted)] border border-blue-5000/20 transition-colors"
+                      className="p-2 rounded-lg bg-transparent text-blue-500 hover:bg-blue-500/10 border border-blue-500 transition-colors"
                       title={currentLang === "ar" ? "عرض" : "View"}
                     >
                       <Eye size={16} />
@@ -1126,7 +1126,7 @@ function UsersTable({
                             `/admin-panel/users/doctor-analytics/${user.id}`
                           )
                         }
-                        className="p-2 rounded-lg bg-transparent text-violet-5000 hover:bg-transparent border border-violet-5000 transition-colors"
+                        className="p-2 rounded-lg bg-transparent text-violet-500 hover:bg-violet-500/10 border border-violet-500 transition-colors"
                         title={
                           currentLang === "ar"
                             ? "تحليلات الدكتور"
@@ -1143,7 +1143,7 @@ function UsersTable({
                           type="button"
                           disabled={loadingApproveUser}
                           onClick={() => handleApprove(user.id)}
-                          className="p-2 rounded-lg bg-transparent text-emerald-5000 hover:opacity-85 border border-emerald-5000 transition-colors disabled:opacity-50"
+                          className="p-2 rounded-lg bg-transparent text-emerald-500 hover:bg-emerald-500/10 border border-emerald-500 transition-colors disabled:opacity-50"
                         >
                           <UserCheck size={16} />
                         </button>
@@ -1152,7 +1152,7 @@ function UsersTable({
                           type="button"
                           disabled={loadingRejectUser}
                           onClick={() => handleReject(user.id)}
-                          className="p-2 rounded-lg bg-transparent text-red-5000 hover:opacity-85 border border-red-5000 transition-colors disabled:opacity-50"
+                          className="p-2 rounded-lg bg-transparent text-red-500 hover:bg-red-500/10 border border-red-500 transition-colors disabled:opacity-50"
                         >
                           <UserMinus size={16} />
                         </button>
@@ -1164,7 +1164,7 @@ function UsersTable({
                         type="button"
                         disabled={loadingDeleteUser}
                         onClick={() => handleDelete(user.id)}
-                        className="p-2 rounded-lg bg-transparent text-red-5000 hover:opacity-85 border border-red-5000 transition-colors disabled:opacity-50"
+                        className="p-2 rounded-lg bg-transparent text-red-500 hover:bg-red-500/10 border border-red-500 transition-colors disabled:opacity-50"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -1273,7 +1273,7 @@ function QuickSearchTab({
                     <button
                       type="button"
                       onClick={() => navigate(`/admin-panel/users/${user.id}`)}
-                      className="p-2 rounded-lg bg-transparent text-blue-5000 hover:bg-[var(--color-primary-muted)] border border-blue-5000/20 transition-colors"
+                      className="p-2 rounded-lg bg-transparent text-blue-500 hover:bg-blue-500/10 border border-blue-500 transition-colors"
                     >
                       <Eye size={16} />
                     </button>
@@ -1411,33 +1411,33 @@ function StatCard({ title, value, icon: Icon, tone = "blue" }) {
   const toneMap = {
     blue: {
       bg: "bg-transparent",
-      text: "text-blue-5000",
-      border: "border-blue-5000/25",
+      text: "text-blue-500",
+      border: "border-blue-500",
     },
     green: {
       bg: "bg-transparent",
-      text: "text-emerald-5000",
-      border: "border-emerald-5000",
+      text: "text-emerald-500",
+      border: "border-emerald-500",
     },
     yellow: {
       bg: "bg-transparent",
-      text: "text-amber-5000",
-      border: "border-amber-5000",
+      text: "text-amber-500",
+      border: "border-amber-500",
     },
     purple: {
       bg: "bg-transparent",
-      text: "text-violet-5000",
-      border: "border-violet-5000",
+      text: "text-violet-500",
+      border: "border-violet-500",
     },
     red: {
       bg: "bg-transparent",
-      text: "text-red-5000",
-      border: "border-red-5000",
+      text: "text-red-500",
+      border: "border-red-500",
     },
     orange: {
       bg: "bg-transparent",
-      text: "text-amber-5000",
-      border: "border-amber-5000",
+      text: "text-orange-500",
+      border: "border-orange-500",
     },
   }
 
@@ -1450,13 +1450,14 @@ function StatCard({ title, value, icon: Icon, tone = "blue" }) {
           <p className="text-sm font-medium text-[var(--color-text-muted)]">
             {title}
           </p>
-          <p className="mt-2 text-2xl font-extrabold text-[var(--color-text)]">
+
+          <p className={`mt-2 text-2xl font-extrabold ${toneStyle.text}`}>
             {value ?? 0}
           </p>
         </div>
 
         <div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center border ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
+          className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
         >
           <Icon size={22} />
         </div>
@@ -1474,12 +1475,13 @@ function TabButton({ id, activeTab, setActiveTab, icon: Icon, label, count }) {
       onClick={() => setActiveTab(id)}
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${
         isActive
-          ? "bg-[var(--color-success)] text-white border-emerald-5000"
-          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-emerald-5000 active:bg-[var(--color-success-hover)]"
+          ? "bg-emerald-500 text-white border-emerald-500"
+          : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-emerald-500 hover:text-white hover:border-emerald-500 active:bg-emerald-600"
       }`}
     >
       <Icon size={16} />
       {label}
+
       {count !== undefined && (
         <span
           className={`px-2 py-0.5 rounded-full text-[11px] border ${
@@ -1508,8 +1510,8 @@ function StatusBadge({ enabled, trueText, falseText }) {
     <span
       className={`inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold border ${
         enabled
-          ? "bg-transparent text-emerald-5000 border-emerald-5000"
-          : "bg-transparent text-red-5000 border-red-5000"
+          ? "bg-transparent text-emerald-500 border-emerald-500"
+          : "bg-transparent text-red-500 border-red-500"
       }`}
     >
       {enabled ? trueText : falseText}
@@ -1555,7 +1557,7 @@ function EmptyState({ title, description }) {
 
 function ErrorBox({ message }) {
   return (
-    <div className="p-5 rounded-2xl bg-transparent text-red-5000 border border-red-5000">
+    <div className="p-5 rounded-2xl bg-transparent text-red-500 border border-red-500">
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 mt-0.5" />
         <p className="text-sm font-bold">{message || "Error"}</p>

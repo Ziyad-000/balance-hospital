@@ -1,36 +1,81 @@
-export const StatCard = ({ icon: Icon, label, value, color, isDark }) => {
-  const colorClasses = {
-    blue: isDark ? "bg-blue-900/20 text-blue-400" : "bg-blue-50 text-blue-600",
-    green: isDark
-      ? "bg-green-900/20 text-green-400"
-      : "bg-green-50 text-green-600",
-    purple: isDark
-      ? "bg-purple-900/20 text-purple-400"
-      : "bg-purple-50 text-purple-600",
-    orange: isDark
-      ? "bg-orange-900/20 text-orange-400"
-      : "bg-orange-50 text-orange-600",
-    red: isDark ? "bg-red-900/20 text-red-400" : "bg-red-50 text-red-600",
-    yellow: isDark
-      ? "bg-yellow-900/20 text-yellow-400"
-      : "bg-yellow-50 text-yellow-600",
+// components/dashboard/stateCard.jsx
+
+export const StatCard = ({ icon: Icon, label, value, color = "blue", subtitle, onClick }) => {
+  const toneMap = {
+    blue: {
+      wrapper: "border-blue-500 text-blue-500",
+      value: "text-blue-500",
+    },
+    green: {
+      wrapper: "border-emerald-500 text-emerald-500",
+      value: "text-emerald-500",
+    },
+    emerald: {
+      wrapper: "border-emerald-500 text-emerald-500",
+      value: "text-emerald-500",
+    },
+    purple: {
+      wrapper: "border-violet-500 text-violet-500",
+      value: "text-violet-500",
+    },
+    violet: {
+      wrapper: "border-violet-500 text-violet-500",
+      value: "text-violet-500",
+    },
+    orange: {
+      wrapper: "border-orange-500 text-orange-500",
+      value: "text-orange-500",
+    },
+    red: {
+      wrapper: "border-red-500 text-red-500",
+      value: "text-red-500",
+    },
+    yellow: {
+      wrapper: "border-amber-500 text-amber-500",
+      value: "text-amber-500",
+    },
+    amber: {
+      wrapper: "border-amber-500 text-amber-500",
+      value: "text-amber-500",
+    },
+    slate: {
+      wrapper: "border-slate-500 text-slate-500",
+      value: "text-slate-500",
+    },
   }
+
+  const tone = toneMap[color] || toneMap.blue
 
   return (
     <div
-      className={`p-4 rounded-xl transition-all duration-200 hover:shadow-lg ${colorClasses[color]}`}
+      onClick={onClick}
+      className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm transition-all duration-200 hover:shadow-lg ${
+        onClick ? "cursor-pointer" : ""
+      }`}
     >
-      <div className="flex items-center justify-between mb-2">
-        <Icon className="w-5 h-5" />
-        <span className="text-2xl font-bold">{value}</span>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-black text-[var(--color-text-muted)]">
+            {label}
+          </p>
+
+          <p className={`mt-1 truncate text-2xl font-black tracking-tight ${tone.value}`}>
+            {value ?? 0}
+          </p>
+
+          {subtitle && (
+            <p className="mt-1 truncate text-xs font-bold text-[var(--color-text-muted)]">
+              {subtitle}
+            </p>
+          )}
+        </div>
+
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-2 bg-transparent ${tone.wrapper}`}
+        >
+          {Icon && <Icon className="h-6 w-6" />}
+        </div>
       </div>
-      <p
-        className={`text-sm font-medium ${
-          isDark ? "text-gray-300" : "text-gray-700"
-        }`}
-      >
-        {label}
-      </p>
     </div>
   )
 }

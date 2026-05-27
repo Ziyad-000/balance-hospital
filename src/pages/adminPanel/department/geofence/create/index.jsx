@@ -1,83 +1,117 @@
-import { useDispatch, useSelector } from "react-redux"
-import { Formik, Form, Field, ErrorMessage } from "formik"
-import * as Yup from "yup"
-import { toast } from "react-toastify"
-import Swal from "sweetalert2"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
-import { ArrowLeft, MapPin, Wifi, Radio, ArrowRight } from "lucide-react"
-import UseInitialValues from "../../../../../hooks/use-initial-values"
-import UseFormValidation from "../../../../../hooks/use-form-validation"
-import { createGoFence } from "../../../../../state/act/actDepartment"
+import { Formik, Form, Field, ErrorMessage } from "formik"
+import * as Yup from "yup"
+import Swal from "sweetalert2"
+import { toast } from "react-toastify"
+import {
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  MapPin,
+  Radio,
+  Save,
+  SlidersHorizontal,
+  Wifi,
+} from "lucide-react"
+
+import axiosInstance from "../../../../../utils/axiosInstance"
+import { getPageTheme } from "../../../../../utils/themeClasses"
+
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  "Content-Type": "application/json",
+})
+
+const initialValues = {
+  name: "",
+  latitude: "",
+  longitude: "",
+  radiusMeters: 100,
+  priority: 100,
+  activeFrom: "",
+  activeTo: "",
+  wifiSsid: "",
+  beaconUuid: "",
+  wifiPolicy: 0,
+  beaconPolicy: 0,
+}
+
+const buildSchema = (lang) =>
+  Yup.object({
+    name: Yup.string()
+      .required(lang === "ar" ? "اسم السياج مطلوب" : "GeoFence name is required")
+      .max(150),
+    latitude: Yup.number()
+      .required(lang === "ar" ? "خط العرض مطلوب" : "Latitude is required")
+      .min(-90)
+      .max(90),
+    longitude: Yup.number()
+      .required(lang === "ar" ? "خط الطول مطلوب" : "Longitude is required")
+      .min(-180)
+      .max(180),
+    radiusMeters: Yup.number().required().min(50).max(5000),
+    priority: Yup.number().required().min(1).max(1000),
+    activeFrom: Yup.string().nullable(),
+    activeTo: Yup.string().nullable(),
+    wifiSsid: Yup.string().max(100).nullable(),
+    beaconUuid: Yup.string().max(100).nullable(),
+    wifiPolicy: Yup.number().oneOf([0, 1, 2]),
+    beaconPolicy: Yup.number().oneOf([0, 1, 2]),
+  })
+
+const toNullableIso = (value) => {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toISOString()
+}
 
 function CreateGeoFence() {
   const { t, i18n } = useTranslation()
-  const dispatch = useDispatch()
   const navigate = useNavigate()
   const { departmentId } = useParams()
-  const currentLang = i18n.language
+  const theme = getPageTheme()
+
+  const currentLang = i18n.language || "ar"
   const isRTL = currentLang === "ar"
 
-  const { mymode } = useSelector((state) => state.mode)
-  const isDark = mymode === "dark"
-
-  const { loadingCreateGofence, error } = useSelector(
-    (state) => state.department
-  )
-
-  const { VALIDATION_SCHEMA_CREATE_GOEFENCE } = UseFormValidation()
-
-  // Initial Values
-
-  const { INITIAL_VALUES_ADD_GOEFENCE } = UseInitialValues()
+  const validationSchema = useMemo(() => buildSchema(currentLang), [currentLang])
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-    const submissionData = {
-      ...values,
-      latitude: parseFloat(values.latitude),
-      longitude: parseFloat(values.longitude),
-      radiusMeters: parseInt(values.radiusMeters),
-      priority: 100,
+    const payload = {
+      name: values.name.trim(),
+      latitude: Number(values.latitude),
+      longitude: Number(values.longitude),
+      radiusMeters: Number(values.radiusMeters),
+      priority: Number(values.priority),
+      activeFrom: toNullableIso(values.activeFrom),
+      activeTo: toNullableIso(values.activeTo),
+      wifiSsid: values.wifiSsid?.trim() || null,
+      beaconUuid: values.beaconUuid?.trim() || null,
+      wifiPolicy: Number(values.wifiPolicy),
+      beaconPolicy: Number(values.beaconPolicy),
     }
 
     try {
-      await dispatch(
-        createGoFence({
-          departmentId: departmentId,
-          data: submissionData,
-        })
-      ).unwrap()
+      await axiosInstance.post(`/api/v1/GeoFence/department/${departmentId}`, payload, {
+        headers: getAuthHeaders(),
+      })
 
-      toast.success(
-        t("geoFenceForm.success.created") || "GeoFence created successfully",
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
-      )
-
+      toast.success(currentLang === "ar" ? "تم إنشاء السياج الجغرافي بنجاح" : "GeoFence created successfully")
       resetForm()
       navigate(`/admin-panel/department/${departmentId}`)
     } catch (error) {
-      console.error("GeoFence creation error:", error)
-
       Swal.fire({
-        title: t("geoFenceForm.error.title") || "Error",
+        title: currentLang === "ar" ? "تعذر إنشاء السياج" : "Failed to create GeoFence",
         text:
-          currentLang === "en"
-            ? error?.messageEn || error?.message || "Failed to create geofence"
-            : error?.message ||
-              error?.messageEn ||
-              "فشل في إنشاء السياج الجغرافي",
+          currentLang === "ar"
+            ? error?.response?.data?.messageAr || error?.response?.data?.message || error?.message
+            : error?.response?.data?.messageEn || error?.response?.data?.message || error?.message,
         icon: "error",
         confirmButtonText: t("common.ok") || "OK",
         confirmButtonColor: "#ef4444",
-        background: isDark ? "#2d2d2d" : "#ffffff",
-        color: isDark ? "#f0f0f0" : "#111827",
       })
     } finally {
       setSubmitting(false)
@@ -85,291 +119,172 @@ function CreateGeoFence() {
   }
 
   return (
-    <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
-      <div className="p-4 sm:p-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-center gap-4 mb-4">
-              <button
-                onClick={() => navigate(-1)}
-                className={`p-2 rounded-lg border transition-colors ${
-                  isDark
-                    ? "border-gray-600 hover:bg-gray-700 text-gray-300"
-                    : "border-gray-300 hover:bg-gray-50 text-gray-700"
-                }`}
-              >
-                {currentLang == "en" ? (
-                  <ArrowLeft size={20} />
-                ) : (
-                  <ArrowRight size={20} />
-                )}{" "}
-              </button>
-              <h1
-                className={`text-2xl sm:text-3xl font-bold ${
-                  isDark ? "text-white" : "text-gray-900"
-                } ${isRTL ? "font-arabic" : ""}`}
-              >
-                {t("geoFenceForm.title") || "Create GeoFence"}
-              </h1>
-            </div>
-          </div>
-
-          {/* Form */}
-          <div
-            className={`rounded-lg shadow border ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-200"
-            }`}
+    <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-sm font-black text-[var(--color-text-muted)] hover:text-[var(--color-success)] transition-colors"
           >
-            <div className="p-6">
-              <Formik
-                initialValues={INITIAL_VALUES_ADD_GOEFENCE}
-                validationSchema={VALIDATION_SCHEMA_CREATE_GOEFENCE}
-                onSubmit={handleSubmit}
-                enableReinitialize
-              >
-                {({ isSubmitting, errors, touched, values, setFieldValue }) => (
-                  <Form className="space-y-6">
-                    {/* Basic Information Section */}
-                    <div className="space-y-6">
-                      <h3
-                        className={`text-lg font-semibold border-b pb-2 flex items-center gap-2 ${
-                          isDark
-                            ? "text-white border-gray-600"
-                            : "text-gray-900 border-gray-200"
-                        }`}
-                      >
-                        <MapPin size={20} />
-                        {t("geoFenceForm.sections.basicInfo") ||
-                          "Basic Information"}
-                      </h3>
+            {currentLang === "en" ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+            {t("common.goBack") || "Back"}
+          </button>
+        </div>
 
-                      {/* Name */}
-                      <div>
-                        <label
-                          htmlFor="name"
-                          className={`block text-sm font-medium mb-2 ${
-                            isDark ? "text-gray-300" : "text-gray-700"
-                          }`}
-                        >
-                          {t("geoFenceForm.fields.name") || "GeoFence Name"}{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <Field
-                          type="text"
-                          id="name"
-                          name="name"
-                          dir={isRTL ? "rtl" : "ltr"}
-                          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            isDark
-                              ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                              : "bg-white border-gray-300 text-gray-900"
-                          } ${
-                            errors.name && touched.name
-                              ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                              : ""
-                          }`}
-                          placeholder={
-                            t("geoFenceForm.placeholders.name") ||
-                            "e.g., Emergency Department - Main Entrance"
-                          }
-                        />
-                        <ErrorMessage
-                          name="name"
-                          component="div"
-                          className="mt-1 text-sm text-red-600"
-                        />
-                      </div>
-
-                      {/* Location Coordinates */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Latitude */}
-                        <div>
-                          <label
-                            htmlFor="latitude"
-                            className={`block text-sm font-medium mb-2 ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`}
-                          >
-                            {t("geoFenceForm.fields.latitude") || "Latitude"}{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <Field
-                            type="number"
-                            id="latitude"
-                            name="latitude"
-                            step="0.000001"
-                            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } ${
-                              errors.latitude && touched.latitude
-                                ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                : ""
-                            }`}
-                            placeholder="27.1809"
-                          />
-                          <ErrorMessage
-                            name="latitude"
-                            component="div"
-                            className="mt-1 text-sm text-red-600"
-                          />
-                        </div>
-
-                        {/* Longitude */}
-                        <div>
-                          <label
-                            htmlFor="longitude"
-                            className={`block text-sm font-medium mb-2 ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`}
-                          >
-                            {t("geoFenceForm.fields.longitude") || "Longitude"}{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <Field
-                            type="number"
-                            id="longitude"
-                            name="longitude"
-                            step="0.000001"
-                            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } ${
-                              errors.longitude && touched.longitude
-                                ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                : ""
-                            }`}
-                            placeholder="31.1837"
-                          />
-                          <ErrorMessage
-                            name="longitude"
-                            component="div"
-                            className="mt-1 text-sm text-red-600"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        {/* Radius */}
-                        <div>
-                          <label
-                            htmlFor="radiusMeters"
-                            className={`block text-sm font-medium mb-2 ${
-                              isDark ? "text-gray-300" : "text-gray-700"
-                            }`}
-                          >
-                            {t("geoFenceForm.fields.radius") ||
-                              "Radius (meters)"}{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <Field
-                            type="number"
-                            id="radiusMeters"
-                            name="radiusMeters"
-                            min="10"
-                            max="10000"
-                            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                              isDark
-                                ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                : "bg-white border-gray-300 text-gray-900"
-                            } ${
-                              errors.radiusMeters && touched.radiusMeters
-                                ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                : ""
-                            }`}
-                          />
-                          <ErrorMessage
-                            name="radiusMeters"
-                            component="div"
-                            className="mt-1 text-sm text-red-600"
-                          />
-                          <p
-                            className={`mt-1 text-xs ${
-                              isDark ? "text-gray-400" : "text-gray-500"
-                            }`}
-                          >
-                            {t("geoFenceForm.hints.radius") ||
-                              "Range: 10 - 10,000 meters"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Submit Buttons */}
-                    <div
-                      className={`flex justify-end space-x-3 pt-6 border-t ${
-                        isDark ? "border-gray-600" : "border-gray-200"
-                      } ${isRTL ? "flex-row-reverse space-x-reverse" : ""}`}
-                    >
-                      <button
-                        type="button"
-                        className={`px-6 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors ${
-                          isDark
-                            ? "border-gray-600 text-gray-300 bg-gray-700 hover:bg-gray-600"
-                            : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                        }`}
-                        onClick={() =>
-                          navigate(`/admin-panel/department/${departmentId}/`)
-                        }
-                      >
-                        {t("geoFenceForm.buttons.cancel") || "Cancel"}
-                      </button>
-
-                      <button
-                        type="submit"
-                        disabled={isSubmitting || loadingCreateGofence}
-                        className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors ${
-                          isSubmitting || loadingCreateGofence
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-blue-600 hover:bg-blue-700"
-                        }`}
-                      >
-                        {isSubmitting || loadingCreateGofence ? (
-                          <div className="flex items-center">
-                            <svg
-                              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                            {t("geoFenceForm.buttons.creating") ||
-                              "Creating..."}
-                          </div>
-                        ) : (
-                          t("geoFenceForm.buttons.create") || "Create GeoFence"
-                        )}
-                      </button>
-                    </div>
-                  </Form>
-                )}
-              </Formik>
+        <div className={`${theme.card} p-6 mb-6`}>
+          <div className="flex items-start gap-4">
+            <IconBox icon={MapPin} tone="blue" />
+            <div>
+              <h1 className="text-3xl font-black text-[var(--color-text)]">
+                {t("geoFenceForm.title") || (currentLang === "ar" ? "إنشاء سياج جغرافي" : "Create GeoFence")}
+              </h1>
+              <p className="mt-1 text-sm font-semibold text-[var(--color-text-muted)]">
+                {currentLang === "ar"
+                  ? "حدد الموقع، نصف القطر، الأولوية، وإشارات WiFi / Beacon."
+                  : "Define location, radius, priority, and WiFi / Beacon signals."}
+              </p>
             </div>
           </div>
         </div>
+
+        <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+          {({ isSubmitting, values }) => (
+            <Form className={`${theme.card} p-6 space-y-6`}>
+              <FormSection
+                icon={MapPin}
+                title={currentLang === "ar" ? "بيانات الموقع" : "Location Details"}
+                tone="blue"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField name="name" label={currentLang === "ar" ? "اسم السياج" : "GeoFence Name"} placeholder="Emergency Department - Main Entrance" />
+                  <FormField name="radiusMeters" type="number" label={currentLang === "ar" ? "نصف القطر بالمتر" : "Radius Meters"} />
+                  <FormField name="latitude" type="number" step="0.000001" label="Latitude" placeholder="27.180900" />
+                  <FormField name="longitude" type="number" step="0.000001" label="Longitude" placeholder="31.183700" />
+                </div>
+              </FormSection>
+
+              <FormSection
+                icon={SlidersHorizontal}
+                title={currentLang === "ar" ? "الأولوية وفترة النشاط" : "Priority & Active Window"}
+                tone="violet"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField name="priority" type="number" label={currentLang === "ar" ? "الأولوية" : "Priority"} />
+                  <FormField name="activeFrom" type="datetime-local" label={currentLang === "ar" ? "نشط من" : "Active From"} />
+                  <FormField name="activeTo" type="datetime-local" label={currentLang === "ar" ? "نشط إلى" : "Active To"} />
+                </div>
+              </FormSection>
+
+              <FormSection
+                icon={Wifi}
+                title={currentLang === "ar" ? "إشارات التحقق" : "Signal Verification"}
+                tone="emerald"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField name="wifiSsid" label="WiFi SSID" placeholder="Hospital-WiFi" />
+                  <PolicyField name="wifiPolicy" label="WiFi Policy" currentLang={currentLang} />
+                  <FormField name="beaconUuid" label="Beacon UUID" placeholder="uuid..." />
+                  <PolicyField name="beaconPolicy" label="Beacon Policy" currentLang={currentLang} />
+                </div>
+
+                <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4">
+                  <p className="text-sm font-bold text-[var(--color-text-muted)]">
+                    {currentLang === "ar"
+                      ? "Ignore = لا تعتمد على الإشارة، Required = يجب تطابق الإشارة، Optional = الإشارة داعمة وليست إجبارية."
+                      : "Ignore = do not validate this signal, Required = signal must match, Optional = signal is supportive but not mandatory."}
+                  </p>
+                </div>
+              </FormSection>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-success)] bg-[var(--color-success)] px-5 py-2.5 text-sm font-black text-white transition-colors hover:bg-[var(--color-success-hover)] disabled:opacity-60"
+                >
+                  <Save size={18} />
+                  {isSubmitting
+                    ? currentLang === "ar"
+                      ? "جاري الحفظ..."
+                      : "Saving..."
+                    : currentLang === "ar"
+                    ? "حفظ السياج"
+                    : "Save GeoFence"}
+                </button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
+  )
+}
+
+function FormSection({ icon: Icon, title, tone, children }) {
+  return (
+    <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-5">
+      <h2 className="mb-4 flex items-center gap-3 text-lg font-black text-[var(--color-text)]">
+        <IconBox icon={Icon} tone={tone} small />
+        {title}
+      </h2>
+      {children}
+    </section>
+  )
+}
+
+function FormField({ name, label, type = "text", placeholder = "", step }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-black text-[var(--color-text)]">
+        {label}
+      </label>
+      <Field
+        name={name}
+        type={type}
+        step={step}
+        placeholder={placeholder}
+        className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-bold text-[var(--color-text)] outline-none focus:border-emerald-500"
+      />
+      <ErrorMessage name={name} component="div" className="mt-1 text-xs font-bold text-red-500" />
+    </div>
+  )
+}
+
+function PolicyField({ name, label, currentLang }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-xs font-black text-[var(--color-text)]">
+        {label}
+      </label>
+      <Field
+        as="select"
+        name={name}
+        className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-bold text-[var(--color-text)] outline-none focus:border-emerald-500"
+      >
+        <option value={0}>{currentLang === "ar" ? "تجاهل" : "Ignore"}</option>
+        <option value={1}>{currentLang === "ar" ? "إجباري" : "Required"}</option>
+        <option value={2}>{currentLang === "ar" ? "اختياري" : "Optional"}</option>
+      </Field>
+      <ErrorMessage name={name} component="div" className="mt-1 text-xs font-bold text-red-500" />
+    </div>
+  )
+}
+
+function IconBox({ icon: Icon, tone = "blue", small = false }) {
+  const toneClass = {
+    blue: "text-blue-500 border-blue-500",
+    emerald: "text-emerald-500 border-emerald-500",
+    violet: "text-violet-500 border-violet-500",
+    orange: "text-orange-500 border-orange-500",
+    red: "text-red-500 border-red-500",
+    slate: "text-slate-500 border-slate-500",
+  }[tone] || "text-blue-500 border-blue-500"
+
+  return (
+    <span className={`${small ? "h-9 w-9 rounded-xl" : "h-12 w-12 rounded-2xl"} flex shrink-0 items-center justify-center border-2 bg-transparent ${toneClass}`}>
+      <Icon className={small ? "h-4 w-4" : "h-6 w-6"} />
+    </span>
   )
 }
 

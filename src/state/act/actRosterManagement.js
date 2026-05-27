@@ -938,3 +938,391 @@ export const getRosterAttendanceSummary = createAsyncThunk(
     }
   }
 )
+
+// ===================================================================
+// ATTENDANCE ANALYTICS FOUNDATION
+// ===================================================================
+
+const normalizeAnalyticsError = (error, fallbackMessage = "Failed to load attendance analytics") => {
+  return (
+    error.response?.data ||
+    error.response?.data?.messageAr ||
+    error.response?.data?.messageEn ||
+    error.message ||
+    fallbackMessage
+  )
+}
+
+const unwrapAnalyticsResponse = (response) => {
+  return response?.data?.data || response?.data
+}
+
+/**
+ * Global today attendance snapshot
+ * GET /api/v1/AttendanceAnalytics/attendance/today
+ */
+export const getTodayAttendanceSnapshot = createAsyncThunk(
+  "rosterManagement/getTodayAttendanceSnapshot",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        "/api/v1/AttendanceAnalytics/attendance/today",
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load today attendance snapshot")
+      )
+    }
+  }
+)
+
+/**
+ * Roster scoped today attendance snapshot
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/today
+ */
+export const getRosterTodayAttendanceSnapshot = createAsyncThunk(
+  "rosterManagement/getRosterTodayAttendanceSnapshot",
+  async ({ rosterId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/today`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load roster today attendance snapshot")
+      )
+    }
+  }
+)
+
+/**
+ * Unified roster attendance dashboard
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/dashboard?date=YYYY-MM-DD
+ */
+export const getRosterAttendanceDashboard = createAsyncThunk(
+  "rosterManagement/getRosterAttendanceDashboard",
+  async ({ rosterId, date = null }, { rejectWithValue }) => {
+    try {
+      const params = buildQueryParams({ date })
+
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/dashboard${
+          params ? `?${params}` : ""
+        }`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load roster attendance dashboard")
+      )
+    }
+  }
+)
+
+/**
+ * Comprehensive attendance analytics
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/analytics?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+ */
+export const getRosterAttendanceAnalytics = createAsyncThunk(
+  "rosterManagement/getRosterAttendanceAnalytics",
+  async ({ rosterId, startDate = null, endDate = null }, { rejectWithValue }) => {
+    try {
+      const params = buildQueryParams({ startDate, endDate })
+
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/analytics${
+          params ? `?${params}` : ""
+        }`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load roster attendance analytics")
+      )
+    }
+  }
+)
+
+/**
+ * Repeated absence patterns
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/absence-patterns?minAbsences=3
+ */
+export const getRosterAbsencePatterns = createAsyncThunk(
+  "rosterManagement/getRosterAbsencePatterns",
+  async ({ rosterId, minAbsences = 3 }, { rejectWithValue }) => {
+    try {
+      const params = buildQueryParams({ minAbsences })
+
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/absence-patterns${
+          params ? `?${params}` : ""
+        }`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load absence patterns")
+      )
+    }
+  }
+)
+
+/**
+ * Late arrival patterns
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/late-patterns
+ */
+export const getRosterLatePatterns = createAsyncThunk(
+  "rosterManagement/getRosterLatePatterns",
+  async ({ rosterId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/late-patterns`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load late patterns")
+      )
+    }
+  }
+)
+
+/**
+ * Department realtime analytics - all departments
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/departments/realtime
+ */
+export const getRosterDepartmentsRealtime = createAsyncThunk(
+  "rosterManagement/getRosterDepartmentsRealtime",
+  async ({ rosterId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/departments/realtime`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load departments realtime analytics")
+      )
+    }
+  }
+)
+
+/**
+ * Department realtime analytics - one department
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/departments/{departmentId}/realtime
+ */
+export const getRosterDepartmentRealtime = createAsyncThunk(
+  "rosterManagement/getRosterDepartmentRealtime",
+  async ({ rosterId, departmentId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/departments/${departmentId}/realtime`,
+        { headers: getAuthHeaders() }
+      )
+
+      return {
+        departmentId,
+        data: unwrapAnalyticsResponse(res),
+      }
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load department realtime analytics")
+      )
+    }
+  }
+)
+
+/**
+ * Specialty / category realtime analytics
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/attendance/specialties/realtime
+ */
+export const getRosterSpecialtiesRealtime = createAsyncThunk(
+  "rosterManagement/getRosterSpecialtiesRealtime",
+  async ({ rosterId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/attendance/specialties/realtime`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load specialties realtime analytics")
+      )
+    }
+  }
+)
+
+/**
+ * Daily coverage gaps
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/coverage/{date}
+ */
+export const getRosterCoverageByDate = createAsyncThunk(
+  "rosterManagement/getRosterCoverageByDate",
+  async ({ rosterId, date }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/coverage/${date}`,
+        { headers: getAuthHeaders() }
+      )
+
+      return {
+        date,
+        data: unwrapAnalyticsResponse(res),
+      }
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load roster coverage by date")
+      )
+    }
+  }
+)
+
+/**
+ * Critical coverage gaps
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/coverage/gaps/critical
+ */
+export const getRosterCriticalCoverageGaps = createAsyncThunk(
+  "rosterManagement/getRosterCriticalCoverageGaps",
+  async ({ rosterId }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/coverage/gaps/critical`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load critical coverage gaps")
+      )
+    }
+  }
+)
+
+/**
+ * Weekly coverage
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/coverage/weekly/{weekStart}
+ */
+export const getRosterWeeklyCoverage = createAsyncThunk(
+  "rosterManagement/getRosterWeeklyCoverage",
+  async ({ rosterId, weekStart }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/coverage/weekly/${weekStart}`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load weekly coverage")
+      )
+    }
+  }
+)
+
+/**
+ * Roster workload analysis
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/workload/{startDate}/{endDate}
+ */
+export const getRosterWorkload = createAsyncThunk(
+  "rosterManagement/getRosterWorkload",
+  async ({ rosterId, startDate, endDate }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/workload/${startDate}/${endDate}`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load roster workload")
+      )
+    }
+  }
+)
+
+/**
+ * Roster workload distribution
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/workload/distribution/{startDate}/{endDate}
+ */
+export const getRosterWorkloadDistribution = createAsyncThunk(
+  "rosterManagement/getRosterWorkloadDistribution",
+  async ({ rosterId, startDate, endDate }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/workload/distribution/${startDate}/${endDate}`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load workload distribution")
+      )
+    }
+  }
+)
+
+/**
+ * Doctor workload detail
+ * GET /api/v1/AttendanceAnalytics/doctors/{doctorId}/workload/{startDate}/{endDate}
+ */
+export const getDoctorWorkloadAnalytics = createAsyncThunk(
+  "rosterManagement/getDoctorWorkloadAnalytics",
+  async ({ doctorId, startDate, endDate }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/doctors/${doctorId}/workload/${startDate}/${endDate}`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load doctor workload analytics")
+      )
+    }
+  }
+)
+
+/**
+ * Attendance heatmap
+ * GET /api/v1/AttendanceAnalytics/rosters/{rosterId}/heatmap/{startDate}/{endDate}
+ */
+export const getRosterAttendanceHeatmap = createAsyncThunk(
+  "rosterManagement/getRosterAttendanceHeatmap",
+  async ({ rosterId, startDate, endDate }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `/api/v1/AttendanceAnalytics/rosters/${rosterId}/heatmap/${startDate}/${endDate}`,
+        { headers: getAuthHeaders() }
+      )
+
+      return unwrapAnalyticsResponse(res)
+    } catch (error) {
+      return rejectWithValue(
+        normalizeAnalyticsError(error, "Failed to load attendance heatmap")
+      )
+    }
+  }
+)

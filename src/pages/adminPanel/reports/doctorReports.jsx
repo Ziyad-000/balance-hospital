@@ -52,6 +52,7 @@ function DoctorReports() {
   const [dateTo, setDateTo] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [attendanceViewMode, setAttendanceViewMode] = useState("rows")
+  const [activeReportTab, setActiveReportTab] = useState("overview")
 
   const { doctorReport, loadingDoctorReport, doctorReportError } = useSelector(
     (state) => state.reports
@@ -462,6 +463,35 @@ function DoctorReports() {
     report.attendanceRecords || []
   )
 
+  const reportTabs = [
+    {
+      id: "overview",
+      label: currentLang === "ar" ? "نظرة عامة" : "Overview",
+      icon: BarChart3,
+      iconClass: iconColors.chart,
+    },
+    {
+      id: "attendance",
+      label: currentLang === "ar" ? "الحضور" : "Attendance",
+      icon: Activity,
+      iconClass: iconColors.activity,
+      count: report.attendanceRecords?.length || 0,
+    },
+    {
+      id: "rosters",
+      label: currentLang === "ar" ? "الروسترات" : "Rosters",
+      icon: Calendar,
+      iconClass: iconColors.calendar,
+      count: report.rosterAssignments?.length || 0,
+    },
+    {
+      id: "requests",
+      label: currentLang === "ar" ? "الإجازات والتبديلات" : "Leaves & Swaps",
+      icon: FileText,
+      iconClass: iconColors.file,
+    },
+  ]
+
   return (
     <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
       <div className="max-w-7xl mx-auto">
@@ -473,9 +503,9 @@ function DoctorReports() {
               className="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-success)] transition-colors duration-200 font-bold"
             >
               {currentLang === "en" ? (
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className={`w-5 h-5 ${iconColors.muted}`} />
               ) : (
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className={`w-5 h-5 ${iconColors.muted}`} />
               )}
               {t("common.goBack")}
             </button>
@@ -497,7 +527,7 @@ function DoctorReports() {
                 }
                 className={exportButtonClass}
               >
-                <Download size={18} className="shrink-0" />
+                <Download size={18} className="shrink-0 text-white" />
                 <span>{t("reports.export.title") || "Export"}</span>
               </button>
             </div>
@@ -620,6 +650,47 @@ function DoctorReports() {
           </div>
         </div>
 
+        <div className={`${theme.card} p-3 mb-6 sticky top-2 z-20`}>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {reportTabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeReportTab === tab.id
+
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveReportTab(tab.id)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black border transition-colors whitespace-nowrap ${
+                    isActive
+                      ? "bg-[var(--color-success)] text-white border-[var(--color-success)] shadow-sm"
+                      : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
+                  }`}
+                >
+                  <Icon
+                    size={16}
+                    className={`shrink-0 ${isActive ? "text-white" : tab.iconClass}`}
+                  />
+                  {tab.label}
+                  {tab.count !== undefined && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-black ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border border-[var(--color-border)]"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {activeReportTab === "overview" && (
+          <>
         {report.rolesSummary && (
           <div className={`${theme.card} p-6 mb-6`}>
             <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
@@ -1006,6 +1077,11 @@ function DoctorReports() {
           </div>
         </div>
 
+          </>
+        )}
+
+        {activeReportTab === "attendance" && (
+          <>
         {report.attendanceRecords && report.attendanceRecords.length > 0 && (
           <div className={`${theme.card} p-6 mb-6`}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -1024,7 +1100,7 @@ function DoctorReports() {
                       : "border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
                   }`}
                 >
-                  <Rows3 size={16} />
+                  <Rows3 size={16} className={attendanceViewMode === "rows" ? "text-white" : iconColors.activity} />
                   {currentLang === "ar" ? "صفوف" : "Rows"}
                 </button>
 
@@ -1037,7 +1113,7 @@ function DoctorReports() {
                       : "border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)]"
                   }`}
                 >
-                  <Grid3X3 size={16} />
+                  <Grid3X3 size={16} className={attendanceViewMode === "calendar" ? "text-white" : iconColors.calendar} />
                   {currentLang === "ar" ? "تقويم" : "Calendar"}
                 </button>
               </div>
@@ -1206,6 +1282,24 @@ function DoctorReports() {
           </div>
         )}
 
+        {(!report.attendanceRecords || report.attendanceRecords.length === 0) && (
+          <div className={`${theme.card} p-8 text-center mb-6`}>
+            <Activity className={`w-14 h-14 mx-auto mb-4 ${iconColors.activity}`} />
+            <h3 className="text-xl font-black text-[var(--color-text)] mb-2">
+              {currentLang === "ar" ? "لا توجد سجلات حضور" : "No attendance records"}
+            </h3>
+            <p className="text-[var(--color-text-muted)]">
+              {currentLang === "ar"
+                ? "لا توجد سجلات حضور للفترة المحددة."
+                : "No attendance records were returned for the selected range."}
+            </p>
+          </div>
+        )}
+          </>
+        )}
+
+        {activeReportTab === "rosters" && (
+          <>
         {report.rosterAssignments && report.rosterAssignments.length > 0 && (
           <div className={`${theme.card} p-6 mb-6`}>
             <h2 className="text-2xl font-black text-[var(--color-text)] mb-6 flex items-center gap-3">
@@ -1230,6 +1324,23 @@ function DoctorReports() {
           </div>
         )}
 
+        {(!report.rosterAssignments || report.rosterAssignments.length === 0) && (
+          <div className={`${theme.card} p-8 text-center mb-6`}>
+            <Calendar className={`w-14 h-14 mx-auto mb-4 ${iconColors.calendar}`} />
+            <h3 className="text-xl font-black text-[var(--color-text)] mb-2">
+              {currentLang === "ar" ? "لا توجد روسترات" : "No roster assignments"}
+            </h3>
+            <p className="text-[var(--color-text-muted)]">
+              {currentLang === "ar"
+                ? "لا توجد روسترات مرتبطة بهذا الطبيب في الفترة المحددة."
+                : "No roster assignments were returned for this doctor in the selected range."}
+            </p>
+          </div>
+        )}
+          </>
+        )}
+
+        {activeReportTab === "requests" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <LeaveRecordsSection
             report={report}
@@ -1249,6 +1360,7 @@ function DoctorReports() {
             formatDate={formatDate}
           />
         </div>
+        )}
       </div>
     </div>
   )

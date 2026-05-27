@@ -1,3 +1,4 @@
+// src\components\dashboard\charts.jsx
 import { useTranslation } from "react-i18next"
 import i18next from "i18next"
 import {
@@ -83,6 +84,19 @@ const formatShortName = (value, max = 18) => {
   return value.length > max ? `${value.substring(0, max)}...` : value
 }
 
+const getLocalizedName = (item, fallback = "-") => {
+  if (!item) return fallback
+
+  if (i18next.language === "ar") {
+    return item.nameAr || item.nameArabic || item.name || item.titleAr || item.title || fallback
+  }
+
+  return item.nameEn || item.nameEnglish || item.name || item.titleEn || item.title || fallback
+}
+
+const getShortLocalizedName = (item, max = 18) => formatShortName(getLocalizedName(item), max)
+
+
 export const DashboardCharts = ({ dashboardData, isDark, t }) => {
   const { i18n } = useTranslation()
   const isRTL = i18n.language === "ar" || i18n.dir() === "rtl"
@@ -121,7 +135,7 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
       doctors: cat.doctorsCount,
       departments: cat.departmentsCount,
       rosters: cat.activeRostersCount,
-      fullName: i18next.language === "ar" ? cat.nameArabic : cat.nameEnglish,
+      fullName: getLocalizedName(cat),
     })) || []
 
   const departmentsActivityData =
@@ -129,7 +143,7 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
       name: dept.code,
       schedules: dept.activeSchedulesCount,
       doctors: dept.assignedDoctorsCount,
-      fullName: i18next.language === "ar" ? dept.nameArabic : dept.nameEnglish,
+      fullName: getLocalizedName(dept),
     })) || []
 
   const pendingRequestsData = [
@@ -164,23 +178,22 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
     dashboardData.configurationSummary?.contractingTypes?.map((type) => ({
       name:
         i18next.language === "ar"
-          ? formatShortName(type.nameArabic, 15)
-          : type.nameEnglish?.split(" ")[0],
+          ? getShortLocalizedName(type, 15)
+          : getLocalizedName(type).split(" ")[0],
       users: type.usersCount,
       maxHours: type.maxHoursPerWeek,
-      fullName: i18next.language === "ar" ? type.nameArabic : type.nameEnglish,
+      fullName: getLocalizedName(type),
     })) || []
 
   const shiftTypesData =
     dashboardData.configurationSummary?.shiftTypes?.map((shift) => ({
       name:
         i18next.language === "ar"
-          ? formatShortName(shift.nameArabic, 18)
-          : shift.nameEnglish?.replace(" Shift", ""),
+          ? getShortLocalizedName(shift, 18)
+          : getLocalizedName(shift).replace(" Shift", ""),
       usage: shift.usageToday,
       hours: shift.totalTime,
-      fullName:
-        i18next.language === "ar" ? shift.nameArabic : shift.nameEnglish,
+      fullName: getLocalizedName(shift),
     })) || []
 
   const rostersCompletionData =
@@ -197,7 +210,7 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
 
   const degreesData =
     dashboardData.configurationSummary?.topDegreesByUsers?.map((degree) => ({
-      name: i18next.language === "ar" ? degree.nameArabic : degree.nameEnglish,
+      name: getLocalizedName(degree),
       users: degree.usersCount,
     })) || []
 
@@ -555,4 +568,3 @@ export const DashboardCharts = ({ dashboardData, isDark, t }) => {
     </div>
   )
 }
-

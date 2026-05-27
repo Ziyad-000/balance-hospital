@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import {
+  Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
@@ -10,6 +12,7 @@ import {
   Building2,
   CalendarDays,
   CheckCircle,
+  Clock,
   Edit,
   Eye,
   Info,
@@ -17,8 +20,13 @@ import {
   MapPin,
   RefreshCw,
   Shield,
+  ShieldAlert,
+  Stethoscope,
+  Timer,
+  UserCheck,
   UserCog,
   UserPlus,
+  Users,
   UserX,
   XCircle,
 } from "lucide-react"
@@ -29,6 +37,8 @@ import {
   getDepartmentGeoFences,
   getDepartmentMonthList,
 } from "../../../state/act/actDepartment"
+
+import { getRosterDepartmentRealtime } from "../../../state/act/actRosterManagement"
 
 import {
   clearSingleDepartment,
@@ -44,6 +54,40 @@ import { formatDate } from "../../../utils/formtDate"
 import DepartmentGeoFences from "./geofence"
 import { getPageTheme } from "../../../utils/themeClasses"
 
+const safeArray = (value) => {
+  if (Array.isArray(value)) return value
+  if (Array.isArray(value?.items)) return value.items
+  if (Array.isArray(value?.data)) return value.data
+  if (Array.isArray(value?.data?.items)) return value.data.items
+  if (Array.isArray(value?.rows)) return value.rows
+  if (Array.isArray(value?.doctors)) return value.doctors
+  return []
+}
+
+const getNumber = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") {
+      const n = Number(value)
+      return Number.isNaN(n) ? 0 : n
+    }
+  }
+
+  return 0
+}
+
+const getValue = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") return value
+  }
+
+  return "-"
+}
+
+const percentText = (value) => {
+  const n = Number(value || 0)
+  return `${Number.isNaN(n) ? 0 : n.toFixed(1)}%`
+}
+
 function SpecificDepartment() {
   const { depId: id } = useParams()
   const dispatch = useDispatch()
@@ -53,24 +97,22 @@ function SpecificDepartment() {
 
   const [activeTab, setActiveTab] = useState("overview")
   const [showRemoveManagerModal, setShowRemoveManagerModal] = useState(false)
+  const [selectedAttendanceRosterId, setSelectedAttendanceRosterId] = useState("")
 
   const currentLang = i18n.language || "ar"
   const isRTL = currentLang === "ar"
 
   const defaultButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "group inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const selectedButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
+    "group inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-success)] text-white border-[var(--color-success)] transition-colors"
 
   const iconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
-
-  const dangerIconButtonClass =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors"
+    "group p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors"
 
   const dangerButtonClass =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-red-500 border-[var(--color-border-strong)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    "group inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border bg-[var(--color-surface)] text-red-500 border-[var(--color-border-strong)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   const toneMap = {
     blue: {
@@ -110,6 +152,27 @@ function SpecificDepartment() {
     },
   }
 
+  const iconColors = {
+    overview: "text-blue-500 dark:text-blue-500",
+    categories: "text-emerald-500 dark:text-emerald-500",
+    manager: "text-violet-500 dark:text-violet-500",
+    rosters: "text-amber-500 dark:text-amber-500",
+    attendance: "text-orange-500 dark:text-orange-500",
+    geofence: "text-red-500 dark:text-red-500",
+
+    refresh: "text-blue-500 dark:text-blue-500",
+    edit: "text-violet-500 dark:text-violet-500",
+    view: "text-blue-500 dark:text-blue-500",
+    danger: "text-red-500 dark:text-red-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    warning: "text-amber-500 dark:text-amber-500",
+    info: "text-blue-500 dark:text-blue-500",
+    muted: "text-slate-500 dark:text-slate-500",
+    doctor: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-amber-500 dark:text-amber-500",
+    absent: "text-red-500 dark:text-red-500",
+    late: "text-orange-500 dark:text-orange-500",
+  }
 
   const { loginRoleResponseDto, departmentManagerId } = useSelector(
     (state) => state.auth
@@ -136,6 +199,14 @@ function SpecificDepartment() {
     getDepartmentGeoFencesError,
   } = useSelector((state) => state.department)
 
+  const {
+    departmentRealtime,
+    departmentRealtimeData,
+    rosterDepartmentRealtime,
+    loading: rosterLoading,
+    errors: rosterErrors,
+  } = useSelector((state) => state.rosterManagement || {})
+
   const roleName = loginRoleResponseDto?.roleNameEn
 
   const depIdsArray = Array.isArray(departmentLinkedIds)
@@ -149,13 +220,10 @@ function SpecificDepartment() {
   )
 
   const isForbiddenForDepartmentManager =
-    roleName === "Department Manager" &&
-    String(departmentManagerId) !== String(id)
+    roleName === "Department Manager" && String(departmentManagerId) !== String(id)
 
   const isForbiddenForCategoryHead =
-    roleName === "Category Head" &&
-    depIdsArray.length > 0 &&
-    !canCategoryHeadManage
+    roleName === "Category Head" && depIdsArray.length > 0 && !canCategoryHeadManage
 
   const canManageDepartment =
     roleName === "System Administrator" ||
@@ -186,15 +254,6 @@ function SpecificDepartment() {
     }
   }, [dispatch, id])
 
-  const refreshData = () => {
-    if (!id) return
-
-    dispatch(getDepartmentById(id))
-    dispatch(getDepartmentCategories({ departmentId: id }))
-    dispatch(getDepartmentGeoFences({ departmentId: id }))
-    dispatch(getDepartmentMonthList({ departmentId: id }))
-  }
-
   const linkedCategories = useMemo(() => {
     if (Array.isArray(departmentCategories) && departmentCategories.length > 0) {
       return departmentCategories
@@ -216,6 +275,64 @@ function SpecificDepartment() {
   const safeMonthList = Array.isArray(departmentMonthList)
     ? departmentMonthList
     : []
+
+  const attendanceRosterOptions = useMemo(() => {
+    const options = []
+
+    safeMonthList.forEach((item, index) => {
+      const rosterId =
+        item.rosterId ||
+        item.rosterID ||
+        item.roster?.id ||
+        item.roster?.rosterId ||
+        item.rosters?.[0]?.id ||
+        item.rosters?.[0]?.rosterId ||
+        item.id
+
+      if (!rosterId) return
+
+      options.push({
+        id: rosterId,
+        label:
+          item.rosterTitle ||
+          item.title ||
+          item.roster?.title ||
+          item.rosters?.[0]?.title ||
+          `${item.month || "-"} / ${item.year || "-"}`,
+        month: item.month,
+        year: item.year,
+        raw: item,
+        key: `${rosterId}-${item.month || index}-${item.year || index}`,
+      })
+    })
+
+    const unique = []
+    const seen = new Set()
+
+    options.forEach((option) => {
+      if (seen.has(String(option.id))) return
+      seen.add(String(option.id))
+      unique.push(option)
+    })
+
+    return unique
+  }, [safeMonthList])
+
+  useEffect(() => {
+    if (selectedAttendanceRosterId || attendanceRosterOptions.length === 0) return
+    setSelectedAttendanceRosterId(String(attendanceRosterOptions[0].id))
+  }, [selectedAttendanceRosterId, attendanceRosterOptions])
+
+  useEffect(() => {
+    if (!id || activeTab !== "attendance" || !selectedAttendanceRosterId) return
+
+    dispatch(
+      getRosterDepartmentRealtime({
+        rosterId: selectedAttendanceRosterId,
+        departmentId: id,
+      })
+    )
+  }, [dispatch, id, activeTab, selectedAttendanceRosterId])
 
   const hasManager = Boolean(
     selectedDepartment?.hasManager ||
@@ -245,6 +362,65 @@ function SpecificDepartment() {
     safeMonthList.length,
     hasManager,
   ])
+
+  const realtimeSource =
+    rosterDepartmentRealtime ||
+    departmentRealtimeData ||
+    departmentRealtime ||
+    {}
+
+  const realtimeDepartment =
+    realtimeSource?.department ||
+    realtimeSource?.data ||
+    realtimeSource?.departmentData ||
+    realtimeSource
+
+  const realtimeDoctors = safeArray(
+    realtimeSource?.doctors ||
+      realtimeSource?.doctorStatuses ||
+      realtimeSource?.attendanceDoctors ||
+      realtimeDepartment?.doctors ||
+      realtimeDepartment?.doctorStatuses
+  )
+
+  const realtimeAlerts = safeArray(
+    realtimeSource?.alerts ||
+      realtimeSource?.departmentAlerts ||
+      realtimeDepartment?.alerts
+  )
+
+  const selectedAttendanceRoster = attendanceRosterOptions.find(
+    (item) => String(item.id) === String(selectedAttendanceRosterId)
+  )
+
+  const refreshData = () => {
+    if (!id) return
+
+    dispatch(getDepartmentById(id))
+    dispatch(getDepartmentCategories({ departmentId: id }))
+    dispatch(getDepartmentGeoFences({ departmentId: id }))
+    dispatch(getDepartmentMonthList({ departmentId: id }))
+
+    if (selectedAttendanceRosterId) {
+      dispatch(
+        getRosterDepartmentRealtime({
+          rosterId: selectedAttendanceRosterId,
+          departmentId: id,
+        })
+      )
+    }
+  }
+
+  const refreshAttendance = () => {
+    if (!id || !selectedAttendanceRosterId) return
+
+    dispatch(
+      getRosterDepartmentRealtime({
+        rosterId: selectedAttendanceRosterId,
+        departmentId: id,
+      })
+    )
+  }
 
   const getDepartmentName = () => {
     if (!selectedDepartment) return "-"
@@ -363,6 +539,11 @@ function SpecificDepartment() {
     navigate(`/admin-panel/department/${id}/${monthItem.month}/${monthItem.year}`)
   }
 
+  const openDepartmentCalendar = () => {
+    if (!selectedAttendanceRosterId) return
+    navigate(`/admin-panel/department/calender/${id}/${selectedAttendanceRosterId}`)
+  }
+
   const handleAssignManager = () => {
     navigate(`/admin-panel/department/assign-manager/${id}?type=department`)
   }
@@ -382,7 +563,9 @@ function SpecificDepartment() {
 
   const EmptyState = ({ icon: Icon, title, description }) => (
     <div className={`${theme.card} p-8 text-center`}>
-      <Icon className="w-14 h-14 mx-auto mb-4 text-[var(--color-text-muted)]" />
+      <span className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center border-2 bg-transparent text-slate-500 border-slate-500">
+        <Icon className="w-8 h-8" />
+      </span>
       <h3 className="text-xl font-bold text-[var(--color-text)]">{title}</h3>
       <p className="mt-2 text-[var(--color-text-muted)]">{description}</p>
     </div>
@@ -407,15 +590,41 @@ function SpecificDepartment() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
-            <p className="text-2xl font-extrabold text-[var(--color-text)]">
+            <p className={`text-2xl font-extrabold ${toneStyle.text}`}>
               {value ?? 0}
             </p>
           </div>
 
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center border ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center border-2 ${toneStyle.bg} ${toneStyle.text} ${toneStyle.border}`}
           >
             <Icon className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const AttendanceStatCard = ({ icon: Icon, title, value, tone = "blue" }) => {
+    const toneStyle = toneMap[tone] || toneMap.blue
+
+    return (
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm min-h-[104px]">
+        <div className="flex items-center justify-between gap-4 h-full">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-black text-[var(--color-text)] leading-5 break-words">
+              {title}
+            </p>
+
+            <p className={`mt-2 text-2xl font-black tracking-tight ${toneStyle.text}`}>
+              {value ?? 0}
+            </p>
+          </div>
+
+          <div
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-2 bg-transparent ${toneStyle.text} ${toneStyle.border}`}
+          >
+            <Icon className="w-5 h-5 shrink-0" />
           </div>
         </div>
       </div>
@@ -451,7 +660,10 @@ function SpecificDepartment() {
         onClick={() => setActiveTab(tabId)}
         className={isActive ? selectedButtonClass : defaultButtonClass}
       >
-        <Icon size={16} />
+        <Icon
+          size={16}
+          className={isActive ? "text-white" : iconColors[tabId] || iconColors.info}
+        />
         {label}
         {count !== undefined && (
           <span
@@ -592,11 +804,8 @@ function SpecificDepartment() {
                 to={`/admin-panel/department/edit/${selectedDepartment?.id}`}
                 className="block"
               >
-                <button
-                  type="button"
-                  className={`${defaultButtonClass} w-full`}
-                >
-                  <Edit size={16} />
+                <button type="button" className={`${defaultButtonClass} w-full`}>
+                  <Edit size={16} className={iconColors.edit} />
                   {currentLang === "ar" ? "تعديل القسم" : "Edit Department"}
                 </button>
               </Link>
@@ -607,7 +816,7 @@ function SpecificDepartment() {
               onClick={() => setActiveTab("manager")}
               className={`${defaultButtonClass} w-full`}
             >
-              <UserCog size={16} />
+              <UserCog size={16} className={iconColors.manager} />
               {currentLang === "ar" ? "إدارة المدير" : "Manage Manager"}
             </button>
 
@@ -616,8 +825,17 @@ function SpecificDepartment() {
               onClick={() => setActiveTab("rosters")}
               className={`${defaultButtonClass} w-full`}
             >
-              <CalendarDays size={16} />
+              <CalendarDays size={16} className={iconColors.rosters} />
               {currentLang === "ar" ? "روسترات القسم" : "Department Rosters"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("attendance")}
+              className={`${defaultButtonClass} w-full`}
+            >
+              <Activity size={16} className={iconColors.attendance} />
+              {currentLang === "ar" ? "تحليل الحضور" : "Attendance Insights"}
             </button>
 
             <button
@@ -625,7 +843,7 @@ function SpecificDepartment() {
               onClick={() => setActiveTab("geofence")}
               className={`${defaultButtonClass} w-full`}
             >
-              <MapPin size={16} />
+              <MapPin size={16} className={iconColors.geofence} />
               GeoFence
             </button>
           </div>
@@ -695,11 +913,8 @@ function SpecificDepartment() {
 
                   {categoryId && (
                     <Link to={`/admin-panel/category/${categoryId}`}>
-                      <button
-                        type="button"
-                        className={iconButtonClass}
-                      >
-                        <Eye size={16} />
+                      <button type="button" className={iconButtonClass}>
+                        <Eye size={16} className={iconColors.view} />
                       </button>
                     </Link>
                   )}
@@ -761,7 +976,7 @@ function SpecificDepartment() {
                       onClick={handleAssignManager}
                       className={defaultButtonClass}
                     >
-                      <UserPlus size={16} />
+                      <UserPlus size={16} className={iconColors.success} />
                       {currentLang === "ar" ? "تغيير المدير" : "Change Manager"}
                     </button>
 
@@ -770,7 +985,7 @@ function SpecificDepartment() {
                       onClick={handleRemoveManager}
                       className={dangerButtonClass}
                     >
-                      <UserX size={16} />
+                      <UserX size={16} className={iconColors.danger} />
                       {currentLang === "ar" ? "إزالة المدير" : "Remove Manager"}
                     </button>
                   </>
@@ -842,7 +1057,7 @@ function SpecificDepartment() {
               onClick={handleAssignManager}
               className={defaultButtonClass}
             >
-              <UserPlus size={16} />
+              <UserPlus size={16} className={iconColors.success} />
               {currentLang === "ar" ? "تعيين مدير" : "Assign Manager"}
             </button>
           </div>
@@ -875,7 +1090,7 @@ function SpecificDepartment() {
             onClick={() => dispatch(getDepartmentMonthList({ departmentId: id }))}
             className={defaultButtonClass}
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={16} className={iconColors.refresh} />
             {currentLang === "ar" ? "تحديث" : "Refresh"}
           </button>
         </div>
@@ -965,9 +1180,7 @@ function SpecificDepartment() {
                     label={currentLang === "ar" ? "النقص" : "Shortfall"}
                     value={shortfall}
                     valueClass={
-                      shortfall > 0
-                        ? "text-red-500"
-                        : "text-emerald-500"
+                      shortfall > 0 ? "text-red-500" : "text-emerald-500"
                     }
                   />
                 </div>
@@ -1006,6 +1219,389 @@ function SpecificDepartment() {
       )}
     </div>
   )
+
+  const renderAttendanceTab = () => {
+    const isLoading =
+      rosterLoading?.departmentRealtime ||
+      rosterLoading?.rosterDepartmentRealtime ||
+      rosterLoading?.getRosterDepartmentRealtime
+
+    const error =
+      rosterErrors?.departmentRealtime ||
+      rosterErrors?.rosterDepartmentRealtime ||
+      rosterErrors?.getRosterDepartmentRealtime
+
+    const scheduled = getNumber(
+      realtimeDepartment.scheduled,
+      realtimeDepartment.scheduledCount,
+      realtimeDepartment.totalScheduled,
+      realtimeDepartment.requiredDoctors
+    )
+
+    const present = getNumber(
+      realtimeDepartment.present,
+      realtimeDepartment.presentCount,
+      realtimeDepartment.totalPresent
+    )
+
+    const absent = getNumber(
+      realtimeDepartment.absent,
+      realtimeDepartment.absentCount,
+      realtimeDepartment.totalAbsent
+    )
+
+    const late = getNumber(
+      realtimeDepartment.late,
+      realtimeDepartment.lateCount,
+      realtimeDepartment.totalLate
+    )
+
+    const notChecked = getNumber(
+      realtimeDepartment.notChecked,
+      realtimeDepartment.notCheckedCount,
+      realtimeDepartment.pendingCheckIn,
+      Math.max(0, scheduled - present - absent)
+    )
+
+    const attendanceRate = getNumber(
+      realtimeDepartment.attendanceRate,
+      realtimeDepartment.presentRate,
+      scheduled > 0 ? (present / scheduled) * 100 : 0
+    )
+
+    return (
+      <div className="space-y-5">
+        <div className={`${theme.card} p-4`}>
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+                <Activity className="w-5 h-5 text-orange-500" />
+                {currentLang === "ar"
+                  ? "تحليل حضور القسم"
+                  : "Department Attendance Insights"}
+              </h2>
+
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                {currentLang === "ar"
+                  ? "متابعة فورية لحضور القسم داخل الروستر المحدد."
+                  : "Realtime attendance view for this department inside the selected roster."}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <select
+                value={selectedAttendanceRosterId}
+                onChange={(e) => setSelectedAttendanceRosterId(e.target.value)}
+                className="px-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] min-w-[220px]"
+              >
+                {attendanceRosterOptions.length === 0 ? (
+                  <option value="">
+                    {currentLang === "ar"
+                      ? "لا توجد روسترات متاحة"
+                      : "No available rosters"}
+                  </option>
+                ) : (
+                  attendanceRosterOptions.map((option) => (
+                    <option key={option.key} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))
+                )}
+              </select>
+
+              <button
+                type="button"
+                onClick={refreshAttendance}
+                disabled={!selectedAttendanceRosterId}
+                className={defaultButtonClass}
+              >
+                <RefreshCw size={16} className={iconColors.refresh} />
+                {currentLang === "ar" ? "تحديث" : "Refresh"}
+              </button>
+
+              <button
+                type="button"
+                onClick={openDepartmentCalendar}
+                disabled={!selectedAttendanceRosterId}
+                className={defaultButtonClass}
+              >
+                <CalendarDays size={16} className={iconColors.rosters} />
+                {currentLang === "ar" ? "فتح التقويم" : "Open Calendar"}
+              </button>
+            </div>
+          </div>
+
+          {selectedAttendanceRoster && (
+            <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
+              <p className="text-sm font-bold text-[var(--color-text)]">
+                {currentLang === "ar" ? "الروستر المحدد" : "Selected Roster"}:{" "}
+                <span className="text-orange-500">
+                  {selectedAttendanceRoster.label}
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {attendanceRosterOptions.length === 0 ? (
+          <EmptyState
+            icon={CalendarDays}
+            title={
+              currentLang === "ar"
+                ? "لا توجد روسترات لعرض الحضور"
+                : "No rosters available for attendance"
+            }
+            description={
+              currentLang === "ar"
+                ? "يجب أن يكون هناك roster مرتبط بالقسم حتى تظهر تحليلات الحضور."
+                : "A roster must be linked to this department to show attendance insights."
+            }
+          />
+        ) : (
+          <>
+            {error && (
+              <div className="p-5 rounded-2xl bg-transparent text-red-500 border-2 border-red-500 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 mt-0.5 text-red-500" />
+                  <div>
+                    <h3 className="font-extrabold mb-1">
+                      {currentLang === "ar"
+                        ? "تعذر تحميل حضور القسم"
+                        : "Failed to load department attendance"}
+                    </h3>
+                    <p className="text-sm font-bold">
+                      {typeof error === "string" ? error : error?.message || "Error"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isLoading && (
+              <InlineLoader
+                text={
+                  currentLang === "ar"
+                    ? "جاري تحميل حضور القسم..."
+                    : "Loading department attendance..."
+                }
+              />
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              <AttendanceStatCard
+                icon={BarChart3}
+                title={currentLang === "ar" ? "معدل الحضور" : "Attendance Rate"}
+                value={percentText(attendanceRate)}
+                tone={
+                  attendanceRate >= 80 ? "green" : attendanceRate >= 50 ? "yellow" : "red"
+                }
+              />
+
+              <AttendanceStatCard
+                icon={Users}
+                title={currentLang === "ar" ? "مجدولين" : "Scheduled"}
+                value={scheduled}
+                tone="blue"
+              />
+
+              <AttendanceStatCard
+                icon={UserCheck}
+                title={currentLang === "ar" ? "حاضرين" : "Present"}
+                value={present}
+                tone="green"
+              />
+
+              <AttendanceStatCard
+                icon={XCircle}
+                title={currentLang === "ar" ? "غياب" : "Absent"}
+                value={absent}
+                tone={absent > 0 ? "red" : "green"}
+              />
+
+              <AttendanceStatCard
+                icon={Clock}
+                title={currentLang === "ar" ? "متأخرين" : "Late"}
+                value={late}
+                tone={late > 0 ? "yellow" : "green"}
+              />
+
+              <AttendanceStatCard
+                icon={Timer}
+                title={currentLang === "ar" ? "لم يسجلوا" : "Not Checked"}
+                value={notChecked}
+                tone={notChecked > 0 ? "orange" : "green"}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <div className={`${theme.card} p-5`}>
+                <h3 className="text-lg font-extrabold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                  <span className="w-10 h-10 rounded-xl border-2 border-red-500 text-red-500 flex items-center justify-center">
+                    <ShieldAlert size={20} />
+                  </span>
+                  {currentLang === "ar" ? "تنبيهات القسم" : "Department Alerts"}
+                </h3>
+
+                {realtimeAlerts.length === 0 ? (
+                  <EmptyMini
+                    icon={CheckCircle}
+                    text={
+                      currentLang === "ar"
+                        ? "لا توجد تنبيهات حالية"
+                        : "No active alerts"
+                    }
+                    tone="green"
+                    toneMap={toneMap}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {realtimeAlerts.slice(0, 8).map((alert, index) => (
+                      <AttendanceListItem
+                        key={alert.id || index}
+                        icon={AlertTriangle}
+                        title={getValue(
+                          currentLang === "ar" ? alert.titleAr : alert.titleEn,
+                          alert.title,
+                          alert.message
+                        )}
+                        subtitle={getValue(
+                          currentLang === "ar" ? alert.messageAr : alert.messageEn,
+                          alert.description,
+                          alert.message
+                        )}
+                        badge={getValue(alert.severity, alert.level, "Alert")}
+                        tone={
+                          String(alert.severity || alert.level)
+                            .toLowerCase()
+                            .includes("critical")
+                            ? "red"
+                            : "yellow"
+                        }
+                        toneMap={toneMap}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className={`${theme.card} p-5`}>
+                <h3 className="text-lg font-extrabold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                  <span className="w-10 h-10 rounded-xl border-2 border-blue-500 text-blue-500 flex items-center justify-center">
+                    <Info size={20} />
+                  </span>
+                  {currentLang === "ar" ? "ملخص تشغيلي" : "Operational Summary"}
+                </h3>
+
+                <div className="space-y-3">
+                  <SummaryRow
+                    label={currentLang === "ar" ? "القسم" : "Department"}
+                    value={getDepartmentName()}
+                  />
+
+                  <SummaryRow
+                    label={currentLang === "ar" ? "الروستر" : "Roster"}
+                    value={selectedAttendanceRoster?.label}
+                  />
+
+                  <SummaryRow
+                    label={currentLang === "ar" ? "معدل الحضور" : "Attendance Rate"}
+                    value={percentText(attendanceRate)}
+                    valueClass={
+                      attendanceRate >= 80
+                        ? "text-emerald-500"
+                        : attendanceRate >= 50
+                        ? "text-amber-500"
+                        : "text-red-500"
+                    }
+                  />
+
+                  <SummaryRow
+                    label={currentLang === "ar" ? "الفجوة الحالية" : "Current Gap"}
+                    value={Math.max(0, scheduled - present)}
+                    valueClass={
+                      scheduled - present > 0 ? "text-red-500" : "text-emerald-500"
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={`${theme.card} p-5`}>
+              <h3 className="text-lg font-extrabold text-[var(--color-text)] mb-4 flex items-center gap-2">
+                <span className="w-10 h-10 rounded-xl border-2 border-emerald-500 text-emerald-500 flex items-center justify-center">
+                  <Stethoscope size={20} />
+                </span>
+                {currentLang === "ar"
+                  ? "حالة الأطباء داخل القسم"
+                  : "Doctors Attendance Status"}
+              </h3>
+
+              {realtimeDoctors.length === 0 ? (
+                <EmptyMini
+                  icon={Stethoscope}
+                  text={
+                    currentLang === "ar"
+                      ? "لا توجد بيانات أطباء لهذا الروستر"
+                      : "No doctor attendance data for this roster"
+                  }
+                  tone="neutral"
+                  toneMap={toneMap}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {realtimeDoctors.slice(0, 18).map((doctor, index) => {
+                    const status = String(
+                      doctor.status ||
+                        doctor.attendanceStatus ||
+                        doctor.currentStatus ||
+                        ""
+                    ).toLowerCase()
+
+                    const tone = status.includes("absent")
+                      ? "red"
+                      : status.includes("late")
+                      ? "yellow"
+                      : status.includes("present") || status.includes("on")
+                      ? "green"
+                      : "neutral"
+
+                    return (
+                      <AttendanceListItem
+                        key={doctor.doctorId || doctor.id || index}
+                        icon={Stethoscope}
+                        title={getValue(
+                          currentLang === "ar"
+                            ? doctor.doctorNameAr || doctor.nameAr
+                            : doctor.doctorNameEn || doctor.nameEn,
+                          doctor.doctorName,
+                          doctor.name,
+                          doctor.fullName
+                        )}
+                        subtitle={`${currentLang === "ar" ? "الحالة" : "Status"}: ${getValue(
+                          doctor.status,
+                          doctor.attendanceStatus,
+                          doctor.currentStatus,
+                          "-"
+                        )}`}
+                        badge={getValue(
+                          doctor.checkInTime,
+                          doctor.timeIn,
+                          doctor.shiftName,
+                          "-"
+                        )}
+                        tone={tone}
+                        toneMap={toneMap}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
 
   const renderGeoFenceTab = () => (
     <div className="space-y-5">
@@ -1072,7 +1668,11 @@ function SpecificDepartment() {
                 onClick={() => navigate("/admin-panel/departments")}
                 className={defaultButtonClass}
               >
-                {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+                {isRTL ? (
+                  <ArrowRight size={16} className={iconColors.info} />
+                ) : (
+                  <ArrowLeft size={16} className={iconColors.info} />
+                )}
                 {currentLang === "ar" ? "رجوع للأقسام" : "Back to Departments"}
               </button>
             )}
@@ -1123,25 +1723,25 @@ function SpecificDepartment() {
               onClick={() => navigate("/admin-panel/departments")}
               className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-emerald-500"
             >
-              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {isRTL ? (
+                <ArrowRight size={16} className={iconColors.info} />
+              ) : (
+                <ArrowLeft size={16} className={iconColors.info} />
+              )}
               {currentLang === "ar" ? "رجوع للأقسام" : "Back to Departments"}
             </button>
           )}
 
           <div className="flex items-center gap-2 ms-auto">
-            <button
-              type="button"
-              onClick={refreshData}
-              className={defaultButtonClass}
-            >
-              <RefreshCw size={16} />
+            <button type="button" onClick={refreshData} className={defaultButtonClass}>
+              <RefreshCw size={16} className={iconColors.refresh} />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
             </button>
 
             {canManageDepartment && roleName !== "Category Head" && (
               <Link to={`/admin-panel/department/edit/${selectedDepartment.id}`}>
                 <button type="button" className={defaultButtonClass}>
-                  <Edit size={16} />
+                  <Edit size={16} className={iconColors.edit} />
                   {currentLang === "ar" ? "تعديل" : "Edit"}
                 </button>
               </Link>
@@ -1152,7 +1752,7 @@ function SpecificDepartment() {
         <div className={`${theme.card} p-6`}>
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-blue-500 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-transparent text-blue-500 border-2 border-blue-500 flex items-center justify-center">
                 <Building2 className="w-7 h-7" />
               </div>
 
@@ -1195,7 +1795,7 @@ function SpecificDepartment() {
                   </span>
 
                   {hasManager && (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-purple-soft)] text-violet-500 border border-[var(--color-purple-border)]">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-transparent text-violet-500 border-2 border-violet-500">
                       {getManagerName()}
                     </span>
                   )}
@@ -1205,7 +1805,7 @@ function SpecificDepartment() {
 
             <div className="grid grid-cols-3 gap-3 min-w-[280px]">
               <div className={`${theme.cardSoft} p-3 text-center`}>
-                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                <p className="text-2xl font-extrabold text-blue-500">
                   {overviewStats.categories}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -1214,7 +1814,7 @@ function SpecificDepartment() {
               </div>
 
               <div className={`${theme.cardSoft} p-3 text-center`}>
-                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                <p className="text-2xl font-extrabold text-emerald-500">
                   {overviewStats.geofences}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -1223,7 +1823,7 @@ function SpecificDepartment() {
               </div>
 
               <div className={`${theme.cardSoft} p-3 text-center`}>
-                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                <p className="text-2xl font-extrabold text-orange-500">
                   {overviewStats.months}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -1264,6 +1864,12 @@ function SpecificDepartment() {
             />
 
             <TabButton
+              id="attendance"
+              icon={Activity}
+              label={currentLang === "ar" ? "الحضور" : "Attendance"}
+            />
+
+            <TabButton
               id="geofence"
               icon={MapPin}
               label="GeoFence"
@@ -1276,8 +1882,71 @@ function SpecificDepartment() {
         {activeTab === "categories" && renderCategoriesTab()}
         {activeTab === "manager" && renderManagerTab()}
         {activeTab === "rosters" && renderRostersTab()}
+        {activeTab === "attendance" && renderAttendanceTab()}
         {activeTab === "geofence" && renderGeoFenceTab()}
       </div>
+    </div>
+  )
+}
+
+function AttendanceListItem({
+  icon: Icon,
+  title,
+  subtitle,
+  badge,
+  tone = "blue",
+  toneMap,
+}) {
+  const toneStyle = toneMap[tone] || toneMap.blue
+
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <span
+          className={`w-9 h-9 rounded-xl border-2 flex items-center justify-center bg-transparent ${toneStyle.text} ${toneStyle.border}`}
+        >
+          <Icon size={17} />
+        </span>
+
+        <div className="min-w-0">
+          <p className="font-bold text-[var(--color-text)] truncate">{title}</p>
+          <p className="text-xs text-[var(--color-text-muted)] truncate">
+            {subtitle}
+          </p>
+        </div>
+      </div>
+
+      <span
+        className={`shrink-0 px-2.5 py-1 rounded-full border-2 text-xs font-bold bg-transparent ${toneStyle.text} ${toneStyle.border}`}
+      >
+        {badge}
+      </span>
+    </div>
+  )
+}
+
+function SummaryRow({
+  label,
+  value,
+  valueClass = "text-[var(--color-text)]",
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
+      <p className="text-sm font-bold text-[var(--color-text-muted)]">{label}</p>
+      <p className={`text-sm font-extrabold ${valueClass}`}>{value ?? "-"}</p>
+    </div>
+  )
+}
+
+function EmptyMini({ icon: Icon, text, tone = "neutral", toneMap }) {
+  const toneStyle = toneMap[tone] || toneMap.neutral
+
+  return (
+    <div
+      className={`rounded-xl border-2 bg-transparent p-6 text-center ${toneStyle.border}`}
+    >
+      <Icon className={`w-10 h-10 mx-auto mb-3 ${toneStyle.text}`} />
+      <p className="text-sm font-bold text-[var(--color-text-muted)]">{text}</p>
     </div>
   )
 }

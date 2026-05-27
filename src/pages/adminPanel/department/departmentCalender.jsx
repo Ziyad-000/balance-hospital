@@ -18,6 +18,8 @@ import {
   Grid3X3,
   List,
   RefreshCw,
+  ShieldAlert,
+  Target,
   Stethoscope,
   UserCheck,
   Users,
@@ -25,9 +27,132 @@ import {
 } from "lucide-react"
 
 import { getDepartmentRosterStructure } from "../../../state/act/actDepartment"
+import {
+  getRosterCoverageByDate,
+  getRosterCriticalCoverageGaps,
+  getRosterWeeklyCoverage,
+} from "../../../state/act/actRosterManagement"
 import { clearDepartmentRosterStructure } from "../../../state/slices/department"
 import { formatDate } from "../../../utils/formtDate"
 import { getPageTheme } from "../../../utils/themeClasses"
+
+const safeArray = (value) => {
+  if (Array.isArray(value)) return value
+  if (Array.isArray(value?.items)) return value.items
+  if (Array.isArray(value?.data)) return value.data
+  if (Array.isArray(value?.data?.items)) return value.data.items
+  if (Array.isArray(value?.rows)) return value.rows
+  return []
+}
+
+const getNumber = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") {
+      const n = Number(value)
+      return Number.isNaN(n) ? 0 : n
+    }
+  }
+
+  return 0
+}
+
+const valueOrDash = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") return value
+  }
+
+  return "-"
+}
+
+const getWeekStartDate = (dateString) => {
+  const date = dateString ? parseDateKey(dateString) : new Date()
+  const day = date.getDay()
+  const weekStart = new Date(date)
+  weekStart.setDate(date.getDate() - day)
+  return formatDateKey(weekStart)
+}
+
+const getCoverageSeverityTone = (value) => {
+  const normalized = String(value || "").toLowerCase()
+
+  if (
+    normalized.includes("critical") ||
+    normalized.includes("high") ||
+    normalized.includes("حرج") ||
+    normalized.includes("عالي")
+  ) {
+    return "red"
+  }
+
+  if (
+    normalized.includes("warning") ||
+    normalized.includes("medium") ||
+    normalized.includes("متوسط") ||
+    normalized.includes("تحذير")
+  ) {
+    return "yellow"
+  }
+
+  if (
+    normalized.includes("good") ||
+    normalized.includes("healthy") ||
+    normalized.includes("ok") ||
+    normalized.includes("مكتمل")
+  ) {
+    return "green"
+  }
+
+  return "blue"
+}
+
+const getToneClasses = (tone = "blue") => {
+  const map = {
+    blue: {
+      text: "text-blue-500",
+      border: "border-blue-500",
+      soft: "bg-transparent",
+      bar: "bg-blue-500",
+    },
+    green: {
+      text: "text-emerald-500",
+      border: "border-emerald-500",
+      soft: "bg-transparent",
+      bar: "bg-emerald-500",
+    },
+    yellow: {
+      text: "text-amber-500",
+      border: "border-amber-500",
+      soft: "bg-transparent",
+      bar: "bg-amber-500",
+    },
+    red: {
+      text: "text-red-500",
+      border: "border-red-500",
+      soft: "bg-transparent",
+      bar: "bg-red-500",
+    },
+    purple: {
+      text: "text-violet-500",
+      border: "border-violet-500",
+      soft: "bg-transparent",
+      bar: "bg-violet-500",
+    },
+    orange: {
+      text: "text-orange-500",
+      border: "border-orange-500",
+      soft: "bg-transparent",
+      bar: "bg-orange-500",
+    },
+    slate: {
+      text: "text-slate-500",
+      border: "border-slate-500",
+      soft: "bg-transparent",
+      bar: "bg-slate-500",
+    },
+  }
+
+  return map[tone] || map.blue
+}
 
 function DepartmentCalender() {
   const { rosterId, depId: id } = useParams()
@@ -36,7 +161,7 @@ function DepartmentCalender() {
   const { i18n } = useTranslation()
   const theme = getPageTheme()
 
-  const [viewMode, setViewMode] = useState("calendar")
+  const [activeTab, setActiveTab] = useState("calendar")
   const [expandedDays, setExpandedDays] = useState({})
   const [selectedDayDate, setSelectedDayDate] = useState(null)
 
@@ -51,6 +176,14 @@ function DepartmentCalender() {
     departmentRosterStructureError,
     error,
   } = useSelector((state) => state.department)
+
+  const {
+    criticalCoverageGaps,
+    coverageByDate,
+    weeklyCoverage,
+    loading: rosterLoading,
+    errors: rosterErrors,
+  } = useSelector((state) => state.rosterManagement)
 
   useEffect(() => {
     if (!id || !rosterId) return
@@ -68,6 +201,26 @@ function DepartmentCalender() {
       dispatch(clearDepartmentRosterStructure())
     }
   }, [dispatch, id, rosterId])
+
+  useEffect(() => {
+    if (!rosterId) return
+
+    const weekStart = getWeekStartDate(selectedDayDate)
+
+    dispatch(getRosterCriticalCoverageGaps({ rosterId }))
+    dispatch(getRosterWeeklyCoverage({ rosterId, weekStart }))
+  }, [dispatch, rosterId, selectedDayDate])
+
+  useEffect(() => {
+    if (!rosterId || !selectedDayDate) return
+
+    dispatch(
+      getRosterCoverageByDate({
+        rosterId,
+        date: selectedDayDate,
+      })
+    )
+  }, [dispatch, rosterId, selectedDayDate])
 
   const roster = useMemo(() => {
     if (departmentRosterStructure) return departmentRosterStructure
@@ -204,27 +357,27 @@ function DepartmentCalender() {
 
     if (value >= 90) {
       return {
-        text: "text-green-700 dark:text-green-300",
-        bg: "bg-green-100 dark:bg-green-900/50",
-        border: "border-green-300 dark:border-green-700",
-        bar: "bg-green-600 dark:bg-green-400",
+        text: "text-emerald-500 dark:text-emerald-500",
+        bg: "bg-transparent",
+        border: "border-emerald-500 dark:border-emerald-500",
+        bar: "bg-emerald-500",
       }
     }
 
     if (value >= 70) {
       return {
-        text: "text-yellow-700 dark:text-yellow-300",
-        bg: "bg-yellow-100 dark:bg-yellow-900/50",
-        border: "border-yellow-300 dark:border-yellow-700",
-        bar: "bg-yellow-600 dark:bg-yellow-400",
+        text: "text-amber-500 dark:text-amber-500",
+        bg: "bg-transparent",
+        border: "border-amber-500 dark:border-amber-500",
+        bar: "bg-amber-500",
       }
     }
 
     return {
-      text: "text-red-700 dark:text-red-300",
-      bg: "bg-red-100 dark:bg-red-900/50",
-      border: "border-red-300 dark:border-red-700",
-      bar: "bg-red-600 dark:bg-red-400",
+      text: "text-red-500 dark:text-red-500",
+      bg: "bg-transparent",
+      border: "border-red-500 dark:border-red-500",
+      bar: "bg-red-500",
     }
   }
 
@@ -232,18 +385,18 @@ function DepartmentCalender() {
     const normalized = String(status || "").toLowerCase()
 
     if (normalized === "complete" || normalized === "completed") {
-      return "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-200 dark:border-green-700"
+      return "bg-transparent text-emerald-500 border-2 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500"
     }
 
     if (normalized === "partial" || normalized === "inprogress") {
-      return "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-200 dark:border-yellow-700"
+      return "bg-transparent text-amber-500 border-2 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500"
     }
 
     if (normalized === "empty") {
-      return "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700"
+      return "bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500"
     }
 
-    return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/50 dark:text-slate-200 dark:border-slate-700"
+    return "bg-transparent text-slate-500 border-2 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500"
   }
 
   const getDayName = (day) => {
@@ -308,6 +461,24 @@ function DepartmentCalender() {
         rosterId,
       })
     )
+
+    dispatch(getRosterCriticalCoverageGaps({ rosterId }))
+
+    dispatch(
+      getRosterWeeklyCoverage({
+        rosterId,
+        weekStart: getWeekStartDate(selectedDayDate),
+      })
+    )
+
+    if (selectedDayDate) {
+      dispatch(
+        getRosterCoverageByDate({
+          rosterId,
+          date: selectedDayDate,
+        })
+      )
+    }
   }
 
   const exportToExcel = async () => {
@@ -516,6 +687,26 @@ function DepartmentCalender() {
   const completionTone = getCompletionTone(summary.completionPercentage)
   const attendanceTone = getCompletionTone(summary.attendanceRate)
 
+  const safeCriticalCoverageGaps = safeArray(criticalCoverageGaps)
+
+  const selectedDayCoverageGaps =
+    coverageByDate?.date === selectedDayDate
+      ? safeArray(coverageByDate?.data)
+      : safeArray(coverageByDate)
+
+  const weeklyCoverageItems = (() => {
+    const fromDays = safeArray(weeklyCoverage?.days)
+    if (fromDays.length) return fromDays
+
+    const fromDaily = safeArray(weeklyCoverage?.dailyCoverage)
+    if (fromDaily.length) return fromDaily
+
+    const fromItems = safeArray(weeklyCoverage?.items)
+    if (fromItems.length) return fromItems
+
+    return safeArray(weeklyCoverage)
+  })()
+
   if (loadingGetDepartmentRosterStructure) {
     return (
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
@@ -537,7 +728,7 @@ function DepartmentCalender() {
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-5xl mx-auto">
           <div className={`${theme.card} p-8 text-center`}>
-            <XCircle className="w-14 h-14 text-red-700 dark:text-red-300 mx-auto mb-4" />
+            <XCircle className="w-14 h-14 text-red-500 dark:text-red-500 mx-auto mb-4" />
 
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
               {currentLang === "ar"
@@ -594,26 +785,63 @@ function DepartmentCalender() {
     )
   }
 
+  const tabItems = [
+    {
+      id: "calendar",
+      icon: Grid3X3,
+      tone: "blue",
+      label: currentLang === "ar" ? "التقويم" : "Calendar",
+      description:
+        currentLang === "ar"
+          ? "عرض الأيام على شكل تقويم مختصر."
+          : "Compact calendar view for roster days.",
+    },
+    {
+      id: "rows",
+      icon: List,
+      tone: "purple",
+      label: currentLang === "ar" ? "الصفوف" : "Rows",
+      description:
+        currentLang === "ar"
+          ? "عرض تفصيلي قابل للفتح والإغلاق."
+          : "Expandable detailed rows view.",
+    },
+    {
+      id: "coverage",
+      icon: ShieldAlert,
+      tone: "red",
+      label: currentLang === "ar" ? "التغطية" : "Coverage",
+      description:
+        currentLang === "ar"
+          ? "الفجوات الحرجة والتغطية الأسبوعية."
+          : "Critical gaps and weekly coverage.",
+    },
+  ]
+
   return (
     <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-5">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <button
             type="button"
             onClick={() => navigate(`/admin-panel/department/${id}`)}
-            className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-emerald-500 transition-colors"
           >
             {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
             {currentLang === "ar" ? "رجوع للقسم" : "Back to Department"}
           </button>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <button type="button" onClick={refreshData} className={theme.secondaryButton}>
+            <button
+              type="button"
+              onClick={refreshData}
+              className={theme.secondaryButton}
+            >
               <RefreshCw size={16} />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
             </button>
 
-            {viewMode === "rows" && (
+            {activeTab === "rows" && (
               <>
                 <button
                   type="button"
@@ -625,7 +853,11 @@ function DepartmentCalender() {
                   {currentLang === "ar" ? "فتح الكل" : "Expand All"}
                 </button>
 
-                <button type="button" onClick={collapseAll} className={theme.secondaryButton}>
+                <button
+                  type="button"
+                  onClick={collapseAll}
+                  className={theme.secondaryButton}
+                >
                   <ChevronUp size={16} />
                   {currentLang === "ar" ? "غلق الكل" : "Collapse All"}
                 </button>
@@ -644,52 +876,49 @@ function DepartmentCalender() {
           </div>
         </div>
 
-        <div className={`${theme.card} p-6`}>
+        <div className={`${theme.card} p-5 lg:p-6`}>
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+            <div className="flex items-start gap-4 min-w-0">
+              <div className="w-14 h-14 rounded-2xl bg-transparent text-blue-500 border-2 border-blue-500 flex items-center justify-center shadow-sm shrink-0">
                 <CalendarDays className="w-7 h-7" />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-text-muted)] mb-1">
                   {departmentName}
                 </p>
 
-                <h1 className="text-3xl font-extrabold text-[var(--color-text)]">
+                <h1 className="text-2xl lg:text-3xl font-extrabold text-[var(--color-text)] break-words">
                   {rosterTitle}
                 </h1>
 
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--color-bg-soft)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-transparent text-slate-500 border-2 border-slate-500">
                     {roster.startDate || "-"} → {roster.endDate || "-"}
                   </span>
 
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold border ${completionTone.bg} ${completionTone.text} ${completionTone.border}`}
+                    className={`px-3 py-1 rounded-full text-xs font-bold border-2 ${completionTone.bg} ${completionTone.text} ${completionTone.border}`}
                   >
-                    {currentLang === "ar" ? "تغطية الجدول" : "Roster Coverage"}:{" "}
-                    {summary.completionPercentage}%
+                    {currentLang === "ar" ? "تغطية الجدول" : "Roster Coverage"}: {summary.completionPercentage}%
                   </span>
 
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold border ${attendanceTone.bg} ${attendanceTone.text} ${attendanceTone.border}`}
+                    className={`px-3 py-1 rounded-full text-xs font-bold border-2 ${attendanceTone.bg} ${attendanceTone.text} ${attendanceTone.border}`}
                   >
-                    {currentLang === "ar" ? "الحضور" : "Attendance"}:{" "}
-                    {summary.attendanceRate}%
+                    {currentLang === "ar" ? "الحضور" : "Attendance"}: {summary.attendanceRate}%
                   </span>
 
                   {summary.totalShortfall > 0 && (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700">
-                      {currentLang === "ar" ? "النقص" : "Shortfall"}:{" "}
-                      {summary.totalShortfall}
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500">
+                      {currentLang === "ar" ? "النقص" : "Shortfall"}: {summary.totalShortfall}
                     </span>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="min-w-[270px]">
+            <div className="w-full xl:w-[360px]">
               <ProgressBar
                 label={currentLang === "ar" ? "تغطية الروستر" : "Roster Coverage"}
                 percentage={summary.completionPercentage}
@@ -707,80 +936,97 @@ function DepartmentCalender() {
           </div>
         </div>
 
-        {summary.totalShortfall > 0 && (
-          <div className={`${theme.card} p-4 border-yellow-500/40`}>
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-700 dark:text-yellow-300 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-[var(--color-text)]">
-                  {currentLang === "ar" ? "تنبيه نقص في التغطية" : "Coverage Shortfall"}
-                </h3>
-
-                <p className="text-sm text-[var(--color-text-muted)] mt-1">
-                  {currentLang === "ar"
-                    ? `يوجد نقص إجمالي ${summary.totalShortfall} طبيب داخل هذا الروستر.`
-                    : `There is a total shortfall of ${summary.totalShortfall} doctors in this roster.`}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-8 gap-4">
-          <StatCard icon={CalendarDays} title={currentLang === "ar" ? "الأيام" : "Days"} value={summary.totalDays} tone="blue" />
-          <StatCard icon={CheckCircle} title={currentLang === "ar" ? "مكتملة" : "Complete"} value={summary.completeDays} tone="green" />
-          <StatCard icon={BarChart3} title={currentLang === "ar" ? "جزئية" : "Partial"} value={summary.partialDays} tone="yellow" />
-          <StatCard icon={XCircle} title={currentLang === "ar" ? "فارغة" : "Empty"} value={summary.emptyDays} tone="red" />
-          <StatCard icon={Users} title={currentLang === "ar" ? "مطلوب" : "Required"} value={summary.totalRequired} tone="orange" />
-          <StatCard icon={Stethoscope} title={currentLang === "ar" ? "معين" : "Assigned"} value={summary.totalAssigned} tone="purple" />
-          <StatCard icon={UserCheck} title={currentLang === "ar" ? "حاضر" : "Present"} value={summary.totalPresent} tone="green" />
-          <StatCard icon={AlertTriangle} title={currentLang === "ar" ? "غير مسجل" : "Not Recorded"} value={summary.totalNotRecorded} tone="yellow" />
-        </div>
-
-        <div className={`${theme.card} p-4`}>
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <h2 className="text-xl font-extrabold text-[var(--color-text)]">
-                {currentLang === "ar" ? "طريقة العرض" : "View Mode"}
+        <div className={`${theme.card} p-4 lg:p-5 sticky top-20 z-20 backdrop-blur supports-[backdrop-filter]:bg-[var(--color-surface)]/95`}>
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-lg font-extrabold text-[var(--color-text)] flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-emerald-500" />
+                {currentLang === "ar" ? "ملخص الروستر" : "Roster Summary"}
               </h2>
-              <p className="text-sm text-[var(--color-text-muted)] mt-1">
+              <p className="text-xs font-semibold text-[var(--color-text-muted)] mt-1">
                 {currentLang === "ar"
-                  ? "بدّل بين عرض التقويم وعرض الصفوف."
-                  : "Switch between calendar view and rows view."}
+                  ? "الأرقام الأساسية ثابتة هنا، وتنقل بين التقويم والصفوف والتغطية من التابات بالأسفل."
+                  : "Key metrics stay visible here; switch between Calendar, Rows, and Coverage below."}
               </p>
             </div>
 
-            <div className="flex items-center gap-2 p-1 rounded-2xl bg-[var(--color-bg-soft)] border border-[var(--color-border)]">
-              <button
-                type="button"
-                onClick={() => setViewMode("calendar")}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
-                  viewMode === "calendar"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                }`}
-              >
-                <Grid3X3 size={16} />
-                {currentLang === "ar" ? "تقويم" : "Calendar"}
-              </button>
+            {summary.totalShortfall > 0 && (
+              <div className="flex items-start gap-2 rounded-2xl border-2 border-amber-500 bg-transparent px-3 py-2 text-amber-500">
+                <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-black">
+                    {currentLang === "ar" ? "تنبيه نقص" : "Shortfall Alert"}
+                  </p>
+                  <p className="text-xs font-bold text-[var(--color-text-muted)]">
+                    {currentLang === "ar"
+                      ? `${summary.totalShortfall} طبيب ناقص`
+                      : `${summary.totalShortfall} doctors short`}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
-              <button
-                type="button"
-                onClick={() => setViewMode("rows")}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
-                  viewMode === "rows"
-                    ? "bg-[var(--color-primary)] text-white"
-                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                }`}
-              >
-                <List size={16} />
-                {currentLang === "ar" ? "صفوف" : "Rows"}
-              </button>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 mt-4">
+            <StatCard icon={CalendarDays} title={currentLang === "ar" ? "الأيام" : "Days"} value={summary.totalDays} tone="blue" compact />
+            <StatCard icon={CheckCircle} title={currentLang === "ar" ? "مكتملة" : "Complete"} value={summary.completeDays} tone="green" compact />
+            <StatCard icon={BarChart3} title={currentLang === "ar" ? "جزئية" : "Partial"} value={summary.partialDays} tone="yellow" compact />
+            <StatCard icon={XCircle} title={currentLang === "ar" ? "فارغة" : "Empty"} value={summary.emptyDays} tone="red" compact />
+            <StatCard icon={Users} title={currentLang === "ar" ? "مطلوب" : "Required"} value={summary.totalRequired} tone="orange" compact />
+            <StatCard icon={Stethoscope} title={currentLang === "ar" ? "معين" : "Assigned"} value={summary.totalAssigned} tone="purple" compact />
+            <StatCard icon={UserCheck} title={currentLang === "ar" ? "حاضر" : "Present"} value={summary.totalPresent} tone="green" compact />
+            <StatCard icon={AlertTriangle} title={currentLang === "ar" ? "غير مسجل" : "Not Recorded"} value={summary.totalNotRecorded} tone="yellow" compact />
           </div>
         </div>
 
-        {viewMode === "calendar" ? (
+        <div className={`${theme.card} p-3 sticky top-[265px] z-10 backdrop-blur supports-[backdrop-filter]:bg-[var(--color-surface)]/95`}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {tabItems.map((item) => (
+              <DepartmentRosterTab
+                key={item.id}
+                item={item}
+                active={activeTab === item.id}
+                onClick={() => setActiveTab(item.id)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {activeTab === "coverage" && (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <CriticalCoveragePanel
+                theme={theme}
+                currentLang={currentLang}
+                criticalGaps={safeCriticalCoverageGaps}
+                loading={rosterLoading?.criticalCoverageGaps}
+                error={rosterErrors?.criticalCoverageGaps}
+              />
+
+              <WeeklyCoveragePanel
+                theme={theme}
+                currentLang={currentLang}
+                weeklyItems={weeklyCoverageItems}
+                loading={rosterLoading?.weeklyCoverage}
+                error={rosterErrors?.weeklyCoverage}
+              />
+            </div>
+
+            {selectedDayDate && (
+              <SelectedDayCoveragePanel
+                theme={theme}
+                currentLang={currentLang}
+                selectedDayDate={selectedDayDate}
+                selectedDay={selectedDay}
+                coverageGaps={selectedDayCoverageGaps}
+                loading={rosterLoading?.coverageByDate}
+                error={rosterErrors?.coverageByDate}
+              />
+            )}
+          </div>
+        )}
+
+        {activeTab === "calendar" && (
           <CalendarView
             roster={roster}
             daysByDate={daysByDate}
@@ -797,7 +1043,9 @@ function DepartmentCalender() {
             getStatusTone={getStatusTone}
             getCompletionTone={getCompletionTone}
           />
-        ) : (
+        )}
+
+        {activeTab === "rows" && (
           <RowsView
             daysList={daysList}
             expandedDays={expandedDays}
@@ -816,6 +1064,55 @@ function DepartmentCalender() {
         )}
       </div>
     </div>
+  )
+}
+
+function DepartmentRosterTab({ item, active, onClick }) {
+  const Icon = item.icon
+  const tone = getToneClasses(item.tone)
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group min-h-[92px] rounded-2xl border-2 p-3 text-start transition-all ${
+        active
+          ? "bg-[var(--color-success)] text-white border-[var(--color-success)] shadow-md"
+          : `bg-transparent ${tone.border} hover:bg-[var(--color-success)] hover:border-[var(--color-success)] hover:text-white`
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={`w-11 h-11 rounded-xl flex items-center justify-center border-2 shrink-0 transition-colors ${
+            active
+              ? "bg-transparent text-white border-white/80"
+              : `bg-transparent ${tone.text} ${tone.border} group-hover:text-white group-hover:border-white/80`
+          }`}
+        >
+          <Icon size={20} />
+        </span>
+
+        <span className="min-w-0">
+          <span
+            className={`block text-sm font-black ${
+              active ? "text-white" : "text-[var(--color-text)] group-hover:text-white"
+            }`}
+          >
+            {item.label}
+          </span>
+
+          <span
+            className={`block text-xs mt-1 leading-relaxed ${
+              active
+                ? "text-white/85"
+                : "text-[var(--color-text-muted)] group-hover:text-white/85"
+            }`}
+          >
+            {item.description}
+          </span>
+        </span>
+      </div>
+    </button>
   )
 }
 
@@ -1068,7 +1365,7 @@ function RowsView({
       <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
         <div>
           <h2 className="text-xl font-extrabold text-[var(--color-text)] flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+            <FileSpreadsheet className="w-5 h-5 text-blue-500 dark:text-blue-500" />
             {currentLang === "ar" ? "عرض الصفوف" : "Rows View"}
           </h2>
 
@@ -1129,7 +1426,7 @@ function CalendarMiniLine({ label, value, danger = false }) {
       <span
         className={`font-extrabold ${
           danger
-            ? "text-red-700 dark:text-red-300"
+            ? "text-red-500 dark:text-red-500"
             : "text-[var(--color-text)]"
         }`}
       >
@@ -1167,7 +1464,7 @@ function DayCard(props) {
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-extrabold text-[var(--color-text)] flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+              <CalendarDays className="w-5 h-5 text-blue-500 dark:text-blue-500" />
               {getDayName(day)}
             </h3>
 
@@ -1184,14 +1481,14 @@ function DayCard(props) {
               value={shortfall}
               valueClass={
                 shortfall > 0
-                  ? "text-red-700 dark:text-red-300"
-                  : "text-green-700 dark:text-green-300"
+                  ? "text-red-500 dark:text-red-500"
+                  : "text-emerald-500 dark:text-emerald-500"
               }
             />
             <MiniStat
               label={currentLang === "ar" ? "الحضور" : "Present"}
               value={attendance.totalPresent || 0}
-              valueClass="text-green-700 dark:text-green-300"
+              valueClass="text-emerald-500 dark:text-emerald-500"
             />
 
             <div className="flex items-center justify-center">
@@ -1245,25 +1542,25 @@ function DayDetails({
         <MiniStat
           label={currentLang === "ar" ? "حاضر" : "Present"}
           value={attendance.totalPresent || 0}
-          valueClass="text-green-700 dark:text-green-300"
+          valueClass="text-emerald-500 dark:text-emerald-500"
         />
 
         <MiniStat
           label={currentLang === "ar" ? "غائب" : "Absent"}
           value={attendance.totalAbsent || 0}
-          valueClass="text-red-700 dark:text-red-300"
+          valueClass="text-red-500 dark:text-red-500"
         />
 
         <MiniStat
           label={currentLang === "ar" ? "متأخر" : "Late"}
           value={attendance.totalLate || 0}
-          valueClass="text-yellow-700 dark:text-yellow-300"
+          valueClass="text-amber-500 dark:text-amber-500"
         />
 
         <MiniStat
           label={currentLang === "ar" ? "قيد التنفيذ" : "In Progress"}
           value={attendance.totalInProgress || 0}
-          valueClass="text-blue-700 dark:text-blue-300"
+          valueClass="text-blue-500 dark:text-blue-500"
         />
 
         <MiniStat
@@ -1340,7 +1637,7 @@ function DayDetails({
                   <MiniStat
                     label={currentLang === "ar" ? "معين" : "Assigned"}
                     value={shiftAssigned}
-                    valueClass="text-blue-700 dark:text-blue-300"
+                    valueClass="text-blue-500 dark:text-blue-500"
                   />
 
                   <MiniStat
@@ -1348,8 +1645,8 @@ function DayDetails({
                     value={shiftShortfall}
                     valueClass={
                       shiftShortfall > 0
-                        ? "text-red-700 dark:text-red-300"
-                        : "text-green-700 dark:text-green-300"
+                        ? "text-red-500 dark:text-red-500"
+                        : "text-emerald-500 dark:text-emerald-500"
                     }
                   />
                 </div>
@@ -1368,7 +1665,7 @@ function DayDetails({
                   </p>
 
                   {shiftDoctors.length === 0 ? (
-                    <div className="p-3 rounded-xl bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/30 dark:text-red-200 dark:border-red-800 text-sm">
+                    <div className="p-3 rounded-xl bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500 text-sm">
                       {currentLang === "ar"
                         ? "لا يوجد دكاترة معينين لهذا الشفت."
                         : "No doctors assigned to this shift."}
@@ -1390,7 +1687,7 @@ function DayDetails({
                             </p>
                           </div>
 
-                          <UserCheck className="w-4 h-4 text-green-700 dark:text-green-300" />
+                          <UserCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-500" />
                         </div>
                       ))}
                     </div>
@@ -1436,36 +1733,39 @@ function ProgressBar({ label, percentage, tone }) {
   )
 }
 
-function StatCard({ icon: Icon, title, value, tone = "blue" }) {
-  const toneMap = {
-    blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    green:
-      "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-    red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
-    yellow:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
-    purple:
-      "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-    orange:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
-  }
+function StatCard({ icon: Icon, title, value, tone = "blue", compact = false }) {
+  const toneClass = getToneClasses(tone)
 
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm p-4">
+    <div
+      className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm hover:border-[var(--color-success)] transition-colors ${
+        compact ? "p-3" : "p-4"
+      }`}
+    >
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
-          <p className="text-2xl font-extrabold text-[var(--color-text)]">
+        <div className="min-w-0">
+          <p
+            className={`font-bold text-[var(--color-text-muted)] truncate ${
+              compact ? "text-[11px]" : "text-sm"
+            }`}
+          >
+            {title}
+          </p>
+          <p
+            className={`font-black tracking-tight ${toneClass.text} ${
+              compact ? "text-xl" : "text-2xl"
+            }`}
+          >
             {value ?? 0}
           </p>
         </div>
 
         <div
-          className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-            toneMap[tone] || toneMap.blue
+          className={`rounded-xl flex items-center justify-center border-2 bg-transparent ${toneClass.text} ${toneClass.border} shrink-0 ${
+            compact ? "w-9 h-9" : "w-11 h-11"
           }`}
         >
-          <Icon className="w-5 h-5" />
+          <Icon className={compact ? "w-4 h-4" : "w-5 h-5"} />
         </div>
       </div>
     </div>
@@ -1492,6 +1792,403 @@ function EmptyState({ title, description }) {
       </h3>
       <p className="text-sm text-[var(--color-text-muted)] mt-2">
         {description}
+      </p>
+    </div>
+  )
+}
+
+
+function CriticalCoveragePanel({ theme, currentLang, criticalGaps, loading, error }) {
+  return (
+    <div className={`${theme.card} p-5`}>
+      <PanelTitle
+        icon={ShieldAlert}
+        title={
+          currentLang === "ar"
+            ? "فجوات التغطية الحرجة"
+            : "Critical Coverage Gaps"
+        }
+        subtitle={
+          currentLang === "ar"
+            ? "الفجوات التي تحتاج تدخل سريع اليوم."
+            : "Coverage gaps that need urgent attention today."
+        }
+      />
+
+      {loading ? (
+        <MiniCoverageLoader
+          text={currentLang === "ar" ? "جاري تحميل الفجوات..." : "Loading gaps..."}
+        />
+      ) : error ? (
+        <MiniCoverageError message={typeof error === "string" ? error : error?.message} />
+      ) : criticalGaps.length === 0 ? (
+        <EmptyCoverage
+          icon={CheckCircle}
+          text={
+            currentLang === "ar"
+              ? "لا توجد فجوات حرجة حاليًا"
+              : "No critical coverage gaps"
+          }
+          tone="green"
+        />
+      ) : (
+        <div className="space-y-3">
+          {criticalGaps.slice(0, 6).map((gap, index) => (
+            <CoverageGapCard
+              key={gap.id || `${gap.departmentId}-${gap.shiftName}-${index}`}
+              gap={gap}
+              currentLang={currentLang}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function WeeklyCoveragePanel({ theme, currentLang, weeklyItems, loading, error }) {
+  return (
+    <div className={`${theme.card} p-5`}>
+      <PanelTitle
+        icon={Target}
+        title={currentLang === "ar" ? "التغطية الأسبوعية" : "Weekly Coverage"}
+        subtitle={
+          currentLang === "ar"
+            ? "نظرة سريعة على مستوى التغطية خلال الأسبوع."
+            : "Quick overview of coverage health across the week."
+        }
+      />
+
+      {loading ? (
+        <MiniCoverageLoader
+          text={
+            currentLang === "ar"
+              ? "جاري تحميل التغطية الأسبوعية..."
+              : "Loading weekly coverage..."
+          }
+        />
+      ) : error ? (
+        <MiniCoverageError message={typeof error === "string" ? error : error?.message} />
+      ) : weeklyItems.length === 0 ? (
+        <EmptyCoverage
+          icon={CalendarDays}
+          text={
+            currentLang === "ar"
+              ? "لا توجد بيانات تغطية أسبوعية"
+              : "No weekly coverage data"
+          }
+          tone="slate"
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {weeklyItems.slice(0, 7).map((item, index) => {
+            const coverage = getNumber(
+              item.coverageRate,
+              item.coveragePercent,
+              item.completionPercentage,
+              item.percentage
+            )
+
+            const tone = coverage >= 90 ? "green" : coverage >= 70 ? "yellow" : "red"
+            const toneClass = getToneClasses(tone)
+
+            return (
+              <div
+                key={item.date || item.dayDate || index}
+                className={`p-4 rounded-xl border-2 bg-transparent ${toneClass.border}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-extrabold text-[var(--color-text)]">
+                      {valueOrDash(
+                        currentLang === "ar"
+                          ? item.dayNameAr || item.dayName
+                          : item.dayNameEn || item.dayName,
+                        item.date,
+                        item.dayDate
+                      )}
+                    </p>
+
+                    <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                      {item.date || item.dayDate || "-"}
+                    </p>
+                  </div>
+
+                  <span className={`text-xl font-black ${toneClass.text}`}>
+                    {coverage}%
+                  </span>
+                </div>
+
+                <div className="mt-3 h-2 rounded-full bg-[var(--color-bg-soft)] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${toneClass.bar}`}
+                    style={{ width: `${Math.max(0, Math.min(100, coverage))}%` }}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SelectedDayCoveragePanel({
+  theme,
+  currentLang,
+  selectedDayDate,
+  selectedDay,
+  coverageGaps,
+  loading,
+  error,
+}) {
+  const required = getNumber(selectedDay?.totalRequired)
+  const assigned = getNumber(selectedDay?.totalAssigned)
+  const shortfall = getNumber(selectedDay?.totalShortfall)
+  const coverageRate = required > 0 ? Math.round((assigned / required) * 100) : 0
+
+  return (
+    <div className={`${theme.card} p-5`}>
+      <PanelTitle
+        icon={CalendarDays}
+        title={
+          currentLang === "ar"
+            ? `تغطية يوم ${selectedDayDate}`
+            : `Coverage for ${selectedDayDate}`
+        }
+        subtitle={
+          currentLang === "ar"
+            ? "تفاصيل فجوات التغطية لليوم المختار من التقويم."
+            : "Coverage gaps for the selected day from the calendar."
+        }
+      />
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <MiniCoverageStat
+          icon={Users}
+          label={currentLang === "ar" ? "المطلوب" : "Required"}
+          value={required}
+          tone="blue"
+        />
+
+        <MiniCoverageStat
+          icon={Stethoscope}
+          label={currentLang === "ar" ? "المعين" : "Assigned"}
+          value={assigned}
+          tone="green"
+        />
+
+        <MiniCoverageStat
+          icon={AlertTriangle}
+          label={currentLang === "ar" ? "النقص" : "Shortfall"}
+          value={shortfall}
+          tone={shortfall > 0 ? "red" : "green"}
+        />
+
+        <MiniCoverageStat
+          icon={BarChart3}
+          label={currentLang === "ar" ? "التغطية" : "Coverage"}
+          value={`${coverageRate}%`}
+          tone={coverageRate >= 90 ? "green" : coverageRate >= 70 ? "yellow" : "red"}
+        />
+      </div>
+
+      {loading ? (
+        <MiniCoverageLoader
+          text={
+            currentLang === "ar"
+              ? "جاري تحميل تغطية اليوم..."
+              : "Loading day coverage..."
+          }
+        />
+      ) : error ? (
+        <MiniCoverageError message={typeof error === "string" ? error : error?.message} />
+      ) : coverageGaps.length === 0 ? (
+        <EmptyCoverage
+          icon={CheckCircle}
+          text={
+            currentLang === "ar"
+              ? "لا توجد فجوات تغطية لهذا اليوم"
+              : "No coverage gaps for this day"
+          }
+          tone="green"
+        />
+      ) : (
+        <div className="space-y-3">
+          {coverageGaps.map((gap, index) => (
+            <CoverageGapCard
+              key={gap.id || `${gap.departmentId}-${gap.shiftName}-${index}`}
+              gap={gap}
+              currentLang={currentLang}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CoverageGapCard({ gap, currentLang }) {
+  const required = getNumber(gap.requiredDoctors, gap.required, gap.requiredCount)
+  const assigned = getNumber(gap.assignedDoctors, gap.assigned, gap.assignedCount)
+  const shortfall = getNumber(gap.shortfallDoctors, gap.shortfall, required - assigned)
+  const severity = valueOrDash(gap.severity, gap.riskLevel, gap.level, "Warning")
+  const tone = shortfall > 0 ? getCoverageSeverityTone(severity) : "green"
+  const toneClass = getToneClasses(tone)
+
+  const departmentName =
+    currentLang === "ar"
+      ? valueOrDash(
+          gap.departmentNameAr,
+          gap.departmentNameArabic,
+          gap.departmentName,
+          gap.departmentNameEn
+        )
+      : valueOrDash(
+          gap.departmentNameEn,
+          gap.departmentNameEnglish,
+          gap.departmentName,
+          gap.departmentNameAr
+        )
+
+  const shiftName =
+    currentLang === "ar"
+      ? valueOrDash(gap.shiftNameAr, gap.shiftNameArabic, gap.shiftName, gap.shiftNameEn)
+      : valueOrDash(gap.shiftNameEn, gap.shiftNameEnglish, gap.shiftName, gap.shiftNameAr)
+
+  return (
+    <div className={`rounded-xl border-2 bg-transparent p-4 ${toneClass.border}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h4 className="font-extrabold text-[var(--color-text)] truncate">
+            {departmentName}
+          </h4>
+
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            {shiftName}
+            {gap.date ? ` • ${gap.date}` : ""}
+          </p>
+        </div>
+
+        <span
+          className={`shrink-0 px-3 py-1 rounded-full text-xs font-extrabold border-2 ${toneClass.text} ${toneClass.border}`}
+        >
+          {severity}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 mt-4">
+        <MiniNumber
+          label={currentLang === "ar" ? "مطلوب" : "Required"}
+          value={required}
+          tone="blue"
+        />
+        <MiniNumber
+          label={currentLang === "ar" ? "معين" : "Assigned"}
+          value={assigned}
+          tone="green"
+        />
+        <MiniNumber
+          label={currentLang === "ar" ? "نقص" : "Shortfall"}
+          value={Math.max(0, shortfall)}
+          tone={shortfall > 0 ? "red" : "green"}
+        />
+      </div>
+
+      {(gap.recommendedAction || gap.message || gap.messageAr || gap.messageEn) && (
+        <p className="mt-3 text-xs font-bold text-[var(--color-text-muted)]">
+          {currentLang === "ar"
+            ? valueOrDash(gap.recommendedActionAr, gap.messageAr, gap.recommendedAction, gap.message)
+            : valueOrDash(gap.recommendedActionEn, gap.messageEn, gap.recommendedAction, gap.message)}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function PanelTitle({ icon: Icon, title, subtitle }) {
+  return (
+    <div className="mb-4 flex items-start gap-3">
+      <div className="w-10 h-10 rounded-xl border-2 border-blue-500 text-blue-500 flex items-center justify-center">
+        <Icon size={20} />
+      </div>
+
+      <div>
+        <h3 className="text-lg font-extrabold text-[var(--color-text)]">
+          {title}
+        </h3>
+
+        {subtitle && (
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function MiniCoverageStat({ icon: Icon, label, value, tone = "blue" }) {
+  const toneClass = getToneClasses(tone)
+
+  return (
+    <div className={`rounded-xl border-2 p-4 bg-transparent ${toneClass.border}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-[var(--color-text-muted)]">
+            {label}
+          </p>
+          <p className={`mt-1 text-xl font-black ${toneClass.text}`}>
+            {value ?? 0}
+          </p>
+        </div>
+
+        <Icon className={`w-6 h-6 ${toneClass.text}`} />
+      </div>
+    </div>
+  )
+}
+
+function MiniNumber({ label, value, tone = "blue" }) {
+  const toneClass = getToneClasses(tone)
+
+  return (
+    <div className="rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] p-2 text-center">
+      <p className={`font-black ${toneClass.text}`}>{value ?? 0}</p>
+      <p className="text-[10px] text-[var(--color-text-muted)]">{label}</p>
+    </div>
+  )
+}
+
+function MiniCoverageLoader({ text }) {
+  return (
+    <div className="p-6 text-center">
+      <div className="w-8 h-8 mx-auto mb-3 rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-primary)] animate-spin" />
+      <p className="text-sm font-bold text-[var(--color-text-muted)]">{text}</p>
+    </div>
+  )
+}
+
+function MiniCoverageError({ message }) {
+  return (
+    <div className="rounded-xl border-2 border-red-500 bg-transparent p-4 text-red-500">
+      <div className="flex items-start gap-3">
+        <AlertTriangle className="w-5 h-5 mt-0.5" />
+        <p className="text-sm font-bold">{message || "Error"}</p>
+      </div>
+    </div>
+  )
+}
+
+function EmptyCoverage({ icon: Icon, text, tone = "slate" }) {
+  const toneClass = getToneClasses(tone)
+
+  return (
+    <div className={`rounded-xl border-2 bg-transparent p-6 text-center ${toneClass.border}`}>
+      <Icon className={`w-10 h-10 mx-auto mb-3 ${toneClass.text}`} />
+      <p className="text-sm font-bold text-[var(--color-text-muted)]">
+        {text}
       </p>
     </div>
   )

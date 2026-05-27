@@ -36,23 +36,23 @@ export const CollapsibleRosterCard = ({
   const textAlign = isRTL ? "text-right" : "text-left"
 
   const iconColors = {
-    calendar: "text-blue-700 dark:text-blue-300",
-    building: "text-green-700 dark:text-green-300",
-    clock: "text-purple-700 dark:text-purple-300",
-    success: "text-green-700 dark:text-green-300",
-    danger: "text-red-700 dark:text-red-300",
-    warning: "text-orange-700 dark:text-orange-300",
-    muted: "text-slate-600 dark:text-slate-300",
-    activity: "text-blue-700 dark:text-blue-300",
+    calendar: "text-blue-500 dark:text-blue-500",
+    building: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-violet-500 dark:text-violet-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    danger: "text-red-500 dark:text-red-500",
+    warning: "text-orange-500 dark:text-orange-500",
+    muted: "text-slate-500 dark:text-slate-500",
+    activity: "text-blue-500 dark:text-blue-500",
   }
 
   const iconBg = {
-    calendar: "bg-blue-100 dark:bg-blue-900/50",
-    building: "bg-green-100 dark:bg-green-900/50",
-    clock: "bg-purple-100 dark:bg-purple-900/50",
-    success: "bg-green-100 dark:bg-green-900/50",
-    warning: "bg-orange-100 dark:bg-orange-900/50",
-    activity: "bg-blue-100 dark:bg-blue-900/50",
+    calendar: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
+    building: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    clock: "bg-transparent dark:bg-transparent border-2 border-violet-500 dark:border-violet-500",
+    success: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+    warning: "bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500",
+    activity: "bg-transparent dark:bg-transparent border-2 border-blue-500 dark:border-blue-500",
   }
 
   const getLocalized = (arValue, enValue) => {
@@ -73,42 +73,42 @@ export const CollapsibleRosterCard = ({
     ) {
       return {
         icon: CheckCircle,
-        iconClass: "text-green-700 dark:text-green-300",
-        bgClass: "bg-green-100 dark:bg-green-900/50",
-        borderClass: "border-green-300 dark:border-green-700",
+        iconClass: "text-emerald-500 dark:text-emerald-500",
+        bgClass: "bg-transparent dark:bg-transparent border-2 border-emerald-500 dark:border-emerald-500",
+        borderClass: "border-emerald-500 dark:border-emerald-500",
       }
     }
 
     if (normalized.includes("late")) {
       return {
         icon: Clock,
-        iconClass: "text-yellow-700 dark:text-yellow-300",
-        bgClass: "bg-yellow-100 dark:bg-yellow-900/50",
-        borderClass: "border-yellow-300 dark:border-yellow-700",
+        iconClass: "text-amber-500 dark:text-amber-500",
+        bgClass: "bg-transparent dark:bg-transparent border-2 border-amber-500 dark:border-amber-500",
+        borderClass: "border-amber-500 dark:border-amber-500",
       }
     }
 
     if (normalized.includes("absent")) {
       return {
         icon: XCircle,
-        iconClass: "text-red-700 dark:text-red-300",
+        iconClass: "text-red-500 dark:text-red-500",
         bgClass: "bg-red-100 dark:bg-red-900/50",
-        borderClass: "border-red-300 dark:border-red-700",
+        borderClass: "border-red-500 dark:border-red-500",
       }
     }
 
     if (normalized.includes("early")) {
       return {
         icon: AlertCircle,
-        iconClass: "text-orange-700 dark:text-orange-300",
-        bgClass: "bg-orange-100 dark:bg-orange-900/50",
-        borderClass: "border-orange-300 dark:border-orange-700",
+        iconClass: "text-orange-500 dark:text-orange-500",
+        bgClass: "bg-transparent dark:bg-transparent border-2 border-orange-500 dark:border-orange-500",
+        borderClass: "border-orange-500 dark:border-orange-500",
       }
     }
 
     return {
       icon: Activity,
-      iconClass: "text-slate-600 dark:text-slate-300",
+      iconClass: "text-slate-500 dark:text-slate-500",
       bgClass: "bg-[var(--color-bg-soft)]",
       borderClass: "border-[var(--color-border)]",
     }
@@ -230,7 +230,7 @@ export const CollapsibleRosterCard = ({
           <div className="flex items-center gap-4">
             <div className="flex flex-wrap gap-3">
               <div className={`${theme.cardSoft} px-4 py-2`}>
-                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                <p className="text-xs font-semibold text-blue-500 dark:text-blue-500 mb-1">
                   {t("doctorReport.rosterAssignments.totalShifts")}
                 </p>
                 <p className="text-lg font-extrabold text-[var(--color-text)]">
@@ -239,7 +239,7 @@ export const CollapsibleRosterCard = ({
               </div>
 
               <div className={`${theme.cardSoft} px-4 py-2`}>
-                <p className="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">
+                <p className="text-xs font-semibold text-emerald-500 dark:text-emerald-500 mb-1">
                   {t("doctorReport.rosterAssignments.completed")}
                 </p>
                 <p className="text-lg font-extrabold text-[var(--color-text)]">

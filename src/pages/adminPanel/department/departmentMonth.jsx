@@ -147,27 +147,33 @@ function DepartmentMonth() {
   const getCompletionTone = (percentage = 0) => {
     if (percentage >= 90) {
       return {
-        text: "text-green-700 dark:text-green-300",
-        bg: "bg-green-100 dark:bg-green-900/50",
-        border: "border-green-300 dark:border-green-700",
-        bar: "bg-green-600 dark:bg-green-400",
+        text: "text-emerald-500 dark:text-emerald-500",
+        bg: "bg-transparent dark:bg-transparent",
+        border: "border-emerald-500 dark:border-emerald-500",
+        iconBorder: "border-emerald-500 dark:border-emerald-500",
+        iconText: "text-emerald-500 dark:text-emerald-500",
+        bar: "bg-emerald-500 dark:bg-emerald-500",
       }
     }
 
     if (percentage >= 70) {
       return {
-        text: "text-yellow-700 dark:text-yellow-300",
-        bg: "bg-yellow-100 dark:bg-yellow-900/50",
-        border: "border-yellow-300 dark:border-yellow-700",
-        bar: "bg-yellow-600 dark:bg-yellow-400",
+        text: "text-amber-500 dark:text-amber-500",
+        bg: "bg-transparent dark:bg-transparent",
+        border: "border-amber-500 dark:border-amber-500",
+        iconBorder: "border-amber-500 dark:border-amber-500",
+        iconText: "text-amber-500 dark:text-amber-500",
+        bar: "bg-amber-500 dark:bg-amber-500",
       }
     }
 
     return {
-      text: "text-red-700 dark:text-red-300",
-      bg: "bg-red-100 dark:bg-red-900/50",
-      border: "border-red-300 dark:border-red-700",
-      bar: "bg-red-600 dark:bg-red-400",
+      text: "text-red-500 dark:text-red-500",
+      bg: "bg-transparent dark:bg-transparent",
+      border: "border-red-500 dark:border-red-500",
+      iconBorder: "border-red-500 dark:border-red-500",
+      iconText: "text-red-500 dark:text-red-500",
+      bar: "bg-red-500 dark:bg-red-500",
     }
   }
 
@@ -505,7 +511,7 @@ function DepartmentMonth() {
       <div className={theme.page} dir={isRTL ? "rtl" : "ltr"}>
         <div className="max-w-5xl mx-auto">
           <div className={`${theme.card} p-8 text-center`}>
-            <XCircle className="w-14 h-14 text-red-700 dark:text-red-300 mx-auto mb-4" />
+            <XCircle className="w-14 h-14 text-red-500 dark:text-red-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-[var(--color-text)] mb-2">
               {currentLang === "ar"
                 ? "تعذر تحميل بيانات الشهر"
@@ -563,8 +569,8 @@ function DepartmentMonth() {
           </button>
 
           <div className="flex items-center gap-2">
-            <button type="button" onClick={handleRefresh} className={theme.secondaryButton}>
-              <RefreshCw size={16} />
+            <button type="button" onClick={handleRefresh} className={`${theme.secondaryButton} group`}>
+              <RefreshCw size={16} className="text-slate-500 group-hover:text-white" />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
             </button>
 
@@ -572,9 +578,9 @@ function DepartmentMonth() {
               type="button"
               onClick={exportToExcel}
               disabled={categories.length === 0}
-              className={`${theme.primaryButton} gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`${theme.primaryButton} gap-2 disabled:opacity-50 disabled:cursor-not-allowed group`}
             >
-              <Download size={16} />
+              <Download size={16} className="text-emerald-500 group-hover:text-white" />
               {currentLang === "ar" ? "تصدير Excel" : "Export Excel"}
             </button>
           </div>
@@ -583,12 +589,12 @@ function DepartmentMonth() {
         <div className={`${theme.card} p-6`}>
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-transparent text-blue-500 border-2 border-blue-500 flex items-center justify-center shadow-sm">
                 <BuildingIcon />
               </div>
 
               <div>
-                <h1 className="text-3xl font-extrabold text-[var(--color-text)]">
+                <h1 className="text-3xl font-black text-[var(--color-text)]">
                   {getDepartmentName()}
                 </h1>
 
@@ -627,7 +633,7 @@ function DepartmentMonth() {
                 <span className="text-sm font-bold text-[var(--color-text)]">
                   {currentLang === "ar" ? "نسبة الإكتمال" : "Completion"}
                 </span>
-                <span className={`text-sm font-extrabold ${completionTone.text}`}>
+                <span className={`text-sm font-black ${completionTone.text}`}>
                   {summary.completionPercentage}%
                 </span>
               </div>
@@ -645,9 +651,9 @@ function DepartmentMonth() {
         </div>
 
         {departmentMonthView?.warnings?.length > 0 && (
-          <div className={`${theme.card} p-4 border-yellow-500/40`}>
+          <div className={`${theme.card} p-4 border-amber-500`}>
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-700 dark:text-yellow-300 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-500 mt-0.5" />
               <div>
                 <h3 className="font-bold text-[var(--color-text)] mb-2">
                   {currentLang === "ar" ? "تحذيرات" : "Warnings"}
@@ -710,8 +716,8 @@ function DepartmentMonth() {
         <div className={`${theme.card} p-5`}>
           <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
             <div>
-              <h2 className="text-xl font-extrabold text-[var(--color-text)] flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+              <h2 className="text-xl font-black text-[var(--color-text)] flex items-center gap-2">
+                <Stethoscope className="w-5 h-5 text-blue-500 dark:text-blue-500" />
                 {currentLang === "ar" ? "التخصصات والروسترات" : "Categories & Rosters"}
               </h2>
 
@@ -757,7 +763,7 @@ function DepartmentMonth() {
                   >
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-4">
                       <div>
-                        <h3 className="text-lg font-extrabold text-[var(--color-text)]">
+                        <h3 className="text-lg font-black text-[var(--color-text)]">
                           {getCategoryName(category)}
                         </h3>
 
@@ -772,7 +778,7 @@ function DepartmentMonth() {
                           <span className="text-xs font-bold text-[var(--color-text-muted)]">
                             {currentLang === "ar" ? "إكتمال التخصص" : "Category Completion"}
                           </span>
-                          <span className={`text-xs font-extrabold ${categoryTone.text}`}>
+                          <span className={`text-xs font-black ${categoryTone.text}`}>
                             {categoryCompletion}%
                           </span>
                         </div>
@@ -830,7 +836,7 @@ function DepartmentMonth() {
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div>
-                                  <h4 className="font-extrabold text-[var(--color-text)]">
+                                  <h4 className="font-black text-[var(--color-text)]">
                                     {getRosterTitle(roster)}
                                   </h4>
 
@@ -840,7 +846,7 @@ function DepartmentMonth() {
                                     </span>
 
                                     {Number(roster.shortfallDoctors || 0) > 0 && (
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300 dark:bg-red-900/50 dark:text-red-200 dark:border-red-700">
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-transparent text-red-500 border-2 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500">
                                         {currentLang === "ar" ? "نقص" : "Shortfall"}:{" "}
                                         {roster.shortfallDoctors}
                                       </span>
@@ -848,7 +854,7 @@ function DepartmentMonth() {
                                   </div>
                                 </div>
 
-                                <Eye className="w-5 h-5 text-blue-700 dark:text-blue-300" />
+                                <Eye className="w-5 h-5 text-blue-500 dark:text-blue-500" />
                               </div>
 
                               <div className="grid grid-cols-3 gap-2 mt-4">
@@ -899,34 +905,54 @@ function BuildingIcon() {
 
 function StatCard({ icon: Icon, title, value, tone = "blue" }) {
   const toneMap = {
-    blue: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    green:
-      "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-    red: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
-    yellow:
-      "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
-    purple:
-      "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
-    orange:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+    blue: {
+      icon: "text-blue-500 dark:text-blue-500",
+      border: "border-blue-500 dark:border-blue-500",
+      value: "text-blue-500 dark:text-blue-500",
+    },
+    green: {
+      icon: "text-emerald-500 dark:text-emerald-500",
+      border: "border-emerald-500 dark:border-emerald-500",
+      value: "text-emerald-500 dark:text-emerald-500",
+    },
+    red: {
+      icon: "text-red-500 dark:text-red-500",
+      border: "border-red-500 dark:border-red-500",
+      value: "text-red-500 dark:text-red-500",
+    },
+    yellow: {
+      icon: "text-amber-500 dark:text-amber-500",
+      border: "border-amber-500 dark:border-amber-500",
+      value: "text-amber-500 dark:text-amber-500",
+    },
+    purple: {
+      icon: "text-violet-500 dark:text-violet-500",
+      border: "border-violet-500 dark:border-violet-500",
+      value: "text-violet-500 dark:text-violet-500",
+    },
+    orange: {
+      icon: "text-orange-500 dark:text-orange-500",
+      border: "border-orange-500 dark:border-orange-500",
+      value: "text-orange-500 dark:text-orange-500",
+    },
   }
 
+  const selectedTone = toneMap[tone] || toneMap.blue
+
   return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm p-4">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border-strong)] rounded-2xl shadow-sm p-4 hover:shadow-md transition-all">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
-          <p className="text-2xl font-extrabold text-[var(--color-text)]">
+        <div className="min-w-0">
+          <p className="text-sm font-black text-[var(--color-text)] truncate">{title}</p>
+          <p className={`text-2xl font-black tracking-tight ${selectedTone.value}`}>
             {value ?? 0}
           </p>
         </div>
 
         <div
-          className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-            toneMap[tone] || toneMap.blue
-          }`}
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-transparent dark:bg-transparent border-2 shadow-sm ${selectedTone.border}`}
         >
-          <Icon className="w-5 h-5" />
+          <Icon className={`w-6 h-6 shrink-0 ${selectedTone.icon}`} />
         </div>
       </div>
     </div>
@@ -935,11 +961,11 @@ function StatCard({ icon: Icon, title, value, tone = "blue" }) {
 
 function MiniStat({ label, value, valueClass = "text-[var(--color-text)]" }) {
   return (
-    <div className="p-3 rounded-xl bg-[var(--color-bg-soft)] border border-[var(--color-border)]">
-      <p className="text-[11px] font-bold text-[var(--color-text-muted)] mb-1">
+    <div className="p-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-strong)] shadow-sm">
+      <p className="text-[11px] font-black text-[var(--color-text-muted)] mb-1">
         {label}
       </p>
-      <p className={`text-sm font-extrabold ${valueClass}`}>{value}</p>
+      <p className={`text-base font-black tracking-tight ${valueClass}`}>{value}</p>
     </div>
   )
 }
@@ -948,7 +974,7 @@ function EmptyState({ title, description }) {
   return (
     <div className="p-8 text-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]">
       <FileSpreadsheet className="w-12 h-12 mx-auto mb-3 text-[var(--color-text-muted)]" />
-      <h3 className="text-lg font-extrabold text-[var(--color-text)]">
+      <h3 className="text-lg font-black text-[var(--color-text)]">
         {title}
       </h3>
       <p className="text-sm text-[var(--color-text-muted)] mt-2">

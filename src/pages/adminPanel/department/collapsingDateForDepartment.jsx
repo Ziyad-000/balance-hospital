@@ -1,14 +1,105 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useSelector } from "react-redux"
 import {
+  AlertCircle,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  CheckCircle2,
-  XCircle,
   Clock,
-  AlertCircle,
+  Stethoscope,
+  Timer,
+  UserCheck,
+  Users,
+  XCircle,
 } from "lucide-react"
+
+import { getPageTheme } from "../../../utils/themeClasses"
+
+const getTone = (tone = "blue") => {
+  const tones = {
+    blue: "bg-transparent text-blue-500 border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
+    emerald:
+      "bg-transparent text-emerald-500 border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
+    amber:
+      "bg-transparent text-amber-500 border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
+    red: "bg-transparent text-red-500 border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
+    violet:
+      "bg-transparent text-violet-500 border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
+    slate:
+      "bg-transparent text-slate-500 border-slate-500 dark:bg-transparent dark:text-slate-500 dark:border-slate-500",
+  }
+
+  return tones[tone] || tones.blue
+}
+
+const getProgressTone = (percentage = 0) => {
+  const value = Number(percentage || 0)
+  if (value >= 90) return "emerald"
+  if (value >= 70) return "amber"
+  if (value > 0) return "amber"
+  return "red"
+}
+
+const getStatusTone = (status) => {
+  switch (String(status || "").toLowerCase()) {
+    case "present":
+    case "approved":
+      return "emerald"
+    case "absent":
+    case "rejected":
+      return "red"
+    case "late":
+    case "pending":
+      return "amber"
+    default:
+      return "slate"
+  }
+}
+
+const getAttendanceIcon = (status) => {
+  switch (status) {
+    case "Present":
+      return CheckCircle2
+    case "Absent":
+      return XCircle
+    case "Late":
+      return Clock
+    default:
+      return AlertCircle
+  }
+}
+
+const Badge = ({ children, tone = "blue", className = "" }) => (
+  <span
+    className={`inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border-2 shadow-sm ${getTone(
+      tone
+    )} ${className}`}
+  >
+    {children}
+  </span>
+)
+
+const IconBox = ({ icon: Icon, tone = "blue", size = "md" }) => {
+  const sizeClass = size === "sm" ? "w-8 h-8 rounded-xl" : "w-11 h-11 rounded-2xl"
+  const iconClass = size === "sm" ? "w-4 h-4" : "w-5 h-5"
+
+  return (
+    <span
+      className={`${sizeClass} border-2 flex items-center justify-center shrink-0 shadow-sm ${getTone(
+        tone
+      )}`}
+    >
+      <Icon className={iconClass} />
+    </span>
+  )
+}
+
+const getName = (item, lang) => {
+  if (!item) return "-"
+  return lang === "ar"
+    ? item.doctorNameAr || item.nameArabic || item.fullNameAr || item.doctorNameEn || item.nameEnglish || "-"
+    : item.doctorNameEn || item.nameEnglish || item.fullNameEn || item.doctorNameAr || item.nameArabic || "-"
+}
 
 const CollapsibleDateCardForDepartment = ({
   dayData,
@@ -19,566 +110,222 @@ const CollapsibleDateCardForDepartment = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const { t, i18n } = useTranslation()
-  const { mymode } = useSelector((state) => state.mode)
+  const theme = getPageTheme()
 
-  const isDark = mymode === "dark"
-  const isRTL = i18n.language === "ar"
+  const currentLang = i18n.language || "ar"
+  const isRTL = currentLang === "ar"
 
-  // Calculate completion percentage based on assigned vs required doctors
+  const shifts = Array.isArray(dayData?.shifts) ? dayData.shifts : []
+  const totalRequired = Number(dayData?.totalRequired || 0)
+  const totalAssigned = Number(dayData?.totalAssigned || 0)
+  const totalShortfall = Number(dayData?.totalShortfall || 0)
+
   const completionPercentage =
-    dayData.totalRequired > 0
-      ? Math.round((dayData.totalAssigned / dayData.totalRequired) * 100)
-      : 0
+    totalRequired > 0 ? Math.round((totalAssigned / totalRequired) * 100) : 0
 
-  // Extract shifts data
-  const shifts = dayData.shifts || []
-  const totalRequired = dayData.totalRequired || 0
-  const totalAssigned = dayData.totalAssigned || 0
-  const totalShortfall = dayData.totalShortfall || 0
+  const completionTone = getProgressTone(completionPercentage)
 
-  const toggleExpansion = () => {
-    setIsExpanded(!isExpanded)
-  }
+  const dayName =
+    currentLang === "ar"
+      ? dayData?.dayOfWeekNameAr || dayData?.dayOfWeekNameEn || "-"
+      : dayData?.dayOfWeekNameEn || dayData?.dayOfWeekNameAr || "-"
 
-  // Get attendance status icon and color
-  const getAttendanceStatusIcon = (status) => {
-    switch (status) {
-      case "Present":
-        return <CheckCircle2 className="w-3 h-3" />
-      case "Absent":
-        return <XCircle className="w-3 h-3" />
-      case "Late":
-        return <Clock className="w-3 h-3" />
-      case "NotRecorded":
-      default:
-        return <AlertCircle className="w-3 h-3" />
-    }
-  }
+  const completionLabel = dayData?.isComplete
+    ? t("roster.completed") || "Completed"
+    : t("roster.incomplete") || "Incomplete"
 
-  const getAttendanceStatusColor = (status) => {
-    switch (status) {
-      case "Present":
-        return isDark ? "text-green-400" : "text-green-600"
-      case "Absent":
-        return isDark ? "text-red-400" : "text-red-600"
-      case "Late":
-        return isDark ? "text-yellow-400" : "text-yellow-600"
-      case "NotRecorded":
-      default:
-        return isDark ? "text-gray-400" : "text-gray-500"
-    }
-  }
-
-  const getAttendanceBadgeColor = (status) => {
-    switch (status) {
-      case "Present":
-        return isDark
-          ? "bg-green-900 text-green-200"
-          : "bg-green-100 text-green-800"
-      case "Absent":
-        return isDark ? "bg-red-900 text-red-200" : "bg-red-100 text-red-800"
-      case "Late":
-        return isDark
-          ? "bg-yellow-900 text-yellow-200"
-          : "bg-yellow-100 text-yellow-800"
-      case "NotRecorded":
-      default:
-        return isDark
-          ? "bg-gray-700 text-gray-300"
-          : "bg-gray-100 text-gray-700"
-    }
-  }
+  const stats = useMemo(
+    () => [
+      {
+        icon: Users,
+        label: t("department.required") || "Required",
+        value: totalRequired,
+        tone: "blue",
+      },
+      {
+        icon: UserCheck,
+        label: t("department.assigned") || "Assigned",
+        value: totalAssigned,
+        tone: "emerald",
+      },
+      {
+        icon: AlertCircle,
+        label: t("department.shortfall") || "Shortfall",
+        value: totalShortfall,
+        tone: totalShortfall > 0 ? "red" : "slate",
+      },
+    ],
+    [t, totalRequired, totalAssigned, totalShortfall]
+  )
 
   return (
-    <div
-      className={`
-        rounded-lg shadow-md border transition-all duration-200 
-        ${
-          isDark
-            ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-            : "bg-white border-gray-200 hover:bg-gray-50"
-        }
-        ${isRTL ? "text-right" : "text-left"}
-      `}
-    >
-      {/* Header - Always visible */}
-      <div
-        className={`
-          p-4 cursor-pointer flex items-center justify-between
-          ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-100"}
-          rounded-lg transition-colors duration-150
-        `}
-        onClick={toggleExpansion}
+    <div className={`${theme.card} overflow-hidden`} dir={isRTL ? "rtl" : "ltr"}>
+      <button
+        type="button"
+        onClick={() => setIsExpanded((prev) => !prev)}
+        className="w-full p-4 text-start hover:bg-[var(--color-success)] hover:text-white transition-colors group"
       >
-        {/* Date and basic info */}
-        <div className="flex-1">
-          <div className="flex items-center gap-4">
-            {/* Date */}
-            <div>
-              <h3
-                className={`
-                  text-lg font-semibold
-                  ${isDark ? "text-white" : "text-gray-900"}
-                `}
-              >
-                {formatDate(dayData.date)}
-              </h3>
-              <p
-                className={`
-                  text-sm
-                  ${isDark ? "text-gray-400" : "text-gray-600"}
-                `}
-              >
-                {i18n.language === "en"
-                  ? dayData.dayOfWeekNameAr
-                  : dayData.dayOfWeekNameEn}
-              </p>
-            </div>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 min-w-0">
+            <IconBox icon={Clock} tone={completionTone} />
 
-            {/* Staffing Summary */}
-            <div className="flex items-center gap-4">
-              {/* Completion Percentage */}
-              <div className="flex items-center gap-2">
-                <div
-                  className={`
-                    w-3 h-3 rounded-full
-                    ${getFillBgColor(completionPercentage)}
-                  `}
-                />
-                <span
-                  className={`
-                    text-sm font-medium
-                    ${getFillColor(completionPercentage)}
-                  `}
-                >
-                  {completionPercentage}%
+            <div className="min-w-0">
+              <h3 className="text-lg font-black text-[var(--color-text)] group-hover:text-white">
+                {formatDate(dayData?.date)}
+              </h3>
+
+              <p className="text-sm font-bold text-[var(--color-text-muted)] group-hover:text-white/80 mt-1">
+                {dayName}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <Badge tone={completionTone}>{completionPercentage}%</Badge>
+                <Badge tone={dayData?.isComplete ? "emerald" : "amber"}>
+                  {completionLabel}
+                </Badge>
+
+                <span className="text-xs font-bold text-[var(--color-text-muted)] group-hover:text-white/80">
+                  {totalAssigned}/{totalRequired} {t("roster.doctors") || "Doctors"}
                 </span>
               </div>
-
-              {/* Doctor Count */}
-              <div
-                className={`
-                  text-sm
-                  ${isDark ? "text-gray-300" : "text-gray-700"}
-                `}
-              >
-                {totalAssigned}/{totalRequired} {t("roster.doctors")}
-              </div>
-
-              {/* Status Badge */}
-              <div
-                className={`
-                  inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                  ${
-                    dayData.isComplete
-                      ? isDark
-                        ? "bg-green-900 text-green-200"
-                        : "bg-green-100 text-green-800"
-                      : isDark
-                      ? "bg-yellow-900 text-yellow-200"
-                      : "bg-yellow-100 text-yellow-800"
-                  }
-                `}
-              >
-                {dayData.isComplete
-                  ? t("roster.completed")
-                  : t("roster.incomplete")}
-              </div>
             </div>
           </div>
-        </div>
 
-        {/* Expand/Collapse Icon */}
-        <div className="flex items-center">
-          {isExpanded ? (
-            <ChevronUp
-              className={`
-                w-5 h-5 transition-transform duration-200
-                ${isDark ? "text-gray-400" : "text-gray-600"}
-              `}
-            />
-          ) : (
-            <ChevronDown
-              className={`
-                w-5 h-5 transition-transform duration-200
-                ${isDark ? "text-gray-400" : "text-gray-600"}
-              `}
-            />
-          )}
+          <span className="w-10 h-10 rounded-xl border-2 border-slate-500 text-slate-500 bg-transparent flex items-center justify-center shrink-0 group-hover:border-white group-hover:text-white">
+            {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </span>
         </div>
-      </div>
+      </button>
 
-      {/* Expandable Content */}
       <div
-        className={`
-          overflow-hidden transition-all duration-300 ease-in-out
-          ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}
-        `}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isExpanded ? "max-h-[1400px] opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
-        <div
-          className={`
-            p-4 pt-0 border-t
-            ${isDark ? "border-gray-700" : "border-gray-200"}
-          `}
-        >
-          {/* Shifts Details */}
-          {shifts && shifts.length > 0 ? (
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-              <h4
-                className={`
-                  text-sm font-medium
-                  ${isDark ? "text-gray-300" : "text-gray-700"}
-                `}
-              >
-                {t("roster.shifts")} ({shifts.length})
-              </h4>
-
-              {shifts.map((shift, index) => (
-                <div
-                  key={`${shift.workingHoursId}-${index}`}
-                  className={`
-                    p-3 rounded-md border
-                    ${
-                      isDark
-                        ? "bg-gray-750 border-gray-600"
-                        : "bg-gray-50 border-gray-200"
-                    }
-                  `}
-                >
-                  <div className="flex items-start justify-between">
-                    {/* Shift Details */}
-                    <div className="flex-1">
-                      <h5
-                        className={`
-                          font-medium text-sm
-                          ${isDark ? "text-white" : "text-gray-900"}
-                        `}
-                      >
-                        {i18n.language === "ar"
-                          ? shift.shiftNameAr
-                          : shift.shiftNameEn}
-                      </h5>
-                      <p
-                        className={`
-                          text-xs mt-1
-                          ${isDark ? "text-gray-400" : "text-gray-600"}
-                        `}
-                      >
-                        {i18n.language === "ar"
-                          ? shift.contractingTypeNameAr
-                          : shift.contractingTypeNameEn}
-                      </p>
-                      <p
-                        className={`
-                          text-xs mt-1
-                          ${isDark ? "text-gray-400" : "text-gray-600"}
-                        `}
-                      >
-                        {formatTime(shift.startTime)} -{" "}
-                        {formatTime(shift.endTime)}
-                      </p>
-                    </div>
-
-                    {/* Shift Stats */}
-                    <div className="text-right ml-3">
-                      <p
-                        className={`
-                          text-sm font-medium
-                          ${isDark ? "text-gray-300" : "text-gray-700"}
-                        `}
-                      >
-                        {shift.assignedDoctors}/{shift.requiredDoctors}
-                      </p>
-                      <p
-                        className={`
-                          text-xs
-                          ${isDark ? "text-gray-400" : "text-gray-500"}
-                        `}
-                      >
-                        {t("department.assigned")}
-                      </p>
-                      {shift.shortfallDoctors > 0 && (
-                        <p className="text-xs text-red-500 mt-1">
-                          -{shift.shortfallDoctors} {t("department.shortfall")}
-                        </p>
-                      )}
-                    </div>
+        <div className="p-4 border-t border-[var(--color-border)] space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {stats.map((item) => (
+              <div key={item.label} className={`${theme.cardSoft} p-3`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xl font-black text-[var(--color-text)]">
+                      {item.value}
+                    </p>
+                    <p className="text-xs font-bold text-[var(--color-text-muted)] mt-1">
+                      {item.label}
+                    </p>
                   </div>
+                  <IconBox icon={item.icon} tone={item.tone} size="sm" />
+                </div>
+              </div>
+            ))}
+          </div>
 
-                  {/* Assigned Doctors with Attendance */}
-                  {shift.doctors && shift.doctors.length > 0 && (
-                    <div className="mt-3 pt-2 border-t border-gray-300 dark:border-gray-600">
-                      <p
-                        className={`
-                          text-xs font-medium mb-2
-                          ${isDark ? "text-gray-400" : "text-gray-600"}
-                        `}
-                      >
-                        {t("roster.assignedDoctors")}:
-                      </p>
-                      <div className="space-y-2">
-                        {shift.doctors.map((doctor, docIndex) => (
-                          <div
-                            key={`${doctor.doctorId}-${docIndex}`}
-                            className={`
-                              flex items-center justify-between p-2 rounded-md
-                              ${
-                                isDark
-                                  ? "bg-gray-800 border border-gray-700"
-                                  : "bg-white border border-gray-200"
-                              }
-                            `}
-                          >
-                            {/* Doctor Info */}
-                            <div className="flex items-center gap-2 flex-1">
-                              <span
-                                className={`
-                                  text-xs font-medium
-                                  ${isDark ? "text-gray-200" : "text-gray-800"}
-                                `}
-                              >
-                                {i18n.language === "ar"
-                                  ? doctor.doctorNameAr
-                                  : doctor.doctorNameEn}
-                              </span>
+          {shifts.length > 0 ? (
+            <div className="space-y-3 max-h-[520px] overflow-y-auto pe-2">
+              <div className="flex items-center gap-2">
+                <IconBox icon={Timer} tone="blue" size="sm" />
+                <h4 className="text-sm font-black text-[var(--color-text)]">
+                  {t("roster.shifts") || "Shifts"} ({shifts.length})
+                </h4>
+              </div>
 
-                              {/* Assignment Status Badge */}
-                              <span
-                                className={`
-                                  inline-flex items-center px-2 py-0.5 rounded-full text-xs
-                                  ${
-                                    doctor.assignmentStatus === "Approved"
-                                      ? isDark
-                                        ? "bg-green-900 text-green-200"
-                                        : "bg-green-100 text-green-800"
-                                      : isDark
-                                      ? "bg-yellow-900 text-yellow-200"
-                                      : "bg-yellow-100 text-yellow-800"
-                                  }
-                                `}
-                              >
-                                {doctor.assignmentStatus}
-                              </span>
-                            </div>
+              {shifts.map((shift, index) => {
+                const shiftName =
+                  currentLang === "ar"
+                    ? shift.shiftNameAr || shift.shiftNameEn || "-"
+                    : shift.shiftNameEn || shift.shiftNameAr || "-"
 
-                            {/* Attendance Info */}
-                            {doctor.attendance && (
-                              <div className="flex items-center gap-2">
-                                {/* Attendance Status */}
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={getAttendanceStatusColor(
-                                      doctor.attendance.status
-                                    )}
-                                  >
-                                    {getAttendanceStatusIcon(
-                                      doctor.attendance.status
-                                    )}
-                                  </span>
-                                  <span
-                                    className={`
-                                      text-xs
-                                      ${getAttendanceStatusColor(
-                                        doctor.attendance.status
-                                      )}
-                                    `}
-                                  >
-                                    {i18n.language === "ar"
-                                      ? doctor.attendance.statusAr
-                                      : doctor.attendance.status}
-                                  </span>
-                                </div>
+                const contractingType =
+                  currentLang === "ar"
+                    ? shift.contractingTypeNameAr || shift.contractingTypeNameEn || "-"
+                    : shift.contractingTypeNameEn || shift.contractingTypeNameAr || "-"
 
-                                {/* Check-in/Check-out Times */}
-                                {doctor.attendance.checkInTime && (
-                                  <span
-                                    className={`
-                                      text-xs
-                                      ${
-                                        isDark
-                                          ? "text-gray-400"
-                                          : "text-gray-600"
-                                      }
-                                    `}
-                                  >
-                                    {formatTime(doctor.attendance.checkInTime)}
-                                    {doctor.attendance.checkOutTime &&
-                                      ` - ${formatTime(
-                                        doctor.attendance.checkOutTime
-                                      )}`}
-                                  </span>
-                                )}
+                const shortfall = Number(shift.shortfallDoctors || 0)
+                const assigned = Number(shift.assignedDoctors || 0)
+                const required = Number(shift.requiredDoctors || 0)
+                const doctors = Array.isArray(shift.doctors) ? shift.doctors : []
 
-                                {/* Late Indicator */}
-                                {doctor.attendance.isLate &&
-                                  doctor.attendance.lateMinutes && (
-                                    <span className="text-xs text-red-500">
-                                      +{doctor.attendance.lateMinutes}m
-                                    </span>
-                                  )}
+                return (
+                  <div key={`${shift.workingHoursId || shift.id || index}`} className={`${theme.cardSoft} p-4`}>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <IconBox icon={Stethoscope} tone={shortfall > 0 ? "red" : "emerald"} size="sm" />
 
-                                {/* Verification Required */}
-                                {doctor.attendance.requiresVerification && (
-                                  <span
-                                    className={`
-                                      inline-flex items-center px-1.5 py-0.5 rounded text-xs
-                                      ${
-                                        isDark
-                                          ? "bg-orange-900 text-orange-200"
-                                          : "bg-orange-100 text-orange-800"
-                                      }
-                                    `}
-                                  >
-                                    !
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                        <div className="min-w-0">
+                          <h5 className="font-black text-[var(--color-text)]">
+                            {shiftName}
+                          </h5>
+                          <p className="text-xs font-bold text-[var(--color-text-muted)] mt-1">
+                            {contractingType}
+                          </p>
+                          <p className="text-xs font-bold text-[var(--color-text-muted)] mt-1">
+                            {formatTime(shift.startTime)} - {formatTime(shift.endTime)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge tone={shortfall > 0 ? "red" : "emerald"}>
+                          {assigned}/{required}
+                        </Badge>
+                        {shortfall > 0 && (
+                          <Badge tone="red">
+                            -{shortfall} {t("department.shortfall") || "Shortfall"}
+                          </Badge>
+                        )}
                       </div>
                     </div>
-                  )}
 
-                  {/* Progress Bar */}
-                  <div className="mt-3">
-                    <div
-                      className={`
-                        w-full h-2 rounded-full
-                        ${isDark ? "bg-gray-600" : "bg-gray-200"}
-                      `}
-                    >
-                      <div
-                        className={`
-                          h-2 rounded-full transition-all duration-300
-                          ${getFillBgColor(
-                            shift.requiredDoctors > 0
-                              ? Math.round(
-                                  (shift.assignedDoctors /
-                                    shift.requiredDoctors) *
-                                    100
-                                )
-                              : 0
-                          )}
-                        `}
-                        style={{
-                          width: `${
-                            shift.requiredDoctors > 0
-                              ? Math.round(
-                                  (shift.assignedDoctors /
-                                    shift.requiredDoctors) *
-                                    100
-                                )
-                              : 0
-                          }%`,
-                        }}
-                      />
-                    </div>
+                    {doctors.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-[var(--color-border)] space-y-2">
+                        <p className="text-xs font-black text-[var(--color-text-muted)]">
+                          {t("roster.assignedDoctors") || "Assigned Doctors"}:
+                        </p>
+
+                        {doctors.map((doctor, docIndex) => {
+                          const AttendanceIcon = getAttendanceIcon(doctor.attendance?.status)
+                          const attendanceTone = getStatusTone(doctor.attendance?.status)
+                          const assignmentTone = getStatusTone(doctor.assignmentStatus)
+
+                          return (
+                            <div
+                              key={`${doctor.doctorId || doctor.id || docIndex}`}
+                              className="flex items-center justify-between gap-3 p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <IconBox icon={UserCheck} tone="blue" size="sm" />
+                                <div className="min-w-0">
+                                  <p className="text-sm font-black text-[var(--color-text)] truncate">
+                                    {getName(doctor, currentLang)}
+                                  </p>
+                                  <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {doctor.assignmentStatus && (
+                                      <Badge tone={assignmentTone}>{doctor.assignmentStatus}</Badge>
+                                    )}
+                                    {doctor.attendance?.status && (
+                                      <Badge tone={attendanceTone}>
+                                        <AttendanceIcon className="w-3 h-3" />
+                                        {doctor.attendance.status}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
-            <div
-              className={`
-                text-center py-6
-                ${isDark ? "text-gray-400" : "text-gray-500"}
-              `}
-            >
-              <p>{t("roster.noShifts")}</p>
-            </div>
-          )}
-
-          {/* Summary Statistics */}
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p
-                  className={`
-                    text-lg font-semibold
-                    ${isDark ? "text-green-400" : "text-green-600"}
-                  `}
-                >
-                  {totalAssigned}
-                </p>
-                <p
-                  className={`
-                    text-xs
-                    ${isDark ? "text-gray-400" : "text-gray-500"}
-                  `}
-                >
-                  {t("department.assigned")}
-                </p>
-              </div>
-              <div>
-                <p
-                  className={`
-                    text-lg font-semibold
-                    ${isDark ? "text-blue-400" : "text-blue-600"}
-                  `}
-                >
-                  {totalRequired}
-                </p>
-                <p
-                  className={`
-                    text-xs
-                    ${isDark ? "text-gray-400" : "text-gray-500"}
-                  `}
-                >
-                  {t("roster.required")}
-                </p>
-              </div>
-              <div>
-                <p
-                  className={`
-                    text-lg font-semibold
-                    ${
-                      totalShortfall > 0
-                        ? isDark
-                          ? "text-red-400"
-                          : "text-red-600"
-                        : isDark
-                        ? "text-green-400"
-                        : "text-green-600"
-                    }
-                  `}
-                >
-                  {totalShortfall}
-                </p>
-                <p
-                  className={`
-                    text-xs
-                    ${isDark ? "text-gray-400" : "text-gray-500"}
-                  `}
-                >
-                  {t("department.shortfall")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Day Information */}
-          {dayData.notes && (
-            <div className="mt-4">
-              <h4
-                className={`
-                  text-sm font-medium mb-2
-                  ${isDark ? "text-gray-300" : "text-gray-700"}
-                `}
-              >
-                {t("roster.notes")}
-              </h4>
-              <p
-                className={`
-                  text-sm p-3 rounded-md
-                  ${
-                    isDark
-                      ? "bg-gray-750 text-gray-300 border border-gray-600"
-                      : "bg-blue-50 text-gray-700 border border-blue-200"
-                  }
-                `}
-              >
-                {dayData.notes}
+            <div className={`${theme.cardSoft} p-6 text-center`}>
+              <IconBox icon={AlertCircle} tone="slate" />
+              <p className="text-sm font-bold text-[var(--color-text-muted)] mt-3">
+                {t("roster.noShifts") || "No shifts for this day"}
               </p>
             </div>
           )}

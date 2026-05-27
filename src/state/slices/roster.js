@@ -63,6 +63,24 @@ import {
 
   getRosterAttendanceReport,
   getRosterAttendanceSummary,
+
+  // Analytics & Reports
+  getTodayAttendanceSnapshot,
+  getRosterTodayAttendanceSnapshot,
+  getRosterAttendanceDashboard,
+  getRosterAttendanceAnalytics,
+  getRosterAbsencePatterns,
+  getRosterLatePatterns,
+  getRosterDepartmentsRealtime,
+  getRosterDepartmentRealtime,
+  getRosterSpecialtiesRealtime,
+  getRosterCoverageByDate,
+  getRosterCriticalCoverageGaps,
+  getRosterWeeklyCoverage,
+  getRosterWorkload,
+  getRosterWorkloadDistribution,
+  getDoctorWorkloadAnalytics,
+  getRosterAttendanceHeatmap,
 } from "../act/actRosterManagement"
 import i18next from "i18next"
 
@@ -76,6 +94,32 @@ const initialState = {
   rosterAttendanceReport: null,
   rosterAttendanceSummary: null,
   
+    // =========================
+  // Attendance Analytics Foundation
+  // =========================
+  todayAttendanceSnapshot: null,
+  rosterTodayAttendanceSnapshot: null,
+  attendanceDashboard: null,
+  attendanceAnalytics: null,
+
+  absencePatterns: [],
+  latePatterns: null,
+
+  departmentsRealtime: [],
+  departmentRealtimeById: {},
+
+  specialtiesRealtime: [],
+
+  coverageByDate: null,
+  criticalCoverageGaps: [],
+  weeklyCoverage: null,
+
+  rosterWorkload: [],
+  workloadDistribution: null,
+  doctorWorkloadAnalytics: null,
+
+  attendanceHeatmap: null,
+
   // ===== ROSTER DATA (بيانات الروستر) =====
   rosters: [],
   selectedRoster: null,
@@ -146,6 +190,28 @@ const initialState = {
 
     rosterAttendanceReport: false,
     rosterAttendanceSummary: false,
+
+    todayAttendanceSnapshot: false,
+    rosterTodayAttendanceSnapshot: false,
+    attendanceDashboard: false,
+    attendanceAnalytics: false,
+
+    absencePatterns: false,
+    latePatterns: false,
+
+    departmentsRealtime: false,
+    departmentRealtime: false,
+    specialtiesRealtime: false,
+
+    coverageByDate: false,
+    criticalCoverageGaps: false,
+    weeklyCoverage: false,
+
+    rosterWorkload: false,
+    workloadDistribution: false,
+    doctorWorkloadAnalytics: false,
+
+    attendanceHeatmap: false,
     // Phase Operations
     createBasic: false,
     addShifts: false,
@@ -242,6 +308,28 @@ const initialState = {
     doctorRequests: null,
     processRequest: null,
     contracting: null,
+    
+    todayAttendanceSnapshot: null,
+    rosterTodayAttendanceSnapshot: null,
+    attendanceDashboard: null,
+    attendanceAnalytics: null,
+
+    absencePatterns: null,
+    latePatterns: null,
+
+    departmentsRealtime: null,
+    departmentRealtime: null,
+    specialtiesRealtime: null,
+
+    coverageByDate: null,
+    criticalCoverageGaps: null,
+    weeklyCoverage: null,
+
+    rosterWorkload: null,
+    workloadDistribution: null,
+    doctorWorkloadAnalytics: null,
+
+    attendanceHeatmap: null,
   },
 
   // ===== UI STATE (حالة واجهة المستخدم) =====
@@ -265,6 +353,37 @@ const initialState = {
   },
 }
 
+
+const normalizeAsyncError = (payload, fallback = "حدث خطأ أثناء جلب البيانات") => {
+  if (!payload) return fallback
+
+  if (typeof payload === "string") return payload
+
+  return (
+    payload.messageAr ||
+    payload.messageEn ||
+    payload.message ||
+    payload.title ||
+    fallback
+  )
+}
+
+const extractAsyncData = (payload) => {
+  if (payload?.data !== undefined) return payload.data
+  return payload ?? null
+}
+
+const extractAsyncList = (payload) => {
+  const data = extractAsyncData(payload)
+
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.items)) return data.items
+  if (Array.isArray(data?.rows)) return data.rows
+  if (Array.isArray(data?.data)) return data.data
+
+  return []
+}
+
 // ===================================================================
 // SLICE DEFINITION (تعريف الـ Slice)
 // ===================================================================
@@ -282,6 +401,69 @@ const rosterManagementSlice = createSlice({
       state.loading.rosterAttendanceSummary = false
       state.errors.rosterAttendanceReport = null
       state.errors.rosterAttendanceSummary = null
+    },
+
+      clearAttendanceAnalyticsData: (state) => {
+      state.todayAttendanceSnapshot = null
+      state.rosterTodayAttendanceSnapshot = null
+      state.attendanceDashboard = null
+      state.attendanceAnalytics = null
+
+      state.absencePatterns = []
+      state.latePatterns = null
+
+      state.departmentsRealtime = []
+      state.departmentRealtimeById = {}
+
+      state.specialtiesRealtime = []
+
+      state.coverageByDate = null
+      state.criticalCoverageGaps = []
+      state.weeklyCoverage = null
+
+      state.rosterWorkload = []
+      state.workloadDistribution = null
+      state.doctorWorkloadAnalytics = null
+
+      state.attendanceHeatmap = null
+
+      state.errors.todayAttendanceSnapshot = null
+      state.errors.rosterTodayAttendanceSnapshot = null
+      state.errors.attendanceDashboard = null
+      state.errors.attendanceAnalytics = null
+
+      state.errors.absencePatterns = null
+      state.errors.latePatterns = null
+
+      state.errors.departmentsRealtime = null
+      state.errors.departmentRealtime = null
+      state.errors.specialtiesRealtime = null
+
+      state.errors.coverageByDate = null
+      state.errors.criticalCoverageGaps = null
+      state.errors.weeklyCoverage = null
+
+      state.errors.rosterWorkload = null
+      state.errors.workloadDistribution = null
+      state.errors.doctorWorkloadAnalytics = null
+
+      state.errors.attendanceHeatmap = null
+    },
+
+    clearCoverageAnalyticsData: (state) => {
+      state.coverageByDate = null
+      state.criticalCoverageGaps = []
+      state.weeklyCoverage = null
+
+      state.errors.coverageByDate = null
+      state.errors.criticalCoverageGaps = null
+      state.errors.weeklyCoverage = null
+    },
+
+    clearDoctorWorkloadAnalytics: (state) => {
+      state.doctorWorkloadAnalytics = null
+      state.loading.doctorWorkloadAnalytics = false
+      state.errors.doctorWorkloadAnalytics = null
     },
 
     // ===== ERROR MANAGEMENT (إدارة الأخطاء) =====
@@ -583,6 +765,339 @@ builder
     state.errors.rosterAttendanceSummary =
       action.payload || "Failed to load roster attendance summary"
   })
+
+        // ===================================================================
+    // ATTENDANCE ANALYTICS FOUNDATION
+    // ===================================================================
+
+    builder
+      // =========================
+      // Today Attendance Snapshot - Global
+      // =========================
+      .addCase(getTodayAttendanceSnapshot.pending, (state) => {
+        state.loading.todayAttendanceSnapshot = true
+        state.errors.todayAttendanceSnapshot = null
+      })
+      .addCase(getTodayAttendanceSnapshot.fulfilled, (state, action) => {
+        state.loading.todayAttendanceSnapshot = false
+        state.todayAttendanceSnapshot = extractAsyncData(action.payload)
+        state.errors.todayAttendanceSnapshot = null
+      })
+      .addCase(getTodayAttendanceSnapshot.rejected, (state, action) => {
+        state.loading.todayAttendanceSnapshot = false
+        state.errors.todayAttendanceSnapshot = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل ملخص حضور اليوم"
+        )
+      })
+
+      // =========================
+      // Today Attendance Snapshot - Roster
+      // =========================
+      .addCase(getRosterTodayAttendanceSnapshot.pending, (state) => {
+        state.loading.rosterTodayAttendanceSnapshot = true
+        state.errors.rosterTodayAttendanceSnapshot = null
+      })
+      .addCase(getRosterTodayAttendanceSnapshot.fulfilled, (state, action) => {
+        state.loading.rosterTodayAttendanceSnapshot = false
+        state.rosterTodayAttendanceSnapshot = extractAsyncData(action.payload)
+        state.errors.rosterTodayAttendanceSnapshot = null
+      })
+      .addCase(getRosterTodayAttendanceSnapshot.rejected, (state, action) => {
+        state.loading.rosterTodayAttendanceSnapshot = false
+        state.errors.rosterTodayAttendanceSnapshot = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل ملخص حضور اليوم للروستر"
+        )
+      })
+
+      // =========================
+      // Roster Attendance Dashboard
+      // =========================
+      .addCase(getRosterAttendanceDashboard.pending, (state) => {
+        state.loading.attendanceDashboard = true
+        state.errors.attendanceDashboard = null
+      })
+      .addCase(getRosterAttendanceDashboard.fulfilled, (state, action) => {
+        state.loading.attendanceDashboard = false
+        state.attendanceDashboard = extractAsyncData(action.payload)
+        state.errors.attendanceDashboard = null
+      })
+      .addCase(getRosterAttendanceDashboard.rejected, (state, action) => {
+        state.loading.attendanceDashboard = false
+        state.errors.attendanceDashboard = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل لوحة تحليلات حضور الروستر"
+        )
+      })
+
+      // =========================
+      // Comprehensive Attendance Analytics
+      // =========================
+      .addCase(getRosterAttendanceAnalytics.pending, (state) => {
+        state.loading.attendanceAnalytics = true
+        state.errors.attendanceAnalytics = null
+      })
+      .addCase(getRosterAttendanceAnalytics.fulfilled, (state, action) => {
+        state.loading.attendanceAnalytics = false
+        state.attendanceAnalytics = extractAsyncData(action.payload)
+        state.errors.attendanceAnalytics = null
+      })
+      .addCase(getRosterAttendanceAnalytics.rejected, (state, action) => {
+        state.loading.attendanceAnalytics = false
+        state.errors.attendanceAnalytics = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل تحليلات الحضور"
+        )
+      })
+
+      // =========================
+      // Absence Patterns
+      // =========================
+      .addCase(getRosterAbsencePatterns.pending, (state) => {
+        state.loading.absencePatterns = true
+        state.errors.absencePatterns = null
+      })
+      .addCase(getRosterAbsencePatterns.fulfilled, (state, action) => {
+        state.loading.absencePatterns = false
+        state.absencePatterns = extractAsyncList(action.payload)
+        state.errors.absencePatterns = null
+      })
+      .addCase(getRosterAbsencePatterns.rejected, (state, action) => {
+        state.loading.absencePatterns = false
+        state.errors.absencePatterns = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل أنماط الغياب"
+        )
+      })
+
+      // =========================
+      // Late Patterns
+      // =========================
+      .addCase(getRosterLatePatterns.pending, (state) => {
+        state.loading.latePatterns = true
+        state.errors.latePatterns = null
+      })
+      .addCase(getRosterLatePatterns.fulfilled, (state, action) => {
+        state.loading.latePatterns = false
+        state.latePatterns = extractAsyncData(action.payload)
+        state.errors.latePatterns = null
+      })
+      .addCase(getRosterLatePatterns.rejected, (state, action) => {
+        state.loading.latePatterns = false
+        state.errors.latePatterns = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل أنماط التأخير"
+        )
+      })
+
+      // =========================
+      // Departments Realtime
+      // =========================
+      .addCase(getRosterDepartmentsRealtime.pending, (state) => {
+        state.loading.departmentsRealtime = true
+        state.errors.departmentsRealtime = null
+      })
+      .addCase(getRosterDepartmentsRealtime.fulfilled, (state, action) => {
+        state.loading.departmentsRealtime = false
+        state.departmentsRealtime = extractAsyncList(action.payload)
+        state.errors.departmentsRealtime = null
+      })
+      .addCase(getRosterDepartmentsRealtime.rejected, (state, action) => {
+        state.loading.departmentsRealtime = false
+        state.errors.departmentsRealtime = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل التحليل الفوري للأقسام"
+        )
+      })
+
+      // =========================
+      // One Department Realtime
+      // =========================
+      .addCase(getRosterDepartmentRealtime.pending, (state) => {
+        state.loading.departmentRealtime = true
+        state.errors.departmentRealtime = null
+      })
+      .addCase(getRosterDepartmentRealtime.fulfilled, (state, action) => {
+        state.loading.departmentRealtime = false
+
+        const departmentId = action.payload?.departmentId
+        const data = action.payload?.data ?? null
+
+        if (departmentId) {
+          state.departmentRealtimeById[String(departmentId)] = data
+        }
+
+        state.errors.departmentRealtime = null
+      })
+      .addCase(getRosterDepartmentRealtime.rejected, (state, action) => {
+        state.loading.departmentRealtime = false
+        state.errors.departmentRealtime = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل التحليل الفوري للقسم"
+        )
+      })
+
+      // =========================
+      // Specialties Realtime
+      // =========================
+      .addCase(getRosterSpecialtiesRealtime.pending, (state) => {
+        state.loading.specialtiesRealtime = true
+        state.errors.specialtiesRealtime = null
+      })
+      .addCase(getRosterSpecialtiesRealtime.fulfilled, (state, action) => {
+        state.loading.specialtiesRealtime = false
+        state.specialtiesRealtime = extractAsyncList(action.payload)
+        state.errors.specialtiesRealtime = null
+      })
+      .addCase(getRosterSpecialtiesRealtime.rejected, (state, action) => {
+        state.loading.specialtiesRealtime = false
+        state.errors.specialtiesRealtime = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل التحليل الفوري للتخصصات"
+        )
+      })
+
+      // =========================
+      // Coverage By Date
+      // =========================
+      .addCase(getRosterCoverageByDate.pending, (state) => {
+        state.loading.coverageByDate = true
+        state.errors.coverageByDate = null
+      })
+      .addCase(getRosterCoverageByDate.fulfilled, (state, action) => {
+        state.loading.coverageByDate = false
+        state.coverageByDate = action.payload || null
+        state.errors.coverageByDate = null
+      })
+      .addCase(getRosterCoverageByDate.rejected, (state, action) => {
+        state.loading.coverageByDate = false
+        state.errors.coverageByDate = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل فجوات التغطية للتاريخ المحدد"
+        )
+      })
+
+      // =========================
+      // Critical Coverage Gaps
+      // =========================
+      .addCase(getRosterCriticalCoverageGaps.pending, (state) => {
+        state.loading.criticalCoverageGaps = true
+        state.errors.criticalCoverageGaps = null
+      })
+      .addCase(getRosterCriticalCoverageGaps.fulfilled, (state, action) => {
+        state.loading.criticalCoverageGaps = false
+        state.criticalCoverageGaps = extractAsyncList(action.payload)
+        state.errors.criticalCoverageGaps = null
+      })
+      .addCase(getRosterCriticalCoverageGaps.rejected, (state, action) => {
+        state.loading.criticalCoverageGaps = false
+        state.errors.criticalCoverageGaps = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل فجوات التغطية الحرجة"
+        )
+      })
+
+      // =========================
+      // Weekly Coverage
+      // =========================
+      .addCase(getRosterWeeklyCoverage.pending, (state) => {
+        state.loading.weeklyCoverage = true
+        state.errors.weeklyCoverage = null
+      })
+      .addCase(getRosterWeeklyCoverage.fulfilled, (state, action) => {
+        state.loading.weeklyCoverage = false
+        state.weeklyCoverage = extractAsyncData(action.payload)
+        state.errors.weeklyCoverage = null
+      })
+      .addCase(getRosterWeeklyCoverage.rejected, (state, action) => {
+        state.loading.weeklyCoverage = false
+        state.errors.weeklyCoverage = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل التغطية الأسبوعية"
+        )
+      })
+
+      // =========================
+      // Roster Workload
+      // =========================
+      .addCase(getRosterWorkload.pending, (state) => {
+        state.loading.rosterWorkload = true
+        state.errors.rosterWorkload = null
+      })
+      .addCase(getRosterWorkload.fulfilled, (state, action) => {
+        state.loading.rosterWorkload = false
+        state.rosterWorkload = extractAsyncList(action.payload)
+        state.errors.rosterWorkload = null
+      })
+      .addCase(getRosterWorkload.rejected, (state, action) => {
+        state.loading.rosterWorkload = false
+        state.errors.rosterWorkload = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل تحليل عبء العمل"
+        )
+      })
+
+      // =========================
+      // Workload Distribution
+      // =========================
+      .addCase(getRosterWorkloadDistribution.pending, (state) => {
+        state.loading.workloadDistribution = true
+        state.errors.workloadDistribution = null
+      })
+      .addCase(getRosterWorkloadDistribution.fulfilled, (state, action) => {
+        state.loading.workloadDistribution = false
+        state.workloadDistribution = extractAsyncData(action.payload)
+        state.errors.workloadDistribution = null
+      })
+      .addCase(getRosterWorkloadDistribution.rejected, (state, action) => {
+        state.loading.workloadDistribution = false
+        state.errors.workloadDistribution = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل توزيع عبء العمل"
+        )
+      })
+
+      // =========================
+      // Doctor Workload Analytics
+      // =========================
+      .addCase(getDoctorWorkloadAnalytics.pending, (state) => {
+        state.loading.doctorWorkloadAnalytics = true
+        state.errors.doctorWorkloadAnalytics = null
+      })
+      .addCase(getDoctorWorkloadAnalytics.fulfilled, (state, action) => {
+        state.loading.doctorWorkloadAnalytics = false
+        state.doctorWorkloadAnalytics = extractAsyncData(action.payload)
+        state.errors.doctorWorkloadAnalytics = null
+      })
+      .addCase(getDoctorWorkloadAnalytics.rejected, (state, action) => {
+        state.loading.doctorWorkloadAnalytics = false
+        state.errors.doctorWorkloadAnalytics = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل تحليل عبء عمل الطبيب"
+        )
+      })
+
+      // =========================
+      // Attendance Heatmap
+      // =========================
+      .addCase(getRosterAttendanceHeatmap.pending, (state) => {
+        state.loading.attendanceHeatmap = true
+        state.errors.attendanceHeatmap = null
+      })
+      .addCase(getRosterAttendanceHeatmap.fulfilled, (state, action) => {
+        state.loading.attendanceHeatmap = false
+        state.attendanceHeatmap = extractAsyncData(action.payload)
+        state.errors.attendanceHeatmap = null
+      })
+      .addCase(getRosterAttendanceHeatmap.rejected, (state, action) => {
+        state.loading.attendanceHeatmap = false
+        state.errors.attendanceHeatmap = normalizeAsyncError(
+          action.payload,
+          "تعذر تحميل خريطة الحضور"
+        )
+      })
+
 
     // ===================================================================
     // PHASE 1: BASIC STRUCTURE (المرحلة 1: الهيكل الأساسي)
@@ -1392,6 +1907,10 @@ export const {
   updateDoctorAssignment,
   removeDoctorAssignment,
   updateShiftInList,
+
+  clearAttendanceAnalyticsData,
+  clearCoverageAnalyticsData,
+  clearDoctorWorkloadAnalytics,
 } = rosterManagementSlice.actions
 
 // ===================================================================
@@ -1650,6 +2169,59 @@ export const selectPhaseProgress = (state) => {
     progressPercentage: (completedPhases / 7) * 100,
   }
 }
+
+
+// ===================================================================
+// Attendance Analytics Selectors
+// ===================================================================
+
+export const selectTodayAttendanceSnapshot = (state) =>
+  state.rosterManagement.todayAttendanceSnapshot
+
+export const selectRosterTodayAttendanceSnapshot = (state) =>
+  state.rosterManagement.rosterTodayAttendanceSnapshot
+
+export const selectAttendanceDashboard = (state) =>
+  state.rosterManagement.attendanceDashboard
+
+export const selectAttendanceAnalytics = (state) =>
+  state.rosterManagement.attendanceAnalytics
+
+export const selectAbsencePatterns = (state) =>
+  state.rosterManagement.absencePatterns
+
+export const selectLatePatterns = (state) =>
+  state.rosterManagement.latePatterns
+
+export const selectDepartmentsRealtime = (state) =>
+  state.rosterManagement.departmentsRealtime
+
+export const selectDepartmentRealtimeById = (departmentId) => (state) =>
+  state.rosterManagement.departmentRealtimeById?.[String(departmentId)] || null
+
+export const selectSpecialtiesRealtime = (state) =>
+  state.rosterManagement.specialtiesRealtime
+
+export const selectCoverageByDate = (state) =>
+  state.rosterManagement.coverageByDate
+
+export const selectCriticalCoverageGaps = (state) =>
+  state.rosterManagement.criticalCoverageGaps
+
+export const selectWeeklyCoverage = (state) =>
+  state.rosterManagement.weeklyCoverage
+
+export const selectRosterWorkload = (state) =>
+  state.rosterManagement.rosterWorkload
+
+export const selectWorkloadDistribution = (state) =>
+  state.rosterManagement.workloadDistribution
+
+export const selectDoctorWorkloadAnalytics = (state) =>
+  state.rosterManagement.doctorWorkloadAnalytics
+
+export const selectAttendanceHeatmap = (state) =>
+  state.rosterManagement.attendanceHeatmap
 
 // Export the reducer as default
 export default rosterManagementSlice.reducer

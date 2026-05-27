@@ -5,6 +5,9 @@ import { useTranslation } from "react-i18next"
 import Swal from "sweetalert2"
 import { toast } from "react-toastify"
 import {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Award,
@@ -18,13 +21,11 @@ import {
   ExternalLink,
   Eye,
   FileText,
-  Filter,
   LinkIcon,
-  Mail,
-  MapPin,
-  Phone,
   RefreshCw,
+  ShieldAlert,
   Stethoscope,
+  Timer,
   Trash2,
   UserCheck,
   Users,
@@ -66,11 +67,52 @@ import {
   unlinkDepartmentFromCategory,
 } from "../../../state/act/actDepartment"
 
-import { getRosterByCategory } from "../../../state/act/actRosterManagement"
+import {
+  getRosterByCategory,
+  getRosterSpecialtiesRealtime,
+} from "../../../state/act/actRosterManagement"
+
 import LoadingGetData from "../../../components/LoadingGetData"
 import CategoryHeadsManagement from "../../../components/categoryHeads"
 import { formatDate } from "../../../utils/formtDate"
 import { getPageTheme } from "../../../utils/themeClasses"
+
+const safeArray = (value) => {
+  if (Array.isArray(value)) return value
+  if (Array.isArray(value?.items)) return value.items
+  if (Array.isArray(value?.data)) return value.data
+  if (Array.isArray(value?.data?.items)) return value.data.items
+  if (Array.isArray(value?.rows)) return value.rows
+  if (Array.isArray(value?.specialties)) return value.specialties
+  if (Array.isArray(value?.categories)) return value.categories
+  if (Array.isArray(value?.doctors)) return value.doctors
+  if (Array.isArray(value?.departments)) return value.departments
+  return []
+}
+
+const getNumber = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") {
+      const n = Number(value)
+      return Number.isNaN(n) ? 0 : n
+    }
+  }
+
+  return 0
+}
+
+const getValue = (...values) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") return value
+  }
+
+  return "-"
+}
+
+const percentText = (value) => {
+  const n = Number(value || 0)
+  return `${Number.isNaN(n) ? 0 : n.toFixed(1)}%`
+}
 
 const SpecificCategory = () => {
   const { catId: id } = useParams()
@@ -82,6 +124,7 @@ const SpecificCategory = () => {
   const [activeTab, setActiveTab] = useState("overview")
   const [depClickId, setDepClickId] = useState(null)
   const [unlinkDepId, setUnlinkDepId] = useState(null)
+  const [selectedAttendanceRosterId, setSelectedAttendanceRosterId] = useState("")
 
   const currentLang = i18n.language || "ar"
   const isRTL = currentLang === "ar"
@@ -129,7 +172,14 @@ const SpecificCategory = () => {
     loadingUnlinkDepartment,
   } = useSelector((state) => state.department)
 
-  const { rosterList, loading } = useSelector((state) => state.rosterManagement)
+  const {
+    rosterList,
+    loading,
+    errors,
+    specialtiesRealtime,
+    rosterSpecialtiesRealtime,
+    specialtyRealtime,
+  } = useSelector((state) => state.rosterManagement)
 
   const canManageCategory =
     loginRoleResponseDto?.roleNameEn === "System Administrator" ||
@@ -154,6 +204,79 @@ const SpecificCategory = () => {
   const rosters = Array.isArray(rosterList)
     ? rosterList
     : rosterList?.items || rosterList?.data?.items || []
+
+  const iconColors = {
+    overview: "text-blue-500 dark:text-blue-500",
+    doctors: "text-emerald-500 dark:text-emerald-500",
+    requests: "text-amber-500 dark:text-amber-500",
+    departments: "text-violet-500 dark:text-violet-500",
+    rosters: "text-orange-500 dark:text-orange-500",
+    heads: "text-purple-500 dark:text-purple-500",
+    attendance: "text-red-500 dark:text-red-500",
+
+    refresh: "text-blue-500 dark:text-blue-500",
+    edit: "text-violet-500 dark:text-violet-500",
+    view: "text-blue-500 dark:text-blue-500",
+    success: "text-emerald-500 dark:text-emerald-500",
+    danger: "text-red-500 dark:text-red-500",
+    warning: "text-amber-500 dark:text-amber-500",
+    link: "text-blue-500 dark:text-blue-500",
+    external: "text-orange-500 dark:text-orange-500",
+    doctor: "text-emerald-500 dark:text-emerald-500",
+    clock: "text-amber-500 dark:text-amber-500",
+    stats: "text-blue-500 dark:text-blue-500",
+    muted: "text-slate-500 dark:text-slate-500",
+  }
+
+  const toneMap = {
+    blue: {
+      text: "text-blue-500",
+      border: "border-blue-500",
+      bg: "bg-transparent",
+    },
+    green: {
+      text: "text-emerald-500",
+      border: "border-emerald-500",
+      bg: "bg-transparent",
+    },
+    yellow: {
+      text: "text-amber-500",
+      border: "border-amber-500",
+      bg: "bg-transparent",
+    },
+    orange: {
+      text: "text-orange-500",
+      border: "border-orange-500",
+      bg: "bg-transparent",
+    },
+    red: {
+      text: "text-red-500",
+      border: "border-red-500",
+      bg: "bg-transparent",
+    },
+    purple: {
+      text: "text-violet-500",
+      border: "border-violet-500",
+      bg: "bg-transparent",
+    },
+    slate: {
+      text: "text-slate-500",
+      border: "border-slate-500",
+      bg: "bg-transparent",
+    },
+  }
+
+  const defaultButton =
+    "group inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const iconButton =
+    "group p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerButton =
+    "group inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-red-500 border-[var(--color-danger-border)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+  const dangerIconButton =
+    "group p-2 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 
   useEffect(() => {
     if (!id) return
@@ -247,6 +370,35 @@ const SpecificCategory = () => {
     }
   }, [approvalError])
 
+  const attendanceRosterOptions = useMemo(() => {
+    return rosters
+      .map((roster) => ({
+        id: roster.id || roster.rosterId,
+        label:
+          roster.title ||
+          roster.rosterTitle ||
+          roster.name ||
+          `${roster.month || "-"} / ${roster.year || "-"}`,
+        raw: roster,
+      }))
+      .filter((item) => item.id)
+  }, [rosters])
+
+  useEffect(() => {
+    if (selectedAttendanceRosterId || attendanceRosterOptions.length === 0) return
+    setSelectedAttendanceRosterId(String(attendanceRosterOptions[0].id))
+  }, [selectedAttendanceRosterId, attendanceRosterOptions])
+
+  useEffect(() => {
+    if (!selectedAttendanceRosterId || activeTab !== "attendance") return
+
+    dispatch(
+      getRosterSpecialtiesRealtime({
+        rosterId: selectedAttendanceRosterId,
+      })
+    )
+  }, [dispatch, selectedAttendanceRosterId, activeTab])
+
   const refreshCategoryData = () => {
     if (!id) return
 
@@ -271,6 +423,24 @@ const SpecificCategory = () => {
     dispatch(availabelDepartmentsForCategory({ categoryId: id }))
     dispatch(getRosterByCategory({ categoryId: id }))
     dispatch(getCategoryHeads({ categoryId: id }))
+
+    if (selectedAttendanceRosterId) {
+      dispatch(
+        getRosterSpecialtiesRealtime({
+          rosterId: selectedAttendanceRosterId,
+        })
+      )
+    }
+  }
+
+  const refreshAttendance = () => {
+    if (!selectedAttendanceRosterId) return
+
+    dispatch(
+      getRosterSpecialtiesRealtime({
+        rosterId: selectedAttendanceRosterId,
+      })
+    )
   }
 
   const getCategoryName = () => {
@@ -645,17 +815,74 @@ const SpecificCategory = () => {
     rosters.length,
   ])
 
-  const defaultButton =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  const selectedAttendanceRoster = attendanceRosterOptions.find(
+    (item) => String(item.id) === String(selectedAttendanceRosterId)
+  )
 
-  const iconButton =
-    "p-2 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  const specialtiesSource =
+    rosterSpecialtiesRealtime ||
+    specialtiesRealtime ||
+    specialtyRealtime ||
+    {}
 
-  const dangerButton =
-    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-[var(--color-surface)] text-red-500 border-[var(--color-danger-border)] hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  const allSpecialties = safeArray(
+    specialtiesSource?.specialties ||
+      specialtiesSource?.categories ||
+      specialtiesSource?.items ||
+      specialtiesSource?.data ||
+      specialtiesSource
+  )
 
-  const dangerIconButton =
-    "p-2 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-surface)] text-red-500 hover:bg-[var(--color-danger)] hover:text-white hover:border-[var(--color-danger)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  const selectedSpecialtyRealtime =
+    allSpecialties.find((item) => {
+      const categoryId =
+        item.categoryId ||
+        item.specialtyId ||
+        item.id ||
+        item.category?.id ||
+        item.specialty?.id
+
+      return String(categoryId) === String(id)
+    }) ||
+    specialtiesSource?.category ||
+    specialtiesSource?.specialty ||
+    {}
+
+  const specialtyDepartments = safeArray(
+    selectedSpecialtyRealtime?.departments ||
+      selectedSpecialtyRealtime?.departmentStatuses ||
+      selectedSpecialtyRealtime?.departmentRealtime
+  )
+
+  const specialtyDoctors = safeArray(
+    selectedSpecialtyRealtime?.doctors ||
+      selectedSpecialtyRealtime?.doctorStatuses ||
+      selectedSpecialtyRealtime?.attendanceDoctors
+  )
+
+  const specialtyAlerts = safeArray(
+    selectedSpecialtyRealtime?.alerts ||
+      selectedSpecialtyRealtime?.warnings ||
+      selectedSpecialtyRealtime?.issues
+  )
+
+  const TableHead = ({ children, align = "center" }) => (
+    <th
+      className={`p-4 text-sm font-bold text-[var(--color-text)] text-${align}`}
+    >
+      {children}
+    </th>
+  )
+
+  const TableCell = ({ children, center = false }) => (
+    <td
+      className={`p-4 text-sm text-[var(--color-text)] ${
+        center ? "text-center" : ""
+      }`}
+    >
+      {children}
+    </td>
+  )
 
   const TabButton = ({ id: tabId, icon: Icon, label, count }) => {
     const isActive = activeTab === tabId
@@ -670,7 +897,10 @@ const SpecificCategory = () => {
             : "bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border-strong)] hover:bg-[var(--color-success)] hover:text-white hover:border-[var(--color-success)] active:bg-[var(--color-success-hover)]"
         }`}
       >
-        <Icon size={16} />
+        <Icon
+          size={16}
+          className={isActive ? "text-white" : iconColors[tabId] || iconColors.overview}
+        />
         {label}
         {count !== undefined && (
           <span
@@ -688,35 +918,20 @@ const SpecificCategory = () => {
   }
 
   const StatCard = ({ icon: Icon, title, value, tone = "blue" }) => {
-    const toneClass = {
-      blue:
-        "bg-transparent text-blue-500 border border-blue-500 dark:bg-transparent dark:text-blue-500 dark:border-blue-500",
-      green:
-        "bg-transparent text-emerald-500 border border-emerald-500 dark:bg-transparent dark:text-emerald-500 dark:border-emerald-500",
-      yellow:
-        "bg-transparent text-amber-500 border border-amber-500 dark:bg-transparent dark:text-amber-500 dark:border-amber-500",
-      purple:
-        "bg-transparent text-violet-500 border border-violet-500 dark:bg-transparent dark:text-violet-500 dark:border-violet-500",
-      orange:
-        "bg-transparent text-orange-500 border border-orange-500 dark:bg-transparent dark:text-orange-500 dark:border-orange-500",
-      red:
-        "bg-transparent text-red-500 border border-red-500 dark:bg-transparent dark:text-red-500 dark:border-red-500",
-    }
+    const toneClass = toneMap[tone] || toneMap.blue
 
     return (
       <div className={`${theme.cardSoft} p-4`}>
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm text-[var(--color-text-muted)]">{title}</p>
-            <p className="text-2xl font-extrabold text-[var(--color-text)]">
+            <p className={`text-2xl font-extrabold ${toneClass.text}`}>
               {value ?? 0}
             </p>
           </div>
 
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-              toneClass[tone] || toneClass.blue
-            }`}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center border-2 bg-transparent ${toneClass.text} ${toneClass.border}`}
           >
             <Icon className="w-5 h-5" />
           </div>
@@ -725,11 +940,47 @@ const SpecificCategory = () => {
     )
   }
 
+  const AttendanceCard = ({ icon: Icon, title, value, tone = "blue" }) => {
+    const toneClass = toneMap[tone] || toneMap.blue
+
+    return (
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm min-h-[104px]">
+        <div className="flex items-center justify-between gap-4 h-full">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-black text-[var(--color-text)] leading-5 break-words">
+              {title}
+            </p>
+            <p className={`mt-2 text-2xl font-black tracking-tight ${toneClass.text}`}>
+              {value ?? 0}
+            </p>
+          </div>
+
+          <div
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-2 bg-transparent ${toneClass.text} ${toneClass.border}`}
+          >
+            <Icon className="w-5 h-5 shrink-0" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const EmptyState = ({ icon: Icon, title, description }) => (
     <div className={`${theme.card} p-8 text-center`}>
-      <Icon className="w-14 h-14 mx-auto mb-4 text-[var(--color-text-muted)]" />
+      <span className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center border-2 bg-transparent text-slate-500 border-slate-500">
+        <Icon className="w-8 h-8" />
+      </span>
       <h3 className="text-xl font-bold text-[var(--color-text)]">{title}</h3>
       <p className="mt-2 text-[var(--color-text-muted)]">{description}</p>
+    </div>
+  )
+
+  const InfoItem = ({ label, value }) => (
+    <div className={`${theme.cardSoft} p-4`}>
+      <p className="text-xs font-bold text-[var(--color-text-muted)] mb-1">
+        {label}
+      </p>
+      <p className="text-sm font-bold text-[var(--color-text)]">{value || "-"}</p>
     </div>
   )
 
@@ -769,7 +1020,11 @@ const SpecificCategory = () => {
             onClick={() => onPageChange(page - 1)}
             className={defaultButton}
           >
-            {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+            {isRTL ? (
+              <ArrowRight size={16} className={iconColors.view} />
+            ) : (
+              <ArrowLeft size={16} className={iconColors.view} />
+            )}
           </button>
 
           <button
@@ -778,7 +1033,11 @@ const SpecificCategory = () => {
             onClick={() => onPageChange(page + 1)}
             className={defaultButton}
           >
-            {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+            {isRTL ? (
+              <ArrowLeft size={16} className={iconColors.view} />
+            ) : (
+              <ArrowRight size={16} className={iconColors.view} />
+            )}
           </button>
         </div>
       </div>
@@ -788,7 +1047,13 @@ const SpecificCategory = () => {
   const renderOverviewTab = () => (
     <div className="space-y-6">
       {(loadingGetCategoryStatistics || loadingGetCategoryDetails) && (
-        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الإحصائيات..." : "Loading statistics..."} />
+        <LoadingGetData
+          text={
+            currentLang === "ar"
+              ? "جاري تحميل الإحصائيات..."
+              : "Loading statistics..."
+          }
+        />
       )}
 
       {(categoryDetailsError || categoryStatisticsError) && (
@@ -839,7 +1104,7 @@ const SpecificCategory = () => {
           icon={Award}
           title={currentLang === "ar" ? "رؤساء" : "Heads"}
           value={overviewStats.heads}
-          tone="blue"
+          tone="red"
         />
       </div>
 
@@ -851,9 +1116,18 @@ const SpecificCategory = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InfoItem label={currentLang === "ar" ? "الاسم العربي" : "Arabic Name"} value={category?.nameArabic} />
-            <InfoItem label={currentLang === "ar" ? "الاسم الإنجليزي" : "English Name"} value={category?.nameEnglish} />
-            <InfoItem label={currentLang === "ar" ? "الكود" : "Code"} value={category?.code} />
+            <InfoItem
+              label={currentLang === "ar" ? "الاسم العربي" : "Arabic Name"}
+              value={category?.nameArabic}
+            />
+            <InfoItem
+              label={currentLang === "ar" ? "الاسم الإنجليزي" : "English Name"}
+              value={category?.nameEnglish}
+            />
+            <InfoItem
+              label={currentLang === "ar" ? "الكود" : "Code"}
+              value={category?.code}
+            />
             <InfoItem
               label={currentLang === "ar" ? "الحالة" : "Status"}
               value={
@@ -866,8 +1140,14 @@ const SpecificCategory = () => {
                   : "Inactive"
               }
             />
-            <InfoItem label={currentLang === "ar" ? "تاريخ الإنشاء" : "Created At"} value={formatDate(category?.createdAt)} />
-            <InfoItem label={currentLang === "ar" ? "أنشئ بواسطة" : "Created By"} value={category?.createdByName || "-"} />
+            <InfoItem
+              label={currentLang === "ar" ? "تاريخ الإنشاء" : "Created At"}
+              value={formatDate(category?.createdAt)}
+            />
+            <InfoItem
+              label={currentLang === "ar" ? "أنشئ بواسطة" : "Created By"}
+              value={category?.createdByName || "-"}
+            />
           </div>
 
           {category?.description && (
@@ -889,7 +1169,7 @@ const SpecificCategory = () => {
           <div className="space-y-3">
             <Link to={`/admin-panel/category/edit/${id}`} className="block">
               <button type="button" className={`${defaultButton} w-full`}>
-                <Edit size={16} />
+                <Edit size={16} className={iconColors.edit} />
                 {currentLang === "ar" ? "تعديل التخصص" : "Edit Category"}
               </button>
             </Link>
@@ -899,7 +1179,7 @@ const SpecificCategory = () => {
               onClick={() => setActiveTab("doctors")}
               className={`${defaultButton} w-full`}
             >
-              <Users size={16} />
+              <Users size={16} className={iconColors.doctors} />
               {currentLang === "ar" ? "عرض الدكاترة" : "View Doctors"}
             </button>
 
@@ -908,8 +1188,17 @@ const SpecificCategory = () => {
               onClick={() => setActiveTab("requests")}
               className={`${defaultButton} w-full`}
             >
-              <Clock size={16} />
+              <Clock size={16} className={iconColors.requests} />
               {currentLang === "ar" ? "طلبات الانضمام" : "Join Requests"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("attendance")}
+              className={`${defaultButton} w-full`}
+            >
+              <Activity size={16} className={iconColors.attendance} />
+              {currentLang === "ar" ? "تحليل الحضور" : "Attendance Insights"}
             </button>
 
             <button
@@ -917,21 +1206,12 @@ const SpecificCategory = () => {
               onClick={() => navigate(`/admin-panel/leaves/${id}`)}
               className={`${defaultButton} w-full`}
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={16} className={iconColors.external} />
               {currentLang === "ar" ? "إجازات التخصص" : "Category Leaves"}
             </button>
           </div>
         </div>
       </div>
-    </div>
-  )
-
-  const InfoItem = ({ label, value }) => (
-    <div className={`${theme.cardSoft} p-4`}>
-      <p className="text-xs font-bold text-[var(--color-text-muted)] mb-1">
-        {label}
-      </p>
-      <p className="text-sm font-bold text-[var(--color-text)]">{value || "-"}</p>
     </div>
   )
 
@@ -976,14 +1256,16 @@ const SpecificCategory = () => {
               }
               className={defaultButton}
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={16} className={iconColors.refresh} />
             </button>
           </div>
         </div>
       </div>
 
       {loadingGetCategoryDoctors ? (
-        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الدكاترة..." : "Loading doctors..."} />
+        <LoadingGetData
+          text={currentLang === "ar" ? "جاري تحميل الدكاترة..." : "Loading doctors..."}
+        />
       ) : categoryDoctorsError ? (
         <div className={`${theme.card} p-6 text-red-500`}>
           {categoryDoctorsError?.message}
@@ -1089,21 +1371,15 @@ const SpecificCategory = () => {
                         <TableCell center>
                           <div className="flex justify-center gap-2">
                             <Link to={`/admin-panel/category/doctor/${doctorId}`}>
-                              <button
-                                type="button"
-                                className={iconButton}
-                              >
-                                <Eye size={16} />
+                              <button type="button" className={iconButton}>
+                                <Eye size={16} className={iconColors.view} />
                               </button>
                             </Link>
 
                             {canManageCategory && (
                               <Link to={`/admin-panel/category/doctor/${doctorId}/edit`}>
-                                <button
-                                  type="button"
-                                  className={iconButton}
-                                >
-                                  <Edit size={16} />
+                                <button type="button" className={iconButton}>
+                                  <Edit size={16} className={iconColors.edit} />
                                 </button>
                               </Link>
                             )}
@@ -1167,14 +1443,16 @@ const SpecificCategory = () => {
               }
               className={defaultButton}
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={16} className={iconColors.refresh} />
             </button>
           </div>
         </div>
       </div>
 
       {loadingGetCategoryPendingRequests ? (
-        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الطلبات..." : "Loading requests..."} />
+        <LoadingGetData
+          text={currentLang === "ar" ? "جاري تحميل الطلبات..." : "Loading requests..."}
+        />
       ) : categoryPendingRequestsError ? (
         <div className={`${theme.card} p-6 text-red-500`}>
           {categoryPendingRequestsError?.message}
@@ -1266,11 +1544,8 @@ const SpecificCategory = () => {
                         <TableCell center>
                           <div className="flex justify-center gap-2">
                             <Link to={`/admin-panel/category/doctor/${userId}`}>
-                              <button
-                                type="button"
-                                className={iconButton}
-                              >
-                                <Eye size={16} />
+                              <button type="button" className={iconButton}>
+                                <Eye size={16} className={iconColors.view} />
                               </button>
                             </Link>
 
@@ -1282,7 +1557,7 @@ const SpecificCategory = () => {
                                   onClick={() => handleApproveRequest(request)}
                                   className={iconButton}
                                 >
-                                  <Check size={16} />
+                                  <Check size={16} className={iconColors.success} />
                                 </button>
 
                                 <button
@@ -1291,7 +1566,7 @@ const SpecificCategory = () => {
                                   onClick={() => handleRejectRequest(request)}
                                   className={dangerIconButton}
                                 >
-                                  <X size={16} />
+                                  <X size={16} className={iconColors.danger} />
                                 </button>
                               </>
                             )}
@@ -1315,24 +1590,6 @@ const SpecificCategory = () => {
     </div>
   )
 
-  const TableHead = ({ children, align = "center" }) => (
-    <th
-      className={`p-4 text-sm font-bold text-[var(--color-text)] text-${align}`}
-    >
-      {children}
-    </th>
-  )
-
-  const TableCell = ({ children, center = false }) => (
-    <td
-      className={`p-4 text-sm text-[var(--color-text)] ${
-        center ? "text-center" : ""
-      }`}
-    >
-      {children}
-    </td>
-  )
-
   const renderDepartmentsTab = () => (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <div className={`${theme.card} p-6`}>
@@ -1342,7 +1599,9 @@ const SpecificCategory = () => {
         </h2>
 
         {loadingGetDepartmentsByCategory ? (
-          <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الأقسام..." : "Loading departments..."} />
+          <LoadingGetData
+            text={currentLang === "ar" ? "جاري تحميل الأقسام..." : "Loading departments..."}
+          />
         ) : linkedDepartments.length === 0 ? (
           <p className="text-[var(--color-text-muted)]">
             {currentLang === "ar" ? "لا توجد أقسام مرتبطة" : "No linked departments"}
@@ -1376,7 +1635,7 @@ const SpecificCategory = () => {
                       onClick={() => handleUnlinkDepartment(departmentId)}
                       className={dangerIconButton}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} className={iconColors.danger} />
                     </button>
                   )}
                 </div>
@@ -1425,7 +1684,7 @@ const SpecificCategory = () => {
                       onClick={() => handleLinkDepartment(departmentId)}
                       className={defaultButton}
                     >
-                      <LinkIcon size={16} />
+                      <LinkIcon size={16} className={iconColors.link} />
                       {currentLang === "ar" ? "ربط" : "Link"}
                     </button>
                   )}
@@ -1455,13 +1714,16 @@ const SpecificCategory = () => {
 
         <Link to="/admin-panel/rosters/create">
           <button type="button" className={defaultButton}>
+            <Calendar size={16} className={iconColors.rosters} />
             {currentLang === "ar" ? "إنشاء روستر" : "Create Roster"}
           </button>
         </Link>
       </div>
 
       {loading?.getRosterByCategory ? (
-        <LoadingGetData text={currentLang === "ar" ? "جاري تحميل الروسترات..." : "Loading rosters..."} />
+        <LoadingGetData
+          text={currentLang === "ar" ? "جاري تحميل الروسترات..." : "Loading rosters..."}
+        />
       ) : rosters.length === 0 ? (
         <EmptyState
           icon={Calendar}
@@ -1529,11 +1791,8 @@ const SpecificCategory = () => {
 
                       <TableCell center>
                         <Link to={`/admin-panel/rosters/${roster.id}`}>
-                          <button
-                            type="button"
-                            className={iconButton}
-                          >
-                            <Eye size={16} />
+                          <button type="button" className={iconButton}>
+                            <Eye size={16} className={iconColors.view} />
                           </button>
                         </Link>
                       </TableCell>
@@ -1547,6 +1806,387 @@ const SpecificCategory = () => {
       )}
     </div>
   )
+
+  const renderAttendanceTab = () => {
+    const isLoading =
+      loading?.specialtiesRealtime ||
+      loading?.rosterSpecialtiesRealtime ||
+      loading?.getRosterSpecialtiesRealtime
+
+    const error =
+      errors?.specialtiesRealtime ||
+      errors?.rosterSpecialtiesRealtime ||
+      errors?.getRosterSpecialtiesRealtime
+
+    const scheduled = getNumber(
+      selectedSpecialtyRealtime.scheduled,
+      selectedSpecialtyRealtime.scheduledCount,
+      selectedSpecialtyRealtime.totalScheduled,
+      selectedSpecialtyRealtime.requiredDoctors
+    )
+
+    const present = getNumber(
+      selectedSpecialtyRealtime.present,
+      selectedSpecialtyRealtime.presentCount,
+      selectedSpecialtyRealtime.totalPresent
+    )
+
+    const absent = getNumber(
+      selectedSpecialtyRealtime.absent,
+      selectedSpecialtyRealtime.absentCount,
+      selectedSpecialtyRealtime.totalAbsent
+    )
+
+    const late = getNumber(
+      selectedSpecialtyRealtime.late,
+      selectedSpecialtyRealtime.lateCount,
+      selectedSpecialtyRealtime.totalLate
+    )
+
+    const notChecked = getNumber(
+      selectedSpecialtyRealtime.notChecked,
+      selectedSpecialtyRealtime.notCheckedCount,
+      Math.max(0, scheduled - present - absent)
+    )
+
+    const attendanceRate = getNumber(
+      selectedSpecialtyRealtime.attendanceRate,
+      selectedSpecialtyRealtime.presentRate,
+      scheduled > 0 ? (present / scheduled) * 100 : 0
+    )
+
+    return (
+      <div className="space-y-5">
+        <div className={`${theme.card} p-4`}>
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-[var(--color-text)] flex items-center gap-2">
+                <Activity className="w-5 h-5 text-red-500" />
+                {currentLang === "ar"
+                  ? "تحليل حضور التخصص"
+                  : "Category Attendance Insights"}
+              </h2>
+
+              <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                {currentLang === "ar"
+                  ? "متابعة فورية لحضور هذا التخصص داخل الروستر المحدد."
+                  : "Realtime attendance view for this category inside the selected roster."}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <select
+                value={selectedAttendanceRosterId}
+                onChange={(e) => setSelectedAttendanceRosterId(e.target.value)}
+                className="px-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] min-w-[220px]"
+              >
+                {attendanceRosterOptions.length === 0 ? (
+                  <option value="">
+                    {currentLang === "ar"
+                      ? "لا توجد روسترات متاحة"
+                      : "No available rosters"}
+                  </option>
+                ) : (
+                  attendanceRosterOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))
+                )}
+              </select>
+
+              <button
+                type="button"
+                onClick={refreshAttendance}
+                disabled={!selectedAttendanceRosterId}
+                className={defaultButton}
+              >
+                <RefreshCw size={16} className={iconColors.refresh} />
+                {currentLang === "ar" ? "تحديث" : "Refresh"}
+              </button>
+
+              {selectedAttendanceRosterId && (
+                <Link to={`/admin-panel/rosters/${selectedAttendanceRosterId}`}>
+                  <button type="button" className={defaultButton}>
+                    <ExternalLink size={16} className={iconColors.external} />
+                    {currentLang === "ar" ? "فتح الروستر" : "Open Roster"}
+                  </button>
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {selectedAttendanceRoster && (
+            <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
+              <p className="text-sm font-bold text-[var(--color-text)]">
+                {currentLang === "ar" ? "الروستر المحدد" : "Selected Roster"}:{" "}
+                <span className="text-red-500">{selectedAttendanceRoster.label}</span>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {attendanceRosterOptions.length === 0 ? (
+          <EmptyState
+            icon={Calendar}
+            title={
+              currentLang === "ar"
+                ? "لا توجد روسترات لعرض الحضور"
+                : "No rosters available for attendance"
+            }
+            description={
+              currentLang === "ar"
+                ? "يجب أن يكون هناك roster مرتبط بالتخصص حتى تظهر تحليلات الحضور."
+                : "A roster must be linked to this category to show attendance insights."
+            }
+          />
+        ) : (
+          <>
+            {error && (
+              <div className="p-5 rounded-2xl bg-transparent text-red-500 border-2 border-red-500 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 mt-0.5 text-red-500" />
+                  <div>
+                    <h3 className="font-extrabold mb-1">
+                      {currentLang === "ar"
+                        ? "تعذر تحميل حضور التخصص"
+                        : "Failed to load category attendance"}
+                    </h3>
+                    <p className="text-sm font-bold">
+                      {typeof error === "string" ? error : error?.message || "Error"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isLoading && (
+              <LoadingGetData
+                text={
+                  currentLang === "ar"
+                    ? "جاري تحميل حضور التخصص..."
+                    : "Loading category attendance..."
+                }
+              />
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              <AttendanceCard
+                icon={BarChart3}
+                title={currentLang === "ar" ? "معدل الحضور" : "Attendance Rate"}
+                value={percentText(attendanceRate)}
+                tone={
+                  attendanceRate >= 80 ? "green" : attendanceRate >= 50 ? "yellow" : "red"
+                }
+              />
+
+              <AttendanceCard
+                icon={Users}
+                title={currentLang === "ar" ? "مجدولين" : "Scheduled"}
+                value={scheduled}
+                tone="blue"
+              />
+
+              <AttendanceCard
+                icon={UserCheck}
+                title={currentLang === "ar" ? "حاضرين" : "Present"}
+                value={present}
+                tone="green"
+              />
+
+              <AttendanceCard
+                icon={XCircle}
+                title={currentLang === "ar" ? "غياب" : "Absent"}
+                value={absent}
+                tone={absent > 0 ? "red" : "green"}
+              />
+
+              <AttendanceCard
+                icon={Clock}
+                title={currentLang === "ar" ? "متأخرين" : "Late"}
+                value={late}
+                tone={late > 0 ? "yellow" : "green"}
+              />
+
+              <AttendanceCard
+                icon={Timer}
+                title={currentLang === "ar" ? "لم يسجلوا" : "Not Checked"}
+                value={notChecked}
+                tone={notChecked > 0 ? "orange" : "green"}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <AnalyticsPanel
+                theme={theme}
+                title={currentLang === "ar" ? "الأقسام داخل التخصص" : "Departments in Category"}
+                icon={Building}
+                tone="blue"
+                toneMap={toneMap}
+              >
+                {specialtyDepartments.length === 0 ? (
+                  <EmptyMini
+                    icon={Building}
+                    text={
+                      currentLang === "ar"
+                        ? "لا توجد بيانات أقسام داخل هذا التخصص"
+                        : "No department data for this category"
+                    }
+                    tone="slate"
+                    toneMap={toneMap}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {specialtyDepartments.slice(0, 8).map((department, index) => (
+                      <AnalyticsListItem
+                        key={department.departmentId || department.id || index}
+                        icon={Building}
+                        title={getValue(
+                          currentLang === "ar"
+                            ? department.departmentNameAr || department.nameAr
+                            : department.departmentNameEn || department.nameEn,
+                          department.departmentName,
+                          department.name
+                        )}
+                        subtitle={`${currentLang === "ar" ? "الحضور" : "Attendance"}: ${percentText(
+                          getNumber(department.attendanceRate, department.presentRate)
+                        )}`}
+                        badge={getValue(department.status, department.severity, "Live")}
+                        tone={
+                          getNumber(department.attendanceRate, department.presentRate) >= 80
+                            ? "green"
+                            : "yellow"
+                        }
+                        toneMap={toneMap}
+                      />
+                    ))}
+                  </div>
+                )}
+              </AnalyticsPanel>
+
+              <AnalyticsPanel
+                theme={theme}
+                title={currentLang === "ar" ? "تنبيهات التخصص" : "Category Alerts"}
+                icon={ShieldAlert}
+                tone="red"
+                toneMap={toneMap}
+              >
+                {specialtyAlerts.length === 0 ? (
+                  <EmptyMini
+                    icon={CheckCircle}
+                    text={
+                      currentLang === "ar"
+                        ? "لا توجد تنبيهات حالية"
+                        : "No active alerts"
+                    }
+                    tone="green"
+                    toneMap={toneMap}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {specialtyAlerts.slice(0, 8).map((alert, index) => (
+                      <AnalyticsListItem
+                        key={alert.id || index}
+                        icon={AlertTriangle}
+                        title={getValue(
+                          currentLang === "ar" ? alert.titleAr : alert.titleEn,
+                          alert.title,
+                          alert.message
+                        )}
+                        subtitle={getValue(
+                          currentLang === "ar" ? alert.messageAr : alert.messageEn,
+                          alert.description,
+                          alert.message
+                        )}
+                        badge={getValue(alert.severity, alert.level, "Alert")}
+                        tone={
+                          String(alert.severity || alert.level)
+                            .toLowerCase()
+                            .includes("critical")
+                            ? "red"
+                            : "yellow"
+                        }
+                        toneMap={toneMap}
+                      />
+                    ))}
+                  </div>
+                )}
+              </AnalyticsPanel>
+            </div>
+
+            <AnalyticsPanel
+              theme={theme}
+              title={currentLang === "ar" ? "حالة الأطباء داخل التخصص" : "Doctors Attendance Status"}
+              icon={Stethoscope}
+              tone="green"
+              toneMap={toneMap}
+            >
+              {specialtyDoctors.length === 0 ? (
+                <EmptyMini
+                  icon={Stethoscope}
+                  text={
+                    currentLang === "ar"
+                      ? "لا توجد بيانات أطباء لهذا الروستر"
+                      : "No doctor attendance data for this roster"
+                  }
+                  tone="slate"
+                  toneMap={toneMap}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {specialtyDoctors.slice(0, 18).map((doctor, index) => {
+                    const status = String(
+                      doctor.status ||
+                        doctor.attendanceStatus ||
+                        doctor.currentStatus ||
+                        ""
+                    ).toLowerCase()
+
+                    const tone = status.includes("absent")
+                      ? "red"
+                      : status.includes("late")
+                      ? "yellow"
+                      : status.includes("present") || status.includes("on")
+                      ? "green"
+                      : "slate"
+
+                    return (
+                      <AnalyticsListItem
+                        key={doctor.doctorId || doctor.id || index}
+                        icon={Stethoscope}
+                        title={getValue(
+                          currentLang === "ar"
+                            ? doctor.doctorNameAr || doctor.nameAr
+                            : doctor.doctorNameEn || doctor.nameEn,
+                          doctor.doctorName,
+                          doctor.name,
+                          doctor.fullName
+                        )}
+                        subtitle={`${currentLang === "ar" ? "الحالة" : "Status"}: ${getValue(
+                          doctor.status,
+                          doctor.attendanceStatus,
+                          doctor.currentStatus,
+                          "-"
+                        )}`}
+                        badge={getValue(
+                          doctor.checkInTime,
+                          doctor.timeIn,
+                          doctor.shiftName,
+                          "-"
+                        )}
+                        tone={tone}
+                        toneMap={toneMap}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+            </AnalyticsPanel>
+          </>
+        )}
+      </div>
+    )
+  }
 
   const renderHeadsTab = () => (
     <div className="space-y-5">
@@ -1571,7 +2211,11 @@ const SpecificCategory = () => {
   )
 
   if (loadingGetSingleCategory && !category) {
-    return <LoadingGetData text={t("gettingData.categoryData") || "Loading category data..."} />
+    return (
+      <LoadingGetData
+        text={t("gettingData.categoryData") || "Loading category data..."}
+      />
+    )
   }
 
   if (singleCategoryError) {
@@ -1591,7 +2235,11 @@ const SpecificCategory = () => {
               onClick={() => navigate("/admin-panel/categories")}
               className={defaultButton}
             >
-              {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+              {isRTL ? (
+                <ArrowRight size={16} className={iconColors.view} />
+              ) : (
+                <ArrowLeft size={16} className={iconColors.view} />
+              )}
               {currentLang === "ar" ? "رجوع للتخصصات" : "Back to Categories"}
             </button>
           </div>
@@ -1627,7 +2275,11 @@ const SpecificCategory = () => {
             onClick={() => navigate("/admin-panel/categories")}
             className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           >
-            {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+            {isRTL ? (
+              <ArrowRight size={16} className={iconColors.view} />
+            ) : (
+              <ArrowLeft size={16} className={iconColors.view} />
+            )}
             {currentLang === "ar" ? "رجوع للتخصصات" : "Back to Categories"}
           </button>
 
@@ -1637,14 +2289,14 @@ const SpecificCategory = () => {
               onClick={refreshCategoryData}
               className={defaultButton}
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={16} className={iconColors.refresh} />
               {currentLang === "ar" ? "تحديث" : "Refresh"}
             </button>
 
             {canManageCategory && (
               <Link to={`/admin-panel/category/edit/${id}`}>
                 <button type="button" className={defaultButton}>
-                  <Edit size={16} />
+                  <Edit size={16} className={iconColors.edit} />
                   {currentLang === "ar" ? "تعديل" : "Edit"}
                 </button>
               </Link>
@@ -1655,7 +2307,7 @@ const SpecificCategory = () => {
         <div className={`${theme.card} p-6`}>
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary-soft)] text-blue-500 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-transparent text-blue-500 border-2 border-blue-500 flex items-center justify-center">
                 <Stethoscope className="w-7 h-7" />
               </div>
 
@@ -1693,7 +2345,7 @@ const SpecificCategory = () => {
 
             <div className="grid grid-cols-3 gap-3 min-w-[280px]">
               <div className={`${theme.cardSoft} p-3 text-center`}>
-                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                <p className="text-2xl font-extrabold text-blue-500">
                   {overviewStats.departments}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -1702,7 +2354,7 @@ const SpecificCategory = () => {
               </div>
 
               <div className={`${theme.cardSoft} p-3 text-center`}>
-                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                <p className="text-2xl font-extrabold text-emerald-500">
                   {overviewStats.users}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -1711,7 +2363,7 @@ const SpecificCategory = () => {
               </div>
 
               <div className={`${theme.cardSoft} p-3 text-center`}>
-                <p className="text-2xl font-extrabold text-[var(--color-text)]">
+                <p className="text-2xl font-extrabold text-amber-500">
                   {overviewStats.pending}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
@@ -1759,6 +2411,12 @@ const SpecificCategory = () => {
             />
 
             <TabButton
+              id="attendance"
+              icon={Activity}
+              label={currentLang === "ar" ? "الحضور" : "Attendance"}
+            />
+
+            <TabButton
               id="heads"
               icon={Award}
               label={currentLang === "ar" ? "الرؤساء" : "Heads"}
@@ -1771,8 +2429,77 @@ const SpecificCategory = () => {
         {activeTab === "requests" && renderRequestsTab()}
         {activeTab === "departments" && renderDepartmentsTab()}
         {activeTab === "rosters" && renderRostersTab()}
+        {activeTab === "attendance" && renderAttendanceTab()}
         {activeTab === "heads" && renderHeadsTab()}
       </div>
+    </div>
+  )
+}
+
+function AnalyticsPanel({ theme, title, icon: Icon, children, tone = "blue", toneMap }) {
+  const toneClass = toneMap[tone] || toneMap.blue
+
+  return (
+    <div className={`${theme.card} p-5`}>
+      <h3 className="text-lg font-extrabold text-[var(--color-text)] mb-4 flex items-center gap-2">
+        <span
+          className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center bg-transparent ${toneClass.text} ${toneClass.border}`}
+        >
+          <Icon size={20} />
+        </span>
+        {title}
+      </h3>
+
+      {children}
+    </div>
+  )
+}
+
+function AnalyticsListItem({
+  icon: Icon,
+  title,
+  subtitle,
+  badge,
+  tone = "blue",
+  toneMap,
+}) {
+  const toneClass = toneMap[tone] || toneMap.blue
+
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <span
+          className={`w-9 h-9 rounded-xl border-2 flex items-center justify-center bg-transparent ${toneClass.text} ${toneClass.border}`}
+        >
+          <Icon size={17} />
+        </span>
+
+        <div className="min-w-0">
+          <p className="font-bold text-[var(--color-text)] truncate">{title}</p>
+          <p className="text-xs text-[var(--color-text-muted)] truncate">
+            {subtitle}
+          </p>
+        </div>
+      </div>
+
+      <span
+        className={`shrink-0 px-2.5 py-1 rounded-full border-2 text-xs font-bold bg-transparent ${toneClass.text} ${toneClass.border}`}
+      >
+        {badge}
+      </span>
+    </div>
+  )
+}
+
+function EmptyMini({ icon: Icon, text, tone = "slate", toneMap }) {
+  const toneClass = toneMap[tone] || toneMap.slate
+
+  return (
+    <div
+      className={`rounded-xl border-2 bg-transparent p-6 text-center ${toneClass.border}`}
+    >
+      <Icon className={`w-10 h-10 mx-auto mb-3 ${toneClass.text}`} />
+      <p className="text-sm font-bold text-[var(--color-text-muted)]">{text}</p>
     </div>
   )
 }

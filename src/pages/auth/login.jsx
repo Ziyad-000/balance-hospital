@@ -576,19 +576,7 @@ const Login = () => {
                         </span>
                       </label>
 
-                      <Link to="/forget-password" className={theme.link}>
-                          {
-                            (currentLang === "ar"
-                              ? "نسيت كلمة المرور؟"
-                              : "Forgot password?")}
-                        </Link>
-
-                      <Link to="/signup" className={theme.link}>
-                        {
-                          (currentLang === "ar"
-                            ? "إنشاء حساب"
-                            : "Create account")}
-                      </Link>
+                      
                     </div>
 
                     <button
@@ -618,21 +606,23 @@ const Login = () => {
               }}
             </Formik>
 
-            <div className="mt-8 pt-6 border-t border-[var(--color-border)]">
-              <Link to="/login-selection">
-                <button type="button" className={theme.secondaryButton}>
-                  {isRTL ? (
-                    <ArrowRight className="w-4 h-4 text-blue-500" />
-                  ) : (
-                    <ArrowLeft className="w-4 h-4 text-blue-500" />
-                  )}
+            <div className="mt-6">
+                <div className="flex items-center justify-between gap-4">
+                  <Link
+                    to="/forget-password"
+                    className={`${theme.link} text-sm font-black`}
+                  >
+                    {currentLang === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
+                  </Link>
 
-                  {currentLang === "ar"
-                    ? "رجوع لاختيار نوع الدخول"
-                    : "Back to login selection"}
-                </button>
-              </Link>
-            </div>
+                  <Link
+                    to="/signup"
+                    className={`${theme.link} text-sm font-black`}
+                  >
+                    {currentLang === "ar" ? "إنشاء حساب" : "Create account"}
+                  </Link>
+                </div>
+              </div>
           </div>
         </div>
       </div>

@@ -19,7 +19,7 @@ const DoctorReports = lazy(() =>
 )
 
 const Dashboard = lazy(() => import("../pages/adminPanel/dashboard/index.jsx"))
-
+const MyProfile = lazy(() => import("../pages/adminPanel/profile"))
 const Notification = lazy(() => import("../pages/adminPanel/notification"))
 
 const EditDoctorData = lazy(() =>
@@ -867,6 +867,10 @@ const router = createBrowserRouter([
             path: "rosters/:id/manage-doctors",
             element: withSuspense(ProtectedManageDoctors),
           },
+          {
+  path: "profile",
+  element: withSuspense(MyProfile),
+},
 
           // ========== FUTURE ROUTES ==========
           // {

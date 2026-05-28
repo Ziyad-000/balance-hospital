@@ -3,7 +3,6 @@ import { Navigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 
 const AdminPanelIndex = () => {
-  // Extract manager IDs from user data
   const {
     categoryManagerId,
     departmentManagerId,
@@ -12,27 +11,53 @@ const AdminPanelIndex = () => {
     userId,
   } = useSelector((state) => state.auth)
 
-  // Conditional navigation based on manager IDs
+  const roleNameEn = loginRoleResponseDto?.roleNameEn || ""
+  const roleNameAr = loginRoleResponseDto?.roleNameAr || ""
+
+  const isCategoryHead =
+    roleNameEn === "Category Head" ||
+    roleNameEn === "Category Manager" ||
+    roleNameEn.includes("Category") ||
+    roleNameAr.includes("رئيس تخصص") ||
+    roleNameAr.includes("مدير تخصص") ||
+    hyprid === "category"
+
+  const isDepartmentManager =
+    roleNameEn === "Department Manager" ||
+    roleNameEn === "Department Head" ||
+    roleNameEn.includes("Department") ||
+    roleNameAr.includes("رئيس قسم") ||
+    roleNameAr.includes("مدير قسم") ||
+    hyprid === "department"
+
+  const isSystemAdministrator =
+    roleNameEn === "System Administrator" ||
+    roleNameEn.includes("System Administrator") ||
+    roleNameAr === "مدير النظام"
+
+  if (isCategoryHead && categoryManagerId && categoryManagerId !== "0") {
+    return <Navigate to={`/admin-panel/category/${categoryManagerId}`} replace />
+  }
+
   if (
-    loginRoleResponseDto.roleNameEn == "Category Head" ||
-    hyprid == "category"
+    isDepartmentManager &&
+    departmentManagerId &&
+    departmentManagerId !== "0"
   ) {
-    // If user is a category manager, redirect to specific category
-    return (
-      <Navigate to={`/admin-panel/category/${categoryManagerId}`} replace />
-    )
-  } else if (
-    loginRoleResponseDto.roleNameEn == "Department Manager" ||
-    hyprid == "department"
-  ) {
-    // If user is a department manager, redirect to specific department
     return (
       <Navigate to={`/admin-panel/department/${departmentManagerId}`} replace />
     )
-  } else if (loginRoleResponseDto.roleNameEn == "System Administrator") {
-    // If user is a department manager, redirect to specific department
-    return <Navigate to={`/admin-panel/dashboard`} replace />
-  } else return <Navigate to={`/admin-panel/doctors/${userId}`} replace />
+  }
+
+  if (isSystemAdministrator) {
+    return <Navigate to="/admin-panel/dashboard" replace />
+  }
+
+  if (userId) {
+    return <Navigate to={`/admin-panel/doctors/${userId}`} replace />
+  }
+
+  return <Navigate to="/admin-panel/profile" replace />
 }
 
 export default AdminPanelIndex

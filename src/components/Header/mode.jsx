@@ -25,6 +25,7 @@ const SunIcon = ({ className }) => (
     <path d="m19.07 4.93-1.41 1.41" />
   </svg>
 )
+
 const MoonIcon = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -45,16 +46,43 @@ const MoonIcon = ({ className }) => (
 function Mode() {
   const { mymode } = useSelector((state) => state.mode)
   const dispatch = useDispatch()
+
   return (
     <button
+      type="button"
       onClick={() => dispatch(changeMode())}
-      className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500 dark:focus:ring-gray-400 transition-colors duration-300 cursor-pointer"
+      className="
+        group
+        inline-flex items-center justify-center
+        w-10 h-10
+        rounded-xl
+        border border-white
+        bg-white
+        text-gray-900
+        shadow-sm
+        transition-all duration-300
+        hover:border-emerald-500
+        hover:bg-emerald-500
+        hover:text-white
+        hover:shadow-lg
+        hover:shadow-emerald-500/20
+        active:scale-95
+        focus:outline-none
+        focus:ring-2
+        focus:ring-emerald-500
+        focus:ring-offset-2
+        dark:border-white
+        dark:bg-white
+        dark:text-gray-900
+        cursor-pointer
+      "
       aria-label="Toggle theme"
+      title={mymode === "light" ? "Switch to dark mode" : "Switch to light mode"}
     >
       {mymode === "light" ? (
-        <SunIcon className="h-5 w-5" />
+        <SunIcon className="h-5 w-5 transition-transform duration-300 group-hover:rotate-45" />
       ) : (
-        <MoonIcon className="h-5 w-5" />
+        <MoonIcon className="h-5 w-5 transition-transform duration-300 group-hover:-rotate-12" />
       )}
     </button>
   )

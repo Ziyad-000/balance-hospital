@@ -15,11 +15,12 @@ import rosterManagementSlice from "./slices/roster"
 import notificationsSlice from "./slices/notification"
 import reportSlice from "./slices/reports"
 import leavesSlice from "./slices/leaves"
-
+import profileReducer from "./slices/profile"
 export const store = configureStore({
   reducer: {
     mode: modeSlice,
     auth: authSlice,
+    profile: profileReducer,
     category: categorySlice,
     department: departmentSlice,
     subDepartment: subDepartmentSlice,
